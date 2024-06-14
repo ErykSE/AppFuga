@@ -1,3 +1,6 @@
+from apps.backend.devices.energy_class import EnergySource
+
+
 class OSD(EnergySource):
     def __init__(self, power, tariff):
         super().__init__(power)
