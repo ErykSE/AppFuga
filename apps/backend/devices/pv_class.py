@@ -12,6 +12,8 @@ class PV(EnergySource):
         self.power = self.power * (self.efficiency / 100) * (self.sunlight / 100)
         return self.power
 
+
+"""
     def adjust_regulator(self, target_power):
         max_regulator_value = 100
         if self.power > target_power:
@@ -22,3 +24,4 @@ class PV(EnergySource):
             self.regulator_setting = max_regulator_value
         self.power = self.power * (self.regulator_setting / max_regulator_value)
         return self.power
+"""

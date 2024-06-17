@@ -1,6 +1,6 @@
 from apps.backend.algorithms.energy_manager_class import EnergyManager
 from apps.backend.devices.bess_class import BESS
-from apps.backend.devices.osd_class import OSD
+from apps.backend.terms.osd_class import OSD
 from apps.backend.devices.pv_class import PV
 
 
@@ -13,8 +13,10 @@ def main():
     scenario = "export"  # Example scenario
     if scenario == "export":
         manager.manage_export()
+        print(type(pv))
     elif scenario == "import":
         manager.manage_import()
+        print("fail")
 
 
 if __name__ == "__main__":
