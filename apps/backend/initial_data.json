@@ -1,0 +1,25 @@
+{
+    "devices": [
+        {
+            "type": "PV Panel",
+            "name": "Panel 1",
+            "quantity": 2,
+            "power_kW": 5.5
+        },
+        {
+            "type": "Wind Turbine",
+            "name": "Turbine 1",
+            "quantity": 1,
+            "power_kW": 10.0
+        }
+    ],
+    "contract": {
+        "export_energy": true,
+        "contracted_limit": 1000,
+        "contract_type": "Instantaneous consumption",
+        "max_consumption": 500,
+        "contract_length": "1 year",
+        "margin": 10,
+        "price": 0.15
+    }
+}
