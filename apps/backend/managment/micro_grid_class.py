@@ -7,7 +7,7 @@ class Microgrid:
         self.wind_turbines = DeviceSet()
         self.fuel_turbines = DeviceSet()
         self.fuel_cells = DeviceSet()
-        self.besses = DeviceSet()
+        self.bess_units = DeviceSet()
 
     def add_pv_panel(self, pv_panel):
         self.pv_panels.add_device(pv_panel)
@@ -15,14 +15,14 @@ class Microgrid:
     def add_wind_turbine(self, wind_turbine):
         self.wind_turbines.add_device(wind_turbine)
 
-    def add_fuel_turbines(self, fuel_turbine):
+    def add_fuel_turbine(self, fuel_turbine):
         self.fuel_turbines.add_device(fuel_turbine)
 
-    def add_fuel_cells(self, fuel_cell):
+    def add_fuel_cell(self, fuel_cell):
         self.fuel_cells.add_device(fuel_cell)
 
-    def add_besses(self, bess):
-        self.besses.add_device(bess)
+    def add_bess(self, bess):
+        self.bess_units.add_device(bess)
 
 
 """
