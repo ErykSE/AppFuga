@@ -1,7 +1,8 @@
 class OSD:
-    def __init__(self, tariff, sold_power):
+    def __init__(self, tariff, sold_power, power):
         self.tariff = tariff  # Tariff rate per kWh
         self.sold_power = sold_power
+        self.power = power
 
     def get_sold_power(self):
         return self.sold_power
@@ -9,5 +10,5 @@ class OSD:
     def get_current_tarrif(self):
         return self.tariff
 
-    def update_sold_power(self, new_power):
-        self.sold_power += new_power
+    def get_current_power(self):
+        return self.power

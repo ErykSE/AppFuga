@@ -1,6 +1,6 @@
-from apps.backend.algorithms.energy_manager_class import EnergyManager
+from apps.backend.managment.energy_manager_class import EnergyManager
 from apps.backend.devices.bess_class import BESS
-from apps.backend.terms.osd_class import OSD
+from apps.backend.others.osd_class import OSD
 from apps.backend.devices.pv_class import PV
 
 

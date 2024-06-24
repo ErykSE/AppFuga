@@ -1,4 +1,4 @@
-from apps.backend.algorithms.set_device_class import DeviceSet
+from apps.backend.managment.set_device_class import DeviceSet
 
 
 class Microgrid:
