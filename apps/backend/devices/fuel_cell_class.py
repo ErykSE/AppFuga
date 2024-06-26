@@ -1,4 +1,4 @@
-from apps.backend.devices.energy_class import EnergySource
+from apps.backend.devices.energy_source_class import EnergySource
 
 
 class FuelCell(EnergySource):
@@ -6,9 +6,20 @@ class FuelCell(EnergySource):
         self,
         id,
         name,
+        priority,
         max_output,
-        current_output=0,
-        switch_status=False,
-        status="offline",
+        min_output,
+        actual_output,
+        switch_status,
+        device_status,
     ):
-        super().__init__(id, name, max_output, current_output, switch_status, status)
+        super().__init__(
+            id,
+            name,
+            priority,
+            max_output,
+            min_output,
+            actual_output,
+            switch_status,
+            device_status,
+        )

@@ -1,23 +1,18 @@
-from apps.backend.managment.energy_manager_class import EnergyManager
-from apps.backend.devices.bess_class import BESS
-from apps.backend.others.osd_class import OSD
-from apps.backend.devices.pv_class import PV
+from apps.backend.managment.micro_grid_class import Microgrid
 
-
-def main():
-    pv = PV(power=1.2, efficiency=15, sunlight=80)  # Example values
-    bess = BESS(power=50, capacity=200, charged=False)  # Example values
-    osd = OSD(power=75, tariff=0.15)  # Example values
-    manager = EnergyManager(pv, bess, osd)
-
-    scenario = "export"  # Example scenario
-    if scenario == "export":
-        manager.manage_export()
-        print(type(pv))
-    elif scenario == "import":
-        manager.manage_import()
-        print("fail")
-
+# from apps.backend.managment.energy_consumer_grid_class import EnergyConsumerGrid
 
 if __name__ == "__main__":
-    main()
+
+    # Przykład użycia
+    file_path = "C:/eryk/AppFuga/apps/backend/initial_data.json"
+
+    microgrid = Microgrid()
+    microgrid.load_data_from_json(file_path)
+
+    print(f"Total power generated: {microgrid.total_power_generated()} kW")
+
+    # consumergrid = EnergyConsumerGrid()
+    # consumergrid.load_data_from_json(file_path)
+
+# print(f"Total power generated: {consumergrid.total_power_consumed()} kW")
