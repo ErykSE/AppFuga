@@ -46,12 +46,12 @@ class EnergyConsumerGrid:
         total_power = sum(
             device.get_current_power()
             for device in self.non_adjustable_devices
-            if device.get_switch_status()
+            # if device.get_switch_status()
         )
         total_power += sum(
             device.get_current_power()
             for device in self.adjustable_devices
-            if device.get_switch_status()
+            # if device.get_switch_status()
         )
         return total_power
 
