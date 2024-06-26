@@ -1,3 +1,6 @@
+import time
+
+
 class BESS:
     def __init__(
         self,
