@@ -134,6 +134,9 @@ class EnergySource:
     def get_max_output(self):
         return self.max_output
 
+    def get_min_output(self):
+        return self.min_output
+
     def get_status(self):
         return self.device_status
 

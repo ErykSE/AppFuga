@@ -106,6 +106,9 @@ class BESS:
     def get_switch_status(self):
         return self.switch_status
 
+    def is_uncharged(self):
+        return self.charge_level < self.capacity
+
     def try_activate(self, attempts=3, delay=1):
         for attempt in range(attempts):
             self.activate()

@@ -71,7 +71,6 @@ class Microgrid:
 
     def total_power_generated(self):
         total_power = 0
-        test = []
         for device_list in [
             self.pv_panels,
             self.wind_turbines,
@@ -79,8 +78,8 @@ class Microgrid:
             self.fuel_cells,
         ]:
             total_power += sum(device.get_actual_output() for device in device_list)
-            test += (device.get_name() for device in device_list)
-        return total_power, test
+
+        return total_power
 
     def load_data_from_json(self, file_path):
         with open(file_path, "r") as file:

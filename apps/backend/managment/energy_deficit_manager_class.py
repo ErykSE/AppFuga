@@ -1,8 +1,7 @@
 class EnergyDeficitManager:
-    def __init__(self, microgrid, osd, contract, demand_power):
+    def __init__(self, microgrid, osd):
         self.microgrid = microgrid
         self.osd = osd
-        self.contract = contract
 
     def handle_power_deficit(self, power_deficit):
         if not self.activate_inactive_devices():

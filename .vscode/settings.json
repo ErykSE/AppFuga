@@ -1,4 +1,7 @@
 {
     "editor.formatOnSave": true,
-    "gitdoc.enabled": true
+    "gitdoc.enabled": true,
+    "python.analysis.extraPaths": [
+        "./apps/backend/managment"
+    ]
 }
