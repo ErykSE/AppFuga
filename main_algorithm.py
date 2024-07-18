@@ -2,7 +2,8 @@ from apps.backend.managment.micro_grid_class import Microgrid
 from apps.backend.managment.consumer_grid_class import EnergyConsumerGrid
 from apps.backend.managment.energy_manager_class import EnergyManager
 from apps.backend.others.osd_class import OSD
-from apps.backend.test.test1 import unittest
+import time
+
 
 if __name__ == "__main__":
 
@@ -25,7 +26,16 @@ if __name__ == "__main__":
 
     osd = OSD.load_data_from_json(contract_file_path, tariffs_file_path)
 
+    # Inicjalizacja i uruchomienie EnergyManager
     energy_manager = EnergyManager(microgrid, consumergrid, osd)
-    energy_manager.check_energy_conditions()
 
-    # unittest.main()
+    try:
+        energy_manager.start()  # To uruchomi wątek z run_energy_management
+
+        # Główna pętla programu
+        while True:
+            time.sleep(1)  # Aby uniknąć zbyt intensywnego użycia CPU
+    except KeyboardInterrupt:
+        print("Zatrzymywanie aplikacji...")
+        energy_manager.stop()  # To zatrzyma wątek
+        print("Aplikacja zatrzymana.")

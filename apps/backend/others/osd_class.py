@@ -61,3 +61,18 @@ class OSD:
         except Exception as e:
             print(f"An error occurred: {e}")
             return None
+
+    def get_contracted_export_possibility(self):
+        return self.CONTRACTED_EXPORT_POSSIBILITY
+
+    def get_sale_limit(self):
+        return self.CONTRACTED_SALE_LIMIT
+
+    def get_sold_power(self):
+        return self.sold_power
+
+    def get_contracted_sale_limit(self):
+        return self.CONTRACTED_SALE_LIMIT
+
+    def sell_power(self, amount):
+        self.sold_power += amount

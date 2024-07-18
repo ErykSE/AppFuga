@@ -58,10 +58,13 @@ class BESS:
 
     @classmethod
     def create_instance(cls, data):
+        print(f"Attempting to create BESS instance with data: {data}")
         if cls.validate_data(data):
             instance = cls(**data)
             instance.is_valid = True
+            print(f"BESS instance created successfully: {instance.name}")
             return instance
+        print("BESS instance creation failed")
         return None
 
     def activate(self):

@@ -81,8 +81,8 @@
             "name": "BESS 2",
             "capacity": 300,
             "charge_level": 150,
-            "switch_status": false,
-            "device_status": "offline"
+            "switch_status": true,
+            "device_status": "online"
         }
     ],
     "non_adjustable_devices": [
@@ -106,9 +106,9 @@
             "id": 1,
             "name": "Adjustable Device 1",
             "priority": 1,
-            "power": 100,
+            "power": 10,
             "switch_status": true,
-            "min_power": 50,
+            "min_power": 500,
             "max_power": 150
         },
         {

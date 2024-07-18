@@ -10,41 +10,70 @@ class EnergySurplusManager:
         self.logger = logging.getLogger(__name__)
 
     def handle_surplus(self):
+
+        bess_available = self.check_bess_availability()
+        export_possible = self.is_export_possible()
+        print(f"BESS available: {bess_available}, Export possible: {export_possible}")
+
         if self.check_bess_availability() and self.is_export_possible():
+            print("BOTH")
             return SurplusAction.BOTH
         elif self.check_bess_availability():
+            print("Charge")
             return SurplusAction.CHARGE_BATTERY
         elif self.is_export_possible():
+            print("Sell")
             return SurplusAction.SELL_ENERGY
         else:
+            print("Limit")
             return SurplusAction.LIMIT_GENERATION
 
     def manage_surplus_energy(self, power_surplus):
         total_managed = 0
-        action = self.handle_surplus()
+        remaining_surplus = power_surplus
 
-        if action == SurplusAction.BOTH:
-            if self.should_prioritize_charging_or_selling():
-                result = self.decide_to_sell_energy(power_surplus)
-                if not result["success"]:
-                    result = self.decide_to_charge_bess(power_surplus)
-            else:
-                result = self.decide_to_charge_bess(power_surplus)
-                if not result["success"]:
-                    result = self.decide_to_sell_energy(power_surplus)
-        elif action == SurplusAction.CHARGE_BATTERY:
-            result = self.decide_to_charge_bess(power_surplus)
-        elif action == SurplusAction.SELL_ENERGY:
-            result = self.decide_to_sell_energy(power_surplus)
-        else:  # SurplusAction.LIMIT_GENERATION
-            result = self.limit_energy_generation(power_surplus)
+        while remaining_surplus > 0:
+            action = self.handle_surplus()
+            result = {"success": False, "amount": 0}
 
-        total_managed += result["amount"]
+            if action == SurplusAction.BOTH:
+                if self.should_prioritize_charging_or_selling():
+                    # Priorytet dla ładowania baterii
+                    bess_result = self.decide_to_charge_bess(remaining_surplus)
+                    remaining_surplus -= bess_result["amount"]
+                    if remaining_surplus > 0:
+                        sell_result = self.decide_to_sell_energy(remaining_surplus)
+                        remaining_surplus -= sell_result["amount"]
+                    result["amount"] = bess_result["amount"] + sell_result["amount"]
+                    result["success"] = bess_result["success"] or sell_result["success"]
+                else:
+                    # Priorytet dla sprzedaży energii
+                    sell_result = self.decide_to_sell_energy(remaining_surplus)
+                    remaining_surplus -= sell_result["amount"]
+                    if remaining_surplus > 0:
+                        bess_result = self.decide_to_charge_bess(remaining_surplus)
+                        remaining_surplus -= bess_result["amount"]
+                    result["amount"] = sell_result["amount"] + bess_result["amount"]
+                    result["success"] = sell_result["success"] or bess_result["success"]
+            elif action == SurplusAction.CHARGE_BATTERY:
+                result = self.decide_to_charge_bess(remaining_surplus)
+                remaining_surplus -= result["amount"]
+            elif action == SurplusAction.SELL_ENERGY:
+                result = self.decide_to_sell_energy(remaining_surplus)
+                remaining_surplus -= result["amount"]
+            else:  # SurplusAction.LIMIT_GENERATION
+                result = self.limit_energy_generation(remaining_surplus)
+                remaining_surplus -= result["amount"]
+
+            total_managed += result["amount"]
+
+            if not result["success"]:
+                break  # Jeśli nie udało się zarządzić nadwyżką, przerwij pętlę
 
         return {
             "action": action,
             "amount_managed": total_managed,
-            "remaining_surplus": power_surplus - total_managed,
+            "remaining_surplus": remaining_surplus,
         }
 
     def should_prioritize_charging_or_selling(self):
@@ -52,9 +81,11 @@ class EnergySurplusManager:
         return True
 
     def decide_to_charge_bess(self, power_surplus):
-        chargeable_bess = [
-            bess for bess in self.microgrid.bess_units.devices if bess.is_uncharged()
-        ]
+        # Implementacja z dodatkowym sprawdzeniem dostępności BESS
+        if not self.check_bess_availability():
+            return {"success": False, "amount": 0}
+
+        chargeable_bess = [bess for bess in self.microgrid.bess if bess.is_uncharged()]
         if not chargeable_bess:
             return {"success": False, "amount": 0}
 
@@ -82,6 +113,11 @@ class EnergySurplusManager:
         return power_charged
 
     def decide_to_sell_energy(self, power_surplus):
+        # Implementacja z dodatkowym sprawdzeniem możliwości eksportu
+        if not self.is_export_possible():
+            return {"success": False, "amount": 0}
+        # Reszta implementacji bez zmian
+
         if self.check_sale_limit(power_surplus):
             amount_sold = self.sell_energy(power_surplus)
             return {"success": True, "amount": amount_sold}
@@ -102,7 +138,7 @@ class EnergySurplusManager:
 
     def limit_energy_generation(self, power_surplus):
         print(f"Limiting {power_surplus} kW of generated power.")
-        # Tu możesz dodać logikę ograniczania generacji
+        # Tu logika ograniczania generacji
         return {"success": True, "amount": power_surplus}
 
     def is_export_possible(self):
@@ -113,7 +149,9 @@ class EnergySurplusManager:
         return self.osd.get_sold_power() + power_surplus <= sale_limit
 
     def check_bess_availability(self):
-        for bess in self.microgrid.bess_units.devices:
+        print(f"Checking BESS availability. BESS units: {self.microgrid.bess}")
+        for bess in self.microgrid.bess:
+            print(f"BESS {bess.id} switch status: {bess.get_switch_status()}")
             if bess.get_switch_status():
                 return True
         return False
@@ -125,95 +163,5 @@ class EnergySurplusManager:
     def get_remaining_bess_power(self):
         return sum(
             bess.get_capacity() - bess.get_charge_level()
-            for bess in self.microgrid.bess_units.devices
+            for bess in self.microgrid.bess
         )
-
-
-"""
-
-    def handle_surplus(self, power_surplus):
-        if self.is_export_possible():
-            self.decide_to_sell_energy(power_surplus)
-        else:
-            self.limit_generated_power(power_surplus)
-
-    def is_export_possible(self):
-        return self.contract.get_is_export_possible()
-
-    def decide_to_sell_energy(self, power_surplus):
-        if self.should_sell_energy():
-            if self.check_sale_limit(power_surplus):
-                self.sell_energy(power_surplus)
-            else:
-                remaining_power = self.get_remaining_sale_power()
-                self.sell_energy(remaining_power)
-                self.handle_surplus_without_selling(power_surplus - remaining_power)
-        else:
-            self.handle_surplus_without_selling(power_surplus)
-
-    def should_sell_energy(self):
-        # Placeholder for tariff check logic
-        pass
-
-    def check_sale_limit(self, power_surplus):
-        sale_limit = self.contract.get_sale_limit()
-        if self.osd.get_sold_power() + power_surplus > sale_limit:
-            return False
-        return True
-
-    def get_remaining_sale_power(self):
-        sale_limit = self.contract.get_sale_limit()
-        remaining_power = sale_limit - self.osd.get_sold_power()
-        return remaining_power
-
-    def sell_energy(self, power_surplus):
-        print(
-            f"Selling {power_surplus} kW of surplus energy. Total energy sold: {self.osd.get_sold_power()} kW."
-        )
-
-    def handle_surplus_without_selling(self, power_surplus):
-        if self.check_bess_availability():
-            if self.check_bess_charge():
-                self.handle_charged_bess(power_surplus)
-            else:
-                self.charge_bess(
-                    power_surplus, attempts=3, delay=1, target_charge_level=80
-                )
-        else:
-            self.limit_generated_power(power_surplus)
-
-    def check_bess_availability(self):
-        for bess in self.microgrid.bess_units.devices:
-            if bess.is_switch_closed():
-                return True
-        return False
-
-    def check_bess_charge(self):
-        for bess in self.microgrid.bess_units.devices:
-            if bess.is_charged():
-                return True
-        return False
-
-    def handle_charged_bess(self, power_surplus):
-        pass
-        # to wróć do pytania o decyzję dotyczącą sprzedania z flagą, że muszę rozważyć sprzedaż, bo bess są naładowane
-
-    def charge_bess(self, power_surplus, attempts, delay, target_charge_level):
-        for _ in range(attempts):
-            if self.currently_charging_bess_index >= len(
-                self.microgrid.bess_units.devices
-            ):
-                self.currently_charging_bess_index = 0
-            bess = self.microgrid.bess_units.devices[self.currently_charging_bess_index]
-            if bess.charge(power_surplus, attempts, delay, target_charge_level):
-                self.currently_charging_bess_index += 1
-                break
-            else:
-                self.currently_charging_bess_index += 1
-        else:
-            print(f"Failed to charge any BESS after {attempts} attempts.")
-
-    def limit_generated_power(self, power_surplus):
-        pass  # Placeholder for future logic
-
-        """

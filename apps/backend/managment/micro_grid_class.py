@@ -13,83 +13,112 @@ class Microgrid:
         self.wind_turbines = []
         self.fuel_turbines = []
         self.fuel_cells = []
-        self.bess_units = []
+        self.bess = []  # Zmieniono nazwę na bess_units dla spójności
 
     def add_device(self, device, device_type):
-        if device_type == "pv_panel":
-            if device.is_valid:
-                self.pv_panels.append(device)
-            else:
-                print(f"Invalid PV Panel: {device.name}")
-        elif device_type == "wind_turbine":
-            if device.is_valid:
-                self.wind_turbines.append(device)
-            else:
-                print(f"Invalid Wind Turbine: {device.name}")
-        elif device_type == "fuel_turbine":
-            if device.is_valid:
-                self.fuel_turbines.append(device)
-            else:
-                print(f"Invalid Fuel Turbine: {device.name}")
-        elif device_type == "fuel_cell":
-            if device.is_valid:
-                self.fuel_cells.append(device)
-            else:
-                print(f"Invalid Fuel Cell: {device.name}")
-        elif device_type == "bess":
-            if device.is_valid:
-                self.bess_units.append(device)
-            else:
-                print(f"Invalid BESS: {device.name}")
+        if device_type == "bess":
+            device_list = self.bess
         else:
-            print(f"Unknown device type: {device_type}")
+            device_list = getattr(self, f"{device_type}s")
+
+        if device.is_valid:
+            device_list.append(device)
+            print(f"Added {device_type}: {device.name}")
+        else:
+            print(f"Invalid {device_type}: {device.name}")
 
     def update_device(self, device_data, device_type):
-        for device in getattr(self, f"{device_type}s"):
+        print(f"Attempting to update {device_type}: {device_data}")
+        if device_type == "bess":
+            device_list = self.bess
+        else:
+            device_list = getattr(self, f"{device_type}s")
+
+        for device in device_list:
             if device.id == device_data["id"]:
                 for key, value in device_data.items():
                     setattr(device, key, value)
-                print(f"{device.name} updated successfully.")
+                print(f"{device_type.capitalize()} {device.name} updated successfully.")
                 return
+        # Jeśli urządzenie nie istnieje, tworzymy nowe
         new_device = self.create_device_instance(device_data, device_type)
-        self.add_device(new_device, device_type)
+        if new_device:
+            self.add_device(new_device, device_type)
+        else:
+            print(f"Failed to create new {device_type} device")
 
     def create_device_instance(self, device_data, device_type):
-        if device_type == "pv_panel":
-            return PV.create_instance(device_data)
-        elif device_type == "wind_turbine":
-            return WindTurbine.create_instance(device_data)
-        elif device_type == "fuel_turbine":
-            return FuelTurbine.create_instance(device_data)
-        elif device_type == "fuel_cell":
-            return FuelCell.create_instance(device_data)
-        elif device_type == "bess":
-            return BESS.create_instance(device_data)
+        # Ta metoda tworzy instancję odpowiedniego urządzenia
+        device_classes = {
+            "pv_panel": PV,
+            "wind_turbine": WindTurbine,
+            "fuel_turbine": FuelTurbine,
+            "fuel_cell": FuelCell,
+            "bess": BESS,
+        }
+        device_class = device_classes.get(device_type)
+        if device_class:
+            return device_class.create_instance(device_data)
         else:
             print(f"Unknown device type: {device_type}")
             return None
 
     def total_power_generated(self):
-        total_power = 0
-        for device_list in [
-            self.pv_panels,
-            self.wind_turbines,
-            self.fuel_turbines,
-            self.fuel_cells,
-        ]:
-            total_power += sum(device.get_actual_output() for device in device_list)
+        # Ta metoda oblicza całkowitą wygenerowaną moc
+        return sum(
+            device.get_actual_output()
+            for device_list in [
+                self.pv_panels,
+                self.wind_turbines,
+                self.fuel_turbines,
+                self.fuel_cells,
+            ]
+            for device in device_list
+        )
 
-        return total_power
+    def get_all_devices(self):
+        # Ta metoda zwraca listę wszystkich urządzeń
+        return (
+            self.pv_panels
+            + self.wind_turbines
+            + self.fuel_turbines
+            + self.fuel_cells
+            + self.bess
+        )
+
+    def get_active_devices(self):
+        # Ta metoda zwraca listę aktywnych urządzeń
+        return [
+            device
+            for device in self.get_all_devices()
+            if device.get_status() == "online"
+        ]
+
+    def get_inactive_devices(self):
+        # Ta metoda zwraca listę nieaktywnych urządzeń
+        return [
+            device
+            for device in self.get_all_devices()
+            if device.get_status() == "offline"
+        ]
 
     def load_data_from_json(self, file_path):
         with open(file_path, "r") as file:
             data = json.load(file)
-        for device_type in [
-            "pv_panel",
-            "wind_turbine",
-            "fuel_turbine",
-            "fuel_cell",
-            "bess",
-        ]:
-            for device_data in data.get(f"{device_type}s", []):
+        print(f"Loaded data from JSON: {data}")
+        device_types = {
+            "pv_panels": "pv_panel",
+            "wind_turbines": "wind_turbine",
+            "fuel_turbines": "fuel_turbine",
+            "fuel_cells": "fuel_cell",
+            "bess": "bess",  # Bez zmiany
+        }
+        for json_key, device_type in device_types.items():
+            devices = data.get(json_key, [])
+            print(f"Processing {json_key}: {devices}")
+            for device_data in devices:
                 self.update_device(device_data, device_type)
+
+        print(f"After loading, BESS units: {len(self.bess)}")
+        for bess in self.bess:
+            print(f"BESS: {bess.name}, ID: {bess.id}")
