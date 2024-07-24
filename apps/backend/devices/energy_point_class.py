@@ -1,4 +1,8 @@
 class EnergyPoint:
+    """
+    Główna klasa dla urządzeń/odbiorów, które zużywają energię. Dziedziczyć z niej będą klasy: AdjustableDevice oraz NonAdjustableDevice.
+    """
+
     def __init__(self, id, name, priority, power, switch_status):
         self.id = id
         self.name = name

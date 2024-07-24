@@ -2,6 +2,10 @@ import time
 
 
 class BESS:
+    """
+    Klasa dla urządzenia magazynującego energię.
+    """
+
     def __init__(
         self,
         id,
@@ -58,43 +62,43 @@ class BESS:
 
     @classmethod
     def create_instance(cls, data):
-        print(f"Attempting to create BESS instance with data: {data}")
+        # print(f"Attempting to create BESS instance with data: {data}")
         if cls.validate_data(data):
             instance = cls(**data)
             instance.is_valid = True
-            print(f"BESS instance created successfully: {instance.name}")
+            # print(f"BESS instance created successfully: {instance.name}")
             return instance
-        print("BESS instance creation failed")
+        # print("BESS instance creation failed")
         return None
 
     def activate(self):
         self.device_status = "online"
         self.switch_status = True
-        print(f"{self.name} is now active with switch_status = {self.switch_status}.")
+        # print(f"{self.name} is now active with switch_status = {self.switch_status}.")
 
     def deactivate(self):
         self.device_status = "offline"
         self.switch_status = False
-        print(f"{self.name} is now inactive with switch_status = {self.switch_status}.")
+        # print(f"{self.name} is now inactive with switch_status = {self.switch_status}.")
 
     def charge(self, percent):
         charge_amount = self.capacity * (percent / 100)
         new_charge_level = self.charge_level + charge_amount
         if new_charge_level > self.capacity:
-            print(f"{self.name} charged to its maximum capacity: {self.capacity} kWh")
+            # print(f"{self.name} charged to its maximum capacity: {self.capacity} kWh")
             new_charge_level = self.capacity
         self.charge_level = new_charge_level
-        print(f"{self.name} charged by {percent}% to {self.charge_level} kWh")
+        # print(f"{self.name} charged by {percent}% to {self.charge_level} kWh")
         return percent, charge_amount
 
     def discharge(self, percent):
         discharge_amount = self.capacity * (percent / 100)
         new_charge_level = self.charge_level - discharge_amount
         if new_charge_level < 0:
-            print(f"{self.name} discharged to 0 kWh")
+            # print(f"{self.name} discharged to 0 kWh")
             new_charge_level = 0
         self.charge_level = new_charge_level
-        print(f"{self.name} discharged by {percent}% to {self.charge_level} kWh")
+        # print(f"{self.name} discharged by {percent}% to {self.charge_level} kWh")
         return percent, discharge_amount
 
     def get_charge_level(self):
@@ -117,10 +121,10 @@ class BESS:
             self.activate()
             time.sleep(delay)
             if self.device_status == "online":
-                print(f"{self.name} activated successfully on attempt {attempt + 1}.")
+                # print(f"{self.name} activated successfully on attempt {attempt + 1}.")
                 return True
-            print(f"Attempt {attempt + 1} to activate {self.name} failed.")
-        print(f"Failed to activate {self.name} after {attempts} attempts.")
+            # print(f"Attempt {attempt + 1} to activate {self.name} failed.")
+        # print(f"Failed to activate {self.name} after {attempts} attempts.")
         return False
 
     def try_deactivate(self, attempts=3, delay=1):
@@ -128,10 +132,10 @@ class BESS:
             self.deactivate()
             time.sleep(delay)
             if self.device_status == "offline":
-                print(f"{self.name} deactivated successfully on attempt {attempt + 1}.")
+                # print(f"{self.name} deactivated successfully on attempt {attempt + 1}.")
                 return True
-            print(f"Attempt {attempt + 1} to deactivate {self.name} failed.")
-        print(f"Failed to deactivate {self.name} after {attempts} attempts.")
+            # print(f"Attempt {attempt + 1} to deactivate {self.name} failed.")
+        # print(f"Failed to deactivate {self.name} after {attempts} attempts.")
         return False
 
     def try_charge(self, percent, attempts=3, delay=1):
@@ -141,17 +145,22 @@ class BESS:
             if self.charge_level == self.charge_level:
                 print(f"{self.name} charged successfully on attempt {attempt + 1}.")
                 return percent_charged, amount_charged
-            print(f"Attempt {attempt + 1} to charge {self.name} failed.")
-        print(f"Failed to charge {self.name} after {attempts} attempts.")
+            # print(f"Attempt {attempt + 1} to charge {self.name} failed.")
+        # print(f"Failed to charge {self.name} after {attempts} attempts.")
         return None
 
-    def try_discharge(self, percent, attempts=3, delay=1):
+    def try_discharge(self, power_needed, attempts=3, delay=1):
         for attempt in range(attempts):
-            percent_discharged, amount_discharged = self.discharge(percent)
+            initial_charge = self.charge_level
+            amount_to_discharge = min(power_needed, self.charge_level)
+            percent_to_discharge = (amount_to_discharge / self.capacity) * 100
+            percent_discharged, amount_discharged = self.discharge(percent_to_discharge)
             time.sleep(delay)
-            if self.charge_level == self.charge_level:
-                print(f"{self.name} discharged successfully on attempt {attempt + 1}.")
+            if self.charge_level < initial_charge:
+                print(
+                    f"{self.name} rozładowany pomyślnie o {amount_discharged} kWh na próbie {attempt + 1}."
+                )
                 return percent_discharged, amount_discharged
-            print(f"Attempt {attempt + 1} to discharge {self.name} failed.")
-        print(f"Failed to discharge {self.name} after {attempts} attempts.")
+            print(f"Próba {attempt + 1} rozładowania {self.name} nie powiodła się.")
+        print(f"Nie udało się rozładować {self.name} po {attempts} próbach.")
         return None

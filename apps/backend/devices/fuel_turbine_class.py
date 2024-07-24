@@ -2,6 +2,10 @@ from apps.backend.devices.energy_source_class import EnergySource
 
 
 class FuelTurbine(EnergySource):
+    """
+    Klasa dla urządzeń generującyh moc typu FuellTurbine. Dziedziczy ona z klasy EnergySource.
+    """
+
     def __init__(
         self,
         id,

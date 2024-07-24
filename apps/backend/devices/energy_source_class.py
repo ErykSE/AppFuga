@@ -2,6 +2,10 @@ import time
 
 
 class EnergySource:
+    """
+    Główna klasa dla urządzeń generujących moc. Dziedziczą z niej klasy: FuelCell, FuelTurbine, PV, WindTurbine.
+    """
+
     def __init__(
         self,
         id,
@@ -106,6 +110,9 @@ class EnergySource:
     def get_available_capacity(self):
         return self.max_output - self.actual_output
 
+    def is_at_full_capacity(self):
+        return self.actual_output == self.max_output
+
     def activate(self):
         self.device_status = "online"
         self.switch_status = True
@@ -165,20 +172,21 @@ class EnergySource:
         )
         return percent_decrease, actual_decrease
 
-    def set_output(self, amount):
+    def set_output(self, target_output):
         if self.device_status != "online":
             print(f"{self.name} is not active.")
-            return
+            return False
 
-        if amount > self.max_output:
-            print(f"{self.name} output set to its maximum: {self.max_output} kW")
+        if target_output > self.max_output:
             self.actual_output = self.max_output
-        elif amount < self.min_output:
-            print(f"{self.name} output set to its minimum: {self.min_output} kW")
+            print(f"{self.name} output set to its maximum: {self.max_output} kW")
+        elif target_output < self.min_output:
             self.actual_output = self.min_output
+            print(f"{self.name} output set to its minimum: {self.min_output} kW")
         else:
-            print(f"{self.name} output set to {amount} kW")
-            self.actual_output = amount
+            self.actual_output = target_output
+            print(f"{self.name} output set to {target_output} kW")
+        return True
 
     def increase_output_to_full_capacity(self):
         if self.device_status != "online":

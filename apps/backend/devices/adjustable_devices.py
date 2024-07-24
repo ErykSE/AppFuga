@@ -2,6 +2,10 @@ from apps.backend.devices.energy_point_class import EnergyPoint
 
 
 class AdjustableDevice(EnergyPoint):
+    """
+    Klasa dla urządzeń/odbiorów, które można regulować w sposób zwiększania/zmniejszania zapotrzebowania. Będzie ona dziedziczyć z głównej klasy EnergyPoint.
+    """
+
     def __init__(self, id, name, priority, power, switch_status, min_power, max_power):
         super().__init__(id, name, priority, power, switch_status)
         self.min_power = min_power

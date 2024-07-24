@@ -2,6 +2,10 @@ from apps.backend.devices.energy_source_class import EnergySource
 
 
 class WindTurbine(EnergySource):
+    """
+    Klasa dla urządzeń generującyh moc typu WindTurbine. Dziedziczy ona z klasy EnergySource.
+    """
+
     def __init__(
         self,
         id,
