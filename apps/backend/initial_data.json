@@ -82,7 +82,7 @@
             "id": 1,
             "name": "Non Adjustable Device 1",
             "priority": 1,
-            "power": 75,
+            "power": 750,
             "switch_status": true
         },
         {
@@ -98,7 +98,7 @@
             "id": 1,
             "name": "Adjustable Device 1",
             "priority": 1,
-            "power": 60,
+            "power": 600,
             "switch_status": true,
             "min_power": 500,
             "max_power": 150

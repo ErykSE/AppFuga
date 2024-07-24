@@ -50,24 +50,31 @@ class EnergyDeficitManager:
         sale_capacity = self.osd.get_remaining_sale_capacity()
         total_capacity = bess_free_capacity + sale_capacity
 
-        self.info_logger.info(f"Additional power required: {additional_power} kW")
+        # self.info_logger.info(f"Additional power required: {additional_power} kW")
 
         can_handle = total_capacity >= additional_power
-        self.info_logger.info(
-            f"Can the system handle the additional power: {'Yes' if can_handle else 'No'}"
-        )
+
+        print(sale_capacity)
+        print(total_capacity)
+        print(can_handle)
+        # self.info_logger.info(
+        # f"Can the system handle the additional power: {'Yes' if can_handle else 'No'}"
+        # )
 
         return can_handle
 
     def maximize_power_output(self, power_deficit):
-        self.info_logger.info(
-            f"Attempting to maximise output for the deficit: {power_deficit} kW"
-        )
 
         can_handle_surplus = self.can_handle_more_power(power_deficit)
+
         self.info_logger.info(
             f"Can the system handle the additional power: {'Yes' if can_handle_surplus else 'No'}"
         )
+
+        if can_handle_surplus:
+            self.info_logger.info("Attempting to maximize output")
+        else:
+            self.info_logger.info("Attempting to control equipment to meet demand")
 
         increased_power = 0
         active_devices = self.microgrid.get_active_devices()
@@ -250,16 +257,7 @@ class EnergyDeficitManager:
             raise ValueError(f"Nieznana akcja: {action}")
 
     def is_bess_available(self):
-        if self.microgrid.bess:
-            self.info_logger.info(f"BESS dostępny: {self.microgrid.bess.name}")
-            self.info_logger.info(
-                f"BESS poziom naładowania: {self.microgrid.bess.get_charge_level()} kWh"
-            )
-            self.info_logger.info(
-                f"BESS status włącznika: {'Włączony' if self.microgrid.bess.get_switch_status() else 'Wyłączony'}"
-            )
-        else:
-            self.info_logger.info("BESS niedostępny")
+
         return (
             self.microgrid.bess
             and self.microgrid.bess.get_switch_status()
@@ -268,13 +266,7 @@ class EnergyDeficitManager:
 
     def can_buy_energy(self):
         result = self.osd.get_bought_power() < self.osd.get_purchase_limit()
-        self.info_logger.info(
-            f"Aktualna ilość zakupionej energii: {self.osd.get_bought_power()} kWh"
-        )
-        self.info_logger.info(
-            f"Limit zakupu energii: {self.osd.get_purchase_limit()} kWh"
-        )
-        self.info_logger.info(f"Możliwość zakupu energii: {'Tak' if result else 'Nie'}")
+
         return result
 
     def increase_active_devices_output(self, power_deficit, can_handle_surplus):
@@ -319,21 +311,21 @@ class EnergyDeficitManager:
 
     def discharge_bess(self, power_deficit):
         if self.microgrid.bess and self.microgrid.bess.get_switch_status():
-            self.info_logger.info(f"Próba rozładowania BESS o {power_deficit} kW")
+            self.info_logger.info(f"Attempting to discharge BESS by {power_deficit} kW")
             initial_charge = self.microgrid.bess.get_charge_level()
             discharged = self.microgrid.bess.try_discharge(power_deficit)
             if discharged is not None:
                 percent_discharged, amount_discharged = discharged
                 new_charge = self.microgrid.bess.get_charge_level()
-                self.info_logger.info(f"Rozładowano BESS o {amount_discharged} kWh")
+                self.info_logger.info(f"BESS was discharged by {amount_discharged} kWh")
                 self.info_logger.info(
-                    f"Poziom naładowania BESS: przed {initial_charge} kWh, po {new_charge} kWh"
+                    f"BESS charge level: before {initial_charge} kWh, after {new_charge} kWh"
                 )
                 return {"success": True, "amount": amount_discharged}
             else:
-                self.info_logger.warning("Nie udało się rozładować BESS")
+                self.info_logger.warning("Failure to discharge BESS")
         else:
-            self.info_logger.warning("BESS nie jest dostępny do rozładowania")
+            self.info_logger.warning("BESS is not available for discharge")
         return {"success": False, "amount": 0}
 
     def buy_energy(self, power_deficit):
@@ -360,11 +352,15 @@ class EnergyDeficitManager:
         PRICE_THRESHOLD = 0.7
         HYSTERESIS = 0.05
 
+        self.info_logger.info(
+            "Start of the decision-making function concerning the discharge or purchase "
+        )
+
         bess_percentage = (bess_energy / self.microgrid.bess.get_capacity()) * 100
 
         if bess_percentage <= BESS_THRESHOLD:
             self.info_logger.info(
-                f"Priorytet zakupu: niski poziom baterii ({bess_percentage}%)"
+                f"Purchase priority - low battery ({bess_percentage}%)"
             )
             return False
 
@@ -378,22 +374,22 @@ class EnergyDeficitManager:
         if price_factor < PRICE_THRESHOLD and deficit < 50:
             decision = False
             self.info_logger.info(
-                f"Priorytet zakupu: niska cena ({current_buy_price}) i niewielki deficyt ({deficit} kW)"
+                f"Purchase priority: low price ({current_buy_price}) i niewielki deficyt ({deficit} kW)"
             )
         elif bess_factor > price_factor + HYSTERESIS:
             decision = True
             self.info_logger.info(
-                f"Priorytet rozładowania BESS: bess factor ({bess_factor:.2f}) > price factor ({price_factor:.2f})"
+                f"Discharge BESS priority: bess factor ({bess_factor:.2f}) > price factor ({price_factor:.2f})"
             )
         elif price_factor > bess_factor + HYSTERESIS:
             decision = False
             self.info_logger.info(
-                f"Priorytet zakupu: price factor ({price_factor:.2f}) > bess factor ({bess_factor:.2f})"
+                f"Purchase priority: price factor ({price_factor:.2f}) > bess factor ({bess_factor:.2f})"
             )
         else:
             decision = self.previous_discharge_decision
             self.info_logger.info(
-                f"Zachowanie poprzedniej decyzji: wartości w zakresie histerezy"
+                f"Behaviour of the previous decision: values within the hysteresis range"
             )
 
         self.previous_discharge_decision = decision

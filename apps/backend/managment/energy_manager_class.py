@@ -100,8 +100,8 @@ class EnergyManager:
                 break
 
     def manage_deficit(self, power_deficit):
-        initial_deficit = power_deficit
-        self.info_logger.info(f"Rozpoczęcie zarządzania deficytem: {power_deficit} kW")
+        # initial_deficit = power_deficit
+        # self.info_logger.info(f"Rozpoczęcie zarządzania deficytem: {power_deficit} kW")
 
         max_iterations = 5  # Dodajemy maksymalną liczbę iteracji
         iteration = 0

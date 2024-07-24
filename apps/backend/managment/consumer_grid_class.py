@@ -5,6 +5,10 @@ from apps.backend.devices.non_adjustable import NonAdjustableDevice
 
 
 class EnergyConsumerGrid:
+    """
+    Główna klasa zarządzająca urządzeniami/odbiorami, które mają zapotrzebowanie na moc.
+    """
+
     def __init__(self):
         self.non_adjustable_devices = []
         self.adjustable_devices = []
