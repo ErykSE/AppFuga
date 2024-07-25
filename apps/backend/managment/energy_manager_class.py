@@ -142,26 +142,22 @@ class EnergyManager:
             self.error_logger.error(f"Error checking energy conditions: {str(e)}")
 
     def manage_surplus(self, power_surplus):
-        while power_surplus > 0 and not self.stop_event.is_set():
-            try:
-                result = self.surplus_manager.manage_surplus_energy(power_surplus)
-                power_surplus = result["remaining_surplus"]
-                if self.stop_event.wait(30):  # Sprawdzaj warunki co 30 sekund
-                    break
-                if power_surplus > 0:
-                    new_total_generated = self.microgrid.total_power_generated()
-                    new_total_demand = self.consumergrid.total_power_consumed()
-                    new_surplus = new_total_generated - new_total_demand
-                    if new_surplus <= 0:
-                        self.info_logger.info(
-                            "Energy conditions changed, exiting surplus management"
-                        )
-                        break
-                    power_surplus = new_surplus
+        result = self.surplus_manager.manage_surplus_energy(power_surplus)
+        managed_amount = result["amount_managed"]
+        remaining_surplus = result["remaining_surplus"]
 
-            except Exception as e:
-                self.error_logger.error(f"Error in surplus management: {str(e)}")
-                break
+        self.info_logger.info(
+            f"Zarządzono {managed_amount} kW nadwyżki. Pozostało: {remaining_surplus} kW"
+        )
+
+        if remaining_surplus > 0:
+            self.info_logger.warning(
+                f"Zakończono zarządzanie nadwyżką. Pozostała nierozwiązana nadwyżka: {remaining_surplus} kW"
+            )
+        else:
+            self.info_logger.info(
+                "Zakończono zarządzanie nadwyżką. Cała nadwyżka została rozwiązana."
+            )
 
     def manage_deficit(self, power_deficit):
         result = self.deficit_manager.handle_deficit(power_deficit)
