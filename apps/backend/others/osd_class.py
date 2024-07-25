@@ -33,6 +33,40 @@ class OSD:
         self.current_tariff_sell = current_tariff_sell  # Aktualna taryfa sprzedaży
 
     @classmethod
+    def validate_data(cls, data):
+        errors = []
+        required_fields = [
+            "CONTRACTED_TYPE",
+            "CONTRACTED_DURATION",
+            "CONTRACTED_MARGIN",
+            "CONTRACTED_EXPORT_POSSIBILITY",
+            "CONTRACTED_SALE_LIMIT",
+            "CONTRACTED_PURCHASE_LIMIT",
+            "sold_power",
+            "bought_power",
+            "current_tariff_buy",
+            "current_tariff_sell",
+        ]
+
+        for field in required_fields:
+            if field not in data:
+                errors.append(f"Missing field: {field}")
+
+        if (
+            not data.get("CONTRACTED_EXPORT_POSSIBILITY", False)
+            and data.get("sold_power", 0) > 0
+        ):
+            errors.append("Sold power > 0 but export is not possible")
+
+        if data.get("sold_power", 0) > data.get("CONTRACTED_SALE_LIMIT", 0):
+            errors.append("Sold power exceeds sale limit")
+
+        if data.get("bought_power", 0) > data.get("CONTRACTED_PURCHASE_LIMIT", 0):
+            errors.append("Bought power exceeds purchase limit")
+
+        return errors
+
+    @classmethod
     def load_data_from_json(cls, contract_file_path, tariffs_file_path):
         try:
             with open(contract_file_path, "r") as file:
@@ -40,33 +74,34 @@ class OSD:
             with open(tariffs_file_path, "r") as file:
                 tariffs_data = json.load(file)
 
-            # print("Contract Data:", contract_data)  # Logowanie danych kontraktu
-            # print("Tariffs Data:", tariffs_data)  # Logowanie danych taryf
+            # Popraw literówki w danych taryf
+            if "current_tarrif_buy" in tariffs_data:
+                tariffs_data["current_tariff_buy"] = tariffs_data.pop(
+                    "current_tarrif_buy"
+                )
+            if "current_tarrif_sell" in tariffs_data:
+                tariffs_data["current_tariff_sell"] = tariffs_data.pop(
+                    "current_tarrif_sell"
+                )
 
-            return cls(
-                CONTRACTED_TYPE=contract_data.get("CONTRACTED_TYPE", "default_type"),
-                CONTRACTED_DURATION=contract_data.get("CONTRACTED_DURATION", 0),
-                CONTRACTED_MARGIN=contract_data.get("CONTRACTED_MARGIN", 0.0),
-                CONTRACTED_EXPORT_POSSIBILITY=contract_data.get(
-                    "CONTRACTED_EXPORT_POSSIBILITY", False
-                ),
-                CONTRACTED_SALE_LIMIT=contract_data.get("CONTRACTED_SALE_LIMIT", 0),
-                CONTRACTED_PURCHASE_LIMIT=contract_data.get(
-                    "CONTRACTED_PURCHASE_LIMIT", 0
-                ),
-                sold_power=contract_data.get("sold_power", 0),
-                bought_power=contract_data.get("bought_power", 0),
-                current_tariff_buy=tariffs_data.get("current_tariff_buy", 0.0),
-                current_tariff_sell=tariffs_data.get("current_tariff_sell", 0.0),
-            )
-        except FileNotFoundError as e:
-            print(f"File not found: {e}")
-        except json.JSONDecodeError as e:
-            print(f"Error decoding JSON: {e}")
-        except KeyError as e:
-            print(f"Key error: {e}")
+            combined_data = {**contract_data, **tariffs_data}
+
+            errors = cls.validate_data(combined_data)
+            if errors:
+                for error in errors:
+                    print(f"Validation error: {error}")
+                raise ValueError("Invalid OSD data")
+
+            # Filtruj dane, aby pasowały do argumentów konstruktora
+            init_params = cls.__init__.__code__.co_varnames[1:]  # Pomijamy 'self'
+            filtered_data = {k: v for k, v in combined_data.items() if k in init_params}
+
+            instance = cls(**filtered_data)
+            print("OSD instance created successfully")
+            return instance
         except Exception as e:
-            print(f"An error occurred: {e}")
+            print(f"An error occurred while loading OSD data: {e}")
+            print(f"Exception details: {type(e).__name__}, {str(e)}")
             return None
 
     def get_contracted_export_possibility(self):

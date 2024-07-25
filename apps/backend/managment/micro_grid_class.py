@@ -99,7 +99,6 @@ class Microgrid:
                 print(f"Failed to create new {device_type} device")
 
     def create_device_instance(self, device_data, device_type):
-        # Ta metoda tworzy instancję odpowiedniego urządzenia
         device_classes = {
             "pv_panel": PV,
             "wind_turbine": WindTurbine,
@@ -109,7 +108,13 @@ class Microgrid:
         }
         device_class = device_classes.get(device_type)
         if device_class:
-            return device_class.create_instance(device_data)
+            instance = device_class.create_instance(device_data)
+            if instance:
+                print(f"Successfully created {device_type} instance: {instance.name}")
+                return instance
+            else:
+                print(f"Failed to create {device_type} instance")
+                return None
         else:
             print(f"Unknown device type: {device_type}")
             return None

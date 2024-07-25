@@ -55,8 +55,9 @@ class EnergyDeficitManager:
         can_handle = total_capacity >= additional_power
 
         print(sale_capacity)
-        print(total_capacity)
-        print(can_handle)
+        print("total_capacity", total_capacity)
+        print("additional_power", additional_power)
+        print("can_handle", can_handle)
         # self.info_logger.info(
         # f"Can the system handle the additional power: {'Yes' if can_handle else 'No'}"
         # )
@@ -70,6 +71,8 @@ class EnergyDeficitManager:
         self.info_logger.info(
             f"Can the system handle the additional power: {'Yes' if can_handle_surplus else 'No'}"
         )
+
+        print("can_handle_surplus", can_handle_surplus)
 
         if can_handle_surplus:
             self.info_logger.info("Attempting to maximize output")
@@ -367,8 +370,8 @@ class EnergyDeficitManager:
         price_factor = (current_buy_price - MIN_BUY_PRICE) / (
             MAX_BUY_PRICE - MIN_BUY_PRICE
         )
-        price_factor = max(0, min(price_factor, 1))
-
+        # price_factor = max(0, min(price_factor, 1))
+        price_factor = 0.3
         bess_factor = bess_percentage / 100
 
         if price_factor < PRICE_THRESHOLD and deficit < 50:

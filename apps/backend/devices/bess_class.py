@@ -25,6 +25,7 @@ class BESS:
 
     @staticmethod
     def validate_data(data):
+        errors = []
         required_keys = [
             "id",
             "name",
@@ -35,41 +36,46 @@ class BESS:
         ]
         for key in required_keys:
             if key not in data:
-                print(f"Missing key: {key} in data: {data}")
-                return False
+                errors.append(f"Missing key: {key}")
         if not isinstance(data["id"], int) or data["id"] <= 0:
-            print(f"Invalid id: {data['id']}")
-            return False
+            errors.append(f"Invalid id: {data['id']}")
         if not isinstance(data["name"], str) or not data["name"]:
-            print(f"Invalid name: {data['name']}")
-            return False
+            errors.append(f"Invalid name: {data['name']}")
         if not isinstance(data["capacity"], (int, float)) or data["capacity"] <= 0:
-            print(f"Invalid capacity: {data['capacity']}")
-            return False
+            errors.append(f"Invalid capacity: {data['capacity']}")
         if (
             not isinstance(data["charge_level"], (int, float))
             or data["charge_level"] < 0
         ):
-            print(f"Invalid charge_level: {data['charge_level']}")
-            return False
+            errors.append(f"Invalid charge_level: {data['charge_level']}")
         if not isinstance(data["switch_status"], bool):
-            print(f"Invalid switch_status: {data['switch_status']}")
-            return False
+            errors.append(f"Invalid switch_status: {data['switch_status']}")
         if data["device_status"] not in ["online", "offline"]:
-            print(f"Invalid device_status: {data['device_status']}")
-            return False
-        return True
+            errors.append(f"Invalid device_status: {data['device_status']}")
+
+        # Dodatkowa walidacja dla przypadku, gdy BESS jest offline i switch jest wyłączony
+        if (
+            data["device_status"] == "offline"
+            or not data["switch_status"]
+            and data["charge_level"] > 0
+        ):
+            errors.append(
+                "BESS is offline and switch is off, but charge level is greater than 0"
+            )
+
+        return errors
 
     @classmethod
     def create_instance(cls, data):
-        # print(f"Attempting to create BESS instance with data: {data}")
-        if cls.validate_data(data):
+        errors = cls.validate_data(data)
+        if not errors:
             instance = cls(**data)
             instance.is_valid = True
-            # print(f"BESS instance created successfully: {instance.name}")
+            print(f"Successfully created BESS instance: {instance.name}")
             return instance
-        # print("BESS instance creation failed")
-        return None
+        else:
+            print(f"Failed to create BESS instance. Errors: {errors}")
+            return None
 
     def activate(self):
         self.device_status = "online"

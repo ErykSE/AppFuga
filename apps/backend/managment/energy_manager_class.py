@@ -1,7 +1,7 @@
 import logging
 from apps.backend.managment.energy_surplus_manager_class import EnergySurplusManager
 from apps.backend.managment.energy_deficit_manager_class import EnergyDeficitManager
-
+from apps.backend.others.data_validator import DataValidator
 
 from threading import Thread, Event
 
@@ -47,10 +47,82 @@ class EnergyManager:
                 self.info_logger.info(
                     "Starting a new iteration of the energy management algorithm"
                 )
+
+                # Validate microgrid data
+                microgrid_data = {
+                    "pv_panels": (
+                        self.microgrid.pv_panels
+                        if isinstance(self.microgrid.pv_panels, list)
+                        else (
+                            [self.microgrid.pv_panels]
+                            if self.microgrid.pv_panels
+                            else []
+                        )
+                    ),
+                    "wind_turbines": (
+                        self.microgrid.wind_turbines
+                        if isinstance(self.microgrid.wind_turbines, list)
+                        else (
+                            [self.microgrid.wind_turbines]
+                            if self.microgrid.wind_turbines
+                            else []
+                        )
+                    ),
+                    "fuel_turbines": (
+                        self.microgrid.fuel_turbines
+                        if isinstance(self.microgrid.fuel_turbines, list)
+                        else (
+                            [self.microgrid.fuel_turbines]
+                            if self.microgrid.fuel_turbines
+                            else []
+                        )
+                    ),
+                    "fuel_cells": (
+                        self.microgrid.fuel_cells
+                        if isinstance(self.microgrid.fuel_cells, list)
+                        else (
+                            [self.microgrid.fuel_cells]
+                            if self.microgrid.fuel_cells
+                            else []
+                        )
+                    ),
+                    "bess": [self.microgrid.bess] if self.microgrid.bess else [],
+                    "non_adjustable_devices": (
+                        self.consumergrid.non_adjustable_devices
+                        if isinstance(self.consumergrid.non_adjustable_devices, list)
+                        else []
+                    ),
+                    "adjustable_devices": (
+                        self.consumergrid.adjustable_devices
+                        if isinstance(self.consumergrid.adjustable_devices, list)
+                        else []
+                    ),
+                }
+
+                microgrid_errors = DataValidator.validate_microgrid_data(microgrid_data)
+
+                # Validate OSD data
+                osd_errors = DataValidator.validate_contract_data(self.osd.__dict__)
+
+                if microgrid_errors or osd_errors:
+                    self.info_logger.error(
+                        "Validation errors detected. Stopping the algorithm."
+                    )
+                    for error in microgrid_errors:
+                        self.error_logger.error(f"Microgrid validation error: {error}")
+                    for error in osd_errors:
+                        self.error_logger.error(f"OSD validation error: {error}")
+                    self.stop()
+                    break
+
                 self.check_energy_conditions()
                 self.stop_event.wait(self.check_interval)
             except Exception as e:
                 self.error_logger.error(f"Error in energy management: {str(e)}")
+                self.error_logger.exception("Full traceback:")
+                self.info_logger.error("An error occurred. Stopping the algorithm.")
+                self.stop()
+                break
 
     def check_energy_conditions(self):
         try:

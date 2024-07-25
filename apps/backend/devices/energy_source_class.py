@@ -29,6 +29,7 @@ class EnergySource:
 
     @staticmethod
     def validate_data(data):
+        errors = []
         required_keys = [
             "id",
             "name",
@@ -41,8 +42,7 @@ class EnergySource:
         ]
         for key in required_keys:
             if key not in data:
-                print(f"Missing key: {key} in data: {data}")
-                return False
+                errors.append(f"Missing key: {key}")
         if not isinstance(data["id"], int) or data["id"] <= 0:
             print(f"Invalid id: {data['id']}")
             return False
@@ -76,15 +76,20 @@ class EnergySource:
         if data["device_status"] not in ["online", "offline"]:
             print(f"Invalid device_status: {data['device_status']}")
             return False
-        return True
+
+        return errors
 
     @classmethod
     def create_instance(cls, data):
-        if cls.validate_data(data):
+        errors = cls.validate_data(data)
+        if not errors:
             instance = cls(**data)
             instance.is_valid = True
+            print(f"Successfully created {cls.__name__} instance: {instance.name}")
             return instance
-        return None
+        else:
+            print(f"Failed to create {cls.__name__} instance. Errors: {errors}")
+            return None
 
     def get_actual_output(self):
         return self.actual_output
