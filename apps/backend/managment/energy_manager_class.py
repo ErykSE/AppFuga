@@ -1,4 +1,5 @@
 import logging
+import time
 from apps.backend.managment.energy_surplus_manager_class import EnergySurplusManager
 from apps.backend.managment.energy_deficit_manager_class import EnergyDeficitManager
 from apps.backend.others.data_validator import DataValidator
@@ -29,6 +30,7 @@ class EnergyManager:
         self.check_interval = check_interval
         self.running = False
         self.stop_event = Event()
+        self.restart_delay = 30  # czas oczekiwania przed ponownym startem (w sekundach)
 
     def start(self):
         self.running = True
@@ -44,89 +46,79 @@ class EnergyManager:
     def run_energy_management(self):
         while self.running and not self.stop_event.is_set():
             try:
+                self.run_single_iteration()
+
+                # Czekamy określony czas przed następną iteracją
                 self.info_logger.info(
-                    "Starting a new iteration of the energy management algorithm"
+                    f"Oczekiwanie {self.restart_delay} sekund przed następną iteracją..."
                 )
-
-                # Validate microgrid data
-                microgrid_data = {
-                    "pv_panels": (
-                        self.microgrid.pv_panels
-                        if isinstance(self.microgrid.pv_panels, list)
-                        else (
-                            [self.microgrid.pv_panels]
-                            if self.microgrid.pv_panels
-                            else []
-                        )
-                    ),
-                    "wind_turbines": (
-                        self.microgrid.wind_turbines
-                        if isinstance(self.microgrid.wind_turbines, list)
-                        else (
-                            [self.microgrid.wind_turbines]
-                            if self.microgrid.wind_turbines
-                            else []
-                        )
-                    ),
-                    "fuel_turbines": (
-                        self.microgrid.fuel_turbines
-                        if isinstance(self.microgrid.fuel_turbines, list)
-                        else (
-                            [self.microgrid.fuel_turbines]
-                            if self.microgrid.fuel_turbines
-                            else []
-                        )
-                    ),
-                    "fuel_cells": (
-                        self.microgrid.fuel_cells
-                        if isinstance(self.microgrid.fuel_cells, list)
-                        else (
-                            [self.microgrid.fuel_cells]
-                            if self.microgrid.fuel_cells
-                            else []
-                        )
-                    ),
-                    "bess": [self.microgrid.bess] if self.microgrid.bess else [],
-                    "non_adjustable_devices": (
-                        self.consumergrid.non_adjustable_devices
-                        if isinstance(self.consumergrid.non_adjustable_devices, list)
-                        else []
-                    ),
-                    "adjustable_devices": (
-                        self.consumergrid.adjustable_devices
-                        if isinstance(self.consumergrid.adjustable_devices, list)
-                        else []
-                    ),
-                }
-
-                microgrid_errors = DataValidator.validate_microgrid_data(microgrid_data)
-
-                # Validate OSD data
-                osd_errors = DataValidator.validate_contract_data(self.osd.__dict__)
-
-                if microgrid_errors or osd_errors:
-                    self.info_logger.error(
-                        "Validation errors detected. Stopping the algorithm."
-                    )
-                    for error in microgrid_errors:
-                        self.error_logger.error(f"Microgrid validation error: {error}")
-                    for error in osd_errors:
-                        self.error_logger.error(f"OSD validation error: {error}")
-                    self.stop()
+                if self.stop_event.wait(self.restart_delay):
                     break
-
-                self.check_energy_conditions()
-                self.stop_event.wait(self.check_interval)
             except Exception as e:
-                self.error_logger.error(f"Error in energy management: {str(e)}")
-                self.error_logger.exception("Full traceback:")
-                self.info_logger.error("An error occurred. Stopping the algorithm.")
-                self.stop()
+                self.handle_runtime_error(e)
                 break
+
+        self.info_logger.info("Energy management stopped")
+
+    def run_single_iteration(self):
+        self.info_logger.info(
+            "Starting a new iteration of the energy management algorithm"
+        )
+
+        # Wczytywanie i walidacja danych
+        microgrid_data = self.prepare_microgrid_data()
+        microgrid_errors = DataValidator.validate_microgrid_data(microgrid_data)
+        osd_errors = DataValidator.validate_contract_data(self.osd.__dict__)
+
+        if microgrid_errors or osd_errors:
+            self.handle_validation_errors(microgrid_errors, osd_errors)
+            return
+
+        # Logowanie stanu systemu
+        self.log_system_summary()
+
+        # Sprawdzenie warunków energetycznych
+        self.check_energy_conditions()
+
+    def prepare_microgrid_data(self):
+        return {
+            "pv_panels": self.get_device_list(self.microgrid.pv_panels),
+            "wind_turbines": self.get_device_list(self.microgrid.wind_turbines),
+            "fuel_turbines": self.get_device_list(self.microgrid.fuel_turbines),
+            "fuel_cells": self.get_device_list(self.microgrid.fuel_cells),
+            "bess": [self.microgrid.bess] if self.microgrid.bess else [],
+            "non_adjustable_devices": self.get_device_list(
+                self.consumergrid.non_adjustable_devices
+            ),
+            "adjustable_devices": self.get_device_list(
+                self.consumergrid.adjustable_devices
+            ),
+        }
+
+    def get_device_list(self, devices):
+        if isinstance(devices, list):
+            return devices
+        elif devices:
+            return [devices]
+        else:
+            return []
+
+    def handle_validation_errors(self, microgrid_errors, osd_errors):
+        self.info_logger.error("Validation errors detected. Stopping the algorithm.")
+        for error in microgrid_errors:
+            self.error_logger.error(f"Microgrid validation error: {error}")
+        for error in osd_errors:
+            self.error_logger.error(f"OSD validation error: {error}")
+        self.stop()
+
+    def handle_runtime_error(self, e):
+        self.error_logger.error(f"Error in energy management: {str(e)}")
+        self.error_logger.exception("Full traceback:")
+        self.info_logger.error("An error occurred. Stopping the algorithm.")
+        self.stop()
 
     def check_energy_conditions(self):
         try:
-            self.log_system_summary()
             total_generated_power = self.microgrid.total_power_generated()
             total_demand_power = self.consumergrid.total_power_consumed()
 
@@ -172,69 +164,17 @@ class EnergyManager:
                 break
 
     def manage_deficit(self, power_deficit):
-        # initial_deficit = power_deficit
-        # self.info_logger.info(f"Rozpoczęcie zarządzania deficytem: {power_deficit} kW")
+        result = self.deficit_manager.handle_deficit(power_deficit)
+        managed_amount = result["amount_managed"]
+        remaining_deficit = result["remaining_deficit"]
 
-        max_iterations = 5  # Dodajemy maksymalną liczbę iteracji
-        iteration = 0
+        self.info_logger.info(
+            f"Zarządzono {managed_amount} kW deficytu. Pozostało: {remaining_deficit} kW"
+        )
 
-        while (
-            power_deficit > 0
-            and not self.stop_event.is_set()
-            and iteration < max_iterations
-        ):
-            try:
-                iteration += 1
-                self.info_logger.info(f"Iteracja {iteration} zarządzania deficytem")
-
-                result = self.deficit_manager.handle_deficit(power_deficit)
-                managed_amount = result["amount_managed"]
-                power_deficit = result["remaining_deficit"]
-
-                self.info_logger.info(
-                    f"Zarządzono {managed_amount} kW deficytu. Pozostało: {power_deficit} kW"
-                )
-
-                if managed_amount == 0:
-                    self.info_logger.warning(
-                        "Nie udało się zarządzić żadną częścią deficytu w tej iteracji."
-                    )
-                    if iteration == max_iterations:
-                        self.info_logger.warning(
-                            "Osiągnięto maksymalną liczbę iteracji bez pełnego rozwiązania deficytu."
-                        )
-                        break
-
-                if self.stop_event.wait(
-                    10
-                ):  # Zmniejszamy czas oczekiwania do 10 sekund
-                    break
-
-                # Aktualizacja warunków
-                new_total_generated = self.microgrid.total_power_generated()
-                new_total_demand = self.consumergrid.total_power_consumed()
-                new_deficit = new_total_demand - new_total_generated
-
-                self.info_logger.info(
-                    f"Aktualna generacja: {new_total_generated} kW, Aktualne zapotrzebowanie: {new_total_demand} kW"
-                )
-
-                if new_deficit <= 0:
-                    self.info_logger.info(
-                        "Warunki energetyczne zmieniły się, deficyt został rozwiązany"
-                    )
-                    break
-
-                power_deficit = new_deficit
-                self.info_logger.info(f"Zaktualizowany deficyt: {power_deficit} kW")
-
-            except Exception as e:
-                self.error_logger.error(f"Błąd w zarządzaniu deficytem: {str(e)}")
-                break
-
-        if power_deficit > 0:
+        if remaining_deficit > 0:
             self.info_logger.warning(
-                f"Zakończono zarządzanie deficytem. Pozostały nierozwiązany deficyt: {power_deficit} kW"
+                f"Zakończono zarządzanie deficytem. Pozostały nierozwiązany deficyt: {remaining_deficit} kW"
             )
         else:
             self.info_logger.info(
