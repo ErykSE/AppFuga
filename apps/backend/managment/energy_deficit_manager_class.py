@@ -243,6 +243,7 @@ class EnergyDeficitManager:
         if self.is_bess_available():
             bess_energy = self.microgrid.bess.get_charge_level()
             current_buy_price = self.osd.get_current_buy_price()
+            print(f"OSD current buy price: {self.osd.get_current_buy_price()}")
             if self.should_discharge_bess(deficit, bess_energy, current_buy_price):
                 return DeficitAction.DISCHARGE_BESS
         if self.can_buy_energy():
@@ -349,8 +350,8 @@ class EnergyDeficitManager:
 
     def should_discharge_bess(self, deficit, bess_energy, current_buy_price):
         # Parametry do konfiguracji
-        MIN_BUY_PRICE = 0.08
-        MAX_BUY_PRICE = 0.18
+        MIN_BUY_PRICE = 0.1
+        MAX_BUY_PRICE = 0.5
         BESS_THRESHOLD = 20  # Minimalny poziom naładowania BESS (%)
         PRICE_THRESHOLD = 0.7
         HYSTERESIS = 0.05
@@ -370,30 +371,23 @@ class EnergyDeficitManager:
         price_factor = (current_buy_price - MIN_BUY_PRICE) / (
             MAX_BUY_PRICE - MIN_BUY_PRICE
         )
-        # price_factor = max(0, min(price_factor, 1))
-        price_factor = 0.3
+        print("current", current_buy_price)
+        print("priceFactor1", price_factor)
+        price_factor = max(0, min(price_factor, 1))
+        print("priceFactor2", price_factor)
+        # price_factor = 0.3
         bess_factor = bess_percentage / 100
 
         if price_factor < PRICE_THRESHOLD and deficit < 50:
-            decision = False
-            self.info_logger.info(
-                f"Purchase priority: low price ({current_buy_price}) i niewielki deficyt ({deficit} kW)"
-            )
-        elif bess_factor > price_factor + HYSTERESIS:
-            decision = True
-            self.info_logger.info(
-                f"Discharge BESS priority: bess factor ({bess_factor:.2f}) > price factor ({price_factor:.2f})"
-            )
+            decision = False  # Kupuj energię, gdy cena jest niska i deficyt mały
         elif price_factor > bess_factor + HYSTERESIS:
-            decision = False
-            self.info_logger.info(
-                f"Purchase priority: price factor ({price_factor:.2f}) > bess factor ({bess_factor:.2f})"
-            )
+            decision = True  # Rozładuj baterię, gdy cena zakupu jest wysoka
+        elif bess_factor > price_factor + HYSTERESIS:
+            decision = True  # Rozładuj baterię, gdy poziom naładowania jest wysoki w stosunku do ceny
         else:
-            decision = self.previous_discharge_decision
-            self.info_logger.info(
-                f"Behaviour of the previous decision: values within the hysteresis range"
-            )
+            decision = (
+                self.previous_discharge_decision
+            )  # Utrzymaj poprzednią decyzję w przypadku niezdecydowania
 
         self.previous_discharge_decision = decision
         return decision

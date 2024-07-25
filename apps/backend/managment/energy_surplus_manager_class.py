@@ -97,7 +97,7 @@ class EnergySurplusManager:
     ):
         # Parametry do konfiguracji
         MIN_SELLING_PRICE = 0.10
-        MAX_SELLING_PRICE = 0.20
+        MAX_SELLING_PRICE = 0.25
         BATTERY_THRESHOLD = 20
         PRICE_THRESHOLD = 0.7
         HYSTERESIS = 0.05
