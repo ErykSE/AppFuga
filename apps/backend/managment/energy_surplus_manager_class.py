@@ -1,7 +1,4 @@
-import logging
 from apps.backend.managment.surplus_action import SurplusAction
-from datetime import datetime, timedelta
-import numpy as np
 
 
 class EnergySurplusManager:
