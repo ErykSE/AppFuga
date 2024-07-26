@@ -264,9 +264,49 @@ class EnergySurplusManager:
             return 0
 
     def limit_energy_generation(self, power_surplus):
-        print(f"Limiting {power_surplus} kW of generated power.")
-        # Tu logika ograniczania generacji
-        return {"success": True, "amount": power_surplus}
+        self.info_logger.info(
+            f"Attempting to limit energy generation by {power_surplus} kW"
+        )
+        total_reduced = 0
+
+        # Sortuj urządzenia według priorytetu (rosnąco)
+        active_generators = sorted(
+            [
+                device
+                for device in self.microgrid.get_all_devices()
+                if device.get_switch_status()
+            ],
+            key=lambda x: x.priority,
+        )
+
+        for device in active_generators:
+            if total_reduced >= power_surplus:
+                break
+
+            current_output = device.get_actual_output()
+            min_output = device.get_min_output()
+            reducible_power = current_output - min_output
+
+            reduction = min(reducible_power, power_surplus - total_reduced)
+
+            if reduction > 0:
+                new_output = current_output - reduction
+                device.set_output(new_output)
+                actual_reduction = current_output - device.get_actual_output()
+                total_reduced += actual_reduction
+                self.info_logger.info(
+                    f"Reduced {device.name} (priority: {device.priority}) power by {actual_reduction} kW from {current_output} kW to {device.get_actual_output()} kW"
+                )
+
+        remaining_surplus = power_surplus - total_reduced
+        self.info_logger.info(f"Total power generation reduced: {total_reduced} kW")
+        self.info_logger.info(f"Remaining surplus: {remaining_surplus} kW")
+
+        return {
+            "success": total_reduced > 0,
+            "amount": total_reduced,
+            "remaining_surplus": remaining_surplus,
+        }
 
     def is_export_possible(self):
         try:
