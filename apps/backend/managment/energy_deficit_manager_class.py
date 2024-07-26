@@ -1,6 +1,6 @@
 from apps.backend.managment.deficit_action import DeficitAction
-
-######################
+from apps.backend.devices.adjustable_devices import AdjustableDevice
+from apps.backend.devices.non_adjustable import NonAdjustableDevice
 
 
 class EnergyDeficitManager:
@@ -8,8 +8,9 @@ class EnergyDeficitManager:
     Klasa zarządzająca deficytem energii.
     """
 
-    def __init__(self, microgrid, osd, info_logger, error_logger):
+    def __init__(self, microgrid, consumergrid, osd, info_logger, error_logger):
         self.microgrid = microgrid
+        self.consumergrid = consumergrid  # Dodaj tę linię
         self.osd = osd
         self.info_logger = info_logger
         self.error_logger = error_logger
@@ -80,51 +81,61 @@ class EnergyDeficitManager:
         handleable_power = self.can_handle_more_power(power_deficit)
 
         current_output = self.microgrid.total_power_generated()
-        target_output = min(
-            current_output + handleable_power + power_deficit,
-            sum(device.get_max_output() for device in self.microgrid.get_all_devices()),
+        max_potential_output = sum(
+            device.get_max_output() for device in self.microgrid.get_all_devices()
         )
+        target_output = min(current_output + power_deficit, max_potential_output)
 
+        self.info_logger.info(f"Current output: {current_output} kW")
+        self.info_logger.info(f"Max potential output: {max_potential_output} kW")
+        self.info_logger.info(f"Power deficit: {power_deficit} kW")
+        self.info_logger.info(f"Handleable power: {handleable_power} kW")
         self.info_logger.info(f"Target output: {target_output} kW")
 
         increased_power = 0
+
+        # Najpierw zwiększamy moc aktywnych urządzeń
         for device in self.microgrid.get_active_devices():
-            initial_output = device.get_actual_output()
-            max_output = device.get_max_output()
-
-            if target_output > (current_output + increased_power):
-                new_output = min(
-                    max_output,
-                    target_output - (current_output + increased_power) + initial_output,
-                )
-                device.set_output(new_output)
-                actual_increase = new_output - initial_output
-                increased_power += actual_increase
-                self.info_logger.info(
-                    f"Increased power {device.name} from {initial_output} kW to {new_output} kW"
-                )
-
             if current_output + increased_power >= target_output:
                 break
 
-        # Aktywuj nieaktywne urządzenia, jeśli to konieczne
+            initial_output = device.get_actual_output()
+            max_output = device.get_max_output()
+
+            new_output = min(
+                max_output,
+                target_output - (current_output + increased_power) + initial_output,
+            )
+
+            device.set_output(new_output)
+            actual_increase = new_output - initial_output
+            increased_power += actual_increase
+
+            self.info_logger.info(
+                f"Increased power of {device.name} from {initial_output} kW to {new_output} kW"
+            )
+
+        # Jeśli nadal potrzebujemy więcej mocy, aktywujemy nieaktywne urządzenia
         if current_output + increased_power < target_output:
             for device in self.microgrid.get_inactive_devices():
+                if current_output + increased_power >= target_output:
+                    break
+
                 if device.try_activate():
                     max_output = device.get_max_output()
                     new_output = min(
                         max_output, target_output - (current_output + increased_power)
                     )
                     device.set_output(new_output)
-                    increased_power += new_output
+                    actual_increase = new_output
+                    increased_power += actual_increase
+
                     self.info_logger.info(
-                        f"Activated {device.name} and set the power to {new_output} kW"
+                        f"Activated {device.name} and set power to {new_output} kW"
                     )
 
-                if current_output + increased_power >= target_output:
-                    break
-
         self.info_logger.info(f"In total, power was increased by {increased_power} kW")
+        self.info_logger.info(f"Final output: {current_output + increased_power} kW")
         return increased_power
 
     def adjust_power_output(self, target_power):
@@ -342,10 +353,46 @@ class EnergyDeficitManager:
         return {"success": False, "amount": 0}
 
     def limit_consumption(self, power_deficit):
-        # Implementacja ograniczenia zużycia
-        # To może wymagać dodatkowej logiki w zależności od specyfiki systemu
-        self.info_logger.info(f"Limiting consumption by {power_deficit} kW")
-        return {"success": True, "amount": power_deficit}
+        self.info_logger.info(f"Attempting to limit consumption by {power_deficit} kW")
+        total_reduced = 0
+
+        all_devices = sorted(
+            self.consumergrid.adjustable_devices
+            + self.consumergrid.non_adjustable_devices,
+            key=lambda x: (not isinstance(x, AdjustableDevice), x.priority),
+        )
+
+        for device in all_devices:
+            if total_reduced >= power_deficit:
+                break
+
+            if isinstance(device, AdjustableDevice) and device.switch_status:
+                reducible_power = device.power - device.min_power
+                reduction_needed = min(reducible_power, power_deficit - total_reduced)
+                if reduction_needed > 0:
+                    actual_reduction = device.decrease_power(reduction_needed)
+                    total_reduced += actual_reduction
+                    self.info_logger.info(
+                        f"Reduced {device.name} power by {actual_reduction} kW"
+                    )
+
+            elif isinstance(device, NonAdjustableDevice) and device.switch_status:
+                if total_reduced + device.power <= power_deficit:
+                    device.deactivate()
+                    total_reduced += device.power
+                    self.info_logger.info(
+                        f"Deactivated {device.name}, saved {device.power} kW"
+                    )
+
+        remaining_deficit = power_deficit - total_reduced
+        self.info_logger.info(f"Total power reduced: {total_reduced} kW")
+        self.info_logger.info(f"Remaining deficit: {remaining_deficit} kW")
+
+        return {
+            "success": total_reduced > 0,
+            "amount": total_reduced,
+            "remaining_deficit": remaining_deficit,
+        }
 
     def should_discharge_bess(self, deficit, bess_energy, current_buy_price):
         # Parametry do konfiguracji

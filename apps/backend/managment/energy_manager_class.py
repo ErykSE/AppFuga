@@ -26,7 +26,7 @@ class EnergyManager:
             microgrid, osd, info_logger, error_logger
         )
         self.deficit_manager = EnergyDeficitManager(
-            microgrid, osd, info_logger, error_logger
+            microgrid, consumergrid, osd, info_logger, error_logger
         )
         self.check_interval = check_interval
         self.running = False
