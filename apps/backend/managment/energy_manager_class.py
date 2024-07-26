@@ -1,3 +1,4 @@
+import json
 import logging
 import time
 from apps.backend.managment.energy_surplus_manager_class import EnergySurplusManager
@@ -47,6 +48,9 @@ class EnergyManager:
         while self.running and not self.stop_event.is_set():
             try:
                 self.run_single_iteration()
+
+                # Zapisz aktualny stan do pliku JSON
+                self.save_live_data()
 
                 # Czekamy określony czas przed następną iteracją
                 self.info_logger.info(
@@ -222,3 +226,30 @@ class EnergyManager:
 
         for line in summary:
             self.info_logger.info(line)
+
+    def save_live_data(self):
+        """
+        Generuje i zapisuje aktualny stan wszystkich urządzeń do pliku JSON.
+        """
+        live_data = {
+            "pv_panels": [panel.to_dict() for panel in self.microgrid.pv_panels],
+            "wind_turbines": [
+                turbine.to_dict() for turbine in self.microgrid.wind_turbines
+            ],
+            "fuel_turbines": [
+                turbine.to_dict() for turbine in self.microgrid.fuel_turbines
+            ],
+            "fuel_cells": [cell.to_dict() for cell in self.microgrid.fuel_cells],
+            "bess": [self.microgrid.bess.to_dict()] if self.microgrid.bess else [],
+            "non_adjustable_devices": [
+                device.to_dict() for device in self.consumergrid.non_adjustable_devices
+            ],
+            "adjustable_devices": [
+                device.to_dict() for device in self.consumergrid.adjustable_devices
+            ],
+        }
+
+        with open("C:/eryk/AppFuga/apps/backend/live_data.json", "w") as f:
+            json.dump(live_data, f, indent=4)
+
+        self.info_logger.info("Live data saved to live_data.json")

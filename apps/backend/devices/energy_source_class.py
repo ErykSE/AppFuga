@@ -289,3 +289,15 @@ class EnergySource:
             f"actual_output={self.actual_output}, switch_status={self.switch_status}, "
             f"device_status='{self.device_status}')"
         )
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "priority": self.priority,
+            "max_output": self.max_output,
+            "min_output": self.min_output,
+            "actual_output": self.get_actual_output(),
+            "switch_status": self.get_switch_status(),
+            "device_status": "online" if self.get_switch_status() else "offline",
+        }

@@ -106,17 +106,20 @@ class OSD:
             if field in data and not isinstance(data[field], (int, float)):
                 errors.append(f"{field} must be a number")
 
-        if (
-            not data.get("CONTRACTED_EXPORT_POSSIBILITY", False)
-            and data.get("sold_power", 0) > 0
-        ):
-            errors.append("Sold power > 0 but export is not possible")
-
-        if data.get("sold_power", 0) > data.get("CONTRACTED_SALE_LIMIT", 0):
-            errors.append("Sold power exceeds sale limit")
-
-        if data.get("bought_power", 0) > data.get("CONTRACTED_PURCHASE_LIMIT", 0):
-            errors.append("Bought power exceeds purchase limit")
+        if not data.get("CONTRACTED_EXPORT_POSSIBILITY", False):
+            if data.get("CONTRACTED_SALE_LIMIT", 0) != 0:
+                errors.append(
+                    "CONTRACTED_SALE_LIMIT must be 0 when CONTRACTED_EXPORT_POSSIBILITY is False"
+                )
+            if data.get("sold_power", 0) != 0:
+                errors.append(
+                    "sold_power must be 0 when CONTRACTED_EXPORT_POSSIBILITY is False"
+                )
+        else:
+            if data.get("CONTRACTED_SALE_LIMIT", 0) < 0:
+                errors.append("CONTRACTED_SALE_LIMIT cannot be negative")
+            if data.get("sold_power", 0) < 0:
+                errors.append("sold_power cannot be negative")
 
         return errors
 

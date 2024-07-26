@@ -26,3 +26,8 @@ class AdjustableDevice(EnergyPoint):
         else:
             self.power = new_power
         print(f"{self.name} power decreased to {self.power} kW")
+
+    def to_dict(self):
+        base_dict = super().to_dict()
+        base_dict.update({"min_power": self.min_power, "max_power": self.max_power})
+        return base_dict

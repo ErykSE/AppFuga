@@ -2,10 +2,10 @@
     "CONTRACTED_TYPE": "Type B",
     "CONTRACTED_DURATION": 12,
     "CONTRACTED_MARGIN": 0.1,
-    "CONTRACTED_EXPORT_POSSIBILITY": true,
-    "CONTRACTED_SALE_LIMIT": 2000,
+    "CONTRACTED_EXPORT_POSSIBILITY": false,
+    "CONTRACTED_SALE_LIMIT": 0,
     "CONTRACTED_PURCHASE_LIMIT": 300,
-    "sold_power": 150,
+    "sold_power": 0,
     "bought_power": 150,
     "current_tariff_buy": 0.41,
     "current_tariff_sell": 0.22

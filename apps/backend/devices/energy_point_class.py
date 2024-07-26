@@ -62,3 +62,12 @@ class EnergyPoint:
     def deactivate(self):
         self.switch_status = False
         print(f"{self.name} is now inactive with switch_status = {self.switch_status}.")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "priority": self.priority,
+            "power": self.power,
+            "switch_status": self.get_switch_status(),
+        }

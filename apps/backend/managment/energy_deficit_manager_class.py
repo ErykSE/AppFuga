@@ -41,88 +41,87 @@ class EnergyDeficitManager:
             "remaining_deficit": remaining_deficit,
         }
 
-    def can_handle_more_power(self, additional_power):
+    def can_handle_more_power(self, power_deficit):
         bess_free_capacity = (
             self.microgrid.bess.get_capacity() - self.microgrid.bess.get_charge_level()
             if self.microgrid.bess
             else 0
         )
+        # Oblicz dostępną pojemność sprzedaży
         sale_capacity = self.osd.get_remaining_sale_capacity()
-        total_capacity = bess_free_capacity + sale_capacity
 
-        # self.info_logger.info(f"Additional power required: {additional_power} kW")
+        # Oblicz całkowitą dostępną pojemność do zagospodarowania nadwyżki
+        total_available_capacity = bess_free_capacity + sale_capacity
 
-        can_handle = total_capacity >= additional_power
+        # Oblicz potencjalną nadwyżkę
+        current_output = self.microgrid.total_power_generated()
+        max_potential_output = sum(
+            device.get_max_output() for device in self.microgrid.get_all_devices()
+        )
+        potential_surplus = max_potential_output - current_output - power_deficit
 
-        print(sale_capacity)
-        print("total_capacity", total_capacity)
-        print("additional_power", additional_power)
-        print("can_handle", can_handle)
-        # self.info_logger.info(
-        # f"Can the system handle the additional power: {'Yes' if can_handle else 'No'}"
-        # )
+        # Oblicz, ile dodatkowej mocy możemy obsłużyć
+        handleable_power = min(total_available_capacity, potential_surplus)
 
-        return can_handle
+        self.info_logger.info(f"Current output: {current_output} kW")
+        self.info_logger.info(f"Max potential output: {max_potential_output} kW")
+        self.info_logger.info(f"Power deficit: {power_deficit} kW")
+        self.info_logger.info(f"Potential surplus: {potential_surplus} kW")
+        self.info_logger.info(f"BESS free capacity: {bess_free_capacity} kWh")
+        self.info_logger.info(f"Available sale capacity: {sale_capacity} kWh")
+        self.info_logger.info(
+            f"Total available capacity: {total_available_capacity} kWh"
+        )
+        self.info_logger.info(f"Handleable additional power: {handleable_power} kW")
+
+        return handleable_power
 
     def maximize_power_output(self, power_deficit):
+        handleable_power = self.can_handle_more_power(power_deficit)
 
-        can_handle_surplus = self.can_handle_more_power(power_deficit)
-
-        self.info_logger.info(
-            f"Can the system handle the additional power: {'Yes' if can_handle_surplus else 'No'}"
+        current_output = self.microgrid.total_power_generated()
+        target_output = min(
+            current_output + handleable_power + power_deficit,
+            sum(device.get_max_output() for device in self.microgrid.get_all_devices()),
         )
 
-        print("can_handle_surplus", can_handle_surplus)
-
-        if can_handle_surplus:
-            self.info_logger.info("Attempting to maximize output")
-        else:
-            self.info_logger.info("Attempting to control equipment to meet demand")
+        self.info_logger.info(f"Target output: {target_output} kW")
 
         increased_power = 0
-        active_devices = self.microgrid.get_active_devices()
-        self.info_logger.info(f"Liczba aktywnych urządzeń: {len(active_devices)}")
-
-        for device in active_devices:
+        for device in self.microgrid.get_active_devices():
             initial_output = device.get_actual_output()
             max_output = device.get_max_output()
 
-            if can_handle_surplus:
-                increase = max_output - initial_output
-            else:
-                increase = min(
-                    max_output - initial_output, power_deficit - increased_power
+            if target_output > (current_output + increased_power):
+                new_output = min(
+                    max_output,
+                    target_output - (current_output + increased_power) + initial_output,
                 )
-
-            if increase > 0:
-                device.set_output(initial_output + increase)
-                new_output = device.get_actual_output()
+                device.set_output(new_output)
                 actual_increase = new_output - initial_output
                 increased_power += actual_increase
                 self.info_logger.info(
                     f"Increased power {device.name} from {initial_output} kW to {new_output} kW"
                 )
 
-            if increased_power >= power_deficit and not can_handle_surplus:
+            if current_output + increased_power >= target_output:
                 break
 
-        if can_handle_surplus or increased_power < power_deficit:
-            inactive_devices = self.microgrid.get_inactive_devices()
-            for device in inactive_devices:
+        # Aktywuj nieaktywne urządzenia, jeśli to konieczne
+        if current_output + increased_power < target_output:
+            for device in self.microgrid.get_inactive_devices():
                 if device.try_activate():
-                    if can_handle_surplus:
-                        new_output = device.get_max_output()
-                    else:
-                        new_output = min(
-                            device.get_max_output(), power_deficit - increased_power
-                        )
+                    max_output = device.get_max_output()
+                    new_output = min(
+                        max_output, target_output - (current_output + increased_power)
+                    )
                     device.set_output(new_output)
                     increased_power += new_output
                     self.info_logger.info(
                         f"Activated {device.name} and set the power to {new_output} kW"
                     )
 
-                if increased_power >= power_deficit and not can_handle_surplus:
+                if current_output + increased_power >= target_output:
                     break
 
         self.info_logger.info(f"In total, power was increased by {increased_power} kW")

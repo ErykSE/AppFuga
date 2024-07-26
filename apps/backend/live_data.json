@@ -6,9 +6,9 @@
             "priority": 1,
             "max_output": 100,
             "min_output": 10,
-            "actual_output": 50,
-            "switch_status": false,
-            "device_status": "offline"
+            "actual_output": 100,
+            "switch_status": true,
+            "device_status": "online"
         },
         {
             "id": 2,
@@ -16,7 +16,7 @@
             "priority": 1,
             "max_output": 120,
             "min_output": 15,
-            "actual_output": 30,
+            "actual_output": 120,
             "switch_status": true,
             "device_status": "online"
         }
@@ -28,7 +28,7 @@
             "priority": 1,
             "max_output": 200,
             "min_output": 20,
-            "actual_output": 40,
+            "actual_output": 200,
             "switch_status": true,
             "device_status": "online"
         },
@@ -38,9 +38,9 @@
             "priority": 1,
             "max_output": 180,
             "min_output": 20,
-            "actual_output": 30,
-            "switch_status": false,
-            "device_status": "offline"
+            "actual_output": 100,
+            "switch_status": true,
+            "device_status": "online"
         }
     ],
     "fuel_turbines": [
@@ -50,7 +50,7 @@
             "priority": 1,
             "max_output": 300,
             "min_output": 30,
-            "actual_output": 40,
+            "actual_output": 300,
             "switch_status": true,
             "device_status": "online"
         }
@@ -62,7 +62,7 @@
             "priority": 1,
             "max_output": 150,
             "min_output": 15,
-            "actual_output": 25,
+            "actual_output": 150,
             "switch_status": true,
             "device_status": "online"
         }

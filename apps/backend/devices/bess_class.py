@@ -41,7 +41,7 @@ class BESS:
             errors.append(f"Invalid id: {data['id']}")
         if not isinstance(data["name"], str) or not data["name"]:
             errors.append(f"Invalid name: {data['name']}")
-        if not isinstance(data["capacity"], (int, float)) or data["capacity"] <= 0:
+        if not isinstance(data["capacity"], (int, float)) or data["capacity"] < 0:
             errors.append(f"Invalid capacity: {data['capacity']}")
         if (
             not isinstance(data["charge_level"], (int, float))
@@ -53,15 +53,19 @@ class BESS:
         if data["device_status"] not in ["online", "offline"]:
             errors.append(f"Invalid device_status: {data['device_status']}")
 
-        # Dodatkowa walidacja dla przypadku, gdy BESS jest offline i switch jest wyłączony
-        if (
-            data["device_status"] == "offline"
-            or not data["switch_status"]
-            and data["charge_level"] > 0
-        ):
-            errors.append(
-                "BESS is offline and switch is off, but charge level is greater than 0"
-            )
+        # Sprawdzamy warunki dla urządzenia online i włączonego
+        if data["device_status"] == "online" and data["switch_status"]:
+            if data["capacity"] == 0:
+                errors.append(
+                    "Capacity must be greater than 0 when BESS is online and switched on"
+                )
+
+        # Sprawdzamy warunki dla urządzenia offline lub wyłączonego
+        if data["device_status"] == "offline" or not data["switch_status"]:
+            if data["charge_level"] > 0:
+                errors.append(
+                    "Charge level must be 0 when BESS is offline or switched off"
+                )
 
         return errors
 
@@ -170,3 +174,13 @@ class BESS:
             print(f"Próba {attempt + 1} rozładowania {self.name} nie powiodła się.")
         print(f"Nie udało się rozładować {self.name} po {attempts} próbach.")
         return None
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "capacity": self.capacity,
+            "charge_level": self.charge_level,
+            "switch_status": self.get_switch_status(),
+            "device_status": "online" if self.get_switch_status() else "offline",
+        }
