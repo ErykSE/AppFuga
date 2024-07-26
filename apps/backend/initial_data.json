@@ -25,7 +25,7 @@
         {
             "id": 1,
             "name": "Wind Turbine 1",
-            "priority": 1,
+            "priority": 2,
             "max_output": 200,
             "min_output": 20,
             "actual_output": 40,
@@ -35,7 +35,7 @@
         {
             "id": 2,
             "name": "Wind Turbine 2",
-            "priority": 1,
+            "priority": 2,
             "max_output": 180,
             "min_output": 20,
             "actual_output": 0,
@@ -47,7 +47,7 @@
         {
             "id": 1,
             "name": "Fuel Turbine 1",
-            "priority": 1,
+            "priority": 4,
             "max_output": 300,
             "min_output": 30,
             "actual_output": 40,
@@ -59,7 +59,7 @@
         {
             "id": 1,
             "name": "Fuel Cell 1",
-            "priority": 1,
+            "priority": 3,
             "max_output": 150,
             "min_output": 15,
             "actual_output": 25,

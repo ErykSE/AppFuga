@@ -1,143 +1,66 @@
-2024-07-26 16:00:34,324 - INFO - Starting a new iteration of the energy management algorithm
-2024-07-26 16:00:34,324 - INFO - Energy management started
-2024-07-26 16:00:34,326 - INFO - Summary of system status:
-2024-07-26 16:00:34,326 - INFO - Total generated power: 205 kW
-2024-07-26 16:00:34,326 - INFO - Total demand: 1220 kW
-2024-07-26 16:00:34,326 - INFO - Number of active devices: 4
-2024-07-26 16:00:34,327 - INFO - Number of inactive devices: 2
-2024-07-26 16:00:34,327 - INFO - Active devices:
-2024-07-26 16:00:34,327 - INFO -   - PV Panel 2, latest power: 100 kW, max power: 120 kW
-2024-07-26 16:00:34,328 - INFO -   - Wind Turbine 1, latest power: 40 kW, max power: 200 kW
-2024-07-26 16:00:34,328 - INFO -   - Fuel Turbine 1, latest power: 40 kW, max power: 300 kW
-2024-07-26 16:00:34,328 - INFO -   - Fuel Cell 1, latest power: 25 kW, max power: 150 kW
-2024-07-26 16:00:34,328 - INFO - Inactive devices:
-2024-07-26 16:00:34,329 - INFO -   - PV Panel 1 , max power: 100 kW
-2024-07-26 16:00:34,329 - INFO -   - Wind Turbine 2 , max power: 180 kW
-2024-07-26 16:00:34,329 - INFO - BESS, charge level: 0 kWh, available capacity: 0 kWh
-2024-07-26 16:00:34,329 - INFO - Possibility to purchase energy: Yes
-2024-07-26 16:00:34,329 - INFO - Energy purchase limit: 300 kWh
-2024-07-26 16:00:34,330 - INFO - Current amount of energy purchased: 150 kWh
-2024-07-26 16:00:34,330 - INFO - Possibility to sell energy: No
-2024-07-26 16:00:34,330 - INFO - Energy sell limit: 0 kWh
-2024-07-26 16:00:34,330 - INFO - Current amount of energy sold: 0 kWh
-2024-07-26 16:00:34,330 - INFO - ##### Power deficit detected - starting deficit management #####
-2024-07-26 16:00:34,331 - INFO - Start managing power deficit:: 1015 kW
-2024-07-26 16:00:34,331 - INFO - Current output: 205 kW
-2024-07-26 16:00:34,331 - INFO - Max potential output: 1050 kW
-2024-07-26 16:00:34,331 - INFO - Power deficit: 1015 kW
-2024-07-26 16:00:34,332 - INFO - Potential surplus: -170 kW
-2024-07-26 16:00:34,332 - INFO - BESS free capacity: 0 kWh
-2024-07-26 16:00:34,332 - INFO - Available sale capacity: 0 kWh
-2024-07-26 16:00:34,332 - INFO - Total available capacity: 0 kWh
-2024-07-26 16:00:34,332 - INFO - Handleable additional power: -170 kW
-2024-07-26 16:00:34,332 - INFO - Current output: 205 kW
-2024-07-26 16:00:34,332 - INFO - Max potential output: 1050 kW
-2024-07-26 16:00:34,333 - INFO - Power deficit: 1015 kW
-2024-07-26 16:00:34,333 - INFO - Handleable power: -170 kW
-2024-07-26 16:00:34,333 - INFO - Target output: 1050 kW
-2024-07-26 16:00:34,334 - INFO - Increased power of PV Panel 2 from 100 kW to 120 kW
-2024-07-26 16:00:34,334 - INFO - Increased power of Wind Turbine 1 from 40 kW to 200 kW
-2024-07-26 16:00:34,334 - INFO - Increased power of Fuel Turbine 1 from 40 kW to 300 kW
-2024-07-26 16:00:34,335 - INFO - Increased power of Fuel Cell 1 from 25 kW to 150 kW
-2024-07-26 16:00:39,338 - INFO - Activated PV Panel 1 and set power to 100 kW
-2024-07-26 16:00:44,340 - INFO - Activated Wind Turbine 2 and set power to 180 kW
-2024-07-26 16:00:44,341 - INFO - In total, power was increased by 845 kW
-2024-07-26 16:00:44,341 - INFO - Final output: 1050 kW
-2024-07-26 16:00:44,342 - INFO - Power was ordered by increasing production: 845 kW
-2024-07-26 16:00:44,342 - INFO - Remaining deficit after maximisation of equipment operation: 170 kW
-2024-07-26 16:00:44,342 - INFO - Iteration 1, remaining deficit: 170 kW
-2024-07-26 16:00:44,343 - INFO - Selected action: DeficitAction.BUY_ENERGY
-2024-07-26 16:00:44,343 - INFO - Action DeficitAction.BUY_ENERGY managed 150 kW. Remaining deficit: 20 kW
-2024-07-26 16:00:44,344 - INFO - After iteration 1: A total managed 150 kW, remaining deficit 20 kW
-2024-07-26 16:00:44,344 - INFO - Iteration 2, remaining deficit: 20 kW
-2024-07-26 16:00:44,344 - INFO - Selected action: DeficitAction.LIMIT_CONSUMPTION
-2024-07-26 16:00:44,345 - INFO - Attempting to limit consumption by 20 kW
-2024-07-26 16:00:44,345 - INFO - Reduced Adjustable Device 1 power by 20 kW
-2024-07-26 16:00:44,346 - INFO - Total power reduced: 20 kW
-2024-07-26 16:00:44,346 - INFO - Remaining deficit: 0 kW
-2024-07-26 16:00:44,347 - INFO - Action DeficitAction.LIMIT_CONSUMPTION managed 20 kW. Remaining deficit: 0 kW
-2024-07-26 16:00:44,347 - INFO - After iteration 2: A total managed 170 kW, remaining deficit 0 kW
-2024-07-26 16:00:44,347 - INFO - Deficit management completed. A total of managed: 1015 kW. Remaining deficit: 0 kW
-2024-07-26 16:00:44,348 - INFO - Zarz¹dzono 1015 kW deficytu. Pozosta³o: 0 kW
-2024-07-26 16:00:44,348 - INFO - Zakoñczono zarz¹dzanie deficytem. Ca³y deficyt zosta³ rozwi¹zany.
-2024-07-26 16:00:44,349 - INFO - Live data saved to live_data.json
-2024-07-26 16:00:44,350 - INFO - Oczekiwanie 30 sekund przed nastêpn¹ iteracj¹...
-2024-07-26 16:01:14,357 - INFO - Starting a new iteration of the energy management algorithm
-2024-07-26 16:01:14,363 - INFO - Summary of system status:
-2024-07-26 16:01:14,364 - INFO - Total generated power: 1050 kW
-2024-07-26 16:01:14,365 - INFO - Total demand: 1200 kW
-2024-07-26 16:01:14,366 - INFO - Number of active devices: 6
-2024-07-26 16:01:14,367 - INFO - Number of inactive devices: 0
-2024-07-26 16:01:14,367 - INFO - Active devices:
-2024-07-26 16:01:14,368 - INFO -   - PV Panel 1, latest power: 100 kW, max power: 100 kW
-2024-07-26 16:01:14,369 - INFO -   - PV Panel 2, latest power: 120 kW, max power: 120 kW
-2024-07-26 16:01:14,370 - INFO -   - Wind Turbine 1, latest power: 200 kW, max power: 200 kW
-2024-07-26 16:01:14,370 - INFO -   - Wind Turbine 2, latest power: 180 kW, max power: 180 kW
-2024-07-26 16:01:14,371 - INFO -   - Fuel Turbine 1, latest power: 300 kW, max power: 300 kW
-2024-07-26 16:01:14,371 - INFO -   - Fuel Cell 1, latest power: 150 kW, max power: 150 kW
-2024-07-26 16:01:14,372 - INFO - Inactive devices:
-2024-07-26 16:01:14,372 - INFO - BESS, charge level: 0 kWh, available capacity: 0 kWh
-2024-07-26 16:01:14,372 - INFO - Possibility to purchase energy: No
-2024-07-26 16:01:14,373 - INFO - Energy purchase limit: 300 kWh
-2024-07-26 16:01:14,373 - INFO - Current amount of energy purchased: 300 kWh
-2024-07-26 16:01:14,374 - INFO - Possibility to sell energy: No
-2024-07-26 16:01:14,374 - INFO - Energy sell limit: 0 kWh
-2024-07-26 16:01:14,374 - INFO - Current amount of energy sold: 0 kWh
-2024-07-26 16:01:14,375 - INFO - ##### Power deficit detected - starting deficit management #####
-2024-07-26 16:01:14,375 - INFO - Start managing power deficit:: 150 kW
-2024-07-26 16:01:14,375 - INFO - Current output: 1050 kW
-2024-07-26 16:01:14,376 - INFO - Max potential output: 1050 kW
-2024-07-26 16:01:14,376 - INFO - Power deficit: 150 kW
-2024-07-26 16:01:14,376 - INFO - Potential surplus: -150 kW
-2024-07-26 16:01:14,376 - INFO - BESS free capacity: 0 kWh
-2024-07-26 16:01:14,377 - INFO - Available sale capacity: 0 kWh
-2024-07-26 16:01:14,377 - INFO - Total available capacity: 0 kWh
-2024-07-26 16:01:14,377 - INFO - Handleable additional power: -150 kW
-2024-07-26 16:01:14,377 - INFO - Current output: 1050 kW
-2024-07-26 16:01:14,378 - INFO - Max potential output: 1050 kW
-2024-07-26 16:01:14,378 - INFO - Power deficit: 150 kW
-2024-07-26 16:01:14,378 - INFO - Handleable power: -150 kW
-2024-07-26 16:01:14,379 - INFO - Target output: 1050 kW
-2024-07-26 16:01:14,380 - INFO - In total, power was increased by 0 kW
-2024-07-26 16:01:14,380 - INFO - Final output: 1050 kW
-2024-07-26 16:01:14,381 - INFO - Power was ordered by increasing production: 0 kW
-2024-07-26 16:01:14,381 - INFO - Remaining deficit after maximisation of equipment operation: 150 kW
-2024-07-26 16:01:14,381 - INFO - Iteration 1, remaining deficit: 150 kW
-2024-07-26 16:01:14,382 - INFO - Selected action: DeficitAction.LIMIT_CONSUMPTION
-2024-07-26 16:01:14,382 - INFO - Attempting to limit consumption by 150 kW
-2024-07-26 16:01:14,382 - INFO - Reduced Adjustable Device 1 power by 150 kW
-2024-07-26 16:01:14,383 - INFO - Total power reduced: 150 kW
-2024-07-26 16:01:14,383 - INFO - Remaining deficit: 0 kW
-2024-07-26 16:01:14,383 - INFO - Action DeficitAction.LIMIT_CONSUMPTION managed 150 kW. Remaining deficit: 0 kW
-2024-07-26 16:01:14,383 - INFO - After iteration 1: A total managed 150 kW, remaining deficit 0 kW
-2024-07-26 16:01:14,384 - INFO - Deficit management completed. A total of managed: 150 kW. Remaining deficit: 0 kW
-2024-07-26 16:01:14,384 - INFO - Zarz¹dzono 150 kW deficytu. Pozosta³o: 0 kW
-2024-07-26 16:01:14,384 - INFO - Zakoñczono zarz¹dzanie deficytem. Ca³y deficyt zosta³ rozwi¹zany.
-2024-07-26 16:01:14,386 - INFO - Live data saved to live_data.json
-2024-07-26 16:01:14,386 - INFO - Oczekiwanie 30 sekund przed nastêpn¹ iteracj¹...
-2024-07-26 16:01:44,390 - INFO - Starting a new iteration of the energy management algorithm
-2024-07-26 16:01:44,393 - INFO - Summary of system status:
-2024-07-26 16:01:44,393 - INFO - Total generated power: 1050 kW
-2024-07-26 16:01:44,394 - INFO - Total demand: 1050 kW
-2024-07-26 16:01:44,394 - INFO - Number of active devices: 6
-2024-07-26 16:01:44,394 - INFO - Number of inactive devices: 0
-2024-07-26 16:01:44,395 - INFO - Active devices:
-2024-07-26 16:01:44,395 - INFO -   - PV Panel 1, latest power: 100 kW, max power: 100 kW
-2024-07-26 16:01:44,395 - INFO -   - PV Panel 2, latest power: 120 kW, max power: 120 kW
-2024-07-26 16:01:44,396 - INFO -   - Wind Turbine 1, latest power: 200 kW, max power: 200 kW
-2024-07-26 16:01:44,396 - INFO -   - Wind Turbine 2, latest power: 180 kW, max power: 180 kW
-2024-07-26 16:01:44,396 - INFO -   - Fuel Turbine 1, latest power: 300 kW, max power: 300 kW
-2024-07-26 16:01:44,396 - INFO -   - Fuel Cell 1, latest power: 150 kW, max power: 150 kW
-2024-07-26 16:01:44,397 - INFO - Inactive devices:
-2024-07-26 16:01:44,397 - INFO - BESS, charge level: 0 kWh, available capacity: 0 kWh
-2024-07-26 16:01:44,398 - INFO - Possibility to purchase energy: No
-2024-07-26 16:01:44,398 - INFO - Energy purchase limit: 300 kWh
-2024-07-26 16:01:44,398 - INFO - Current amount of energy purchased: 300 kWh
-2024-07-26 16:01:44,398 - INFO - Possibility to sell energy: No
-2024-07-26 16:01:44,399 - INFO - Energy sell limit: 0 kWh
-2024-07-26 16:01:44,399 - INFO - Current amount of energy sold: 0 kWh
-2024-07-26 16:01:44,399 - INFO - ##### Power generation matches demand - no action needed #####
-2024-07-26 16:01:44,401 - INFO - Live data saved to live_data.json
-2024-07-26 16:01:44,401 - INFO - Oczekiwanie 30 sekund przed nastêpn¹ iteracj¹...
-2024-07-26 16:01:57,927 - INFO - Energy management stopping
-2024-07-26 16:01:57,927 - INFO - Energy management stopped
+2024-07-26 16:29:02,621 - INFO - Starting a new iteration of the energy management algorithm
+2024-07-26 16:29:02,621 - INFO - Energy management started
+2024-07-26 16:29:02,622 - INFO - Summary of system status:
+2024-07-26 16:29:02,622 - INFO - Total generated power: 205 kW
+2024-07-26 16:29:02,623 - INFO - Total demand: 1220 kW
+2024-07-26 16:29:02,623 - INFO - Number of active devices: 4
+2024-07-26 16:29:02,623 - INFO - Number of inactive devices: 2
+2024-07-26 16:29:02,623 - INFO - Active devices:
+2024-07-26 16:29:02,623 - INFO -   - PV Panel 2, latest power: 100 kW, max power: 120 kW
+2024-07-26 16:29:02,623 - INFO -   - Wind Turbine 1, latest power: 40 kW, max power: 200 kW
+2024-07-26 16:29:02,624 - INFO -   - Fuel Turbine 1, latest power: 40 kW, max power: 300 kW
+2024-07-26 16:29:02,624 - INFO -   - Fuel Cell 1, latest power: 25 kW, max power: 150 kW
+2024-07-26 16:29:02,624 - INFO - Inactive devices:
+2024-07-26 16:29:02,625 - INFO -   - PV Panel 1 , max power: 100 kW
+2024-07-26 16:29:02,625 - INFO -   - Wind Turbine 2 , max power: 180 kW
+2024-07-26 16:29:02,625 - INFO - BESS, charge level: 0 kWh, available capacity: 0 kWh
+2024-07-26 16:29:02,625 - INFO - Possibility to purchase energy: Yes
+2024-07-26 16:29:02,625 - INFO - Energy purchase limit: 300 kWh
+2024-07-26 16:29:02,625 - INFO - Current amount of energy purchased: 150 kWh
+2024-07-26 16:29:02,626 - INFO - Possibility to sell energy: No
+2024-07-26 16:29:02,626 - INFO - Energy sell limit: 0 kWh
+2024-07-26 16:29:02,626 - INFO - Current amount of energy sold: 0 kWh
+2024-07-26 16:29:02,626 - INFO - ##### Power deficit detected - starting deficit management #####
+2024-07-26 16:29:02,626 - INFO - Start managing power deficit:: 1015 kW
+2024-07-26 16:29:02,626 - INFO - Current output: 205 kW
+2024-07-26 16:29:02,626 - INFO - Max potential output: 1050 kW
+2024-07-26 16:29:02,626 - INFO - Power deficit: 1015 kW
+2024-07-26 16:29:02,627 - INFO - Potential surplus: -170 kW
+2024-07-26 16:29:02,627 - INFO - BESS free capacity: 0 kWh
+2024-07-26 16:29:02,627 - INFO - Available sale capacity: 0 kWh
+2024-07-26 16:29:02,627 - INFO - Total available capacity: 0 kWh
+2024-07-26 16:29:02,627 - INFO - Handleable additional power: -170 kW
+2024-07-26 16:29:02,627 - INFO - Current output: 205 kW
+2024-07-26 16:29:02,627 - INFO - Max potential output: 1050 kW
+2024-07-26 16:29:02,628 - INFO - Power deficit: 1015 kW
+2024-07-26 16:29:02,628 - INFO - Handleable power: -170 kW
+2024-07-26 16:29:02,628 - INFO - Target output: 1050 kW
+2024-07-26 16:29:02,628 - INFO - Increased power of PV Panel 2 (priority: 1) from 100 kW to 120 kW
+2024-07-26 16:29:02,629 - INFO - Increased power of Wind Turbine 1 (priority: 2) from 40 kW to 200 kW
+2024-07-26 16:29:02,629 - INFO - Increased power of Fuel Cell 1 (priority: 3) from 25 kW to 150 kW
+2024-07-26 16:29:02,630 - INFO - Increased power of Fuel Turbine 1 (priority: 4) from 40 kW to 300 kW
+2024-07-26 16:29:07,632 - INFO - Activated PV Panel 1 (priority: 1) and set power to 100 kW
+2024-07-26 16:29:12,636 - INFO - Activated Wind Turbine 2 (priority: 2) and set power to 180 kW
+2024-07-26 16:29:12,636 - INFO - In total, power was increased by 845 kW
+2024-07-26 16:29:12,636 - INFO - Final output: 1050 kW
+2024-07-26 16:29:12,637 - INFO - Power was ordered by increasing production: 845 kW
+2024-07-26 16:29:12,637 - INFO - Remaining deficit after maximisation of equipment operation: 170 kW
+2024-07-26 16:29:12,637 - INFO - Iteration 1, remaining deficit: 170 kW
+2024-07-26 16:29:12,638 - INFO - Selected action: DeficitAction.BUY_ENERGY
+2024-07-26 16:29:12,638 - INFO - Action DeficitAction.BUY_ENERGY managed 150 kW. Remaining deficit: 20 kW
+2024-07-26 16:29:12,639 - INFO - After iteration 1: A total managed 150 kW, remaining deficit 20 kW
+2024-07-26 16:29:12,640 - INFO - Iteration 2, remaining deficit: 20 kW
+2024-07-26 16:29:12,640 - INFO - Selected action: DeficitAction.LIMIT_CONSUMPTION
+2024-07-26 16:29:12,640 - INFO - Attempting to limit consumption by 20 kW
+2024-07-26 16:29:12,641 - INFO - Reduced Adjustable Device 1 power by 20 kW
+2024-07-26 16:29:12,642 - INFO - Total power reduced: 20 kW
+2024-07-26 16:29:12,643 - INFO - Remaining deficit: 0 kW
+2024-07-26 16:29:12,643 - INFO - Action DeficitAction.LIMIT_CONSUMPTION managed 20 kW. Remaining deficit: 0 kW
+2024-07-26 16:29:12,644 - INFO - After iteration 2: A total managed 170 kW, remaining deficit 0 kW
+2024-07-26 16:29:12,644 - INFO - Deficit management completed. A total of managed: 1015 kW. Remaining deficit: 0 kW
+2024-07-26 16:29:12,644 - INFO - Zarz¹dzono 1015 kW deficytu. Pozosta³o: 0 kW
+2024-07-26 16:29:12,645 - INFO - Zakoñczono zarz¹dzanie deficytem. Ca³y deficyt zosta³ rozwi¹zany.
+2024-07-26 16:29:12,646 - INFO - Live data saved to live_data.json
+2024-07-26 16:29:12,647 - INFO - Oczekiwanie 30 sekund przed nastêpn¹ iteracj¹...
+2024-07-26 16:29:20,683 - INFO - Energy management stopping
+2024-07-26 16:29:20,683 - INFO - Energy management stopped

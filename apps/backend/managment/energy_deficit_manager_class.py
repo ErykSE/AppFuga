@@ -94,45 +94,51 @@ class EnergyDeficitManager:
 
         increased_power = 0
 
+        # Sortujemy wszystkie urządzenia według priorytetu (rosnąco)
+        all_devices = sorted(self.microgrid.get_all_devices(), key=lambda x: x.priority)
+
         # Najpierw zwiększamy moc aktywnych urządzeń
-        for device in self.microgrid.get_active_devices():
+        for device in all_devices:
             if current_output + increased_power >= target_output:
                 break
 
-            initial_output = device.get_actual_output()
-            max_output = device.get_max_output()
+            if device.get_switch_status():  # Jeśli urządzenie jest aktywne
+                initial_output = device.get_actual_output()
+                max_output = device.get_max_output()
 
-            new_output = min(
-                max_output,
-                target_output - (current_output + increased_power) + initial_output,
-            )
+                new_output = min(
+                    max_output,
+                    target_output - (current_output + increased_power) + initial_output,
+                )
 
-            device.set_output(new_output)
-            actual_increase = new_output - initial_output
-            increased_power += actual_increase
+                device.set_output(new_output)
+                actual_increase = new_output - initial_output
+                increased_power += actual_increase
 
-            self.info_logger.info(
-                f"Increased power of {device.name} from {initial_output} kW to {new_output} kW"
-            )
+                self.info_logger.info(
+                    f"Increased power of {device.name} (priority: {device.priority}) from {initial_output} kW to {new_output} kW"
+                )
 
         # Jeśli nadal potrzebujemy więcej mocy, aktywujemy nieaktywne urządzenia
         if current_output + increased_power < target_output:
-            for device in self.microgrid.get_inactive_devices():
+            for device in all_devices:
                 if current_output + increased_power >= target_output:
                     break
 
-                if device.try_activate():
-                    max_output = device.get_max_output()
-                    new_output = min(
-                        max_output, target_output - (current_output + increased_power)
-                    )
-                    device.set_output(new_output)
-                    actual_increase = new_output
-                    increased_power += actual_increase
+                if not device.get_switch_status():  # Jeśli urządzenie jest nieaktywne
+                    if device.try_activate():
+                        max_output = device.get_max_output()
+                        new_output = min(
+                            max_output,
+                            target_output - (current_output + increased_power),
+                        )
+                        device.set_output(new_output)
+                        actual_increase = new_output
+                        increased_power += actual_increase
 
-                    self.info_logger.info(
-                        f"Activated {device.name} and set power to {new_output} kW"
-                    )
+                        self.info_logger.info(
+                            f"Activated {device.name} (priority: {device.priority}) and set power to {new_output} kW"
+                        )
 
         self.info_logger.info(f"In total, power was increased by {increased_power} kW")
         self.info_logger.info(f"Final output: {current_output + increased_power} kW")
