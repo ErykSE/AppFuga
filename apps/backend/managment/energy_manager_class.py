@@ -151,16 +151,16 @@ class EnergyManager:
         remaining_surplus = result["remaining_surplus"]
 
         self.info_logger.info(
-            f"Zarządzono {managed_amount} kW nadwyżki. Pozostało: {remaining_surplus} kW"
+            f"Managed {managed_amount} kW of surplus. Remaining: {remaining_surplus} kW"
         )
 
         if remaining_surplus > 0:
             self.info_logger.warning(
-                f"Zakończono zarządzanie nadwyżką. Pozostała nierozwiązana nadwyżka: {remaining_surplus} kW"
+                f"Surplus management completed. Remaining unresolved surplus: {remaining_surplus} kW"
             )
         else:
             self.info_logger.info(
-                "Zakończono zarządzanie nadwyżką. Cała nadwyżka została rozwiązana."
+                "Surplus management completed. The entire surplus has been dissolved."
             )
 
     def manage_deficit(self, power_deficit):
@@ -169,16 +169,16 @@ class EnergyManager:
         remaining_deficit = result["remaining_deficit"]
 
         self.info_logger.info(
-            f"Zarządzono {managed_amount} kW deficytu. Pozostało: {remaining_deficit} kW"
+            f"Managed {managed_amount} kW of deficit. Remaining: {remaining_deficit} kW"
         )
 
         if remaining_deficit > 0:
             self.info_logger.warning(
-                f"Zakończono zarządzanie deficytem. Pozostały nierozwiązany deficyt: {remaining_deficit} kW"
+                f"Deficit management has been completed. Remaining unresolved deficit: {remaining_deficit} kW"
             )
         else:
             self.info_logger.info(
-                "Zakończono zarządzanie deficytem. Cały deficyt został rozwiązany."
+                "Deficit management has been completed. The entire deficit has been resolved."
             )
 
     def log_system_summary(self):

@@ -274,7 +274,7 @@ class EnergyDeficitManager:
         elif action == DeficitAction.LIMIT_CONSUMPTION:
             return self.limit_consumption(deficit)
         else:
-            raise ValueError(f"Nieznana akcja: {action}")
+            raise ValueError(f"Unknown action: {action}")
 
     def is_bess_available(self):
 
@@ -305,27 +305,27 @@ class EnergyDeficitManager:
                     increase = device.get_actual_output() - initial_output
                 increased_power += increase
                 self.info_logger.info(
-                    f"Zwiększono moc urządzenia {device.name} z {initial_output} kW do {device.get_actual_output()} kW"
+                    f"Increased device power {device.name} z {initial_output} kW to {device.get_actual_output()} kW"
                 )
             if increased_power >= power_deficit and not can_handle_surplus:
                 break
-        self.info_logger.info(f"Łącznie zwiększono moc o {increased_power} kW")
+        self.info_logger.info(f"In total, power was increased by {increased_power} kW")
         return {"success": increased_power > 0, "amount": increased_power}
 
     def are_active_devices_at_full_capacity(self):
         active_devices = self.microgrid.get_active_devices()
-        self.info_logger.info(f"Liczba aktywnych urządzeń: {len(active_devices)}")
+        self.info_logger.info(f"Number of active devices: {len(active_devices)}")
         all_at_full_capacity = True
         for device in active_devices:
             current_output = device.get_actual_output()
             max_output = device.get_max_output()
             is_at_full = device.is_at_max_output()  # Zmiana tutaj
             self.info_logger.info(
-                f"Urządzenie {device.name}: aktualna moc {current_output} kW, maksymalna moc {max_output} kW, na pełnej mocy: {'Tak' if is_at_full else 'Nie'}"
+                f"Device {device.name}: latest power {current_output} kW, maximum power {max_output} kW, at full power: {'Yes' if is_at_full else 'No'}"
             )
             all_at_full_capacity = all_at_full_capacity and is_at_full
         self.info_logger.info(
-            f"Wszystkie aktywne urządzenia pracują na 100%: {'Tak' if all_at_full_capacity else 'Nie'}"
+            f"All active equipment is operating at 100%: {'Yes' if all_at_full_capacity else 'No'}"
         )
         return all_at_full_capacity
 
@@ -458,7 +458,7 @@ class EnergyDeficitManager:
                     increase = device.get_actual_output()
                 activated_power += increase
                 self.info_logger.info(
-                    f"Aktywowano urządzenie {device.name} i zwiększono moc o {increase} kW"
+                    f"The device {device.name} was activated and the power was increased by {increase} kW"
                 )
             if activated_power >= power_deficit and not can_handle_surplus:
                 break

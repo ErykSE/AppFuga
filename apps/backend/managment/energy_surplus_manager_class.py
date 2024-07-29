@@ -23,7 +23,7 @@ class EnergySurplusManager:
             while remaining_surplus > 0 and iteration < MAX_ITERATIONS:
                 iteration += 1
                 self.info_logger.info(
-                    f"Iteracja {iteration}, pozostała nadwyżka: {remaining_surplus} kW"
+                    f"Iteration {iteration}, surplus remaining: {remaining_surplus} kW"
                 )
 
                 bess_available = self.check_bess_availability()
@@ -41,31 +41,31 @@ class EnergySurplusManager:
 
                 # Próbujemy każdą dostępną akcję
                 for action in available_actions:
-                    self.info_logger.info(f"Próba wykonania akcji: {action}")
+                    self.info_logger.info(f"Attempting to perform the action: {action}")
                     result = self.execute_action(action, remaining_surplus)
 
                     if result["success"]:
                         total_managed += result["amount"]
                         remaining_surplus -= result["amount"]
                         self.info_logger.info(
-                            f"Akcja {action} zarządziła {result['amount']} kW. Pozostała nadwyżka: {remaining_surplus} kW"
+                            f"Action {action} managed {result['amount']} kW. Surplus remaining: {remaining_surplus} kW"
                         )
                         break  # Przerwij pętlę for, jeśli akcja się powiodła
                     else:
                         self.info_logger.info(
-                            f"Akcja {action} nie powiodła się. Powód: {result.get('reason', 'Nieznany')}"
+                            f"Action {action} has failed. Reason: {result.get('reason', 'Unknown')}"
                         )
 
                 # Jeśli żadna akcja nie powiodła się, przerwij główną pętlę
                 else:
                     self.error_logger.error(
-                        "Żadna akcja nie powiodła się. Przerywanie zarządzania nadwyżką."
+                        "No action successful. Interruption of surplus management."
                     )
                     break
 
             if iteration == MAX_ITERATIONS:
                 self.error_logger.error(
-                    f"Osiągnięto maksymalną liczbę iteracji ({MAX_ITERATIONS}) bez rozwiązania nadwyżki."
+                    f"The maximum number of iterations ({MAX_ITERATIONS}) has been reached without solving the surplus."
                 )
 
         except Exception as e:
@@ -103,13 +103,11 @@ class EnergySurplusManager:
         HYSTERESIS = 0.05
 
         if battery_free_percentage <= BATTERY_THRESHOLD:
-            print(
-                f"Priorytet ładowania: niski poziom baterii ({100 - battery_free_percentage}%)"
-            )
+            print(f"Charging priority: low battery ({100 - battery_free_percentage}%)")
             return True
 
         if battery_free_percentage == 0:
-            print("BESS pełny, priorytet sprzedaży")
+            print("BESS full, sales priority")
             return False
 
         price_factor = (current_selling_price - MIN_SELLING_PRICE) / (
@@ -121,21 +119,21 @@ class EnergySurplusManager:
 
         if price_factor > PRICE_THRESHOLD and surplus_power > 50:
             print(
-                f"Priorytet sprzedaży: wysoka cena ({current_selling_price}) i znacząca nadwyżka ({surplus_power} kW)"
+                f"Sales priority: high price ({current_selling_price}) and significant surplus ({surplus_power} kW)"
             )
             return False
         elif battery_factor > price_factor + HYSTERESIS:
             print(
-                f"Priorytet ładowania: battery factor ({battery_factor:.2f}) > price factor ({price_factor:.2f})"
+                f"Charging priority: battery factor ({battery_factor:.2f}) > price factor ({price_factor:.2f})"
             )
             return True
         elif price_factor > battery_factor + HYSTERESIS:
             print(
-                f"Priorytet sprzedaży: price factor ({price_factor:.2f}) > battery factor ({battery_factor:.2f})"
+                f"Sales priority: price factor ({price_factor:.2f}) > battery factor ({battery_factor:.2f})"
             )
             return False
         else:
-            print(f"Zachowanie poprzedniej decyzji: wartości w zakresie histerezy")
+            print(f"Maintaining the previous decision: values ​​in the hysteresis range")
             return self.previous_decision
 
     def get_bess_free_capacity(self):
@@ -149,7 +147,7 @@ class EnergySurplusManager:
             return 0
         except Exception as e:
             self.error_logger.error(
-                f"Błąd w próbie wyliczenia dostępnego miejsca w wartości liczbowej: {str(e)}"
+                f"Error in attempt to calculate available space in a numerical value: {str(e)}"
             )
 
     def get_bess_free_percentage(self):
@@ -161,38 +159,36 @@ class EnergySurplusManager:
             return 0
         except Exception as e:
             self.error_logger.error(
-                f"Błąd w próbie wyliczenia dostępnego miejsca w %: {str(e)}"
+                f"Error in attempting to calculate the available space in the %: {str(e)}"
             )
 
     def decide_to_charge_bess(self, power_surplus):
         try:
             if not self.check_bess_availability():
-                self.info_logger.info("BESS nie jest dostępny do ładowania.")
-                return {"success": False, "amount": 0, "reason": "BESS niedostępny"}
+                self.info_logger.info("BESS is not available for charging.")
+                return {"success": False, "amount": 0, "reason": "BESS not available"}
 
             bess = self.microgrid.bess
             free_capacity = self.get_bess_free_capacity()
 
             if free_capacity == 0:
-                self.info_logger.info(
-                    "BESS jest w pełni naładowany. Brak dostępnej pojemności."
-                )
-                return {"success": False, "amount": 0, "reason": "BESS pełny"}
+                self.info_logger.info("BESS is fully charged. No capacity available.")
+                return {"success": False, "amount": 0, "reason": "BESS full"}
 
             amount_to_charge = min(power_surplus, free_capacity)
             percent_to_charge = (amount_to_charge / bess.get_capacity()) * 100
             charged_percent, actual_charge = bess.try_charge(percent_to_charge)
 
-            self.info_logger.info(f"Pomyślnie naładowano BESS o {actual_charge} kW.")
+            self.info_logger.info(f"Successfully charged BESS o {actual_charge} kW.")
             return {"success": True, "amount": actual_charge}
         except Exception as e:
-            self.error_logger.error(f"Błąd w decide_to_charge_bess: {str(e)}")
+            self.error_logger.error(f"Error in decide_to_charge_bess: {str(e)}")
             return {"success": False, "amount": 0, "reason": str(e)}
 
     def decide_to_sell_energy(self, power_surplus):
         try:
             if not self.is_export_possible():
-                return {"success": False, "amount": 0, "reason": "Eksport niemożliwy"}
+                return {"success": False, "amount": 0, "reason": "Export impossible"}
 
             sale_limit = self.osd.get_sale_limit()
             sold_power = self.osd.get_sold_power()
@@ -200,12 +196,12 @@ class EnergySurplusManager:
 
             if remaining_sale_capacity <= 0:
                 self.info_logger.info(
-                    "Osiągnięto limit sprzedaży. Nie można sprzedać więcej energii."
+                    "The sales limit has been reached. No more energy can be sold."
                 )
                 return {
                     "success": False,
                     "amount": 0,
-                    "reason": "Limit sprzedaży osiągnięty",
+                    "reason": "Sales limit reached",
                 }
 
             amount_to_sell = min(power_surplus, remaining_sale_capacity)
@@ -217,7 +213,7 @@ class EnergySurplusManager:
                 return {
                     "success": False,
                     "amount": 0,
-                    "reason": "Brak możliwości sprzedaży",
+                    "reason": "No possibility of sale",
                 }
         except Exception as e:
             self.error_logger.error(f"Error in decide_to_sell_energy: {str(e)}")
