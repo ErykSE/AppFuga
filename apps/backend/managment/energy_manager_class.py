@@ -10,8 +10,25 @@ from threading import Thread, Event
 
 class EnergyManager:
     """
-    Główna klasa zarządzająca energią. Sprawdzana jest tutaj aktualna sytuacja i na tej podstawie załączane sa odpowiednie klasy
-    odpowiednio do zarządzania nadwyżką lub deficytem.
+    Główna klasa zarządzająca energią w systemie mikrosieciowym.
+
+    Klasa ta odpowiada za monitorowanie i zarządzanie bilansem energetycznym,
+    obsługując zarówno nadwyżki, jak i deficyty energii. Wykorzystuje ona
+    osobne menedżery do obsługi nadwyżek (EnergySurplusManager) i deficytów
+    (EnergyDeficitManager).
+
+    Attributes:
+        microgrid (object): Obiekt reprezentujący mikrosieć.
+        consumergrid (object): Obiekt reprezentujący sieć konsumentów.
+        osd (object): Obiekt reprezentujący operatora systemu dystrybucyjnego.
+        info_logger (logging.Logger): Logger do zapisywania informacji.
+        error_logger (logging.Logger): Logger do zapisywania błędów.
+        surplus_manager (EnergySurplusManager): Menedżer do obsługi nadwyżek energii.
+        deficit_manager (EnergyDeficitManager): Menedżer do obsługi deficytów energii.
+        check_interval (int): Interwał czasowy między kolejnymi sprawdzeniami (w sekundach).
+        running (bool): Flaga wskazująca, czy menedżer jest aktualnie uruchomiony.
+        stop_event (threading.Event): Wydarzenie do sygnalizacji zatrzymania.
+        restart_delay (int): Opóźnienie przed ponownym uruchomieniem (w sekundach).
     """
 
     def __init__(
@@ -34,17 +51,27 @@ class EnergyManager:
         self.restart_delay = 30  # czas oczekiwania przed ponownym startem (w sekundach)
 
     def start(self):
+        """
+        Uruchamia proces zarządzania energią w osobnym wątku.
+        """
         self.running = True
         self.stop_event.clear()
         Thread(target=self.run_energy_management).start()
         self.info_logger.info("Energy management started")
 
     def stop(self):
+        """
+        Zatrzymuje proces zarządzania energią.
+        """
         self.running = False
         self.stop_event.set()
         self.info_logger.info("Energy management stopping")
 
     def run_energy_management(self):
+        """
+        Główna pętla zarządzania energią. Wykonuje cykliczne sprawdzenia
+        i zarządzanie bilansem energetycznym.
+        """
         while self.running and not self.stop_event.is_set():
             try:
                 self.run_single_iteration()
@@ -65,6 +92,11 @@ class EnergyManager:
         self.info_logger.info("Energy management stopped")
 
     def run_single_iteration(self):
+        """
+        Wykonuje pojedynczą iterację algorytmu zarządzania energią.
+        Obejmuje wczytywanie danych, walidację, logowanie stanu systemu
+        i sprawdzenie warunków energetycznych.
+        """
         self.info_logger.info(
             "Starting a new iteration of the energy management algorithm"
         )
@@ -85,6 +117,12 @@ class EnergyManager:
         self.check_energy_conditions()
 
     def prepare_microgrid_data(self):
+        """
+        Przygotowuje dane mikrosieci do walidacji.
+
+        Returns:
+            dict: Słownik zawierający dane wszystkich urządzeń w mikrosieci.
+        """
         return {
             "pv_panels": self.get_device_list(self.microgrid.pv_panels),
             "wind_turbines": self.get_device_list(self.microgrid.wind_turbines),
@@ -100,6 +138,15 @@ class EnergyManager:
         }
 
     def get_device_list(self, devices):
+        """
+        Pomocnicza metoda do uzyskania listy urządzeń.
+
+        Args:
+            devices (object or list): Pojedyncze urządzenie lub lista urządzeń.
+
+        Returns:
+            list: Lista urządzeń.
+        """
         if isinstance(devices, list):
             return devices
         elif devices:
@@ -108,6 +155,13 @@ class EnergyManager:
             return []
 
     def handle_validation_errors(self, microgrid_errors, osd_errors):
+        """
+        Obsługuje błędy walidacji danych mikrosieci i OSD.
+
+        Args:
+            microgrid_errors (list): Lista błędów walidacji danych mikrosieci.
+            osd_errors (list): Lista błędów walidacji danych OSD.
+        """
         self.info_logger.error("Validation errors detected. Stopping the algorithm.")
         for error in microgrid_errors:
             self.error_logger.error(f"Microgrid validation error: {error}")
@@ -116,12 +170,22 @@ class EnergyManager:
         self.stop()
 
     def handle_runtime_error(self, e):
+        """
+        Obsługuje błędy wykonania występujące podczas zarządzania energią.
+
+        Args:
+            e (Exception): Wyjątek, który wystąpił.
+        """
         self.error_logger.error(f"Error in energy management: {str(e)}")
         self.error_logger.exception("Full traceback:")
         self.info_logger.error("An error occurred. Stopping the algorithm.")
         self.stop()
 
     def check_energy_conditions(self):
+        """
+        Sprawdza warunki energetyczne i inicjuje odpowiednie działania
+        w przypadku nadwyżki lub deficytu energii.
+        """
         try:
             total_generated_power = self.microgrid.total_power_generated()
             total_demand_power = self.consumergrid.total_power_consumed()
@@ -146,6 +210,12 @@ class EnergyManager:
             self.error_logger.error(f"Error checking energy conditions: {str(e)}")
 
     def manage_surplus(self, power_surplus):
+        """
+        Zarządza nadwyżką energii.
+
+        Args:
+            power_surplus (float): Wartość nadwyżki energii w kW.
+        """
         result = self.surplus_manager.manage_surplus_energy(power_surplus)
         managed_amount = result["amount_managed"]
         remaining_surplus = result["remaining_surplus"]
@@ -164,6 +234,12 @@ class EnergyManager:
             )
 
     def manage_deficit(self, power_deficit):
+        """
+        Zarządza deficytem energii.
+
+        Args:
+            power_deficit (float): Wartość deficytu energii w kW.
+        """
         result = self.deficit_manager.handle_deficit(power_deficit)
         managed_amount = result["amount_managed"]
         remaining_deficit = result["remaining_deficit"]
@@ -182,6 +258,10 @@ class EnergyManager:
             )
 
     def log_system_summary(self):
+        """
+        Loguje podsumowanie stanu systemu, w tym informacje o generacji,
+        zapotrzebowaniu, aktywnych i nieaktywnych urządzeniach oraz BESS.
+        """
         total_generated_power = self.microgrid.total_power_generated()
         total_demand_power = self.consumergrid.total_power_consumed()
         active_devices = self.microgrid.get_active_devices()

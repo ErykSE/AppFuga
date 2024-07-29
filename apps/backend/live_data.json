@@ -16,7 +16,7 @@
             "priority": 1,
             "max_output": 120,
             "min_output": 15,
-            "actual_output": 15,
+            "actual_output": 100,
             "switch_status": true,
             "device_status": "online"
         }
@@ -28,7 +28,7 @@
             "priority": 2,
             "max_output": 200,
             "min_output": 20,
-            "actual_output": 38,
+            "actual_output": 40,
             "switch_status": true,
             "device_status": "online"
         },
@@ -71,10 +71,10 @@
         {
             "id": 1,
             "name": "BESS 1",
-            "capacity": 0,
-            "charge_level": 0,
-            "switch_status": false,
-            "device_status": "offline"
+            "capacity": 1000,
+            "charge_level": 60,
+            "switch_status": true,
+            "device_status": "online"
         }
     ],
     "non_adjustable_devices": [

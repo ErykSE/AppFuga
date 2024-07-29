@@ -15,7 +15,7 @@ if __name__ == "__main__":
 
     info_logger, error_logger = get_loggers()
 
-    microgrid = Microgrid()
+    microgrid = Microgrid(info_logger, error_logger)
     microgrid.load_data_from_json(database_file_path)
 
     consumergrid = EnergyConsumerGrid()

@@ -5,18 +5,46 @@ from apps.backend.devices.non_adjustable import NonAdjustableDevice
 
 class EnergyDeficitManager:
     """
-    Klasa zarządzająca deficytem energii.
+    Klasa odpowiedzialna za zarządzanie deficytem energii w systemie mikrosieci.
+
+    Ta klasa implementuje różne strategie obsługi niedoboru energii,
+    w tym maksymalizację produkcji, rozładowywanie akumulatorów,
+    zakup energii i ograniczanie zużycia przez odbiory. Priorytetyzuje działania
+    w oparciu o aktualny stan systemu, poziomy naładowania akumulatorów
+    i ceny energii.
+
+    Atrybuty:
+        microgrid (Microgrid): Zarządzany system mikrosieci.
+        consumergrid (ConsumerGrid): Zarządzany system odbiorców energii.
+        osd (OSD): Obiekt zawierający dane dotyczące informacji kontraktowych pomiędzy przedsiębiorstwem, a dostawcą.
+        info_logger (Logger): Logger do wiadomości informacyjnych.
+        error_logger (Logger): Logger do wiadomości o błędach.
+        previous_discharge_decision (bool): Flaga przechowująca poprzednią decyzję o rozładowaniu dla histerezy.
     """
 
     def __init__(self, microgrid, consumergrid, osd, info_logger, error_logger):
         self.microgrid = microgrid
-        self.consumergrid = consumergrid  # Dodaj tę linię
+        self.consumergrid = consumergrid
         self.osd = osd
         self.info_logger = info_logger
         self.error_logger = error_logger
         self.previous_discharge_decision = False  # Domyślna wartość
 
     def handle_deficit(self, power_deficit):
+        """
+        Zarządza deficytem energii poprzez wykonywanie odpowiednich działań.
+
+        Ta metoda próbuje obsłużyć deficyt energii poprzez serię działań,
+        w tym maksymalizację produkcji, rozładowywanie akumulatorów,
+        zakup energii i ograniczanie zużycia. Kontynuuje, dopóki deficyt
+        nie zostanie w pełni zarządzony lub nie zostaną wyczerpane wszystkie opcje.
+
+        Argumenty:
+            power_deficit (float): Ilość deficytu energii do zarządzania w kW.
+
+        Zwraca:
+            dict: Słownik zawierający ilość zarządzonego deficytu i ewentualny pozostały deficyt.
+        """
         self.info_logger.info(f"Start managing power deficit:: {power_deficit} kW")
 
         managed = self.maximize_power_output(power_deficit)
@@ -43,6 +71,18 @@ class EnergyDeficitManager:
         }
 
     def can_handle_more_power(self, power_deficit):
+        """
+        Oblicza, ile dodatkowej mocy system może obsłużyć.
+
+        Ta metoda analizuje aktualny stan systemu, w tym pojemność BESS i możliwości sprzedaży,
+        aby określić, ile dodatkowej mocy może być wygenerowane i obsłużone.
+
+        Argumenty:
+            power_deficit (float): Aktualny deficyt energii w kW.
+
+        Zwraca:
+            float: Ilość dodatkowej mocy, którą system może obsłużyć w kW.
+        """
         bess_free_capacity = (
             self.microgrid.bess.get_capacity() - self.microgrid.bess.get_charge_level()
             if self.microgrid.bess
@@ -78,6 +118,19 @@ class EnergyDeficitManager:
         return handleable_power
 
     def maximize_power_output(self, power_deficit):
+        """
+        Maksymalizuje produkcję energii w celu pokrycia deficytu.
+
+        Ta metoda zwiększa moc wyjściową aktywnych urządzeń generujących
+        i aktywuje nieaktywne urządzenia, jeśli to konieczne, aby pokryć
+        deficyt energii. Urządzenia są priorytetyzowane według ich wartości priorytetu.
+
+        Argumenty:
+            power_deficit (float): Ilość deficytu energii do pokrycia w kW.
+
+        Zwraca:
+            float: Ilość zwiększonej mocy wyjściowej w kW.
+        """
         handleable_power = self.can_handle_more_power(power_deficit)
 
         current_output = self.microgrid.total_power_generated()
@@ -144,7 +197,9 @@ class EnergyDeficitManager:
         self.info_logger.info(f"Final output: {current_output + increased_power} kW")
         return increased_power
 
+    """
     def adjust_power_output(self, target_power):
+
         current_power = self.microgrid.total_power_generated()
         power_difference = target_power - current_power
         step_size = min(
@@ -158,8 +213,10 @@ class EnergyDeficitManager:
         else:
             self.info_logger.info("Power is already at an optimum level.")
             return 0
+    
 
     def increase_power_gradually(self, power_deficit, step_size):
+        
         self.info_logger.info(
             f"Gradual increase power. Deficit: {power_deficit} kW, Step: {step_size} kW"
         )
@@ -186,6 +243,7 @@ class EnergyDeficitManager:
         return increased_power
 
     def decrease_power_gradually(self, power_surplus, step_size):
+        
         self.info_logger.info(
             f"Gradual reduction in power. Surplus: {power_surplus} kW, Step: {step_size} kW"
         )
@@ -212,8 +270,21 @@ class EnergyDeficitManager:
 
         self.info_logger.info(f"In total, power was reduced by {decreased_power} kW")
         return decreased_power
+    """
 
     def manage_remaining_deficit(self, remaining_deficit):
+        """
+        Zarządza pozostałym deficytem energii po maksymalizacji produkcji.
+
+        Ta metoda wykonuje serię działań w celu pokrycia pozostałego deficytu,
+        w tym rozładowywanie BESS, zakup energii i ograniczanie zużycia.
+
+        Argumenty:
+            remaining_deficit (float): Pozostały deficyt energii do zarządzania w kW.
+
+        Zwraca:
+            dict: Słownik zawierający ilość zarządzonego deficytu i ewentualny pozostały deficyt.
+        """
         total_managed = 0
         iteration = 0
         MAX_ITERATIONS = 100
@@ -256,6 +327,18 @@ class EnergyDeficitManager:
         }
 
     def decide_deficit_action(self, deficit):
+        """
+        Decyduje o najlepszej akcji do podjęcia w celu zarządzania deficytem energii.
+
+        Ta metoda analizuje aktualny stan systemu, w tym dostępność BESS i możliwość
+        zakupu energii, aby wybrać najbardziej odpowiednią akcję do zarządzania deficytem.
+
+        Argumenty:
+            deficit (float): Aktualny deficyt energii w kW.
+
+        Zwraca:
+            DeficitAction: Wybrana akcja do wykonania.
+        """
         if self.is_bess_available():
             bess_energy = self.microgrid.bess.get_charge_level()
             current_buy_price = self.osd.get_current_buy_price()
@@ -289,6 +372,7 @@ class EnergyDeficitManager:
 
         return result
 
+    """
     def increase_active_devices_output(self, power_deficit, can_handle_surplus):
         increased_power = 0
         for device in self.microgrid.get_active_devices():
@@ -312,6 +396,8 @@ class EnergyDeficitManager:
         self.info_logger.info(f"In total, power was increased by {increased_power} kW")
         return {"success": increased_power > 0, "amount": increased_power}
 
+    """
+    """
     def are_active_devices_at_full_capacity(self):
         active_devices = self.microgrid.get_active_devices()
         self.info_logger.info(f"Number of active devices: {len(active_devices)}")
@@ -328,8 +414,21 @@ class EnergyDeficitManager:
             f"All active equipment is operating at 100%: {'Yes' if all_at_full_capacity else 'No'}"
         )
         return all_at_full_capacity
+    """
 
     def discharge_bess(self, power_deficit):
+        """
+        Próbuje rozładować System Magazynowania Energii w Akumulatorach (BESS) w celu pokrycia deficytu.
+
+        Ta metoda sprawdza dostępność BESS i próbuje go rozładować, aby pokryć
+        istniejący deficyt energii.
+
+        Argumenty:
+            power_deficit (float): Ilość deficytu energii do pokrycia w kW.
+
+        Zwraca:
+            dict: Słownik zawierający informacje o sukcesie operacji i ilości rozładowanej energii.
+        """
         if self.microgrid.bess and self.microgrid.bess.get_switch_status():
             self.info_logger.info(f"Attempting to discharge BESS by {power_deficit} kW")
             initial_charge = self.microgrid.bess.get_charge_level()
@@ -359,6 +458,20 @@ class EnergyDeficitManager:
         return {"success": False, "amount": 0}
 
     def limit_consumption(self, power_deficit):
+        """
+        Ogranicza zużycie energii w celu pokrycia deficytu.
+
+        Ta metoda redukuje moc urządzeń odbiorczych, zaczynając od
+        urządzeń o najniższym priorytecie, aż do osiągnięcia wymaganej
+        redukcji lub rozważenia wszystkich urządzeń.
+
+        Argumenty:
+            power_deficit (float): Ilość deficytu energii do pokrycia poprzez ograniczenie zużycia w kW.
+
+        Zwraca:
+            dict: Słownik zawierający informacje o sukcesie operacji,
+                  ilości zredukowanej mocy i ewentualnym pozostałym deficycie.
+        """
         self.info_logger.info(f"Attempting to limit consumption by {power_deficit} kW")
         total_reduced = 0
 
@@ -401,6 +514,20 @@ class EnergyDeficitManager:
         }
 
     def should_discharge_bess(self, deficit, bess_energy, current_buy_price):
+        """
+        Decyduje, czy rozładować System Magazynowania Energii w Akumulatorach (BESS).
+
+        Ta metoda analizuje aktualny stan BESS, cenę zakupu energii i wielkość deficytu,
+        aby zdecydować, czy rozładowanie BESS jest optymalną strategią.
+
+        Argumenty:
+            deficit (float): Aktualny deficyt energii w kW.
+            bess_energy (float): Aktualny poziom energii w BESS w kWh.
+            current_buy_price (float): Aktualna cena zakupu energii.
+
+        Zwraca:
+            bool: True jeśli BESS powinien być rozładowany, False w przeciwnym przypadku.
+        """
         # Parametry do konfiguracji
         MIN_BUY_PRICE = 0.1
         MAX_BUY_PRICE = 0.5
@@ -445,6 +572,19 @@ class EnergyDeficitManager:
         return decision
 
     def activate_inactive_devices(self, power_deficit, can_handle_surplus):
+        """
+        Aktywuje nieaktywne urządzenia generujące w celu pokrycia deficytu energii.
+
+        Ta metoda próbuje aktywować nieaktywne urządzenia generujące i ustawić ich
+        moc wyjściową, aby pokryć istniejący deficyt energii.
+
+        Argumenty:
+            power_deficit (float): Ilość deficytu energii do pokrycia w kW.
+            can_handle_surplus (bool): Czy system może obsłużyć ewentualną nadwyżkę energii.
+
+        Zwraca:
+            dict: Słownik zawierający informacje o sukcesie operacji i ilości aktywowanej mocy.
+        """
         activated_power = 0
         for device in self.microgrid.get_inactive_devices():
             if device.try_activate():

@@ -85,10 +85,8 @@ class EnergySource:
         if not errors:
             instance = cls(**data)
             instance.is_valid = True
-            print(f"Successfully created {cls.__name__} instance: {instance.name}")
             return instance
         else:
-            print(f"Failed to create {cls.__name__} instance. Errors: {errors}")
             return None
 
     def get_actual_output(self):
@@ -121,13 +119,17 @@ class EnergySource:
     def activate(self):
         self.device_status = "online"
         self.switch_status = True
-        print(f"{self.name} is now active with switch_status = {self.switch_status}.")
+        print(
+            f"{self.name} is now active with switch_status ERERE = {self.switch_status}."
+        )
 
     def deactivate(self):
         self.device_status = "offline"
         self.actual_output = 0
         self.switch_status = False
-        print(f"{self.name} is now inactive with switch_status = {self.switch_status}.")
+        print(
+            f"{self.name} is now inactive with switch_status DDSAD = {self.switch_status}."
+        )
 
     def increase_output(self, amount, is_percent=True):
         if self.device_status != "online":

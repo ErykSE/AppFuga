@@ -3,7 +3,19 @@ from apps.backend.managment.surplus_action import SurplusAction
 
 class EnergySurplusManager:
     """
-    Klasa zarządzająca nadwyżką energii.
+    Klasa odpowiedzialna za zarządzanie nadwyżką energii w systemie mikrosieci.
+
+    Ta klasa implementuje różne strategie obsługi nadwyżki produkcji energii,
+    w tym ładowanie BESS, sprzedaż energii do sieci i ograniczanie
+    generacji energii. Priorytetyzuje działania w oparciu o aktualny stan systemu,
+    poziom naładowania BESS i ceny energii.
+
+    Atrybuty:
+        microgrid (Microgrid): Zarządzany system mikrosieci.
+        osd (OSD): Obiekt zawierający dane dotyczące informacji kontraktowych pomiędzy przedsiębiorstwem, a dostawcą.
+        info_logger (Logger): Logger do wiadomości informacyjnych.
+        error_logger (Logger): Logger do wiadomości o błędach.
+        previous_decision (bool): Flaga przechowująca poprzednią decyzję dla histerezy.
     """
 
     def __init__(self, microgrid, osd, info_logger, error_logger):
@@ -14,6 +26,20 @@ class EnergySurplusManager:
         self.previous_decision = True  # Domyślnie priorytet ładowania
 
     def manage_surplus_energy(self, power_surplus):
+        """
+        Zarządza nadwyżką energii poprzez wykonywanie odpowiednich działań.
+
+        Ta metoda próbuje obsłużyć nadwyżkę energii poprzez wywołanie odpowiednich działań,
+        w tym ładowanie BESS, sprzedaż energii lub ograniczanie
+        generacji. Kontynuuje, dopóki nadwyżka nie zostanie w pełni zarządzona
+        lub nie zostanie osiągnięta maksymalna liczba iteracji.
+
+        Argumenty:
+            power_surplus (float): Ilość nadwyżki energii do zarządzania w kW.
+
+        Zwraca:
+            dict: Słownik zawierający ilość zarządzonej energii i ewentualną pozostałą nadwyżkę.
+        """
         total_managed = 0
         remaining_surplus = power_surplus
         iteration = 0
@@ -77,6 +103,20 @@ class EnergySurplusManager:
         }
 
     def execute_action(self, action, remaining_surplus):
+        """
+        Wykonuje określone działanie w celu zarządzania nadwyżką energii.
+
+        Ta metoda przekierowuje do odpowiedniego działania na podstawie dostarczonego
+        enum'a SurplusAction. Może obsługiwać ładowanie BESS, sprzedaż energii,
+        ograniczanie generacji lub kombinację i podjęcie decyzji odnośnie ładowania lub sprzedaży.
+
+        Argumenty:
+            action (SurplusAction): Działanie do wykonania.
+            remaining_surplus (float): Pozostała nadwyżka energii do zarządzania w kW.
+
+        Zwraca:
+            dict: Słownik wskazujący na sukces działania i ilość zarządzonej energii.
+        """
         if action == SurplusAction.BOTH:
             self.info_logger.info("BOTH")
             return self.handle_both_action(remaining_surplus)
@@ -95,6 +135,21 @@ class EnergySurplusManager:
     def should_prioritize_charging_or_selling(
         self, surplus_power, battery_free_percentage, current_selling_price
     ):
+        """
+        Określa, czy priorytetem powinno być ładowanie BESS czy sprzedaż energii.
+
+        Ta metoda wykorzystuje różne czynniki, takie jak poziom naładowania BESS,
+        aktualna cena sprzedaży i nadwyżka mocy, aby zdecydować o priorytecie między
+        ładowaniem, a sprzedażą energii do sieci.
+
+        Argumenty:
+            surplus_power (float): Aktualna nadwyżka mocy w kW.
+            battery_free_percentage (float): Procent wolnej pojemności w BESS.
+            current_selling_price (float): Aktualna cena sprzedaży energii do sieci.
+
+        Zwraca:
+            bool: True jeśli priorytetem powinno być ładowanie, False jeśli sprzedaż.
+        """
         # Parametry do konfiguracji
         MIN_SELLING_PRICE = 0.10
         MAX_SELLING_PRICE = 0.25
@@ -103,11 +158,9 @@ class EnergySurplusManager:
         HYSTERESIS = 0.05
 
         if battery_free_percentage <= BATTERY_THRESHOLD:
-            print(f"Charging priority: low battery ({100 - battery_free_percentage}%)")
             return True
 
         if battery_free_percentage == 0:
-            print("BESS full, sales priority")
             return False
 
         price_factor = (current_selling_price - MIN_SELLING_PRICE) / (
@@ -118,22 +171,28 @@ class EnergySurplusManager:
         battery_factor = 1 - (battery_free_percentage / 100)
 
         if price_factor > PRICE_THRESHOLD and surplus_power > 50:
-            print(
+            self.info_logger.info(
                 f"Sales priority: high price ({current_selling_price}) and significant surplus ({surplus_power} kW)"
             )
+
             return False
         elif battery_factor > price_factor + HYSTERESIS:
-            print(
+            self.info_logger.info(
                 f"Charging priority: battery factor ({battery_factor:.2f}) > price factor ({price_factor:.2f})"
             )
+
             return True
         elif price_factor > battery_factor + HYSTERESIS:
-            print(
+            self.info_logger.info(
                 f"Sales priority: price factor ({price_factor:.2f}) > battery factor ({battery_factor:.2f})"
             )
+
             return False
         else:
-            print(f"Maintaining the previous decision: values ​​in the hysteresis range")
+            self.info_logger.info(
+                f"Maintaining the previous decision: values ​​in the hysteresis range"
+            )
+
             return self.previous_decision
 
     def get_bess_free_capacity(self):
@@ -163,6 +222,18 @@ class EnergySurplusManager:
             )
 
     def decide_to_charge_bess(self, power_surplus):
+        """
+        Decyduje, czy ładować system BESS i o ile.
+
+        Ta metoda sprawdza dostępność i pojemność BESS, a następnie próbuje
+        naładować go nadwyżką energii, jeśli to możliwe.
+
+        Argumenty:
+            power_surplus (float): Ilość nadwyżki energii dostępnej do ładowania w kW.
+
+        Zwraca:
+            dict: Słownik wskazujący na sukces próby ładowania i naładowaną ilość.
+        """
         try:
             if not self.check_bess_availability():
                 self.info_logger.info("BESS is not available for charging.")
@@ -186,6 +257,19 @@ class EnergySurplusManager:
             return {"success": False, "amount": 0, "reason": str(e)}
 
     def decide_to_sell_energy(self, power_surplus):
+        """
+        Decyduje, czy sprzedać nadwyżkę energii do sieci i ile.
+
+        Ta metoda sprawdza, czy eksport energii jest możliwy, oblicza ilość, która może
+        być sprzedana na podstawie aktualnych limitów i już sprzedanej energii,
+        a następnie próbuje sprzedać nadwyżkę.
+
+        Argumenty:
+            power_surplus (float): Ilość nadwyżki energii dostępnej do sprzedaży w kW.
+
+        Zwraca:
+            dict: Słownik wskazujący na sukces próby sprzedaży i sprzedaną ilość.
+        """
         try:
             if not self.is_export_possible():
                 return {"success": False, "amount": 0, "reason": "Export impossible"}
@@ -260,6 +344,21 @@ class EnergySurplusManager:
             return 0
 
     def limit_energy_generation(self, power_surplus):
+        """
+        Ogranicza generację energii w celu zarządzania nadwyżką mocy. Gdy
+        pozostałe metody zawiodły wywoływana jest ta metoda jako ostateczność.
+
+        Ta metoda redukuje moc wyjściową urządzeń generujących w mikrosieci,
+        zaczynając od urządzeń o najniższym priorytecie, aż do osiągnięcia
+        wymaganej redukcji lub rozważenia wszystkich urządzeń.
+
+        Argumenty:
+            power_surplus (float): Ilość nadwyżki mocy do zredukowania w kW.
+
+        Zwraca:
+            dict: Słownik zawierający informacje o sukcesie operacji,
+                  ilości zredukowanej mocy i ewentualnej pozostałej nadwyżce.
+        """
         self.info_logger.info(
             f"Attempting to limit energy generation by {power_surplus} kW"
         )
