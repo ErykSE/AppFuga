@@ -2,6 +2,7 @@ import json
 from threading import Thread, Event
 from apps.backend.managment.energy_surplus_manager_class import EnergySurplusManager
 from apps.backend.managment.energy_deficit_manager_class import EnergyDeficitManager
+from apps.backend.others.osd_class import OSD
 from apps.backend.others.data_validator import DataValidator
 
 
@@ -42,10 +43,20 @@ class EnergyManager:
         self.deficit_manager = EnergyDeficitManager(
             microgrid, consumergrid, osd, info_logger, error_logger
         )
+
         self.check_interval = check_interval
         self.running = False
         self.stop_event = Event()
         self.restart_delay = 30  # czas oczekiwania przed ponownym startem (w sekundach)
+        self.first_run = True
+        self.initial_data_path = "C:/eryk/AppFuga/apps/backend/initial_data.json"
+        self.initial_contract_path = "C:/eryk/AppFuga/apps/backend/contract_data.json"
+        self.live_data_path = "C:/eryk/AppFuga/apps/backend/live_data.json"
+        self.live_contract_path = "C:/eryk/AppFuga/apps/backend/live_contract_data.json"
+        if self.osd is None:
+            self.error_logger.error(
+                "OSD object is None. It will be initialized during the first run."
+            )
 
     def start(self):
         """Uruchamia proces zarządzania energią w osobnym wątku."""
@@ -64,6 +75,12 @@ class EnergyManager:
         """Główna pętla zarządzania energią."""
         while self.running and not self.stop_event.is_set():
             try:
+                if self.first_run:
+                    self.load_initial_data()
+                    self.first_run = False
+                else:
+                    self.load_live_data()
+
                 self.run_single_iteration()
                 self.save_live_data()
                 self.save_contract_data()
@@ -82,6 +99,11 @@ class EnergyManager:
             "Starting a new iteration of the energy management algorithm"
         )
 
+        if self.osd is None:
+            self.error_logger.error(
+                "OSD object is None. Cannot proceed with the iteration."
+            )
+            return
         microgrid_data = self.prepare_microgrid_data()
         microgrid_errors = DataValidator.validate_microgrid_data(microgrid_data)
         osd_errors = DataValidator.validate_contract_data(self.osd.__dict__)
@@ -102,6 +124,12 @@ class EnergyManager:
                 )
         else:
             self.info_logger.info("No devices were updated based on meter readings")
+
+        if self.osd is None:
+            self.error_logger.error(
+                "OSD object is None. Cannot proceed with the iteration."
+            )
+            return
 
         self.log_system_summary()
         self.check_energy_conditions()
@@ -247,6 +275,32 @@ class EnergyManager:
         for line in summary:
             self.info_logger.info(line)
 
+    def load_initial_data(self):
+        self.microgrid.load_data_from_json(self.initial_data_path)
+        self.consumergrid.load_data_from_json(self.initial_data_path)
+        self.osd = OSD.load_data_from_json(self.initial_contract_path)
+        if self.osd is None:
+            raise ValueError("Failed to load OSD data from initial contract file.")
+        self.surplus_manager.osd = self.osd
+        self.deficit_manager.osd = self.osd
+        self.info_logger.info("Loaded initial data")
+
+    def load_live_data(self):
+        try:
+            self.microgrid.load_data_from_json(self.live_data_path)
+            self.consumergrid.load_data_from_json(self.live_data_path)
+            new_osd = OSD.load_data_from_json(self.live_contract_path)
+            if new_osd is not None:
+                self.osd = new_osd
+                self.surplus_manager.osd = self.osd
+                self.deficit_manager.osd = self.osd
+            else:
+                raise ValueError("Failed to load OSD data from live contract file.")
+            self.info_logger.info("Loaded live data")
+        except FileNotFoundError:
+            self.error_logger.error("Live data files not found. Loading initial data.")
+            self.load_initial_data()
+
     def save_live_data(self):
         """Generuje i zapisuje aktualny stan wszystkich urządzeń do pliku JSON."""
         live_data = {
@@ -267,13 +321,14 @@ class EnergyManager:
             ],
         }
 
-        with open("C:/eryk/AppFuga/apps/backend/live_data.json", "w") as f:
+        with open(self.live_data_path, "w") as f:
             json.dump(live_data, f, indent=4)
 
         self.info_logger.info("Live data saved to live_data.json")
 
     def save_contract_data(self):
         """Generuje i zapisuje aktualne dane kontraktowe do osobnego pliku JSON."""
+
         contract_data = {
             "CONTRACTED_TYPE": self.osd.CONTRACTED_TYPE,
             "CONTRACTED_DURATION": self.osd.CONTRACTED_DURATION,
@@ -287,7 +342,7 @@ class EnergyManager:
             "current_tariff_sell": self.osd.get_current_sell_price(),
         }
 
-        with open("C:/eryk/AppFuga/apps/backend/live_contract_data.json", "w") as f:
+        with open(self.live_contract_path, "w") as f:
             json.dump(contract_data, f, indent=4)
 
         self.info_logger.info("Live contract data saved to live_contract_data.json")

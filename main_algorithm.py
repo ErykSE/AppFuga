@@ -5,37 +5,45 @@ from apps.backend.others.osd_class import OSD
 from apps.backend.others.logger_config import get_loggers
 import time
 
-
 if __name__ == "__main__":
-    # device data
-    database_file_path = "C:/eryk/AppFuga/apps/backend/initial_data.json"
+    # Ścieżki do plików danych
+    initial_data_path = "C:/eryk/AppFuga/apps/backend/initial_data.json"
+    initial_contract_path = "C:/eryk/AppFuga/apps/backend/contract_data.json"
 
-    # contract data
-    contract_file_path = "C:/eryk/AppFuga/apps/backend/contract_data.json"
-
+    # Konfiguracja loggerów
     info_logger, error_logger = get_loggers()
 
-    microgrid = Microgrid(info_logger, error_logger)
-    microgrid.load_data_from_json(database_file_path)
-
-    consumergrid = EnergyConsumerGrid()
-    consumergrid.load_data_from_json(database_file_path)
-
-    osd = OSD.load_data_from_json(contract_file_path)
-
-    # Inicjalizacja i uruchomienie EnergyManager
-    # energy_manager = EnergyManager(microgrid, consumergrid, osd)
-    energy_manager = EnergyManager(
-        microgrid, consumergrid, osd, info_logger, error_logger
-    )
-
     try:
-        energy_manager.start()  # To uruchomi wątek z run_energy_management
+        # Inicjalizacja mikrosieci
+        microgrid = Microgrid(info_logger, error_logger)
+        microgrid.load_data_from_json(initial_data_path)
+
+        # Inicjalizacja sieci konsumentów
+        consumergrid = EnergyConsumerGrid()
+        consumergrid.load_data_from_json(initial_data_path)
+
+        # Inicjalizacja OSD
+        osd = OSD.load_data_from_json(initial_contract_path)
+        if osd is None:
+            raise ValueError("Failed to load OSD data from initial contract file.")
+
+        # Inicjalizacja i uruchomienie EnergyManager
+        energy_manager = EnergyManager(
+            microgrid, consumergrid, osd, info_logger, error_logger
+        )
+
+        # Uruchomienie zarządzania energią
+        energy_manager.start()
 
         # Główna pętla programu
         while True:
             time.sleep(1)  # Aby uniknąć zbyt intensywnego użycia CPU
+
     except KeyboardInterrupt:
         print("Zatrzymywanie aplikacji...")
-        energy_manager.stop()  # To zatrzyma wątek
+        if "energy_manager" in locals():
+            energy_manager.stop()  # Zatrzymanie wątku zarządzania energią
         print("Aplikacja zatrzymana.")
+    except Exception as e:
+        error_logger.error(f"Wystąpił błąd podczas inicjalizacji: {str(e)}")
+        print(f"Wystąpił błąd: {str(e)}")

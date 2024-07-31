@@ -145,10 +145,9 @@ class OSD:
             if errors:
                 for error in errors:
                     print(f"Validation error: {error}")
-                raise ValueError("Invalid OSD data")
+                return None
 
-            # Filtruj dane, aby pasowały do argumentów konstruktora
-            init_params = cls.__init__.__code__.co_varnames[1:]  # Pomijamy 'self'
+            init_params = cls.__init__.__code__.co_varnames[1:]
             filtered_data = {k: v for k, v in data.items() if k in init_params}
 
             instance = cls(**filtered_data)
@@ -157,10 +156,14 @@ class OSD:
                 f"Loaded tariffs - Buy: {instance.current_tariff_buy}, Sell: {instance.current_tariff_sell}"
             )
             return instance
+        except FileNotFoundError:
+            print(f"Contract file not found: {contract_file_path}")
+        except json.JSONDecodeError:
+            print(f"Invalid JSON in contract file: {contract_file_path}")
         except Exception as e:
             print(f"An error occurred while loading OSD data: {e}")
             print(f"Exception details: {type(e).__name__}, {str(e)}")
-            return None
+        return None
 
     def get_contracted_export_possibility(self):
         return self.CONTRACTED_EXPORT_POSSIBILITY
