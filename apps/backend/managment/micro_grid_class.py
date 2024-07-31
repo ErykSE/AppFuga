@@ -3,6 +3,7 @@ from apps.backend.devices.wind_turbine_class import WindTurbine
 from apps.backend.devices.fuel_turbine_class import FuelTurbine
 from apps.backend.devices.fuel_cell_class import FuelCell
 from apps.backend.devices.bess_class import BESS
+from apps.backend.devices.power_meter import PowerMeter
 
 import json
 import os
@@ -31,6 +32,7 @@ class Microgrid:
         self.fuel_turbines = []
         self.fuel_cells = []
         self.bess = None
+        self.power_meters = {}
         self.info_logger = info_logger
         self.error_logger = error_logger
 
@@ -48,14 +50,18 @@ class Microgrid:
         if device_type == "bess":
             if self.bess is None:
                 self.bess = device
-                self.info_logger.info(f"Added BESS: {device.name}")
+                self.info_logger.info(
+                    f"Added BESS: {device.name} (Status: {device.device_status})"
+                )
             else:
                 self.error_logger.error("BESS already exists. Cannot add another one.")
         else:
             device_list = getattr(self, f"{device_type}s")
             if device.is_valid:
                 device_list.append(device)
-                self.info_logger.info(f"Added {device_type}: {device.name}")
+                self.info_logger.info(
+                    f"Added {device_type}: {device.name} (Status: {device.device_status})"
+                )
             else:
                 self.error_logger.error(f"Invalid {device_type}: {device.name}")
 
@@ -280,6 +286,19 @@ class Microgrid:
                 for device_data in devices:
                     self.update_device(device_data, device_type)
 
+            # Ładowanie danych mierników
+            for meter_data in data.get("power_meters", []):
+                meter = PowerMeter.create_instance(meter_data)
+                if meter:
+                    self.add_power_meter(meter)
+                    self.info_logger.info(
+                        f"Loaded power meter: {meter.name}, Status: {meter.status}, Reading: {meter.measured_power} kW, Device ID: {meter.device_id}"
+                    )
+                else:
+                    self.error_logger.warning(
+                        f"Failed to create power meter: {meter_data}"
+                    )
+
             self.info_logger.info("Data loaded successfully.")
         except FileNotFoundError as e:
             self.error_logger.error(f"Error: {e}")
@@ -287,3 +306,55 @@ class Microgrid:
             self.error_logger.error(f"Error: Invalid JSON format in file {file_path}")
         except Exception as e:
             self.error_logger.error(f"An unexpected error occurred: {e}")
+
+    ###########################
+
+    def add_power_meter(self, power_meter):
+        if isinstance(power_meter, PowerMeter):
+            self.power_meters[power_meter.device_id] = power_meter
+            self.info_logger.info(
+                f"Added power meter: {power_meter.name} for device ID: {power_meter.device_id}"
+            )
+        else:
+            self.error_logger.error(f"Invalid power meter object")
+
+    def update_device_with_meter_data(self):
+        all_devices = self.get_all_devices()
+        updated_devices = []
+        self.info_logger.info(
+            f"Checking {len(all_devices)} devices for updates based on meter readings"
+        )
+        for device in all_devices:
+            meter = self.power_meters.get(device.id)
+            if meter:
+                self.info_logger.info(
+                    f"Checking device {device.name} (ID: {device.id}). Device status: {device.device_status}, Meter status: {meter.status}, Meter reading: {meter.measured_power} kW"
+                )
+                if (
+                    meter.status == "online"
+                    and device.device_status == "offline"
+                    and meter.measured_power > 0
+                ):
+                    self.error_logger.error(
+                        f"Communication error detected with {device.name} (ID: {device.id}). "
+                        f"Device status is offline but meter reading indicates power generation of {meter.measured_power} kW."
+                    )
+                    device.actual_output = meter.measured_power
+                    device.device_status = "online"
+                    device.switch_status = True
+                    updated_devices.append(device)
+                    self.info_logger.warning(
+                        f"Updated {device.name} status to online and set actual output to {meter.measured_power} kW "
+                        f"based on meter reading. Please check the device communication."
+                    )
+                elif device.device_status == "offline" and meter.measured_power > 0:
+                    self.info_logger.warning(
+                        f"{device.name} (ID: {device.id}) is offline but meter reading indicates power generation. "
+                        f"Meter status: {meter.status}, Meter reading: {meter.measured_power} kW. "
+                        f"Device status not updated due to offline meter."
+                    )
+            else:
+                self.info_logger.info(
+                    f"No meter found for device {device.name} (ID: {device.id})"
+                )
+        return updated_devices

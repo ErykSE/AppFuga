@@ -43,39 +43,39 @@ class EnergySource:
         for key in required_keys:
             if key not in data:
                 errors.append(f"Missing key: {key}")
-        if not isinstance(data["id"], int) or data["id"] <= 0:
-            print(f"Invalid id: {data['id']}")
-            return False
-        if not isinstance(data["name"], str) or not data["name"]:
-            print(f"Invalid name: {data['name']}")
-            return False
-        if not isinstance(data["priority"], int) or data["priority"] < 0:
-            print(f"Invalid priority: {data['priority']}")
-            return False
-        if not isinstance(data["max_output"], (int, float)) or data["max_output"] <= 0:
-            print(f"Invalid max_output: {data['max_output']}")
-            return False
-        if not isinstance(data["min_output"], (int, float)) or data["min_output"] < 0:
-            print(f"Invalid min_output: {data['min_output']}")
-            return False
-        if data["min_output"] > data["max_output"]:
-            print(
-                f"min_output ({data['min_output']}) is greater than max_output ({data['max_output']})"
-            )
-            return False
+
+        if not isinstance(data.get("id"), int) or data.get("id", 0) <= 0:
+            errors.append(f"Invalid id: {data.get('id')}")
+        if not isinstance(data.get("name"), str) or not data.get("name"):
+            errors.append(f"Invalid name: {data.get('name')}")
+        if not isinstance(data.get("priority"), int) or data.get("priority", 0) < 0:
+            errors.append(f"Invalid priority: {data.get('priority')}")
         if (
-            not isinstance(data["actual_output"], (int, float))
-            or data["actual_output"] > data["max_output"]
-            or data["actual_output"] < data["min_output"]
+            not isinstance(data.get("max_output"), (int, float))
+            or data.get("max_output", 0) <= 0
         ):
-            print(f"Invalid actual_output: {data['actual_output']}")
-            return False
-        if not isinstance(data["switch_status"], bool):
-            print(f"Invalid switch_status: {data['switch_status']}")
-            return False
-        if data["device_status"] not in ["online", "offline"]:
-            print(f"Invalid device_status: {data['device_status']}")
-            return False
+            errors.append(f"Invalid max_output: {data.get('max_output')}")
+        if (
+            not isinstance(data.get("min_output"), (int, float))
+            or data.get("min_output", 0) < 0
+        ):
+            errors.append(f"Invalid min_output: {data.get('min_output')}")
+        if data.get("min_output", 0) > data.get("max_output", 0):
+            errors.append(
+                f"min_output ({data.get('min_output')}) is greater than max_output ({data.get('max_output')})"
+            )
+        if not isinstance(data.get("actual_output"), (int, float)):
+            errors.append(f"Invalid actual_output: {data.get('actual_output')}")
+        if not isinstance(data.get("switch_status"), bool):
+            errors.append(f"Invalid switch_status: {data.get('switch_status')}")
+        if data.get("device_status") not in ["online", "offline"]:
+            errors.append(f"Invalid device_status: {data.get('device_status')}")
+
+        # Jeśli urządzenie jest offline, pozwól na actual_output = 0
+        if data.get("device_status") == "offline" and data.get("actual_output") != 0:
+            errors.append(
+                f"Offline device should have actual_output = 0, got: {data.get('actual_output')}"
+            )
 
         return errors
 
