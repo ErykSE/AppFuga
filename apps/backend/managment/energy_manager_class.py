@@ -66,6 +66,7 @@ class EnergyManager:
             try:
                 self.run_single_iteration()
                 self.save_live_data()
+                self.save_contract_data()
                 self.info_logger.info(
                     f"Waiting {self.restart_delay} seconds before next iteration..."
                 )
@@ -270,3 +271,23 @@ class EnergyManager:
             json.dump(live_data, f, indent=4)
 
         self.info_logger.info("Live data saved to live_data.json")
+
+    def save_contract_data(self):
+        """Generuje i zapisuje aktualne dane kontraktowe do osobnego pliku JSON."""
+        contract_data = {
+            "CONTRACTED_TYPE": self.osd.CONTRACTED_TYPE,
+            "CONTRACTED_DURATION": self.osd.CONTRACTED_DURATION,
+            "CONTRACTED_MARGIN": self.osd.CONTRACTED_MARGIN,
+            "CONTRACTED_EXPORT_POSSIBILITY": self.osd.CONTRACTED_EXPORT_POSSIBILITY,
+            "CONTRACTED_SALE_LIMIT": self.osd.CONTRACTED_SALE_LIMIT,
+            "CONTRACTED_PURCHASE_LIMIT": self.osd.CONTRACTED_PURCHASE_LIMIT,
+            "sold_power": self.osd.get_sold_power(),
+            "bought_power": self.osd.get_bought_power(),
+            "current_tariff_buy": self.osd.get_current_buy_price(),
+            "current_tariff_sell": self.osd.get_current_sell_price(),
+        }
+
+        with open("C:/eryk/AppFuga/apps/backend/live_contract_data.json", "w") as f:
+            json.dump(contract_data, f, indent=4)
+
+        self.info_logger.info("Live contract data saved to live_contract_data.json")

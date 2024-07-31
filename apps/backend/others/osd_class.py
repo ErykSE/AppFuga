@@ -185,6 +185,9 @@ class OSD:
     def get_current_buy_price(self):
         return self.current_tariff_buy
 
+    def get_current_sell_price(self):
+        return self.current_tariff_sell
+
     def get_contracted_sale_limit(self):
         return self.CONTRACTED_SALE_LIMIT
 
