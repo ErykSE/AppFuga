@@ -82,14 +82,14 @@
             "id": 8,
             "name": "Non Adjustable Device 1",
             "priority": 1,
-            "power": 15,
+            "power": 150,
             "switch_status": true
         },
         {
             "id": 9,
             "name": "Non Adjustable Device 2",
             "priority": 2,
-            "power": 5,
+            "power": 500,
             "switch_status": false
         }
     ],

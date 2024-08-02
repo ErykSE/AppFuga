@@ -1,0 +1,44 @@
+{
+  "2024-08-02": {
+    "date": "2024-08-02",
+    "day_of_week": "Friday",
+    "consumption": {
+      "raw": [
+        748.0
+      ],
+      "standardized": [
+        0.0
+      ],
+      "geometric_indicators": {
+        "sum": 748.0,
+        "peak_value": 748.0,
+        "standard_deviation": 0,
+        "kurtosis": "Insufficient data"
+      },
+      "patterns": {
+        "peak_indices": [],
+        "peak_values": [],
+        "peak_times": []
+      }
+    },
+    "generation": {
+      "raw": [
+        695.2
+      ],
+      "standardized": [
+        0.0
+      ],
+      "geometric_indicators": {
+        "sum": 695.2,
+        "peak_value": 695.2,
+        "standard_deviation": 0,
+        "kurtosis": "Insufficient data"
+      },
+      "patterns": {
+        "peak_indices": [],
+        "peak_values": [],
+        "peak_times": []
+      }
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "2024-08-02": {
+    "date": "2024-08-02",
+    "day_of_week": "Friday",
+    "day_type": "deficit",
+    "consumption": [
+      748.0
+    ],
+    "generation": [
+      695.2
+    ],
+    "temperature": [
+      20.0
+    ],
+    "buy_price": [
+      0.41
+    ],
+    "sell_price": [
+      0.22000000000000003
+    ],
+    "surplus_deficit": [
+      -52.799999999999955
+    ],
+    "is_holiday": false,
+    "season": "summer"
+  }
+}

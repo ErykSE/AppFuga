@@ -1,9 +1,11 @@
+from datetime import datetime
 import json
 from threading import Thread, Event
 from apps.backend.managment.energy_surplus_manager_class import EnergySurplusManager
 from apps.backend.managment.energy_deficit_manager_class import EnergyDeficitManager
 from apps.backend.others.osd_class import OSD
 from apps.backend.others.data_validator import DataValidator
+from apps.backend.managment.power_profile_manager import PowerProfileManager
 
 
 class EnergyManager:
@@ -53,10 +55,12 @@ class EnergyManager:
         self.initial_contract_path = "C:/eryk/AppFuga/apps/backend/contract_data.json"
         self.live_data_path = "C:/eryk/AppFuga/apps/backend/live_data.json"
         self.live_contract_path = "C:/eryk/AppFuga/apps/backend/live_contract_data.json"
-        if self.osd is None:
-            self.error_logger.error(
-                "OSD object is None. It will be initialized during the first run."
-            )
+        self.power_profile_manager = PowerProfileManager(
+            "C:/eryk/AppFuga/apps/backend/power_profile",
+            self.info_logger,
+            self.error_logger,
+        )
+        self.info_logger.info("####################PowerProfileManager initialized")
 
     def start(self):
         """Uruchamia proces zarządzania energią w osobnym wątku."""
@@ -132,6 +136,7 @@ class EnergyManager:
             return
 
         self.log_system_summary()
+        self.update_power_profile()  # funkcja do profilu mocy
         self.check_energy_conditions()
 
     def prepare_microgrid_data(self):
@@ -346,3 +351,15 @@ class EnergyManager:
             json.dump(contract_data, f, indent=4)
 
         self.info_logger.info("Live contract data saved to live_contract_data.json")
+
+    def update_power_profile(self):
+        self.info_logger.info("###############Updating power profile in EnergyManager")
+        current_time = datetime.now()
+        consumption = self.consumergrid.total_power_consumed()
+        generation = self.microgrid.total_power_generated()
+        buy_price = self.osd.get_current_buy_price()
+        sell_price = self.osd.get_current_sell_price()
+
+        self.power_profile_manager.update(
+            current_time, consumption, generation, buy_price, sell_price
+        )

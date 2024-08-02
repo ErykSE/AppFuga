@@ -6,7 +6,7 @@
             "priority": 1,
             "max_output": 100,
             "min_output": 10,
-            "actual_output": 15,
+            "actual_output": 100,
             "switch_status": true,
             "device_status": "online"
         },
@@ -16,7 +16,7 @@
             "priority": 1,
             "max_output": 120,
             "min_output": 15,
-            "actual_output": 100,
+            "actual_output": 120,
             "switch_status": true,
             "device_status": "online"
         }
@@ -28,7 +28,7 @@
             "priority": 2,
             "max_output": 200,
             "min_output": 20,
-            "actual_output": 40,
+            "actual_output": 200,
             "switch_status": true,
             "device_status": "online"
         },
@@ -50,7 +50,7 @@
             "priority": 4,
             "max_output": 300,
             "min_output": 30,
-            "actual_output": 40,
+            "actual_output": 178,
             "switch_status": true,
             "device_status": "online"
         }
@@ -62,7 +62,7 @@
             "priority": 3,
             "max_output": 150,
             "min_output": 15,
-            "actual_output": 25,
+            "actual_output": 150,
             "switch_status": true,
             "device_status": "online"
         }
@@ -82,14 +82,14 @@
             "id": 8,
             "name": "Non Adjustable Device 1",
             "priority": 1,
-            "power": 15,
+            "power": 150,
             "switch_status": true
         },
         {
             "id": 9,
             "name": "Non Adjustable Device 2",
             "priority": 2,
-            "power": 5,
+            "power": 500,
             "switch_status": false
         }
     ],

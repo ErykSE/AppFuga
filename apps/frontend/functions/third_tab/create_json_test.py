@@ -1,3 +1,5 @@
+"""
+
 import sys
 import json
 import mysql.connector  # Przykładowy sterownik do MySQL
@@ -84,3 +86,5 @@ if __name__ == "__main__":
     window = MyApp()
     window.show()
     sys.exit(app.exec())
+
+    """
