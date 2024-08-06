@@ -8,8 +8,11 @@ from scipy.signal import find_peaks
 import os
 
 
+from apps.backend.others import weather_data
+
+
 class PowerProfile:
-    def __init__(self, aggregation_interval=5):
+    def __init__(self, info_logger, error_logger, aggregation_interval=5):
         self.aggregation_interval = aggregation_interval
         self.data_buffer = []
         self.daily_profiles = {}
@@ -18,6 +21,11 @@ class PowerProfile:
         self.last_aggregation_time = None
         self.metadata = {"last_update": None, "day_count": 0, "holidays": []}
         self.scaler = StandardScaler()
+
+        self.info_logger = info_logger
+        self.error_logger = error_logger
+
+        self.weather_data = weather_data
 
     def add_data_point(
         self, timestamp, consumption, generation, temperature, buy_price, sell_price
@@ -62,20 +70,20 @@ class PowerProfile:
             microsecond=0,
         )
 
-        avg_consumption = sum(d["consumption"] for d in self.data_buffer) / len(
-            self.data_buffer
+        avg_consumption = round(
+            sum(d["consumption"] for d in self.data_buffer) / len(self.data_buffer), 2
         )
-        avg_generation = sum(d["generation"] for d in self.data_buffer) / len(
-            self.data_buffer
+        avg_generation = round(
+            sum(d["generation"] for d in self.data_buffer) / len(self.data_buffer), 2
         )
-        avg_temperature = sum(d["temperature"] for d in self.data_buffer) / len(
-            self.data_buffer
+        avg_temperature = round(
+            sum(d["temperature"] for d in self.data_buffer) / len(self.data_buffer), 2
         )
-        avg_buy_price = sum(d["buy_price"] for d in self.data_buffer) / len(
-            self.data_buffer
+        avg_buy_price = round(
+            sum(d["buy_price"] for d in self.data_buffer) / len(self.data_buffer), 2
         )
-        avg_sell_price = sum(d["sell_price"] for d in self.data_buffer) / len(
-            self.data_buffer
+        avg_sell_price = round(
+            sum(d["sell_price"] for d in self.data_buffer) / len(self.data_buffer), 2
         )
 
         self.consumption_data.append(
@@ -94,7 +102,7 @@ class PowerProfile:
             self.daily_profiles[date_key] = {
                 "date": date_key,
                 "day_of_week": aggregation_time.strftime("%A"),
-                "day_type": "deficit",  # This will be updated at 23:55
+                "day_type": "deficit",  # To będzie aktualizowane o 23:55
                 "consumption": [],
                 "generation": [],
                 "temperature": [],
@@ -112,7 +120,7 @@ class PowerProfile:
         self.daily_profiles[date_key]["buy_price"].append(avg_buy_price)
         self.daily_profiles[date_key]["sell_price"].append(avg_sell_price)
         self.daily_profiles[date_key]["surplus_deficit"].append(
-            avg_generation - avg_consumption
+            round(avg_generation - avg_consumption, 2)
         )
 
         self.last_aggregation_time = datetime.now()
@@ -126,6 +134,13 @@ class PowerProfile:
         print(
             f"Data aggregated for {date_key}. Total data points: {len(self.daily_profiles[date_key]['consumption'])}"
         )
+
+    def clear_weekly_data(self):
+        self.consumption_data = []
+        self.generation_data = []
+
+    def clear_monthly_data(self):
+        self.daily_profiles = {}
 
     def get_season(self, date):
         month = date.month
@@ -169,30 +184,27 @@ class PowerProfile:
             }
 
         return {
-            "avg_daily_consumption": np.mean(trend_data["consumption"]),
-            "avg_daily_generation": np.mean(trend_data["generation"]),
-            "consumption_trend": (
+            "avg_daily_consumption": round(np.mean(trend_data["consumption"]), 2),
+            "avg_daily_generation": round(np.mean(trend_data["generation"]), 2),
+            "consumption_trend": round(
                 np.polyfit(
                     range(len(trend_data["consumption"])), trend_data["consumption"], 1
-                )[0]
-                if len(trend_data["consumption"]) > 1
-                else 0
+                )[0],
+                2,
             ),
-            "generation_trend": (
+            "generation_trend": round(
                 np.polyfit(
                     range(len(trend_data["generation"])), trend_data["generation"], 1
-                )[0]
-                if len(trend_data["generation"]) > 1
-                else 0
+                )[0],
+                2,
             ),
-            "surplus_deficit_trend": (
+            "surplus_deficit_trend": round(
                 np.polyfit(
                     range(len(trend_data["surplus_deficit"])),
                     trend_data["surplus_deficit"],
                     1,
-                )[0]
-                if len(trend_data["surplus_deficit"]) > 1
-                else 0
+                )[0],
+                2,
             ),
             "data_points": len(trend_data["consumption"]),
         }
@@ -214,17 +226,19 @@ class PowerProfile:
     def calculate_geometric_indicators(self, profile):
         if len(profile) < 4:
             return {
-                "sum": np.sum(profile),
-                "peak_value": np.max(profile) if profile.size > 0 else 0,
+                "sum": round(np.sum(profile), 2),
+                "peak_value": round(np.max(profile), 2) if profile.size > 0 else 0,
                 "standard_deviation": "Insufficient data",
                 "kurtosis": "Insufficient data",
             }
         kurtosis = stats.kurtosis(profile)
         return {
-            "sum": np.sum(profile),
-            "peak_value": np.max(profile),
-            "standard_deviation": np.std(profile),
-            "kurtosis": kurtosis if not np.isnan(kurtosis) else "Insufficient data",
+            "sum": round(np.sum(profile), 2),
+            "peak_value": round(np.max(profile), 2),
+            "standard_deviation": round(np.std(profile), 2),
+            "kurtosis": (
+                round(kurtosis, 2) if not np.isnan(kurtosis) else "Insufficient data"
+            ),
         }
 
     def detect_patterns(self, profile, prominence=1):
@@ -283,7 +297,7 @@ class PowerProfile:
                     existing_data = []
 
                 new_data = getattr(self, f"{data_type}_data")
-                combined_data = existing_data + new_data
+                combined_data = self.round_dict_values(existing_data + new_data)
 
                 with open(filename, "w") as f:
                     json.dump(combined_data, f, indent=2)
@@ -297,15 +311,18 @@ class PowerProfile:
             else:
                 existing_profiles = {}
 
-            combined_profiles = {**existing_profiles, **self.daily_profiles}
+            combined_profiles = self.round_dict_values(
+                {**existing_profiles, **self.daily_profiles}
+            )
             with open(daily_profiles_file, "w") as f:
                 json.dump(combined_profiles, f, indent=2)
             files_saved.append(daily_profiles_file)
 
             # Zapisywanie metadata
-            with open(f"{filename_prefix}_metadata.json", "w") as f:
+            metadata_file = f"{filename_prefix}_metadata.json"
+            with open(metadata_file, "w") as f:
                 json.dump(self.metadata, f, indent=2)
-            files_saved.append(f"{filename_prefix}_metadata.json")
+            files_saved.append(metadata_file)
 
             # Tworzenie i zapisywanie pliku analizy
             analysis_file = f"{filename_prefix}_analysis.json"
@@ -315,11 +332,12 @@ class PowerProfile:
                     datetime.fromisoformat(date).date()
                 )
 
+            analysis_data = self.round_dict_values(analysis_data)
             with open(analysis_file, "w") as f:
                 json.dump(analysis_data, f, indent=2)
             files_saved.append(analysis_file)
 
-            print(f"Files saved: {', '.join(files_saved)}")
+            self.info_logger.info(f"Files saved: {', '.join(files_saved)}")
 
             # Sprawdzenie końca tygodnia i miesiąca
             is_end_of_week = (
@@ -334,42 +352,15 @@ class PowerProfile:
                 and current_date.minute >= 55
             )
 
-            if is_end_of_week:
-                for data_type in ["consumption", "generation"]:
-                    filename = f"{filename_prefix}_{data_type}.json"
-                    self.archive_data(
-                        filename, f"{filename_prefix}_archive_weekly_{data_type}"
-                    )
-                    # Czyścimy plik po archiwizacji
-                    open(filename, "w").close()
-                # Czyścimy bufory danych
-                setattr(self, f"{data_type}_data", [])
+            return {
+                "files_saved": files_saved,
+                "is_end_of_week": is_end_of_week,
+                "is_end_of_month": is_end_of_month,
+            }
 
-            if is_end_of_month:
-                self.archive_data(
-                    daily_profiles_file,
-                    f"{filename_prefix}_archive_monthly_daily_profiles",
-                )
-                # Czyścimy daily_profiles po archiwizacji
-                self.daily_profiles = {}
-
-            # Clear data buffers after saving
-            self.consumption_data = []
-            self.generation_data = []
         except Exception as e:
-            print(f"Error saving data: {str(e)}")
+            self.error_logger.error(f"Error saving data: {str(e)}")
             raise
-
-    def archive_data(self, source_file, archive_prefix):
-        if os.path.exists(source_file):
-            with open(source_file, "r") as f:
-                data = json.load(f)
-            archive_name = f"{archive_prefix}_{datetime.now().strftime('%Y%m%d')}.json"
-            with open(archive_name, "w") as f:
-                json.dump(data, f, indent=2)
-            print(f"Data archived to {archive_name}")
-        else:
-            print(f"Source file {source_file} does not exist. Nothing to archive.")
 
     @classmethod
     def load_data(cls, filename_prefix, date_str):
@@ -405,10 +396,10 @@ class PowerProfile:
         consumption = np.array(profile["consumption"])
         generation = np.array(profile["generation"])
 
-        consumption_mean = np.mean(consumption)
-        consumption_std = np.std(consumption)
-        generation_mean = np.mean(generation)
-        generation_std = np.std(generation)
+        consumption_mean = round(np.mean(consumption), 2)
+        consumption_std = round(np.std(consumption), 2)
+        generation_mean = round(np.mean(generation), 2)
+        generation_std = round(np.std(generation), 2)
 
         consumption_anomalies = np.where(
             np.abs(consumption - consumption_mean) > threshold * consumption_std
@@ -436,16 +427,92 @@ class PowerProfile:
             self.daily_profiles[date_key]["day_type"] = (
                 "surplus" if surplus_count > deficit_count else "deficit"
             )
-            print(
+            self.info_logger.info(
                 f"Updated day type for {date_key}: {self.daily_profiles[date_key]['day_type']}"
             )
+        else:
+            self.error_logger.error(f"No data found for date {date_key}")
 
-    def archive_data(self, source_file, archive_prefix):
+    def archive_data(self, source_file, archive_file):
         if os.path.exists(source_file):
             with open(source_file, "r") as f:
                 data = json.load(f)
-            archive_name = f"{archive_prefix}_{datetime.now().strftime('%Y%m%d')}.json"
-            with open(archive_name, "w") as f:
+            with open(archive_file, "w") as f:
                 json.dump(data, f, indent=2)
-            # Czyścimy plik źródłowy
-            open(source_file, "w").close()
+            self.info_logger.info(f"Data archived from {source_file} to {archive_file}")
+        else:
+            self.error_logger.warning(
+                f"Source file {source_file} does not exist. Nothing to archive."
+            )
+
+    def round_dict_values(self, d, decimal_places=2):
+        if isinstance(d, dict):
+            return {k: self.round_dict_values(v, decimal_places) for k, v in d.items()}
+        elif isinstance(d, list):
+            return [self.round_dict_values(v, decimal_places) for v in d]
+        elif isinstance(d, float):
+            return round(d, decimal_places)
+        else:
+            return d
+
+    def predict_events(self):
+        events = []
+        forecast = self.weather_data.get_forecast()
+
+        for _, row in forecast.iterrows():
+            weather_id = row["id"]
+            weather_main = row["main"]
+            weather_description = row["description"]
+
+            if weather_id // 100 == 2:  # Kody burz zaczynają się od 2xx
+                events.append(
+                    {
+                        "time": row["time"],
+                        "event": "Thunderstorm",
+                        "description": f"Possible power outage, activate off-grid mode. Details: {weather_description}",
+                    }
+                )
+            elif row["wind_speed"] > 10:  # prędkość wiatru w m/s
+                events.append(
+                    {
+                        "time": row["time"],
+                        "event": "High wind",
+                        "description": f'Potential for increased wind power generation. Wind speed: {row["wind_speed"]} m/s',
+                    }
+                )
+            elif weather_main in ["Rain", "Snow"]:
+                events.append(
+                    {
+                        "time": row["time"],
+                        "event": "Precipitation",
+                        "description": f"Possible reduction in solar power generation. Type: {weather_main}",
+                    }
+                )
+            elif row["clouds"] > 70:  # Zachmurzenie powyżej 70%
+                events.append(
+                    {
+                        "time": row["time"],
+                        "event": "High cloud cover",
+                        "description": f'Potential reduction in solar power generation. Cloud cover: {row["clouds"]}%',
+                    }
+                )
+
+            # Sprawdzamy również ekstremalne temperatury
+            if row["temperature"] > 35:  # Temperatura powyżej 35°C
+                events.append(
+                    {
+                        "time": row["time"],
+                        "event": "High temperature",
+                        "description": f'Potential increase in energy demand for cooling. Temperature: {row["temperature"]}°C',
+                    }
+                )
+            elif row["temperature"] < 0:  # Temperatura poniżej 0°C
+                events.append(
+                    {
+                        "time": row["time"],
+                        "event": "Low temperature",
+                        "description": f'Potential increase in energy demand for heating. Temperature: {row["temperature"]}°C',
+                    }
+                )
+
+        return events
