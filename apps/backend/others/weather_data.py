@@ -18,7 +18,6 @@ class WeatherData:
         if response.status_code == 200:
             data = response.json()
             self.current_weather = {
-                "id": data["weather"][0]["id"],
                 "main": data["weather"][0]["main"],
                 "description": data["weather"][0]["description"],
                 "temperature": data["main"]["temp"],
@@ -42,7 +41,6 @@ class WeatherData:
                     forecast.append(
                         {
                             "time": forecast_time,
-                            "id": item["weather"][0]["id"],
                             "main": item["weather"][0]["main"],
                             "description": item["weather"][0]["description"],
                             "temperature": item["main"]["temp"],

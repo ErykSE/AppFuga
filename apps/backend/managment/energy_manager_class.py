@@ -59,6 +59,9 @@ class EnergyManager:
             "C:/eryk/AppFuga/apps/backend/power_profile",
             self.info_logger,
             self.error_logger,
+            api_key="708e75906d18e5338d7f573cf9c01041",
+            lat=50.86,
+            lon=16.32,
         )
         self.info_logger.info("####################PowerProfileManager initialized")
 
@@ -136,7 +139,8 @@ class EnergyManager:
             return
 
         self.log_system_summary()
-        self.update_power_profile()  # funkcja do profilu mocy
+        current_time = datetime.now()
+        self.update_power_profile(current_time)
         self.check_energy_conditions()
 
     def prepare_microgrid_data(self):
@@ -352,9 +356,7 @@ class EnergyManager:
 
         self.info_logger.info("Live contract data saved to live_contract_data.json")
 
-    def update_power_profile(self):
-        self.info_logger.info("###############Updating power profile in EnergyManager")
-        current_time = datetime.now()
+    def update_power_profile(self, current_time):
         consumption = self.consumergrid.total_power_consumed()
         generation = self.microgrid.total_power_generated()
         buy_price = self.osd.get_current_buy_price()
