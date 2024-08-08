@@ -2,7 +2,7 @@ import pyarrow.parquet as pq
 
 # Odczytaj plik .parquet
 table = pq.read_table(
-    "C:/eryk/AppFuga/apps/backend/power_profile/detailed/2024-08-06.parquet"
+    "C:/eryk/AppFuga/apps/backend/power_profile/detailed/2024-08-08.parquet"
 )
 
 # Konwertuj do pandas DataFrame

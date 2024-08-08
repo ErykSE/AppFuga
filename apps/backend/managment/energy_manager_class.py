@@ -1,11 +1,13 @@
 from datetime import datetime
 import json
 from threading import Thread, Event
+import time
 from apps.backend.managment.energy_surplus_manager_class import EnergySurplusManager
 from apps.backend.managment.energy_deficit_manager_class import EnergyDeficitManager
 from apps.backend.others.osd_class import OSD
 from apps.backend.others.data_validator import DataValidator
 from apps.backend.managment.power_profile_manager import PowerProfileManager
+from apps.backend.managment.operation_action import OperationMode
 
 
 class EnergyManager:
@@ -63,7 +65,22 @@ class EnergyManager:
             lat=50.86,
             lon=16.32,
         )
-        self.info_logger.info("####################PowerProfileManager initialized")
+        self.auto_interval = 30  # 30 sekund dla trybu automatycznego
+        self.semi_auto_interval = 300  # 5 minut dla trybu półautomatycznego
+        self.operation_mode = OperationMode.AUTOMATIC
+        self.action_timeout = 60  # 1 minuta na decyzję operatora
+
+    def load_configuration(self):
+        try:
+            with open(
+                "C:/eryk/AppFuga/apps/backend/operation_mode.json", "r"
+            ) as mode_file:
+                mode_data = json.load(mode_file)
+                self.operation_mode = OperationMode(mode_data.get("mode", "automatic"))
+            self.info_logger.info(f"Loaded operation mode: {self.operation_mode.value}")
+        except Exception as e:
+            self.error_logger.error(f"Error loading configuration: {str(e)}")
+            self.operation_mode = OperationMode.AUTOMATIC
 
     def start(self):
         """Uruchamia proces zarządzania energią w osobnym wątku."""
@@ -79,9 +96,10 @@ class EnergyManager:
         self.info_logger.info("Energy management stopping")
 
     def run_energy_management(self):
-        """Główna pętla zarządzania energią."""
+        self.first_run = True
         while self.running and not self.stop_event.is_set():
             try:
+                self.load_configuration()
                 if self.first_run:
                     self.load_initial_data()
                     self.first_run = False
@@ -89,12 +107,13 @@ class EnergyManager:
                     self.load_live_data()
 
                 self.run_single_iteration()
-                self.save_live_data()
-                self.save_contract_data()
-                self.info_logger.info(
-                    f"Waiting {self.restart_delay} seconds before next iteration..."
+
+                interval = (
+                    self.auto_interval
+                    if self.operation_mode == OperationMode.AUTOMATIC
+                    else self.semi_auto_interval
                 )
-                if self.stop_event.wait(self.restart_delay):
+                if self.stop_event.wait(interval):
                     break
             except Exception as e:
                 self.handle_runtime_error(e)
@@ -103,21 +122,9 @@ class EnergyManager:
 
     def run_single_iteration(self):
         self.info_logger.info(
-            "Starting a new iteration of the energy management algorithm"
+            f"Starting a new iteration in {self.operation_mode.value} mode"
         )
-
-        if self.osd is None:
-            self.error_logger.error(
-                "OSD object is None. Cannot proceed with the iteration."
-            )
-            return
-        microgrid_data = self.prepare_microgrid_data()
-        microgrid_errors = DataValidator.validate_microgrid_data(microgrid_data)
-        osd_errors = DataValidator.validate_contract_data(self.osd.__dict__)
-
-        if microgrid_errors or osd_errors:
-            self.handle_validation_errors(microgrid_errors, osd_errors)
-            return
+        start_time = time.time()
 
         self.info_logger.info("Starting device update based on meter readings")
         updated_devices = self.microgrid.update_device_with_meter_data()
@@ -129,19 +136,136 @@ class EnergyManager:
                 self.info_logger.info(
                     f"Updated device: {device.name} (ID: {device.id}), New status: {device.device_status}, New output: {device.actual_output} kW"
                 )
-        else:
-            self.info_logger.info("No devices were updated based on meter readings")
 
-        if self.osd is None:
-            self.error_logger.error(
-                "OSD object is None. Cannot proceed with the iteration."
-            )
-            return
-
-        self.log_system_summary()
-        current_time = datetime.now()
-        self.update_power_profile(current_time)
         self.check_energy_conditions()
+
+        if self.operation_mode == OperationMode.SEMI_AUTOMATIC:
+            self.process_operator_decisions()
+            self.wait_for_operator_decisions()
+            self.clean_up_expired_actions()
+
+        self.save_live_data()
+        self.save_contract_data()
+        self.update_power_profile(datetime.now())
+
+        elapsed_time = time.time() - start_time
+        self.info_logger.info(f"Iteration completed in {elapsed_time:.2f} seconds")
+
+    def clean_up_expired_actions(self):
+        actions = self.load_operator_actions()
+        current_time = time.time()
+        new_pending_actions = []
+        for action in actions["pending_actions"]:
+            if current_time - action["timestamp"] > self.action_timeout:
+                self.info_logger.info(
+                    f"Action expired: {action['device_name']} - {action['action']}"
+                )
+                action["status"] = "expired"
+                actions["completed_actions"].append(action)
+            else:
+                new_pending_actions.append(action)
+        actions["pending_actions"] = new_pending_actions
+        self.save_operator_actions(actions)
+
+    def wait_for_operator_decisions(self):
+        start_time = time.time()
+        while time.time() - start_time < self.action_timeout:
+            actions = self.load_operator_actions()
+            if not any(
+                action["status"] == "pending" for action in actions["pending_actions"]
+            ):
+                break
+            time.sleep(1)
+
+    def execute_action(self, device, action):
+        if self.operation_mode == OperationMode.AUTOMATIC:
+            return self.perform_action(device, action)
+        else:
+            self.add_pending_action(device, action)
+            return {"success": True, "amount": 0, "pending": True}
+
+    def add_pending_action(self, device, action):
+        self.operator_actions["pending_actions"].append(
+            {
+                "device_id": device.id,
+                "device_name": device.name,
+                "action": action,
+                "timestamp": int(time.time()),
+            }
+        )
+
+    def perform_action(self, device, action):
+        # Implementacja faktycznego wykonania akcji
+        if action == "activate":
+            success = device.try_activate()
+        elif action == "deactivate":
+            success = device.try_deactivate()
+        elif action.startswith("set_output"):
+            _, value = action.split(":")
+            success = device.set_output(float(value))
+        else:
+            self.error_logger.error(f"Unknown action: {action}")
+            return {"success": False, "amount": 0, "error": "Unknown action"}
+
+        if success:
+            self.info_logger.info(
+                f"Action performed successfully: {device.name} - {action}"
+            )
+            return {"success": True, "amount": device.get_actual_output()}
+        else:
+            self.error_logger.error(f"Action failed: {device.name} - {action}")
+            return {"success": False, "amount": 0, "error": "Action failed"}
+
+    def process_operator_decisions(self):
+        actions = self.load_operator_actions()
+        new_pending_actions = []
+        for action in actions["pending_actions"]:
+            if action["status"] == "approved":
+                self.process_approved_action(action)
+            elif action["status"] == "rejected":
+                self.info_logger.info(
+                    f"Action rejected: {action['device_name']} - {action['action']}"
+                )
+            else:
+                new_pending_actions.append(action)
+        actions["pending_actions"] = new_pending_actions
+        self.save_operator_actions(actions)
+
+    def process_completed_action(self, action):
+        if action["status"] == "approved":
+            device = self.microgrid.get_device_by_id(action["device_id"])
+            if device:
+                self.perform_action(device, action["action"])
+        action["decision_timestamp"] = int(time.time())
+        self.operator_actions["completed_actions"].append(action)
+
+    def load_operator_actions(self):
+        try:
+            with open("operator_actions.json", "r") as file:
+                return json.load(file)
+        except FileNotFoundError:
+            return {"pending_actions": [], "completed_actions": []}
+
+    def save_operator_actions(self, actions):
+        with open("operator_actions.json", "w") as file:
+            json.dump(actions, file, indent=2)
+
+    def process_approved_action(self, action):
+        device = self.microgrid.get_device_by_id(action["device_id"])
+        if device:
+            result = self.perform_action(device, action["action"])
+            if result["success"]:
+                self.info_logger.info(
+                    f"Action executed successfully: {action['device_name']} - {action['action']}"
+                )
+            else:
+                self.error_logger.error(
+                    f"Action execution failed: {action['device_name']} - {action['action']} - {result.get('error')}"
+                )
+        else:
+            self.error_logger.error(f"Device not found for action: {action}")
+
+    #############################################
 
     def prepare_microgrid_data(self):
         """Przygotowuje dane mikrosieci do walidacji."""
@@ -160,44 +284,32 @@ class EnergyManager:
             ],
         }
 
-    def handle_validation_errors(self, microgrid_errors, osd_errors):
-        """Obsługuje błędy walidacji danych mikrosieci i OSD."""
-        self.error_logger.error("Validation errors detected. Stopping the algorithm.")
-        for error in microgrid_errors:
-            self.error_logger.error(f"Microgrid validation error: {error}")
-        for error in osd_errors:
-            self.error_logger.error(f"OSD validation error: {error}")
-        self.stop()
-
-    def handle_runtime_error(self, e):
-        """Obsługuje błędy wykonania występujące podczas zarządzania energią."""
-        self.error_logger.error(f"Error in energy management: {str(e)}")
-        self.error_logger.exception("Full traceback:")
-        self.error_logger.error("An error occurred. Stopping the algorithm.")
-        self.stop()
-
     def check_energy_conditions(self):
-        """Sprawdza warunki energetyczne i inicjuje odpowiednie działania."""
         try:
             total_generated_power = self.microgrid.total_power_generated()
             total_demand_power = self.consumergrid.total_power_consumed()
 
+            self.info_logger.info(f"Total generated power: {total_generated_power} kW")
+            self.info_logger.info(f"Total demand power: {total_demand_power} kW")
+
             if total_generated_power > total_demand_power:
-                self.info_logger.info(
-                    "Power surplus detected - starting surplus management"
-                )
                 power_surplus = total_generated_power - total_demand_power
+                self.info_logger.info(
+                    f"Power surplus detected: {power_surplus} kW - starting surplus management"
+                )
                 self.manage_surplus(power_surplus)
             elif total_generated_power < total_demand_power:
-                self.info_logger.info(
-                    "Power deficit detected - starting deficit management"
-                )
                 power_deficit = total_demand_power - total_generated_power
+                self.info_logger.info(
+                    f"Power deficit detected: {power_deficit} kW - starting deficit management"
+                )
                 self.manage_deficit(power_deficit)
             else:
                 self.info_logger.info(
                     "Power generation matches demand - no action needed"
                 )
+
+            self.log_system_summary()
         except Exception as e:
             self.error_logger.error(f"Error checking energy conditions: {str(e)}")
 
@@ -239,8 +351,23 @@ class EnergyManager:
                 "Deficit management completed. The entire deficit has been resolved."
             )
 
+    def handle_validation_errors(self, microgrid_errors, osd_errors):
+        """Obsługuje błędy walidacji danych mikrosieci i OSD."""
+        self.error_logger.error("Validation errors detected. Stopping the algorithm.")
+        for error in microgrid_errors:
+            self.error_logger.error(f"Microgrid validation error: {error}")
+        for error in osd_errors:
+            self.error_logger.error(f"OSD validation error: {error}")
+        self.stop()
+
+    def handle_runtime_error(self, e):
+        """Obsługuje błędy wykonania występujące podczas zarządzania energią."""
+        self.error_logger.error(f"Error in energy management: {str(e)}")
+        self.error_logger.exception("Full traceback:")
+        self.error_logger.error("An error occurred. Stopping the algorithm.")
+        self.stop()
+
     def log_system_summary(self):
-        """Loguje podsumowanie stanu systemu."""
         total_generated_power = self.microgrid.total_power_generated()
         total_demand_power = self.consumergrid.total_power_consumed()
         active_devices = self.microgrid.get_active_devices()

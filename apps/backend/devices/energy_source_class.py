@@ -26,6 +26,9 @@ class EnergySource:
         self.switch_status = switch_status
         self.device_status = device_status
         self.is_valid = False
+        self.pending_action = None
+        self.action_approved = None
+        self.action_request_time = None
 
     @staticmethod
     def validate_data(data):
@@ -302,4 +305,6 @@ class EnergySource:
             "actual_output": self.get_actual_output(),
             "switch_status": self.get_switch_status(),
             "device_status": "online" if self.get_switch_status() else "offline",
+            "pending_action": self.pending_action,
+            "action_approved": self.action_approved,
         }
