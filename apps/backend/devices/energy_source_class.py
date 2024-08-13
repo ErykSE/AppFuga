@@ -183,14 +183,19 @@ class EnergySource:
         return percent_decrease, actual_decrease
 
     def set_output(self, target_output):
+        print(f"Attempting to set output for {self.name} to {target_output} kW")
         if self.device_status != "online":
             print(f"{self.name} is not active.")
             return False
 
         if target_output > self.max_output:
+            print(f"Target output {target_output} exceeds max output {self.max_output}")
             self.actual_output = self.max_output
             print(f"{self.name} output set to its maximum: {self.max_output} kW")
         elif target_output < self.min_output:
+            print(
+                f"Target output {target_output} is below min output {self.min_output}"
+            )
             self.actual_output = self.min_output
             print(f"{self.name} output set to its minimum: {self.min_output} kW")
         else:

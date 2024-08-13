@@ -1,5 +1,7 @@
 from datetime import datetime
 import json
+import os
+import random
 from threading import Thread, Event
 import time
 from apps.backend.managment.energy_surplus_manager_class import EnergySurplusManager
@@ -8,6 +10,7 @@ from apps.backend.others.osd_class import OSD
 from apps.backend.others.data_validator import DataValidator
 from apps.backend.managment.power_profile_manager import PowerProfileManager
 from apps.backend.managment.operation_action import OperationMode
+from apps.backend.managment.surplus_action import SurplusAction
 
 
 class EnergyManager:
@@ -42,7 +45,11 @@ class EnergyManager:
         self.info_logger = info_logger
         self.error_logger = error_logger
         self.surplus_manager = EnergySurplusManager(
-            microgrid, osd, info_logger, error_logger
+            microgrid,
+            osd,
+            info_logger,
+            error_logger,
+            self.execute_action,  # Upewnij się, że przekazujesz tę funkcję
         )
         self.deficit_manager = EnergyDeficitManager(
             microgrid, consumergrid, osd, info_logger, error_logger
@@ -66,9 +73,18 @@ class EnergyManager:
             lon=16.32,
         )
         self.auto_interval = 30  # 30 sekund dla trybu automatycznego
-        self.semi_auto_interval = 300  # 5 minut dla trybu półautomatycznego
+        self.semi_auto_interval = 180  # 5 minut dla trybu półautomatycznego
         self.operation_mode = OperationMode.AUTOMATIC
         self.action_timeout = 60  # 1 minuta na decyzję operatora
+        self.pending_actions_path = os.path.join(
+            os.path.dirname(__file__),
+            "C:/eryk/AppFuga/apps/backend/pending_actions.json",
+        )
+        self.operator_decisions_path = os.path.join(
+            os.path.dirname(__file__),
+            "C:/eryk/AppFuga/apps/backend/operator_decisions.json",
+        )
+        self.operator_actions = {"pending_actions": [], "completed_actions": []}
 
     def load_configuration(self):
         try:
@@ -139,11 +155,6 @@ class EnergyManager:
 
         self.check_energy_conditions()
 
-        if self.operation_mode == OperationMode.SEMI_AUTOMATIC:
-            self.process_operator_decisions()
-            self.wait_for_operator_decisions()
-            self.clean_up_expired_actions()
-
         self.save_live_data()
         self.save_contract_data()
         self.update_power_profile(datetime.now())
@@ -167,42 +178,108 @@ class EnergyManager:
         actions["pending_actions"] = new_pending_actions
         self.save_operator_actions(actions)
 
-    def wait_for_operator_decisions(self):
+    def wait_for_operator_decision(self, action):
         start_time = time.time()
         while time.time() - start_time < self.action_timeout:
-            actions = self.load_operator_actions()
-            if not any(
-                action["status"] == "pending" for action in actions["pending_actions"]
-            ):
-                break
-            time.sleep(1)
+            decision = self.load_operator_decision()
+            if decision:
+                return decision.get("approved", False)
+            time.sleep(1)  # Krótka przerwa, aby nie obciążać CPU
+        return False  # Timeout - traktujemy jako odmowę
 
     def execute_action(self, device, action):
+        self.info_logger.info(
+            f"EnergyManager.execute_action called with device: {device.name}, action: {action}"
+        )
         if self.operation_mode == OperationMode.AUTOMATIC:
             return self.perform_action(device, action)
         else:
-            self.add_pending_action(device, action)
-            return {"success": True, "amount": 0, "pending": True}
+            return self.add_pending_action(device, action)
 
-    def add_pending_action(self, device, action):
-        self.operator_actions["pending_actions"].append(
-            {
-                "device_id": device.id,
-                "device_name": device.name,
-                "action": action,
-                "timestamp": int(time.time()),
-            }
-        )
+    def add_pending_action(self, action):
+        actions = self.load_pending_actions()
+        actions.append(action)
+        self.save_pending_actions(actions)
+
+    def remove_pending_action(self, action):
+        actions = self.load_pending_actions()
+        actions = [a for a in actions if a["id"] != action["id"]]
+        self.save_pending_actions(actions)
+
+    def remove_pending_action(self, action):
+        actions = self.load_pending_actions()
+        actions = [a for a in actions if a["id"] != action["id"]]
+        self.save_pending_actions(actions)
+
+    def load_pending_actions(self):
+        try:
+            with open(self.pending_actions_path, "r") as file:
+                return json.load(file)
+        except (FileNotFoundError, json.JSONDecodeError):
+            return []
+
+    def save_pending_actions(self, actions):
+        with open(self.pending_actions_path, "w") as file:
+            json.dump(actions, file, indent=2)
+
+    def load_operator_decision(self):
+        try:
+            with open(self.operator_decisions_path, "r") as file:
+                decisions = json.load(file)
+                return decisions[0] if decisions else None
+        except (FileNotFoundError, json.JSONDecodeError):
+            return None
+
+    def save_operator_decisions(self, decisions):
+        with open(self.operator_decisions_path, "w") as file:
+            json.dump(decisions, file, indent=2)
+
+    def process_pending_actions(self):
+        actions = self.load_operator_actions()
+        new_pending_actions = []
+        for action in actions["pending_actions"]:
+            if action["status"] == "approved":
+                device = self.microgrid.get_device_by_id(action["device_id"])
+                if device:
+                    result = self.perform_action(device, action["action"])
+                    if result["success"]:
+                        self.info_logger.info(
+                            f"Processed approved action: {action['device_name']} - {action['action']}"
+                        )
+                    else:
+                        self.error_logger.error(
+                            f"Failed to process approved action: {action['device_name']} - {action['action']}"
+                        )
+                else:
+                    self.error_logger.error(f"Device not found for action: {action}")
+            elif action["status"] == "rejected":
+                self.info_logger.info(
+                    f"Action rejected: {action['device_name']} - {action['action']}"
+                )
+            else:
+                new_pending_actions.append(action)
+        actions["pending_actions"] = new_pending_actions
+        self.save_operator_actions(actions)
 
     def perform_action(self, device, action):
-        # Implementacja faktycznego wykonania akcji
+        self.info_logger.info(f"Performing action: {device.name} - {action}")
         if action == "activate":
             success = device.try_activate()
         elif action == "deactivate":
             success = device.try_deactivate()
         elif action.startswith("set_output"):
             _, value = action.split(":")
+            self.info_logger.info(
+                f"Attempting to set output to {value} for device {device.name}"
+            )
             success = device.set_output(float(value))
+            self.info_logger.info(
+                f"Set output result for {device.name}: {'Success' if success else 'Failure'}"
+            )
+            if success:
+                self.info_logger.info(
+                    f"New output for {device.name}: {device.get_actual_output()} kW"
+                )
         else:
             self.error_logger.error(f"Unknown action: {action}")
             return {"success": False, "amount": 0, "error": "Unknown action"}
@@ -217,19 +294,33 @@ class EnergyManager:
             return {"success": False, "amount": 0, "error": "Action failed"}
 
     def process_operator_decisions(self):
-        actions = self.load_operator_actions()
-        new_pending_actions = []
-        for action in actions["pending_actions"]:
-            if action["status"] == "approved":
-                self.process_approved_action(action)
-            elif action["status"] == "rejected":
-                self.info_logger.info(
-                    f"Action rejected: {action['device_name']} - {action['action']}"
-                )
-            else:
-                new_pending_actions.append(action)
-        actions["pending_actions"] = new_pending_actions
-        self.save_operator_actions(actions)
+        decisions = self.load_operator_decisions()
+        pending_actions = self.load_pending_actions()
+
+        for decision in decisions:
+            if decision["approved"]:
+                device = self.microgrid.get_device_by_id(decision["device_id"])
+                if device:
+                    result = self.perform_action(device, decision["action"])
+                    self.info_logger.info(
+                        f"Processed approved action: {decision['device_name']} - {decision['action']}, Result: {result}"
+                    )
+                else:
+                    self.error_logger.error(f"Device not found for action: {decision}")
+
+        # Usuń przetworzone akcje z pending_actions
+        pending_actions = [
+            action
+            for action in pending_actions
+            if not any(
+                d["device_id"] == action["device_id"]
+                and d["action"] == action["action"]
+                for d in decisions
+            )
+        ]
+
+        self.save_pending_actions(pending_actions)
+        self.save_operator_decisions([])  # Czyścimy decyzje po przetworzeniu
 
     def process_completed_action(self, action):
         if action["status"] == "approved":
@@ -241,14 +332,34 @@ class EnergyManager:
 
     def load_operator_actions(self):
         try:
-            with open("operator_actions.json", "r") as file:
-                return json.load(file)
+            with open(self.operator_actions_path, "r") as file:
+                actions = json.load(file)
+            return actions
         except FileNotFoundError:
+            self.info_logger.warning(
+                f"operator_actions.json not found at {self.operator_actions_path}. Creating new file."
+            )
+            actions = {"pending_actions": [], "completed_actions": []}
+            self.save_operator_actions(actions)
+            return actions
+        except json.JSONDecodeError:
+            self.error_logger.error(
+                f"Error decoding operator_actions.json. File may be corrupted."
+            )
             return {"pending_actions": [], "completed_actions": []}
 
     def save_operator_actions(self, actions):
-        with open("operator_actions.json", "w") as file:
+        with open(self.operator_actions_path, "w") as file:
             json.dump(actions, file, indent=2)
+
+    def check_operator_decisions(self):
+        try:
+            with open(self.operator_decisions_path, "r") as file:
+                decisions = json.load(file)
+            # Symulacja: zawsze zwracamy pozytywną decyzję
+            return [{**action, "approved": True} for action in decisions]
+        except (FileNotFoundError, json.JSONDecodeError):
+            return []
 
     def process_approved_action(self, action):
         device = self.microgrid.get_device_by_id(action["device_id"])
@@ -314,7 +425,12 @@ class EnergyManager:
             self.error_logger.error(f"Error checking energy conditions: {str(e)}")
 
     def manage_surplus(self, power_surplus):
-        """Zarządza nadwyżką energii."""
+        if self.operation_mode == OperationMode.AUTOMATIC:
+            self.manage_surplus_automatic(power_surplus)
+        else:
+            self.manage_surplus_semi_automatic(power_surplus)
+
+    def manage_surplus_automatic(self, power_surplus):
         result = self.surplus_manager.manage_surplus_energy(power_surplus)
         managed_amount = result["amount_managed"]
         remaining_surplus = result["remaining_surplus"]
@@ -332,8 +448,62 @@ class EnergyManager:
                 "Surplus management completed. The entire surplus has been dissolved."
             )
 
+    def manage_surplus_semi_automatic(self, power_surplus):
+        proposed_actions = self.surplus_manager.get_proposed_actions(power_surplus)
+        for action in proposed_actions:
+            serializable_action = {
+                "id": action["id"],
+                "device_id": action["device"].id,
+                "device_name": action["device"].name,
+                "action": action["action"],
+                "current_output": action["current_output"],
+                "proposed_output": action["proposed_output"],
+                "reduction": action["reduction"],
+                "timestamp": int(time.time()),
+            }
+            self.add_pending_action(serializable_action)
+
+        for action in proposed_actions:
+            self.info_logger.info(
+                f"Processing action: {action['action']} for device {action['device'].name}"
+            )
+            decision = self.simulate_operator_decision(action)
+            if decision:
+                self.info_logger.info(
+                    f"Action approved: {action['action']} for device {action['device'].name}"
+                )
+                result = self.perform_action(action["device"], action["action"])
+                if result["success"]:
+                    self.info_logger.info(
+                        f"Successfully executed action: {action['action']} for device {action['device'].name}"
+                    )
+                    self.info_logger.info(
+                        f"New output for {action['device'].name}: {action['device'].get_actual_output()} kW"
+                    )
+                else:
+                    self.error_logger.error(
+                        f"Failed to execute action: {action['action']} for device {action['device'].name}"
+                    )
+                    self.error_logger.error(
+                        f"Reason: {result.get('error', 'Unknown error')}"
+                    )
+            else:
+                self.info_logger.info(
+                    f"Action rejected: {action['action']} for device {action['device'].name}"
+                )
+
+            self.remove_pending_action(action)
+            time.sleep(1)  # Symulacja czasu oczekiwania między akcjami
+
+    def simulate_operator_decision(self, action):
+        # Symulacja decyzji operatora
+        decision = random.choice([True, False])
+        self.info_logger.info(
+            f"Simulated operator decision for {action['device'].name}: {'Approved' if decision else 'Rejected'}"
+        )
+        return decision
+
     def manage_deficit(self, power_deficit):
-        """Zarządza deficytem energii."""
         result = self.deficit_manager.handle_deficit(power_deficit)
         managed_amount = result["amount_managed"]
         remaining_deficit = result["remaining_deficit"]
@@ -350,6 +520,10 @@ class EnergyManager:
             self.info_logger.info(
                 "Deficit management completed. The entire deficit has been resolved."
             )
+
+    def clear_operator_decision(self):
+        with open(self.operator_decisions_path, "w") as file:
+            json.dump([], file)
 
     def handle_validation_errors(self, microgrid_errors, osd_errors):
         """Obsługuje błędy walidacji danych mikrosieci i OSD."""
@@ -438,7 +612,6 @@ class EnergyManager:
             self.load_initial_data()
 
     def save_live_data(self):
-        """Generuje i zapisuje aktualny stan wszystkich urządzeń do pliku JSON."""
         live_data = {
             "pv_panels": [panel.to_dict() for panel in self.microgrid.pv_panels],
             "wind_turbines": [

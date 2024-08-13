@@ -18,28 +18,15 @@ class EnergySurplusManager:
         previous_decision (bool): Flaga przechowująca poprzednią decyzję dla histerezy.
     """
 
-    def __init__(self, microgrid, osd, info_logger, error_logger):
+    def __init__(self, microgrid, osd, info_logger, error_logger, execute_action_func):
         self.microgrid = microgrid
         self.osd = osd
         self.info_logger = info_logger
         self.error_logger = error_logger
+        self.execute_action_func = execute_action_func
         self.previous_decision = True  # Domyślnie priorytet ładowania
 
     def manage_surplus_energy(self, power_surplus):
-        """
-        Zarządza nadwyżką energii poprzez wykonywanie odpowiednich działań.
-
-        Ta metoda próbuje obsłużyć nadwyżkę energii poprzez wywołanie odpowiednich działań,
-        w tym ładowanie BESS, sprzedaż energii lub ograniczanie
-        generacji. Kontynuuje, dopóki nadwyżka nie zostanie w pełni zarządzona
-        lub nie zostanie osiągnięta maksymalna liczba iteracji.
-
-        Argumenty:
-            power_surplus (float): Ilość nadwyżki energii do zarządzania w kW.
-
-        Zwraca:
-            dict: Słownik zawierający ilość zarządzonej energii i ewentualną pozostałą nadwyżkę.
-        """
         total_managed = 0
         remaining_surplus = power_surplus
         iteration = 0
@@ -68,7 +55,9 @@ class EnergySurplusManager:
                 # Próbujemy każdą dostępną akcję
                 for action in available_actions:
                     self.info_logger.info(f"Attempting to perform the action: {action}")
+                    self.info_logger.info(f"Action type: {type(action)}")
                     result = self.execute_action(action, remaining_surplus)
+                    self.info_logger.info(f"Action result: {result}")
 
                     if result["success"]:
                         total_managed += result["amount"]
@@ -76,7 +65,7 @@ class EnergySurplusManager:
                         self.info_logger.info(
                             f"Action {action} managed {result['amount']} kW. Surplus remaining: {remaining_surplus} kW"
                         )
-                        break  # Przerwij pętlę for, jeśli akcja się powiodła
+                        break
                     else:
                         self.info_logger.info(
                             f"Action {action} has failed. Reason: {result.get('reason', 'Unknown')}"
@@ -96,6 +85,7 @@ class EnergySurplusManager:
 
         except Exception as e:
             self.error_logger.error(f"Error in manage_surplus_energy: {str(e)}")
+            self.error_logger.exception("Full traceback:")
 
         return {
             "amount_managed": total_managed,
@@ -106,10 +96,6 @@ class EnergySurplusManager:
         """
         Wykonuje określone działanie w celu zarządzania nadwyżką energii.
 
-        Ta metoda przekierowuje do odpowiedniego działania na podstawie dostarczonego
-        enum'a SurplusAction. Może obsługiwać ładowanie BESS, sprzedaż energii,
-        ograniczanie generacji lub kombinację i podjęcie decyzji odnośnie ładowania lub sprzedaży.
-
         Argumenty:
             action (SurplusAction): Działanie do wykonania.
             remaining_surplus (float): Pozostała nadwyżka energii do zarządzania w kW.
@@ -117,6 +103,9 @@ class EnergySurplusManager:
         Zwraca:
             dict: Słownik wskazujący na sukces działania i ilość zarządzonej energii.
         """
+        self.info_logger.info(f"Executing action: {action}, type: {type(action)}")
+        self.info_logger.info(f"Remaining surplus: {remaining_surplus}")
+
         if action == SurplusAction.BOTH:
             self.info_logger.info("BOTH")
             return self.handle_both_action(remaining_surplus)
@@ -130,7 +119,7 @@ class EnergySurplusManager:
             self.info_logger.info("LIMIT")
             return self.limit_energy_generation(remaining_surplus)
         else:
-            return {"success": False, "amount": 0, "reason": "Nieznana akcja"}
+            return {"success": False, "amount": 0, "reason": "Unknown action"}
 
     def should_prioritize_charging_or_selling(
         self, surplus_power, battery_free_percentage, current_selling_price
@@ -360,11 +349,11 @@ class EnergySurplusManager:
                   ilości zredukowanej mocy i ewentualnej pozostałej nadwyżce.
         """
         self.info_logger.info(
-            f"Attempting to limit energy generation by {power_surplus} kW"
+            f"Starting limit_energy_generation with power_surplus: {power_surplus}"
         )
         total_reduced = 0
+        reasons = []
 
-        # Sortuj urządzenia według priorytetu (rosnąco)
         active_generators = sorted(
             [
                 device
@@ -374,6 +363,13 @@ class EnergySurplusManager:
             key=lambda x: x.priority,
         )
 
+        self.info_logger.info(
+            f"Active generators: {[device.name for device in active_generators]}"
+        )
+
+        if not active_generators:
+            reasons.append("No active generators found")
+
         for device in active_generators:
             if total_reduced >= power_surplus:
                 break
@@ -382,25 +378,56 @@ class EnergySurplusManager:
             min_output = device.get_min_output()
             reducible_power = current_output - min_output
 
+            self.info_logger.info(
+                f"Processing device: {device.name}, Current output: {current_output}, Min output: {min_output}, Reducible power: {reducible_power}"
+            )
+
+            if reducible_power <= 0:
+                reasons.append(f"Device {device.name} cannot be reduced further")
+                continue
+
             reduction = min(reducible_power, power_surplus - total_reduced)
 
             if reduction > 0:
                 new_output = current_output - reduction
-                device.set_output(new_output)
-                actual_reduction = current_output - device.get_actual_output()
-                total_reduced += actual_reduction
+                action = f"set_output:{new_output}"
                 self.info_logger.info(
-                    f"Reduced {device.name} (priority: {device.priority}) power by {actual_reduction} kW from {current_output} kW to {device.get_actual_output()} kW"
+                    f"Attempting to execute action: {action} for device {device.name}"
                 )
+                result = self.execute_action_func(device, action)
+                self.info_logger.info(f"Result of execute_action_func: {result}")
+
+                if result.get("pending", False):
+                    self.info_logger.info(
+                        f"Action pending for {device.name}: set output to {new_output} kW"
+                    )
+                    break
+                elif result["success"]:
+                    actual_reduction = current_output - device.get_actual_output()
+                    total_reduced += actual_reduction
+                    self.info_logger.info(
+                        f"Reduced {device.name} (priority: {device.priority}) power by {actual_reduction} kW "
+                        f"from {current_output} kW to {device.get_actual_output()} kW"
+                    )
+                else:
+                    reasons.append(
+                        f"Failed to reduce power for {device.name}. Reason: {result.get('reason', 'Unknown')}"
+                    )
 
         remaining_surplus = power_surplus - total_reduced
         self.info_logger.info(f"Total power generation reduced: {total_reduced} kW")
         self.info_logger.info(f"Remaining surplus: {remaining_surplus} kW")
 
+        if total_reduced == 0:
+            self.info_logger.warning(
+                f"Failed to reduce any power. Reasons: {', '.join(reasons)}"
+            )
+
         return {
             "success": total_reduced > 0,
             "amount": total_reduced,
             "remaining_surplus": remaining_surplus,
+            "reason": "; ".join(reasons) if reasons else "Unknown",
         }
 
     def is_export_possible(self):
@@ -416,3 +443,47 @@ class EnergySurplusManager:
         except Exception as e:
             self.error_logger.error(f"Error checking bess possibility: {str(e)}")
             return False
+
+    def get_proposed_actions(self, power_surplus):
+        proposed_actions = []
+        active_generators = sorted(
+            [
+                device
+                for device in self.microgrid.get_all_devices()
+                if device.get_switch_status()
+            ],
+            key=lambda x: x.priority,
+        )
+
+        remaining_surplus = power_surplus
+        action_id = 1
+
+        for device in active_generators:
+            if remaining_surplus <= 0:
+                break
+
+            current_output = device.get_actual_output()
+            min_output = device.get_min_output()
+            reducible_power = current_output - min_output
+
+            if reducible_power <= 0:
+                continue
+
+            reduction = min(reducible_power, remaining_surplus)
+            new_output = current_output - reduction
+
+            proposed_actions.append(
+                {
+                    "id": action_id,
+                    "device": device,
+                    "action": f"set_output:{new_output}",
+                    "current_output": current_output,
+                    "proposed_output": new_output,
+                    "reduction": reduction,
+                }
+            )
+
+            remaining_surplus -= reduction
+            action_id += 1
+
+        return proposed_actions

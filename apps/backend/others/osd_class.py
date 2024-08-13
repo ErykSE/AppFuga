@@ -138,8 +138,12 @@ class OSD:
             ValueError: Jeśli dane są nieprawidłowe.
         """
         try:
+            print(f"Attempting to load OSD data from: {contract_file_path}")
             with open(contract_file_path, "r") as file:
                 data = json.load(file)
+
+            print("Raw contract data loaded:")
+            print(json.dumps(data, indent=2))
 
             errors = cls.validate_data(data)
             if errors:
@@ -152,9 +156,9 @@ class OSD:
 
             instance = cls(**filtered_data)
             print("OSD instance created successfully")
-            print(
-                f"Loaded tariffs - Buy: {instance.current_tariff_buy}, Sell: {instance.current_tariff_sell}"
-            )
+            print("Loaded contract data:")
+            for key, value in filtered_data.items():
+                print(f"  {key}: {value}")
             return instance
         except FileNotFoundError:
             print(f"Contract file not found: {contract_file_path}")
