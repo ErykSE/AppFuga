@@ -25,18 +25,20 @@ class EnergySurplusManager:
         self.error_logger = error_logger
         self.execute_action_func = execute_action_func
         self.previous_decision = True  # Domyślnie priorytet ładowania
+        self.EPSILON = 1e-6  # Stała do porównywania liczb zmiennoprzecinkowych
 
     def manage_surplus_energy(self, power_surplus):
         total_managed = 0
         remaining_surplus = power_surplus
         iteration = 0
         MAX_ITERATIONS = 100
+        attempted_actions = set()
 
         try:
-            while remaining_surplus > 0 and iteration < MAX_ITERATIONS:
+            while remaining_surplus > self.EPSILON and iteration < MAX_ITERATIONS:
                 iteration += 1
                 self.info_logger.info(
-                    f"Iteration {iteration}, surplus remaining: {remaining_surplus} kW"
+                    f"Iteration {iteration}, surplus remaining: {remaining_surplus:.6f} kW"
                 )
 
                 bess_available = self.check_bess_availability()
@@ -44,39 +46,48 @@ class EnergySurplusManager:
 
                 # Określamy dostępne akcje
                 available_actions = []
-                if bess_available and export_possible:
+                if (
+                    bess_available
+                    and export_possible
+                    and SurplusAction.BOTH not in attempted_actions
+                ):
                     available_actions.append(SurplusAction.BOTH)
-                if bess_available:
+                if (
+                    bess_available
+                    and SurplusAction.CHARGE_BATTERY not in attempted_actions
+                ):
                     available_actions.append(SurplusAction.CHARGE_BATTERY)
-                if export_possible:
+                if (
+                    export_possible
+                    and SurplusAction.SELL_ENERGY not in attempted_actions
+                ):
                     available_actions.append(SurplusAction.SELL_ENERGY)
-                available_actions.append(SurplusAction.LIMIT_GENERATION)
+                if SurplusAction.LIMIT_GENERATION not in attempted_actions:
+                    available_actions.append(SurplusAction.LIMIT_GENERATION)
 
-                # Próbujemy każdą dostępną akcję
-                for action in available_actions:
-                    self.info_logger.info(f"Attempting to perform the action: {action}")
-                    self.info_logger.info(f"Action type: {type(action)}")
-                    result = self.execute_action(action, remaining_surplus)
-                    self.info_logger.info(f"Action result: {result}")
-
-                    if result["success"]:
-                        total_managed += result["amount"]
-                        remaining_surplus -= result["amount"]
-                        self.info_logger.info(
-                            f"Action {action} managed {result['amount']} kW. Surplus remaining: {remaining_surplus} kW"
-                        )
-                        break
-                    else:
-                        self.info_logger.info(
-                            f"Action {action} has failed. Reason: {result.get('reason', 'Unknown')}"
-                        )
-
-                # Jeśli żadna akcja nie powiodła się, przerwij główną pętlę
-                else:
-                    self.error_logger.error(
-                        "No action successful. Interruption of surplus management."
+                if not available_actions:
+                    self.info_logger.warning(
+                        "No more available actions to handle surplus."
                     )
                     break
+
+                action = available_actions[0]  # Wybieramy pierwszą dostępną akcję
+                attempted_actions.add(action)
+
+                self.info_logger.info(f"Attempting to perform the action: {action}")
+                result = self.execute_action(action, remaining_surplus)
+                self.info_logger.info(f"Action result: {result}")
+
+                if result["success"]:
+                    total_managed += result["amount"]
+                    remaining_surplus -= result["amount"]
+                    self.info_logger.info(
+                        f"Action {action} managed {result['amount']:.6f} kW. Surplus remaining: {remaining_surplus:.6f} kW"
+                    )
+                else:
+                    self.info_logger.info(
+                        f"Action {action} has failed. Reason: {result.get('reason', 'Unknown')}"
+                    )
 
             if iteration == MAX_ITERATIONS:
                 self.error_logger.error(
@@ -88,8 +99,8 @@ class EnergySurplusManager:
             self.error_logger.exception("Full traceback:")
 
         return {
-            "amount_managed": total_managed,
-            "remaining_surplus": remaining_surplus,
+            "amount_managed": round(total_managed, 6),
+            "remaining_surplus": round(remaining_surplus, 6),
         }
 
     def execute_action(self, action, remaining_surplus):
@@ -104,19 +115,15 @@ class EnergySurplusManager:
             dict: Słownik wskazujący na sukces działania i ilość zarządzonej energii.
         """
         self.info_logger.info(f"Executing action: {action}, type: {type(action)}")
-        self.info_logger.info(f"Remaining surplus: {remaining_surplus}")
+        self.info_logger.info(f"Remaining surplus: {remaining_surplus:.6f}")
 
         if action == SurplusAction.BOTH:
-            self.info_logger.info("BOTH")
             return self.handle_both_action(remaining_surplus)
         elif action == SurplusAction.CHARGE_BATTERY:
-            self.info_logger.info("CHARGE")
             return self.decide_to_charge_bess(remaining_surplus)
         elif action == SurplusAction.SELL_ENERGY:
-            self.info_logger.info("SELL")
             return self.decide_to_sell_energy(remaining_surplus)
         elif action == SurplusAction.LIMIT_GENERATION:
-            self.info_logger.info("LIMIT")
             return self.limit_energy_generation(remaining_surplus)
         else:
             return {"success": False, "amount": 0, "reason": "Unknown action"}
@@ -140,8 +147,8 @@ class EnergySurplusManager:
             bool: True jeśli priorytetem powinno być ładowanie, False jeśli sprzedaż.
         """
         # Parametry do konfiguracji
-        MIN_SELLING_PRICE = 0.10
-        MAX_SELLING_PRICE = 0.25
+        MIN_SELLING_PRICE = 0.01
+        MAX_SELLING_PRICE = 2.25
         BATTERY_THRESHOLD = 20
         PRICE_THRESHOLD = 0.7
         HYSTERESIS = 0.05
@@ -152,36 +159,38 @@ class EnergySurplusManager:
         if battery_free_percentage == 0:
             return False
 
-        price_factor = (current_selling_price - MIN_SELLING_PRICE) / (
-            MAX_SELLING_PRICE - MIN_SELLING_PRICE
-        )
-        price_factor = max(0, min(price_factor, 1))
+        # price_factor = (current_selling_price - MIN_SELLING_PRICE) / (
+        # MAX_SELLING_PRICE - MIN_SELLING_PRICE
+        # )
+        # price_factor = max(0, min(price_factor, 1))
 
-        battery_factor = 1 - (battery_free_percentage / 100)
+        # battery_factor = 1 - (battery_free_percentage / 100)
+        price_factor = 0.2
+        battery_factor = 0.1
+
+        self.info_logger.info(f"Battery ({battery_factor}) price ({price_factor} kW)")
+
+        # battery_factor = 0.77
 
         if price_factor > PRICE_THRESHOLD and surplus_power > 50:
             self.info_logger.info(
                 f"Sales priority: high price ({current_selling_price}) and significant surplus ({surplus_power} kW)"
             )
-
             return False
         elif battery_factor > price_factor + HYSTERESIS:
             self.info_logger.info(
                 f"Charging priority: battery factor ({battery_factor:.2f}) > price factor ({price_factor:.2f})"
             )
-
             return True
         elif price_factor > battery_factor + HYSTERESIS:
             self.info_logger.info(
                 f"Sales priority: price factor ({price_factor:.2f}) > battery factor ({battery_factor:.2f})"
             )
-
             return False
         else:
             self.info_logger.info(
-                f"Maintaining the previous decision: values ​​in the hysteresis range"
+                f"xxxx: price factor ({price_factor:.2f}) > battery factor ({battery_factor:.2f})"
             )
-
             return self.previous_decision
 
     def get_bess_free_capacity(self):
@@ -225,22 +234,22 @@ class EnergySurplusManager:
         """
         try:
             if not self.check_bess_availability():
-                self.info_logger.info("BESS is not available for charging.")
                 return {"success": False, "amount": 0, "reason": "BESS not available"}
 
             bess = self.microgrid.bess
             free_capacity = self.get_bess_free_capacity()
 
-            if free_capacity == 0:
-                self.info_logger.info("BESS is fully charged. No capacity available.")
+            if free_capacity <= self.EPSILON:
                 return {"success": False, "amount": 0, "reason": "BESS full"}
 
             amount_to_charge = min(power_surplus, free_capacity)
             percent_to_charge = (amount_to_charge / bess.get_capacity()) * 100
             charged_percent, actual_charge = bess.try_charge(percent_to_charge)
 
-            self.info_logger.info(f"Successfully charged BESS o {actual_charge} kW.")
-            return {"success": True, "amount": actual_charge}
+            self.info_logger.info(
+                f"BESS charged by {actual_charge:.2f} kW. New level: {bess.get_charge_level():.2f} kWh"
+            )
+            return {"success": True, "amount": round(actual_charge, 6)}
         except Exception as e:
             self.error_logger.error(f"Error in decide_to_charge_bess: {str(e)}")
             return {"success": False, "amount": 0, "reason": str(e)}
@@ -267,27 +276,29 @@ class EnergySurplusManager:
             sold_power = self.osd.get_sold_power()
             remaining_sale_capacity = sale_limit - sold_power
 
-            if remaining_sale_capacity <= 0:
+            if remaining_sale_capacity <= self.EPSILON:
                 self.info_logger.info(
                     "The sales limit has been reached. No more energy can be sold."
                 )
-                return {
-                    "success": False,
-                    "amount": 0,
-                    "reason": "Sales limit reached",
-                }
+                return {"success": False, "amount": 0, "reason": "Sales limit reached"}
 
             amount_to_sell = min(power_surplus, remaining_sale_capacity)
 
-            if amount_to_sell > 0:
+            if amount_to_sell > self.EPSILON:
                 sold_amount = self.sell_energy(amount_to_sell)
-                return {"success": True, "amount": sold_amount}
+                if sold_amount > 0:
+                    self.info_logger.info(
+                        f"Successfully sold {sold_amount:.6f} kW of energy."
+                    )
+                    return {"success": True, "amount": round(sold_amount, 6)}
+                else:
+                    return {
+                        "success": False,
+                        "amount": 0,
+                        "reason": "Failed to sell energy",
+                    }
             else:
-                return {
-                    "success": False,
-                    "amount": 0,
-                    "reason": "No possibility of sale",
-                }
+                return {"success": False, "amount": 0, "reason": "No energy to sell"}
         except Exception as e:
             self.error_logger.error(f"Error in decide_to_sell_energy: {str(e)}")
             return {"success": False, "amount": 0, "reason": str(e)}
@@ -304,7 +315,10 @@ class EnergySurplusManager:
 
         if should_charge:
             result = self.decide_to_charge_bess(remaining_surplus)
-            if not result["success"] or result["amount"] < remaining_surplus:
+            if (
+                not result["success"]
+                or result["amount"] < remaining_surplus - self.EPSILON
+            ):
                 sell_result = self.decide_to_sell_energy(
                     remaining_surplus - result["amount"]
                 )
@@ -312,7 +326,10 @@ class EnergySurplusManager:
                 result["success"] = result["success"] or sell_result["success"]
         else:
             result = self.decide_to_sell_energy(remaining_surplus)
-            if not result["success"] or result["amount"] < remaining_surplus:
+            if (
+                not result["success"]
+                or result["amount"] < remaining_surplus - self.EPSILON
+            ):
                 charge_result = self.decide_to_charge_bess(
                     remaining_surplus - result["amount"]
                 )
@@ -349,7 +366,7 @@ class EnergySurplusManager:
                   ilości zredukowanej mocy i ewentualnej pozostałej nadwyżce.
         """
         self.info_logger.info(
-            f"Starting limit_energy_generation with power_surplus: {power_surplus}"
+            f"Starting limit_energy_generation with power_surplus: {power_surplus:.6f}"
         )
         total_reduced = 0
         reasons = []
@@ -371,7 +388,7 @@ class EnergySurplusManager:
             reasons.append("No active generators found")
 
         for device in active_generators:
-            if total_reduced >= power_surplus:
+            if total_reduced >= power_surplus - self.EPSILON:
                 break
 
             current_output = device.get_actual_output()
@@ -379,17 +396,17 @@ class EnergySurplusManager:
             reducible_power = current_output - min_output
 
             self.info_logger.info(
-                f"Processing device: {device.name}, Current output: {current_output}, Min output: {min_output}, Reducible power: {reducible_power}"
+                f"Processing device: {device.name}, Current output: {current_output:.6f}, Min output: {min_output:.6f}, Reducible power: {reducible_power:.6f}"
             )
 
-            if reducible_power <= 0:
+            if reducible_power <= self.EPSILON:
                 reasons.append(f"Device {device.name} cannot be reduced further")
                 continue
 
             reduction = min(reducible_power, power_surplus - total_reduced)
 
-            if reduction > 0:
-                new_output = current_output - reduction
+            if reduction > self.EPSILON:
+                new_output = round(current_output - reduction, 6)
                 action = f"set_output:{new_output}"
                 self.info_logger.info(
                     f"Attempting to execute action: {action} for device {device.name}"
@@ -399,15 +416,15 @@ class EnergySurplusManager:
 
                 if result.get("pending", False):
                     self.info_logger.info(
-                        f"Action pending for {device.name}: set output to {new_output} kW"
+                        f"Action pending for {device.name}: set output to {new_output:.6f} kW"
                     )
                     break
                 elif result["success"]:
                     actual_reduction = current_output - device.get_actual_output()
                     total_reduced += actual_reduction
                     self.info_logger.info(
-                        f"Reduced {device.name} (priority: {device.priority}) power by {actual_reduction} kW "
-                        f"from {current_output} kW to {device.get_actual_output()} kW"
+                        f"Reduced {device.name} (priority: {device.priority}) power by {actual_reduction:.6f} kW "
+                        f"from {current_output:.6f} kW to {device.get_actual_output():.6f} kW"
                     )
                 else:
                     reasons.append(
@@ -415,8 +432,8 @@ class EnergySurplusManager:
                     )
 
         remaining_surplus = power_surplus - total_reduced
-        self.info_logger.info(f"Total power generation reduced: {total_reduced} kW")
-        self.info_logger.info(f"Remaining surplus: {remaining_surplus} kW")
+        self.info_logger.info(f"Total power generation reduced: {total_reduced:.6f} kW")
+        self.info_logger.info(f"Remaining surplus: {remaining_surplus:.6f} kW")
 
         if total_reduced == 0:
             self.info_logger.warning(
@@ -424,9 +441,9 @@ class EnergySurplusManager:
             )
 
         return {
-            "success": total_reduced > 0,
-            "amount": total_reduced,
-            "remaining_surplus": remaining_surplus,
+            "success": total_reduced > self.EPSILON,
+            "amount": round(total_reduced, 6),
+            "remaining_surplus": round(remaining_surplus, 6),
             "reason": "; ".join(reasons) if reasons else "Unknown",
         }
 
@@ -446,6 +463,86 @@ class EnergySurplusManager:
 
     def get_proposed_actions(self, power_surplus):
         proposed_actions = []
+        action_id = 1
+        remaining_surplus = power_surplus
+
+        # Sprawdź możliwość ładowania BESS
+        if self.check_bess_availability():
+            bess_action = self.prepare_bess_action(remaining_surplus, action_id)
+            if bess_action:
+                proposed_actions.append(bess_action)
+                remaining_surplus -= bess_action["reduction"]
+                action_id += 1
+
+        # Sprawdź możliwość sprzedaży energii
+        if self.is_export_possible():
+            sell_action = self.prepare_sell_action(remaining_surplus, action_id)
+            if sell_action:
+                proposed_actions.append(sell_action)
+                remaining_surplus -= sell_action["reduction"]
+                action_id += 1
+
+        # Jeśli nadal jest nadwyżka, zaproponuj ograniczenie generacji
+        if remaining_surplus > 0:
+            limit_actions = self.prepare_limit_actions(remaining_surplus, action_id)
+            proposed_actions.extend(limit_actions)
+
+        return proposed_actions
+
+    def prepare_action(self, action_type, power_surplus):
+        if action_type == SurplusAction.BOTH:
+            bess_action = self.prepare_bess_action(power_surplus)
+            sell_action = self.prepare_sell_action(power_surplus)
+            return [
+                action for action in [bess_action, sell_action] if action is not None
+            ]
+        elif action_type == SurplusAction.CHARGE_BATTERY:
+            bess_action = self.prepare_bess_action(power_surplus)
+            return [bess_action] if bess_action is not None else []
+        elif action_type == SurplusAction.SELL_ENERGY:
+            sell_action = self.prepare_sell_action(power_surplus)
+            return [sell_action] if sell_action is not None else []
+        elif action_type == SurplusAction.LIMIT_GENERATION:
+            return self.prepare_limit_actions(power_surplus)
+        else:
+            return []
+
+    def prepare_bess_action(self, power_surplus):
+        if not self.can_charge_bess(power_surplus):
+            self.info_logger.info("BESS cannot be charged at the moment.")
+            return None
+
+        bess = self.microgrid.bess
+        free_capacity = self.get_bess_free_capacity()
+        amount_to_charge = min(power_surplus, free_capacity)
+        return {
+            "device": bess,
+            "action": f"charge:{amount_to_charge}",
+            "current_output": bess.get_charge_level(),
+            "proposed_output": bess.get_charge_level() + amount_to_charge,
+            "reduction": amount_to_charge,
+        }
+
+    def prepare_sell_action(self, power_surplus):
+        if not self.is_export_possible():
+            return None
+
+        sale_limit = self.osd.get_sale_limit()
+        sold_power = self.osd.get_sold_power()
+        remaining_sale_capacity = sale_limit - sold_power
+        if remaining_sale_capacity > 0:
+            amount_to_sell = min(power_surplus, remaining_sale_capacity)
+            return {
+                "device": self.osd,
+                "action": f"sell:{amount_to_sell}",
+                "current_output": sold_power,
+                "proposed_output": sold_power + amount_to_sell,
+                "reduction": amount_to_sell,
+            }
+        return None
+
+    def prepare_limit_actions(self, power_surplus):
+        actions = []
         active_generators = sorted(
             [
                 device
@@ -456,34 +553,32 @@ class EnergySurplusManager:
         )
 
         remaining_surplus = power_surplus
-        action_id = 1
-
         for device in active_generators:
-            if remaining_surplus <= 0:
-                break
-
             current_output = device.get_actual_output()
             min_output = device.get_min_output()
             reducible_power = current_output - min_output
 
-            if reducible_power <= 0:
-                continue
+            if reducible_power > self.EPSILON:
+                reduction = min(reducible_power, remaining_surplus)
+                new_output = current_output - reduction
+                actions.append(
+                    {
+                        "device": device,
+                        "action": f"set_output:{new_output:.2f}",
+                        "current_output": current_output,
+                        "proposed_output": new_output,
+                        "reduction": reduction,
+                    }
+                )
+                remaining_surplus -= reduction
 
-            reduction = min(reducible_power, remaining_surplus)
-            new_output = current_output - reduction
+            if remaining_surplus <= self.EPSILON:
+                break
 
-            proposed_actions.append(
-                {
-                    "id": action_id,
-                    "device": device,
-                    "action": f"set_output:{new_output}",
-                    "current_output": current_output,
-                    "proposed_output": new_output,
-                    "reduction": reduction,
-                }
-            )
+        return actions
 
-            remaining_surplus -= reduction
-            action_id += 1
-
-        return proposed_actions
+    def can_charge_bess(self, amount):
+        if not self.check_bess_availability():
+            return False
+        free_capacity = self.get_bess_free_capacity()
+        return free_capacity > self.EPSILON and amount > 0

@@ -4,6 +4,8 @@ import os
 import random
 from threading import Thread, Event
 import time
+import uuid
+from apps.backend.devices.bess_class import BESS
 from apps.backend.managment.energy_surplus_manager_class import EnergySurplusManager
 from apps.backend.managment.energy_deficit_manager_class import EnergyDeficitManager
 from apps.backend.others.osd_class import OSD
@@ -11,6 +13,10 @@ from apps.backend.others.data_validator import DataValidator
 from apps.backend.managment.power_profile_manager import PowerProfileManager
 from apps.backend.managment.operation_action import OperationMode
 from apps.backend.managment.surplus_action import SurplusAction
+from apps.backend.devices.pv_class import PV
+from apps.backend.devices.wind_turbine_class import WindTurbine
+from apps.backend.devices.fuel_cell_class import FuelCell
+from apps.backend.devices.fuel_turbine_class import FuelTurbine
 
 
 class EnergyManager:
@@ -73,7 +79,7 @@ class EnergyManager:
             lon=16.32,
         )
         self.auto_interval = 30  # 30 sekund dla trybu automatycznego
-        self.semi_auto_interval = 180  # 5 minut dla trybu półautomatycznego
+        self.semi_auto_interval = 15  # 5 minut dla trybu półautomatycznego
         self.operation_mode = OperationMode.AUTOMATIC
         self.action_timeout = 60  # 1 minuta na decyzję operatora
         self.pending_actions_path = os.path.join(
@@ -85,6 +91,7 @@ class EnergyManager:
             "C:/eryk/AppFuga/apps/backend/operator_decisions.json",
         )
         self.operator_actions = {"pending_actions": [], "completed_actions": []}
+        self.EPSILON = 1e-6  # Dodaj tę linię
 
     def load_configuration(self):
         try:
@@ -122,14 +129,14 @@ class EnergyManager:
                 else:
                     self.load_live_data()
 
-                self.run_single_iteration()
-
-                interval = (
+                result = self.run_single_iteration()
+                wait_time = (
                     self.auto_interval
                     if self.operation_mode == OperationMode.AUTOMATIC
                     else self.semi_auto_interval
                 )
-                if self.stop_event.wait(interval):
+                self.info_logger.info(f"Waiting {wait_time} seconds for next iteration")
+                if self.stop_event.wait(wait_time):
                     break
             except Exception as e:
                 self.handle_runtime_error(e)
@@ -152,15 +159,41 @@ class EnergyManager:
                 self.info_logger.info(
                     f"Updated device: {device.name} (ID: {device.id}), New status: {device.device_status}, New output: {device.actual_output} kW"
                 )
+        self.log_system_summary()
+        self.info_logger.info(
+            f"BESS charge level before actions: {self.microgrid.bess.get_charge_level():.2f} kWh"
+        )
 
-        self.check_energy_conditions()
+        result = self.check_energy_conditions()
 
+        if result is not None and self.operation_mode == OperationMode.SEMI_AUTOMATIC:
+            if "approved_actions" in result:
+                self.execute_approved_actions(result["approved_actions"])
+                # Usuwamy ponowne obliczanie nadwyżki i zarządzanie nią
+
+        self.log_system_summary()
         self.save_live_data()
         self.save_contract_data()
         self.update_power_profile(datetime.now())
 
         elapsed_time = time.time() - start_time
         self.info_logger.info(f"Iteration completed in {elapsed_time:.2f} seconds")
+        self.info_logger.info(
+            f"BESS charge level after actions: {self.microgrid.bess.get_charge_level():.2f} kWh"
+        )
+
+        return result
+
+    def calculate_current_surplus(self):
+        try:
+            total_generated_power = self.microgrid.total_power_generated()
+            total_demand_power = self.consumergrid.total_power_consumed()
+            surplus = max(0, total_generated_power - total_demand_power)
+            self.info_logger.info(f"Recalculated surplus: {surplus} kW")
+            return surplus
+        except Exception as e:
+            self.error_logger.error(f"Error calculating current surplus: {str(e)}")
+            return None
 
     def clean_up_expired_actions(self):
         actions = self.load_operator_actions()
@@ -194,22 +227,50 @@ class EnergyManager:
         if self.operation_mode == OperationMode.AUTOMATIC:
             return self.perform_action(device, action)
         else:
-            return self.add_pending_action(device, action)
+            serializable_action = {
+                "device_id": device.id,
+                "device_name": device.name,
+                "action": action,
+                "timestamp": int(time.time()),
+            }
+            self.add_pending_action(serializable_action)
+            # Zwracamy informację o oczekującej akcji
+            return {
+                "pending": True,
+                "success": True,
+                "amount": self.get_action_amount(action),
+            }
+
+    def get_action_amount(self, action):
+        if action.startswith("charge:"):
+            _, amount = action.split(":")
+            return float(amount)
+        elif action.startswith("sell:"):
+            _, amount = action.split(":")
+            return float(amount)
+        elif action.startswith("set_output:"):
+            _, new_output = action.split(":")
+            return float(new_output)
+        else:
+            return 0
 
     def add_pending_action(self, action):
+        """
+        Dodaje akcję do listy oczekujących akcji.
+
+        :param action: Słownik reprezentujący akcję do dodania
+        """
         actions = self.load_pending_actions()
         actions.append(action)
         self.save_pending_actions(actions)
 
     def remove_pending_action(self, action):
-        actions = self.load_pending_actions()
-        actions = [a for a in actions if a["id"] != action["id"]]
-        self.save_pending_actions(actions)
-
-    def remove_pending_action(self, action):
-        actions = self.load_pending_actions()
-        actions = [a for a in actions if a["id"] != action["id"]]
-        self.save_pending_actions(actions)
+        try:
+            actions = self.load_pending_actions()
+            actions = [a for a in actions if a.get("id") != action.get("id")]
+            self.save_pending_actions(actions)
+        except Exception as e:
+            self.error_logger.exception(f"Error in remove_pending_action: {str(e)}")
 
     def load_pending_actions(self):
         try:
@@ -262,36 +323,54 @@ class EnergyManager:
         self.save_operator_actions(actions)
 
     def perform_action(self, device, action):
-        self.info_logger.info(f"Performing action: {device.name} - {action}")
-        if action == "activate":
-            success = device.try_activate()
-        elif action == "deactivate":
-            success = device.try_deactivate()
-        elif action.startswith("set_output"):
-            _, value = action.split(":")
-            self.info_logger.info(
-                f"Attempting to set output to {value} for device {device.name}"
-            )
-            success = device.set_output(float(value))
-            self.info_logger.info(
-                f"Set output result for {device.name}: {'Success' if success else 'Failure'}"
-            )
-            if success:
-                self.info_logger.info(
-                    f"New output for {device.name}: {device.get_actual_output()} kW"
-                )
-        else:
-            self.error_logger.error(f"Unknown action: {action}")
-            return {"success": False, "amount": 0, "error": "Unknown action"}
+        self.info_logger.info(
+            f"Performing action: {device.name if hasattr(device, 'name') else 'OSD'} - {action}"
+        )
 
-        if success:
-            self.info_logger.info(
-                f"Action performed successfully: {device.name} - {action}"
-            )
-            return {"success": True, "amount": device.get_actual_output()}
-        else:
-            self.error_logger.error(f"Action failed: {device.name} - {action}")
-            return {"success": False, "amount": 0, "error": "Action failed"}
+        try:
+            if action.startswith("charge:"):
+                _, amount = action.split(":")
+                return self.surplus_manager.decide_to_charge_bess(float(amount))
+            elif action.startswith("sell:"):
+                _, amount = action.split(":")
+                return self.surplus_manager.decide_to_sell_energy(float(amount))
+            elif action.startswith("set_output:"):
+                _, value = action.split(":")
+                new_output = float(value)
+                if isinstance(device, BESS):
+                    self.error_logger.error(
+                        f"Cannot set output for BESS device: {device.name}"
+                    )
+                    return {
+                        "success": False,
+                        "amount": 0,
+                        "reason": "Cannot set output for BESS",
+                    }
+                current_output = device.get_actual_output()
+                success = device.set_output(new_output)
+                if success:
+                    actual_new_output = device.get_actual_output()
+                    reduction = current_output - actual_new_output
+                    self.info_logger.info(
+                        f"Set output for {device.name} from {current_output} kW to {actual_new_output} kW"
+                    )
+                    return {"success": True, "amount": reduction}
+                else:
+                    return {
+                        "success": False,
+                        "amount": 0,
+                        "reason": f"Failed to set output for {device.name}",
+                    }
+            else:
+                self.error_logger.error(f"Unknown action: {action}")
+                return {
+                    "success": False,
+                    "amount": 0,
+                    "reason": f"Unknown action: {action}",
+                }
+        except Exception as e:
+            self.error_logger.exception(f"Error in perform_action: {str(e)}")
+            return {"success": False, "amount": 0, "reason": str(e)}
 
     def process_operator_decisions(self):
         decisions = self.load_operator_decisions()
@@ -403,32 +482,34 @@ class EnergyManager:
             self.info_logger.info(f"Total generated power: {total_generated_power} kW")
             self.info_logger.info(f"Total demand power: {total_demand_power} kW")
 
+            result = None
             if total_generated_power > total_demand_power:
                 power_surplus = total_generated_power - total_demand_power
                 self.info_logger.info(
                     f"Power surplus detected: {power_surplus} kW - starting surplus management"
                 )
-                self.manage_surplus(power_surplus)
+                result = self.manage_surplus(power_surplus)
             elif total_generated_power < total_demand_power:
                 power_deficit = total_demand_power - total_generated_power
                 self.info_logger.info(
                     f"Power deficit detected: {power_deficit} kW - starting deficit management"
                 )
-                self.manage_deficit(power_deficit)
+                result = self.manage_deficit(power_deficit)
             else:
                 self.info_logger.info(
                     "Power generation matches demand - no action needed"
                 )
 
-            self.log_system_summary()
+            return result
         except Exception as e:
             self.error_logger.error(f"Error checking energy conditions: {str(e)}")
+            return None
 
     def manage_surplus(self, power_surplus):
         if self.operation_mode == OperationMode.AUTOMATIC:
-            self.manage_surplus_automatic(power_surplus)
+            return self.manage_surplus_automatic(power_surplus)
         else:
-            self.manage_surplus_semi_automatic(power_surplus)
+            return self.manage_surplus_semi_automatic(power_surplus)
 
     def manage_surplus_automatic(self, power_surplus):
         result = self.surplus_manager.manage_surplus_energy(power_surplus)
@@ -449,57 +530,128 @@ class EnergyManager:
             )
 
     def manage_surplus_semi_automatic(self, power_surplus):
-        proposed_actions = self.surplus_manager.get_proposed_actions(power_surplus)
-        for action in proposed_actions:
-            serializable_action = {
-                "id": action["id"],
-                "device_id": action["device"].id,
-                "device_name": action["device"].name,
-                "action": action["action"],
-                "current_output": action["current_output"],
-                "proposed_output": action["proposed_output"],
-                "reduction": action["reduction"],
-                "timestamp": int(time.time()),
-            }
-            self.add_pending_action(serializable_action)
+        self.info_logger.info(
+            f"Managing surplus in semi-automatic mode: {power_surplus} kW"
+        )
+        approved_actions = []
+        remaining_surplus = power_surplus
+        attempted_actions = set()
 
-        for action in proposed_actions:
+        while remaining_surplus > self.EPSILON:
+            bess_available = self.surplus_manager.check_bess_availability()
+            export_possible = self.surplus_manager.is_export_possible()
+
             self.info_logger.info(
-                f"Processing action: {action['action']} for device {action['device'].name}"
+                f"BESS available: {bess_available}, Export possible: {export_possible}"
             )
-            decision = self.simulate_operator_decision(action)
-            if decision:
+
+            available_actions = self.get_available_actions(
+                bess_available, export_possible, attempted_actions
+            )
+
+            if not available_actions:
+                self.info_logger.warning("No more available actions to handle surplus.")
+                break
+
+            action = available_actions[0]
+            attempted_actions.add(action)
+
+            self.info_logger.info(f"Attempting to perform the action: {action}")
+            proposed_actions = self.surplus_manager.prepare_action(
+                action, remaining_surplus
+            )
+
+            if not proposed_actions:
                 self.info_logger.info(
-                    f"Action approved: {action['action']} for device {action['device'].name}"
+                    f"No actions proposed for {action}. Moving to next action type."
                 )
-                result = self.perform_action(action["device"], action["action"])
-                if result["success"]:
+                continue
+
+            for proposed_action in proposed_actions:
+                serializable_action = self.prepare_serializable_action(proposed_action)
+                self.add_pending_action(serializable_action)
+
+                self.info_logger.info(
+                    f"Waiting for operator decision on action: {serializable_action['action']} for {serializable_action['device_name']}"
+                )
+                decision = self.simulate_operator_decision(serializable_action)
+
+                if decision:
                     self.info_logger.info(
-                        f"Successfully executed action: {action['action']} for device {action['device'].name}"
+                        f"Action approved: {serializable_action['action']} for {serializable_action['device_name']}"
                     )
+                    approved_actions.append(serializable_action)
+                    actual_reduction = serializable_action["reduction"]
+                    remaining_surplus -= actual_reduction
                     self.info_logger.info(
-                        f"New output for {action['device'].name}: {action['device'].get_actual_output()} kW"
+                        f"Action approved to reduce {actual_reduction:.2f} kW. Remaining surplus: {remaining_surplus:.2f} kW"
                     )
                 else:
-                    self.error_logger.error(
-                        f"Failed to execute action: {action['action']} for device {action['device'].name}"
+                    self.info_logger.info(
+                        f"Action rejected: {serializable_action['action']} for {serializable_action['device_name']}"
                     )
-                    self.error_logger.error(
-                        f"Reason: {result.get('error', 'Unknown error')}"
-                    )
-            else:
-                self.info_logger.info(
-                    f"Action rejected: {action['action']} for device {action['device'].name}"
-                )
 
-            self.remove_pending_action(action)
-            time.sleep(1)  # Symulacja czasu oczekiwania między akcjami
+                self.remove_pending_action(serializable_action)
+
+            if remaining_surplus <= self.EPSILON:
+                break
+
+        self.info_logger.info(
+            f"Surplus management completed. Approved actions: {len(approved_actions)}, Initial surplus: {power_surplus} kW, Remaining surplus: {remaining_surplus} kW"
+        )
+        return {
+            "approved_actions": approved_actions,
+            "initial_surplus": power_surplus,
+            "remaining_surplus": remaining_surplus,
+        }
+
+    def get_available_actions(self, bess_available, export_possible, attempted_actions):
+        available_actions = []
+        if (
+            bess_available
+            and export_possible
+            and SurplusAction.BOTH not in attempted_actions
+        ):
+            available_actions.append(SurplusAction.BOTH)
+        if bess_available and SurplusAction.CHARGE_BATTERY not in attempted_actions:
+            available_actions.append(SurplusAction.CHARGE_BATTERY)
+        if export_possible and SurplusAction.SELL_ENERGY not in attempted_actions:
+            available_actions.append(SurplusAction.SELL_ENERGY)
+        if SurplusAction.LIMIT_GENERATION not in attempted_actions:
+            available_actions.append(SurplusAction.LIMIT_GENERATION)
+        return available_actions
+
+    def prepare_serializable_action(self, action):
+        if isinstance(action["device"], OSD):
+            return {
+                "id": str(uuid.uuid4()),
+                "device_id": "OSD",
+                "device_name": "OSD",
+                "device_type": "OSD",
+                "action": action["action"],
+                "current_output": action.get("current_output"),
+                "proposed_output": action.get("proposed_output"),
+                "reduction": action.get("reduction"),
+                "timestamp": int(time.time()),
+            }
+        else:
+            return {
+                "id": str(uuid.uuid4()),
+                "device_id": action["device"].id,
+                "device_name": action["device"].name,
+                "device_type": self.get_device_type(action["device"]),
+                "action": action["action"],
+                "current_output": action.get("current_output"),
+                "proposed_output": action.get("proposed_output"),
+                "reduction": action.get("reduction"),
+                "timestamp": int(time.time()),
+            }
 
     def simulate_operator_decision(self, action):
         # Symulacja decyzji operatora
-        decision = random.choice([True, False])
+        decision = random.choice([True, True])
         self.info_logger.info(
-            f"Simulated operator decision for {action['device'].name}: {'Approved' if decision else 'Rejected'}"
+            f"Simulated operator decision for {action['device_name']}: {'Approved' if decision else 'Rejected'}"
         )
         return decision
 
@@ -665,3 +817,98 @@ class EnergyManager:
         self.power_profile_manager.update(
             current_time, consumption, generation, buy_price, sell_price
         )
+
+    def execute_approved_actions(self, approved_actions):
+        self.info_logger.info("Executing approved actions:")
+        for action in approved_actions:
+            self.info_logger.info(f"Processing action: {action}")
+            device = self.get_device_by_id_and_type(
+                action["device_id"], action["device_type"]
+            )
+            if device:
+                self.info_logger.info(
+                    f"Device found: {device.name}, type: {type(device).__name__}"
+                )
+                if isinstance(device, BESS):
+                    self.info_logger.info(
+                        f"Before action: {device.name} charge level: {device.get_charge_level()} kWh"
+                    )
+                else:
+                    self.info_logger.info(
+                        f"Before action: {device.name} output: {device.get_actual_output()} kW"
+                    )
+
+                result = self.perform_action(device, action["action"])
+
+                if result["success"]:
+                    if isinstance(device, BESS):
+                        self.info_logger.info(
+                            f"After action: {device.name} charge level: {device.get_charge_level()} kWh"
+                        )
+                        self.info_logger.info(
+                            f"Executed {action['action']} for {action['device_name']}: Success. New charge level: {device.get_charge_level()} kWh"
+                        )
+                    else:
+                        new_output = device.get_actual_output()
+                        self.info_logger.info(
+                            f"After action: {device.name} output: {new_output} kW"
+                        )
+                        self.info_logger.info(
+                            f"Executed {action['action']} for {action['device_name']}: Success. New output: {new_output} kW"
+                        )
+                else:
+                    self.error_logger.error(
+                        f"Failed to execute action {action['action']} for {action['device_name']}: {result.get('reason', 'Unknown reason')}"
+                    )
+            else:
+                self.error_logger.error(f"Device not found for action: {action}")
+
+        self.log_system_summary()
+
+    def get_device_by_id_and_type(self, device_id, device_type):
+        self.info_logger.info(
+            f"Searching for device with ID: {device_id}, type: {device_type}"
+        )
+        if device_type == "OSD":
+            return self.osd
+        if device_type == "BESS":
+            return (
+                self.microgrid.bess
+                if self.microgrid.bess and self.microgrid.bess.id == device_id
+                else None
+            )
+
+        device_lists = {
+            "PV": self.microgrid.pv_panels,
+            "PVPanel": self.microgrid.pv_panels,
+            "WindTurbine": self.microgrid.wind_turbines,
+            "FuelTurbine": self.microgrid.fuel_turbines,
+            "FuelCell": self.microgrid.fuel_cells,
+        }
+
+        if device_type in device_lists:
+            for device in device_lists[device_type]:
+                if device.id == device_id:
+                    self.info_logger.info(f"Found device: {device.name}")
+                    return device
+        else:
+            self.error_logger.error(f"Unknown device type: {device_type}")
+
+        self.error_logger.error(f"Device not found: ID {device_id}, type {device_type}")
+        return None
+
+    def get_device_type(self, device):
+        if isinstance(device, PVPanel):
+            return "PV"
+        elif isinstance(device, WindTurbine):
+            return "WindTurbine"
+        elif isinstance(device, FuelTurbine):
+            return "FuelTurbine"
+        elif isinstance(device, FuelCell):
+            return "FuelCell"
+        elif isinstance(device, BESS):
+            return "BESS"
+        elif isinstance(device, OSD):
+            return "OSD"
+        else:
+            return type(device).__name__

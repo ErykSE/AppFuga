@@ -71,7 +71,7 @@
         {
             "id": 7,
             "name": "BESS 1",
-            "capacity": 1000,
+            "capacity": 350,
             "charge_level": 0,
             "switch_status": false,
             "device_status": "offline"

@@ -99,6 +99,8 @@ class BESS:
             new_charge_level = self.capacity
         self.charge_level = new_charge_level
         # print(f"{self.name} charged by {percent}% to {self.charge_level} kWh")
+        print(f"BESS charged: -> {new_charge_level}")  # Dodaj ten log
+
         return percent, charge_amount
 
     def discharge(self, percent):

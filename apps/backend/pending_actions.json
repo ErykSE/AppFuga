@@ -1,1 +1,121 @@
-[]
+[
+  {
+    "id": "25d2faa9-5a7f-4026-904d-fc5fcb964bb3",
+    "device_id": 7,
+    "device_name": "BESS 1",
+    "device_type": "BESS",
+    "action": "charge:111",
+    "current_output": 200,
+    "proposed_output": 311,
+    "reduction": 111,
+    "timestamp": 1723633631
+  },
+  {
+    "device_id": 7,
+    "device_name": "BESS 1",
+    "action": "charge:111",
+    "timestamp": 1723633631
+  },
+  {
+    "id": "82de1c86-f553-4e22-a77c-02d101c5d332",
+    "device_id": 7,
+    "device_name": "BESS 1",
+    "device_type": "BESS",
+    "action": "charge:111",
+    "current_output": 200,
+    "proposed_output": 311,
+    "reduction": 111,
+    "timestamp": 1723633662
+  },
+  {
+    "device_id": 7,
+    "device_name": "BESS 1",
+    "action": "charge:111",
+    "timestamp": 1723633662
+  },
+  {
+    "id": "5b6b726d-be16-41f5-a506-135b76f89477",
+    "device_id": 7,
+    "device_name": "BESS 1",
+    "device_type": "BESS",
+    "action": "charge:111",
+    "current_output": 200,
+    "proposed_output": 311,
+    "reduction": 111,
+    "timestamp": 1723634153
+  },
+  {
+    "device_id": 7,
+    "device_name": "BESS 1",
+    "action": "charge:111",
+    "timestamp": 1723634153
+  },
+  {
+    "id": "9e144fc6-4a17-4e93-bf67-899f7d9c4a6f",
+    "device_id": 7,
+    "device_name": "BESS 1",
+    "device_type": "BESS",
+    "action": "charge:111",
+    "current_output": 200,
+    "proposed_output": 311,
+    "reduction": 111,
+    "timestamp": 1723634314
+  },
+  {
+    "device_id": 7,
+    "device_name": "BESS 1",
+    "action": "charge:111",
+    "timestamp": 1723634314
+  },
+  {
+    "id": "5aa439b7-db9b-4596-b8c4-a30b685aca6f",
+    "device_id": 7,
+    "device_name": "BESS 1",
+    "device_type": "BESS",
+    "action": "charge:111",
+    "current_output": 200,
+    "proposed_output": 311,
+    "reduction": 111,
+    "timestamp": 1723634346
+  },
+  {
+    "device_id": 7,
+    "device_name": "BESS 1",
+    "action": "charge:111",
+    "timestamp": 1723634346
+  },
+  {
+    "id": "16d13fce-e42c-48b4-9240-98810c044e16",
+    "device_id": 7,
+    "device_name": "BESS 1",
+    "device_type": "BESS",
+    "action": "charge:111",
+    "current_output": 200,
+    "proposed_output": 311,
+    "reduction": 111,
+    "timestamp": 1723634584
+  },
+  {
+    "device_id": 7,
+    "device_name": "BESS 1",
+    "action": "charge:111",
+    "timestamp": 1723634584
+  },
+  {
+    "id": "eaaf68ed-38ee-41cd-a991-9510ba6dbf64",
+    "device_id": 7,
+    "device_name": "BESS 1",
+    "device_type": "BESS",
+    "action": "charge:111",
+    "current_output": 200,
+    "proposed_output": 311,
+    "reduction": 111,
+    "timestamp": 1723634615
+  },
+  {
+    "device_id": 7,
+    "device_name": "BESS 1",
+    "action": "charge:111",
+    "timestamp": 1723634615
+  }
+]
