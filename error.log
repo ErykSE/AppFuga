@@ -1,14 +1,1 @@
-2024-08-14 16:01:10,717 - ERROR - Communication error detected with PV Panel 1 (ID: 1). Device status is offline but meter reading indicates power generation of 15 kW.
-2024-08-14 16:01:10,732 - ERROR - Error in energy management: 'OSD' object has no attribute 'name'
-2024-08-14 16:01:10,732 - ERROR - Full traceback:
-Traceback (most recent call last):
-  File "c:\eryk\AppFuga\apps\backend\managment\energy_manager_class.py", line 132, in run_energy_management
-    result = self.run_single_iteration()
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "c:\eryk\AppFuga\apps\backend\managment\energy_manager_class.py", line 171, in run_single_iteration
-    self.execute_approved_actions(result["approved_actions"])
-  File "c:\eryk\AppFuga\apps\backend\managment\energy_manager_class.py", line 830, in execute_approved_actions
-    f"Device found: {device.name}, type: {type(device).__name__}"
-                     ^^^^^^^^^^^
-AttributeError: 'OSD' object has no attribute 'name'
-2024-08-14 16:01:10,734 - ERROR - An error occurred. Stopping the algorithm.
+2024-08-17 02:07:42,890 - ERROR - Communication error detected with PV Panel 1 (ID: 1). Device status is offline but meter reading indicates power generation of 15 kW.

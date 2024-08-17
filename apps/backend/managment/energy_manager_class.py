@@ -323,9 +323,8 @@ class EnergyManager:
         self.save_operator_actions(actions)
 
     def perform_action(self, device, action):
-        self.info_logger.info(
-            f"Performing action: {device.name if hasattr(device, 'name') else 'OSD'} - {action}"
-        )
+        device_name = self.get_device_name(device)
+        self.info_logger.info(f"Performing action: {device_name} - {action}")
 
         try:
             if action.startswith("charge:"):
@@ -339,7 +338,7 @@ class EnergyManager:
                 new_output = float(value)
                 if isinstance(device, BESS):
                     self.error_logger.error(
-                        f"Cannot set output for BESS device: {device.name}"
+                        f"Cannot set output for BESS device: {device_name}"
                     )
                     return {
                         "success": False,
@@ -352,14 +351,14 @@ class EnergyManager:
                     actual_new_output = device.get_actual_output()
                     reduction = current_output - actual_new_output
                     self.info_logger.info(
-                        f"Set output for {device.name} from {current_output} kW to {actual_new_output} kW"
+                        f"Set output for {device_name} from {current_output} kW to {actual_new_output} kW"
                     )
                     return {"success": True, "amount": reduction}
                 else:
                     return {
                         "success": False,
                         "amount": 0,
-                        "reason": f"Failed to set output for {device.name}",
+                        "reason": f"Failed to set output for {device_name}",
                     }
             else:
                 self.error_logger.error(f"Unknown action: {action}")
@@ -535,7 +534,6 @@ class EnergyManager:
         )
         approved_actions = []
         remaining_surplus = power_surplus
-        attempted_actions = set()
 
         while remaining_surplus > self.EPSILON:
             bess_available = self.surplus_manager.check_bess_availability()
@@ -545,56 +543,93 @@ class EnergyManager:
                 f"BESS available: {bess_available}, Export possible: {export_possible}"
             )
 
-            available_actions = self.get_available_actions(
-                bess_available, export_possible, attempted_actions
-            )
-
-            if not available_actions:
-                self.info_logger.warning("No more available actions to handle surplus.")
-                break
-
-            action = available_actions[0]
-            attempted_actions.add(action)
-
-            self.info_logger.info(f"Attempting to perform the action: {action}")
-            proposed_actions = self.surplus_manager.prepare_action(
-                action, remaining_surplus
-            )
-
-            if not proposed_actions:
-                self.info_logger.info(
-                    f"No actions proposed for {action}. Moving to next action type."
+            if bess_available and export_possible:
+                battery_free_percentage = (
+                    self.surplus_manager.get_bess_free_percentage()
                 )
-                continue
-
-            for proposed_action in proposed_actions:
-                serializable_action = self.prepare_serializable_action(proposed_action)
-                self.add_pending_action(serializable_action)
-
-                self.info_logger.info(
-                    f"Waiting for operator decision on action: {serializable_action['action']} for {serializable_action['device_name']}"
+                current_selling_price = self.osd.get_current_sell_price()
+                should_charge = (
+                    self.surplus_manager.should_prioritize_charging_or_selling(
+                        remaining_surplus,
+                        battery_free_percentage,
+                        current_selling_price,
+                    )
                 )
-                decision = self.simulate_operator_decision(serializable_action)
 
-                if decision:
-                    self.info_logger.info(
-                        f"Action approved: {serializable_action['action']} for {serializable_action['device_name']}"
-                    )
-                    approved_actions.append(serializable_action)
-                    actual_reduction = serializable_action["reduction"]
-                    remaining_surplus -= actual_reduction
-                    self.info_logger.info(
-                        f"Action approved to reduce {actual_reduction:.2f} kW. Remaining surplus: {remaining_surplus:.2f} kW"
-                    )
+                if should_charge:
+                    action = self.surplus_manager.prepare_bess_action(remaining_surplus)
+                    if not action:
+                        # Jeśli nie można ładować BESS, próbujemy sprzedać energię
+                        action = self.surplus_manager.prepare_sell_action(
+                            remaining_surplus
+                        )
                 else:
-                    self.info_logger.info(
-                        f"Action rejected: {serializable_action['action']} for {serializable_action['device_name']}"
+                    action = self.surplus_manager.prepare_sell_action(remaining_surplus)
+                    if not action:
+                        # Jeśli nie można sprzedać energii, próbujemy ładować BESS
+                        action = self.surplus_manager.prepare_bess_action(
+                            remaining_surplus
+                        )
+            elif bess_available:
+                action = self.surplus_manager.prepare_bess_action(remaining_surplus)
+            elif export_possible:
+                action = self.surplus_manager.prepare_sell_action(remaining_surplus)
+            else:
+                action = None
+
+            if not action:
+                # Jeśli nie można ani ładować BESS, ani sprzedawać energii, przechodzimy do limitowania generacji
+                limit_actions = self.surplus_manager.prepare_limit_actions(
+                    remaining_surplus
+                )
+                if limit_actions:
+                    action = limit_actions[0]
+                else:
+                    self.info_logger.warning(
+                        "No more available actions to handle surplus."
                     )
+                    break
 
-                self.remove_pending_action(serializable_action)
+            serializable_action = self.prepare_serializable_action(action)
+            self.add_pending_action(serializable_action)
 
-            if remaining_surplus <= self.EPSILON:
-                break
+            self.info_logger.info(
+                f"Waiting for operator decision on action: {serializable_action['action']} for {serializable_action['device_name']}"
+            )
+            decision = self.simulate_operator_decision(serializable_action)
+
+            if decision:
+                self.info_logger.info(
+                    f"Action approved: {serializable_action['action']} for {serializable_action['device_name']}"
+                )
+                approved_actions.append(serializable_action)
+                device = self.get_device_by_id_and_type(
+                    serializable_action["device_id"], serializable_action["device_type"]
+                )
+                if device:
+                    result = self.perform_action(device, serializable_action["action"])
+                    if result["success"]:
+                        actual_reduction = result["amount"]
+                        remaining_surplus -= actual_reduction
+                        self.info_logger.info(
+                            f"Action executed to reduce {actual_reduction:.2f} kW. Remaining surplus: {remaining_surplus:.2f} kW"
+                        )
+                        serializable_action["executed"] = True
+                        serializable_action["actual_reduction"] = actual_reduction
+                    else:
+                        self.info_logger.warning(
+                            f"Action execution failed: {result.get('reason', 'Unknown reason')}"
+                        )
+                else:
+                    self.error_logger.error(
+                        f"Device not found for action: {serializable_action}"
+                    )
+            else:
+                self.info_logger.info(
+                    f"Action rejected: {serializable_action['action']} for {serializable_action['device_name']}"
+                )
+
+            self.remove_pending_action(serializable_action)
 
         self.info_logger.info(
             f"Surplus management completed. Approved actions: {len(approved_actions)}, Initial surplus: {power_surplus} kW, Remaining surplus: {remaining_surplus} kW"
@@ -622,30 +657,21 @@ class EnergyManager:
         return available_actions
 
     def prepare_serializable_action(self, action):
-        if isinstance(action["device"], OSD):
-            return {
-                "id": str(uuid.uuid4()),
-                "device_id": "OSD",
-                "device_name": "OSD",
-                "device_type": "OSD",
-                "action": action["action"],
-                "current_output": action.get("current_output"),
-                "proposed_output": action.get("proposed_output"),
-                "reduction": action.get("reduction"),
-                "timestamp": int(time.time()),
-            }
-        else:
-            return {
-                "id": str(uuid.uuid4()),
-                "device_id": action["device"].id,
-                "device_name": action["device"].name,
-                "device_type": self.get_device_type(action["device"]),
-                "action": action["action"],
-                "current_output": action.get("current_output"),
-                "proposed_output": action.get("proposed_output"),
-                "reduction": action.get("reduction"),
-                "timestamp": int(time.time()),
-            }
+        return {
+            "id": str(uuid.uuid4()),
+            "device_id": (
+                action["device"].id if hasattr(action["device"], "id") else "OSD"
+            ),
+            "device_name": (
+                action["device"].name if hasattr(action["device"], "name") else "OSD"
+            ),
+            "device_type": self.get_device_type(action["device"]),
+            "action": action["action"],
+            "current_output": action.get("current_output"),
+            "proposed_output": action.get("proposed_output"),
+            "reduction": action.get("reduction"),
+            "timestamp": int(time.time()),
+        }
 
     def simulate_operator_decision(self, action):
         # Symulacja decyzji operatora
@@ -822,20 +848,33 @@ class EnergyManager:
         self.info_logger.info("Executing approved actions:")
         for action in approved_actions:
             self.info_logger.info(f"Processing action: {action}")
+            if action.get("executed", False):
+                self.info_logger.info(
+                    f"Action already executed: {action['action']} for {action['device_name']}"
+                )
+                continue
+
             device = self.get_device_by_id_and_type(
                 action["device_id"], action["device_type"]
             )
             if device:
+                device_name = self.get_device_name(device)
+                device_type = type(device).__name__
                 self.info_logger.info(
-                    f"Device found: {device.name}, type: {type(device).__name__}"
+                    f"Device found: {device_name}, type: {device_type}"
                 )
+
                 if isinstance(device, BESS):
                     self.info_logger.info(
-                        f"Before action: {device.name} charge level: {device.get_charge_level()} kWh"
+                        f"Before action: {device_name} charge level: {device.get_charge_level()} kWh"
+                    )
+                elif isinstance(device, OSD):
+                    self.info_logger.info(
+                        f"Before action: OSD current sold power: {device.get_sold_power()} kW"
                     )
                 else:
                     self.info_logger.info(
-                        f"Before action: {device.name} output: {device.get_actual_output()} kW"
+                        f"Before action: {device_name} output: {device.get_actual_output()} kW"
                     )
 
                 result = self.perform_action(device, action["action"])
@@ -843,27 +882,42 @@ class EnergyManager:
                 if result["success"]:
                     if isinstance(device, BESS):
                         self.info_logger.info(
-                            f"After action: {device.name} charge level: {device.get_charge_level()} kWh"
+                            f"After action: {device_name} charge level: {device.get_charge_level()} kWh"
                         )
                         self.info_logger.info(
-                            f"Executed {action['action']} for {action['device_name']}: Success. New charge level: {device.get_charge_level()} kWh"
+                            f"Executed {action['action']} for {device_name}: Success. New charge level: {device.get_charge_level()} kWh"
+                        )
+                    elif isinstance(device, OSD):
+                        self.info_logger.info(
+                            f"After action: OSD new sold power: {device.get_sold_power()} kW"
+                        )
+                        self.info_logger.info(
+                            f"Executed {action['action']} for OSD: Success. Amount sold: {result['amount']} kW"
                         )
                     else:
                         new_output = device.get_actual_output()
                         self.info_logger.info(
-                            f"After action: {device.name} output: {new_output} kW"
+                            f"After action: {device_name} output: {new_output} kW"
                         )
                         self.info_logger.info(
-                            f"Executed {action['action']} for {action['device_name']}: Success. New output: {new_output} kW"
+                            f"Executed {action['action']} for {device_name}: Success. New output: {new_output} kW"
                         )
                 else:
                     self.error_logger.error(
-                        f"Failed to execute action {action['action']} for {action['device_name']}: {result.get('reason', 'Unknown reason')}"
+                        f"Failed to execute action {action['action']} for {device_name}: {result.get('reason', 'Unknown reason')}"
                     )
             else:
                 self.error_logger.error(f"Device not found for action: {action}")
 
         self.log_system_summary()
+
+    def get_device_name(self, device):
+        if isinstance(device, OSD):
+            return "OSD"
+        elif hasattr(device, "name"):
+            return device.name
+        else:
+            return type(device).__name__
 
     def get_device_by_id_and_type(self, device_id, device_type):
         self.info_logger.info(
@@ -898,7 +952,7 @@ class EnergyManager:
         return None
 
     def get_device_type(self, device):
-        if isinstance(device, PVPanel):
+        if isinstance(device, PV):
             return "PV"
         elif isinstance(device, WindTurbine):
             return "WindTurbine"

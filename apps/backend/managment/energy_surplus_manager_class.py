@@ -165,8 +165,8 @@ class EnergySurplusManager:
         # price_factor = max(0, min(price_factor, 1))
 
         # battery_factor = 1 - (battery_free_percentage / 100)
-        price_factor = 0.2
-        battery_factor = 0.1
+        price_factor = 0.1
+        battery_factor = 0.2
 
         self.info_logger.info(f"Battery ({battery_factor}) price ({price_factor} kW)")
 

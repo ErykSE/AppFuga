@@ -117,5 +117,16 @@
     "device_name": "BESS 1",
     "action": "charge:111",
     "timestamp": 1723634615
+  },
+  {
+    "id": "957cc186-5672-4c7b-9c27-990d143cea20",
+    "device_id": "OSD",
+    "device_name": "OSD",
+    "device_type": "OSD",
+    "action": "sell:111",
+    "current_output": 50,
+    "proposed_output": 161,
+    "reduction": 111,
+    "timestamp": 1723848730
   }
 ]
