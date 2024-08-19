@@ -5,7 +5,7 @@
     "CONTRACTED_EXPORT_POSSIBILITY": true,
     "CONTRACTED_SALE_LIMIT": 200,
     "CONTRACTED_PURCHASE_LIMIT": 300,
-    "sold_power": 200.0,
+    "sold_power": 50,
     "bought_power": 150,
     "current_tariff_buy": 0.41,
     "current_tariff_sell": 0.2

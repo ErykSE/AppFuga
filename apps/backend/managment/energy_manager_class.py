@@ -166,10 +166,14 @@ class EnergyManager:
 
         result = self.check_energy_conditions()
 
-        if result is not None and self.operation_mode == OperationMode.SEMI_AUTOMATIC:
+        approved_actions = []
+        if result is not None:
             if "approved_actions" in result:
-                self.execute_approved_actions(result["approved_actions"])
-                # Usuwamy ponowne obliczanie nadwyżki i zarządzanie nią
+                approved_actions = result["approved_actions"]
+
+        # Wykonaj zatwierdzone akcje tylko raz
+        if approved_actions:
+            self.execute_approved_actions(approved_actions)
 
         self.log_system_summary()
         self.save_live_data()
@@ -280,8 +284,14 @@ class EnergyManager:
             return []
 
     def save_pending_actions(self, actions):
-        with open(self.pending_actions_path, "w") as file:
-            json.dump(actions, file, indent=2)
+        with open(self.pending_actions_path, "w") as f:
+            json.dump(actions, f, indent=2)
+        self.info_logger.info(f"Saved {len(actions)} pending actions")
+        for action in actions:
+            self.info_logger.info(f"Pending action: {json.dumps(action, indent=2)}")
+
+        # Weryfikacja zapisu
+        self.verify_file_content(self.pending_actions_path, "pending actions")
 
     def load_operator_decision(self):
         try:
@@ -292,8 +302,28 @@ class EnergyManager:
             return None
 
     def save_operator_decisions(self, decisions):
-        with open(self.operator_decisions_path, "w") as file:
-            json.dump(decisions, file, indent=2)
+        with open(self.operator_decisions_path, "w") as f:
+            json.dump(decisions, f, indent=2)
+        self.info_logger.info(f"Saved {len(decisions)} operator decisions")
+        for decision in decisions:
+            self.info_logger.info(
+                f"Operator decision: {json.dumps(decision, indent=2)}"
+            )
+
+        # Weryfikacja zapisu
+        self.verify_file_content(self.operator_decisions_path, "operator decisions")
+
+    def verify_file_content(self, file_path, file_description):
+        try:
+            with open(file_path, "r") as f:
+                content = json.load(f)
+            self.info_logger.info(
+                f"Successfully verified {file_description} file. Content: {json.dumps(content, indent=2)}"
+            )
+        except Exception as e:
+            self.error_logger.error(
+                f"Error verifying {file_description} file: {str(e)}"
+            )
 
     def process_pending_actions(self):
         actions = self.load_operator_actions()
@@ -532,113 +562,57 @@ class EnergyManager:
         self.info_logger.info(
             f"Managing surplus in semi-automatic mode: {power_surplus} kW"
         )
+        all_actions = self.surplus_manager.get_proposed_actions(power_surplus)
+
+        self.info_logger.info(f"Generated {len(all_actions)} possible actions")
+        self.save_pending_actions(all_actions)
+
+        operator_decisions = self.generate_operator_decisions(all_actions)
+        self.save_operator_decisions(operator_decisions)
+
         approved_actions = []
         remaining_surplus = power_surplus
 
-        while remaining_surplus > self.EPSILON:
-            bess_available = self.surplus_manager.check_bess_availability()
-            export_possible = self.surplus_manager.is_export_possible()
-
-            self.info_logger.info(
-                f"BESS available: {bess_available}, Export possible: {export_possible}"
-            )
-
-            if bess_available and export_possible:
-                battery_free_percentage = (
-                    self.surplus_manager.get_bess_free_percentage()
-                )
-                current_selling_price = self.osd.get_current_sell_price()
-                should_charge = (
-                    self.surplus_manager.should_prioritize_charging_or_selling(
-                        remaining_surplus,
-                        battery_free_percentage,
-                        current_selling_price,
-                    )
-                )
-
-                if should_charge:
-                    action = self.surplus_manager.prepare_bess_action(remaining_surplus)
-                    if not action:
-                        # Jeśli nie można ładować BESS, próbujemy sprzedać energię
-                        action = self.surplus_manager.prepare_sell_action(
-                            remaining_surplus
-                        )
-                else:
-                    action = self.surplus_manager.prepare_sell_action(remaining_surplus)
-                    if not action:
-                        # Jeśli nie można sprzedać energii, próbujemy ładować BESS
-                        action = self.surplus_manager.prepare_bess_action(
-                            remaining_surplus
-                        )
-            elif bess_available:
-                action = self.surplus_manager.prepare_bess_action(remaining_surplus)
-            elif export_possible:
-                action = self.surplus_manager.prepare_sell_action(remaining_surplus)
-            else:
-                action = None
-
-            if not action:
-                # Jeśli nie można ani ładować BESS, ani sprzedawać energii, przechodzimy do limitowania generacji
-                limit_actions = self.surplus_manager.prepare_limit_actions(
-                    remaining_surplus
-                )
-                if limit_actions:
-                    action = limit_actions[0]
-                else:
-                    self.info_logger.warning(
-                        "No more available actions to handle surplus."
-                    )
-                    break
-
-            serializable_action = self.prepare_serializable_action(action)
-            self.add_pending_action(serializable_action)
-
-            self.info_logger.info(
-                f"Waiting for operator decision on action: {serializable_action['action']} for {serializable_action['device_name']}"
-            )
-            decision = self.simulate_operator_decision(serializable_action)
-
-            if decision:
+        for action, decision in zip(all_actions, operator_decisions):
+            if decision["approved"]:
+                approved_actions.append(action)
+                remaining_surplus -= action["reduction"]
                 self.info_logger.info(
-                    f"Action approved: {serializable_action['action']} for {serializable_action['device_name']}"
+                    f"Action approved: {json.dumps(action, indent=2)}"
                 )
-                approved_actions.append(serializable_action)
-                device = self.get_device_by_id_and_type(
-                    serializable_action["device_id"], serializable_action["device_type"]
-                )
-                if device:
-                    result = self.perform_action(device, serializable_action["action"])
-                    if result["success"]:
-                        actual_reduction = result["amount"]
-                        remaining_surplus -= actual_reduction
-                        self.info_logger.info(
-                            f"Action executed to reduce {actual_reduction:.2f} kW. Remaining surplus: {remaining_surplus:.2f} kW"
-                        )
-                        serializable_action["executed"] = True
-                        serializable_action["actual_reduction"] = actual_reduction
-                    else:
-                        self.info_logger.warning(
-                            f"Action execution failed: {result.get('reason', 'Unknown reason')}"
-                        )
-                else:
-                    self.error_logger.error(
-                        f"Device not found for action: {serializable_action}"
-                    )
             else:
                 self.info_logger.info(
-                    f"Action rejected: {serializable_action['action']} for {serializable_action['device_name']}"
+                    f"Action rejected: {json.dumps(action, indent=2)}"
                 )
-
-            self.remove_pending_action(serializable_action)
+        time.sleep(5)
+        self.clear_pending_actions()
+        self.clear_operator_decisions()
 
         self.info_logger.info(
-            f"Surplus management completed. Approved actions: {len(approved_actions)}, Initial surplus: {power_surplus} kW, Remaining surplus: {remaining_surplus} kW"
+            f"Surplus management completed. Approved actions: {len(approved_actions)}, "
+            f"Initial surplus: {power_surplus} kW, Remaining surplus: {remaining_surplus} kW"
         )
         return {
             "approved_actions": approved_actions,
             "initial_surplus": power_surplus,
             "remaining_surplus": remaining_surplus,
         }
+
+    def clear_pending_actions(self):
+        with open(self.pending_actions_path, "w") as f:
+            json.dump([], f)
+        self.info_logger.info("Cleared pending actions file")
+        self.verify_file_content(self.pending_actions_path, "cleared pending actions")
+
+    def generate_operator_decisions(self, actions):
+        decisions = [
+            {"approved": random.choice([True, False]), "action_id": action["id"]}
+            for action in actions
+        ]
+        self.info_logger.info("Generated operator decisions:")
+        for decision in decisions:
+            self.info_logger.info(f"Decision: {json.dumps(decision, indent=2)}")
+        return decisions
 
     def get_available_actions(self, bess_available, export_possible, attempted_actions):
         available_actions = []
@@ -702,6 +676,14 @@ class EnergyManager:
     def clear_operator_decision(self):
         with open(self.operator_decisions_path, "w") as file:
             json.dump([], file)
+
+    def clear_operator_decisions(self):
+        with open(self.operator_decisions_path, "w") as f:
+            json.dump([], f)
+        self.info_logger.info("Cleared operator decisions file")
+        self.verify_file_content(
+            self.operator_decisions_path, "cleared operator decisions"
+        )
 
     def handle_validation_errors(self, microgrid_errors, osd_errors):
         """Obsługuje błędy walidacji danych mikrosieci i OSD."""
@@ -843,6 +825,47 @@ class EnergyManager:
         self.power_profile_manager.update(
             current_time, consumption, generation, buy_price, sell_price
         )
+
+    def execute_approved_action(self, action):
+        self.info_logger.info(
+            f"Executing approved action: {action['action']} for {action['device_name']}"
+        )
+        device = self.get_device_by_id_and_type(
+            action["device_id"], action["device_type"]
+        )
+        if device:
+            result = self.perform_action(device, action["action"])
+            if result["success"]:
+                self.info_logger.info(
+                    f"Action executed to reduce {result['amount']:.2f} kW."
+                )
+                return {"success": True, "amount": result["amount"]}
+            else:
+                self.info_logger.warning(
+                    f"Action execution failed: {result.get('reason', 'Unknown reason')}"
+                )
+        else:
+            self.error_logger.error(f"Device not found for action: {action}")
+        return {"success": False, "amount": 0}
+
+    def get_device_by_id_and_type(self, device_id, device_type):
+        if device_type == "OSD":
+            return self.osd
+        elif device_type == "BESS":
+            return (
+                self.microgrid.bess
+                if self.microgrid.bess and self.microgrid.bess.id == device_id
+                else None
+            )
+        else:
+            return next(
+                (
+                    device
+                    for device in self.microgrid.get_all_devices()
+                    if device.id == device_id
+                ),
+                None,
+            )
 
     def execute_approved_actions(self, approved_actions):
         self.info_logger.info("Executing approved actions:")

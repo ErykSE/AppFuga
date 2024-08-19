@@ -1,3 +1,4 @@
+import uuid
 from apps.backend.managment.surplus_action import SurplusAction
 
 
@@ -462,32 +463,33 @@ class EnergySurplusManager:
             return False
 
     def get_proposed_actions(self, power_surplus):
-        proposed_actions = []
-        action_id = 1
+        actions = []
         remaining_surplus = power_surplus
 
-        # Sprawdź możliwość ładowania BESS
-        if self.check_bess_availability():
-            bess_action = self.prepare_bess_action(remaining_surplus, action_id)
+        bess_available = self.check_bess_availability()
+        export_possible = self.is_export_possible()
+
+        self.info_logger.info(
+            f"BESS available: {bess_available}, Export possible: {export_possible}"
+        )
+
+        if bess_available:
+            bess_action = self.prepare_bess_action(remaining_surplus)
             if bess_action:
-                proposed_actions.append(bess_action)
+                actions.append(bess_action)
                 remaining_surplus -= bess_action["reduction"]
-                action_id += 1
 
-        # Sprawdź możliwość sprzedaży energii
-        if self.is_export_possible():
-            sell_action = self.prepare_sell_action(remaining_surplus, action_id)
+        if export_possible and remaining_surplus > self.EPSILON:
+            sell_action = self.prepare_sell_action(remaining_surplus)
             if sell_action:
-                proposed_actions.append(sell_action)
+                actions.append(sell_action)
                 remaining_surplus -= sell_action["reduction"]
-                action_id += 1
 
-        # Jeśli nadal jest nadwyżka, zaproponuj ograniczenie generacji
-        if remaining_surplus > 0:
-            limit_actions = self.prepare_limit_actions(remaining_surplus, action_id)
-            proposed_actions.extend(limit_actions)
+        if remaining_surplus > self.EPSILON:
+            limit_actions = self.prepare_limit_actions(remaining_surplus)
+            actions.extend(limit_actions)
 
-        return proposed_actions
+        return actions
 
     def prepare_action(self, action_type, power_surplus):
         if action_type == SurplusAction.BOTH:
@@ -516,7 +518,10 @@ class EnergySurplusManager:
         free_capacity = self.get_bess_free_capacity()
         amount_to_charge = min(power_surplus, free_capacity)
         return {
-            "device": bess,
+            "id": str(uuid.uuid4()),
+            "device_id": bess.id,
+            "device_name": bess.name,
+            "device_type": "BESS",
             "action": f"charge:{amount_to_charge}",
             "current_output": bess.get_charge_level(),
             "proposed_output": bess.get_charge_level() + amount_to_charge,
@@ -533,7 +538,10 @@ class EnergySurplusManager:
         if remaining_sale_capacity > 0:
             amount_to_sell = min(power_surplus, remaining_sale_capacity)
             return {
-                "device": self.osd,
+                "id": str(uuid.uuid4()),
+                "device_id": "OSD",
+                "device_name": "OSD",
+                "device_type": "OSD",
                 "action": f"sell:{amount_to_sell}",
                 "current_output": sold_power,
                 "proposed_output": sold_power + amount_to_sell,
@@ -563,7 +571,10 @@ class EnergySurplusManager:
                 new_output = current_output - reduction
                 actions.append(
                     {
-                        "device": device,
+                        "id": str(uuid.uuid4()),
+                        "device_id": device.id,
+                        "device_name": device.name,
+                        "device_type": type(device).__name__,
                         "action": f"set_output:{new_output:.2f}",
                         "current_output": current_output,
                         "proposed_output": new_output,
