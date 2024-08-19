@@ -19,7 +19,17 @@ class EnergySurplusManager:
         previous_decision (bool): Flaga przechowująca poprzednią decyzję dla histerezy.
     """
 
-    def __init__(self, microgrid, osd, info_logger, error_logger, execute_action_func):
+    def __init__(
+        self,
+        microgrid,
+        osd,
+        info_logger,
+        error_logger,
+        execute_action_func,
+        add_to_tabu_func,
+        is_in_tabu_func,
+        clean_tabu_func,
+    ):
         self.microgrid = microgrid
         self.osd = osd
         self.info_logger = info_logger
@@ -27,6 +37,11 @@ class EnergySurplusManager:
         self.execute_action_func = execute_action_func
         self.previous_decision = True  # Domyślnie priorytet ładowania
         self.EPSILON = 1e-6  # Stała do porównywania liczb zmiennoprzecinkowych
+        self.add_to_tabu = add_to_tabu_func
+        self.is_in_tabu = is_in_tabu_func
+        self.clean_tabu_list = (
+            clean_tabu_func  # Zmienione z self.clean_tabu na self.clean_tabu_list
+        )
 
     def manage_surplus_energy(self, power_surplus):
         total_managed = 0
@@ -116,6 +131,9 @@ class EnergySurplusManager:
             dict: Słownik wskazujący na sukces działania i ilość zarządzonej energii.
         """
         self.info_logger.info(f"Executing action: {action}, type: {type(action)}")
+        self.info_logger.info(
+            f"XXXXXXXXXXXXXXXXXXXXXXXXXExecuting actionxdxdxdd: {action}"
+        )
         self.info_logger.info(f"Remaining surplus: {remaining_surplus:.6f}")
 
         if action == SurplusAction.BOTH:
@@ -465,59 +483,87 @@ class EnergySurplusManager:
             return False
 
     def get_proposed_actions(self, power_surplus):
-        actions = []
-        remaining_surplus = power_surplus
+        self.clean_tabu_list()
+        self.info_logger.info(f"Checking tabu list before proposing actions")
+        self.info_logger.info(f"BESS id: {self.microgrid.bess.id}")
+        self.info_logger.info(
+            f"BESS in tabu: {self.is_in_tabu(self.microgrid.bess.id)}"
+        )
+        bess = self.microgrid.bess  # Zakładamy, że BESS jest dostępny przez microgrid
+        osd = self.osd
 
-        bess_available = self.check_bess_availability()
-        export_possible = self.is_export_possible()
+        bess_available = (
+            bess.get_switch_status()
+            and not self.is_in_tabu(bess.id)
+            and bess.is_uncharged()
+        )
+        export_possible = (
+            osd.get_contracted_export_possibility()
+            and not self.is_in_tabu("OSD")
+            and osd.can_sell_energy()
+        )
 
         self.info_logger.info(
             f"BESS available: {bess_available}, Export possible: {export_possible}"
         )
+        self.info_logger.info(
+            f"BESS charge level: {bess.get_charge_level()} / {bess.get_capacity()} kWh"
+        )
+        self.info_logger.info(
+            f"OSD remaining sale capacity: {osd.get_remaining_sale_capacity()} kWh"
+        )
 
         if bess_available and export_possible:
-            battery_free_percentage = self.get_bess_free_percentage()
-            current_selling_price = self.osd.get_current_sell_price()
-            should_charge = self.should_prioritize_charging_or_selling(
-                remaining_surplus, battery_free_percentage, current_selling_price
+            self.info_logger.info(
+                "XXXXXXXXXXXXXXXXXXSelected action: SurplusAction.BOTH"
             )
-
-            if should_charge:
-                bess_action = self.prepare_bess_action(remaining_surplus)
-                if bess_action:
-                    actions.append(bess_action)
-                    remaining_surplus -= bess_action["reduction"]
-
-                if remaining_surplus > self.EPSILON:
-                    sell_action = self.prepare_sell_action(remaining_surplus)
-                    if sell_action:
-                        actions.append(sell_action)
-                        remaining_surplus -= sell_action["reduction"]
-            else:
-                sell_action = self.prepare_sell_action(remaining_surplus)
-                if sell_action:
-                    actions.append(sell_action)
-                    remaining_surplus -= sell_action["reduction"]
-
-                if remaining_surplus > self.EPSILON:
-                    bess_action = self.prepare_bess_action(remaining_surplus)
-                    if bess_action:
-                        actions.append(bess_action)
-                        remaining_surplus -= bess_action["reduction"]
+            return self.prepare_both_actions(power_surplus)
         elif bess_available:
+            self.info_logger.info(
+                "XXXXXXXXXXXXXXXXSelected action: SurplusAction.CHARGE_BATTERY"
+            )
+            return [self.prepare_bess_action(power_surplus)]
+        elif export_possible:
+            self.info_logger.info(
+                "XXXXXXXXXXXXXXXXSelected action: SurplusAction.SELL_ENERGY"
+            )
+            return [self.prepare_sell_action(power_surplus)]
+        else:
+            self.info_logger.info(
+                "XXXXXXXXXXXXXXXXXXXSelected action: SurplusAction.LIMIT_GENERATION"
+            )
+            return self.prepare_limit_actions(power_surplus)
+
+    def prepare_both_actions(self, power_surplus):
+        battery_free_percentage = self.get_bess_free_percentage()
+        current_selling_price = self.osd.get_current_sell_price()
+        should_charge = self.should_prioritize_charging_or_selling(
+            power_surplus, battery_free_percentage, current_selling_price
+        )
+
+        actions = []
+        remaining_surplus = power_surplus
+
+        if should_charge:
             bess_action = self.prepare_bess_action(remaining_surplus)
             if bess_action:
                 actions.append(bess_action)
                 remaining_surplus -= bess_action["reduction"]
-        elif export_possible:
+
+            if remaining_surplus > self.EPSILON:
+                sell_action = self.prepare_sell_action(remaining_surplus)
+                if sell_action:
+                    actions.append(sell_action)
+        else:
             sell_action = self.prepare_sell_action(remaining_surplus)
             if sell_action:
                 actions.append(sell_action)
                 remaining_surplus -= sell_action["reduction"]
 
-        if remaining_surplus > self.EPSILON:
-            limit_actions = self.prepare_limit_actions(remaining_surplus)
-            actions.extend(limit_actions)
+            if remaining_surplus > self.EPSILON:
+                bess_action = self.prepare_bess_action(remaining_surplus)
+                if bess_action:
+                    actions.append(bess_action)
 
         return actions
 

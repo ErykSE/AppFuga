@@ -56,7 +56,10 @@ class EnergyManager:
             osd,
             info_logger,
             error_logger,
-            self.execute_action,  # Upewnij się, że przekazujesz tę funkcję
+            self.execute_action,
+            self.add_to_tabu_list,
+            self.is_in_tabu_list,
+            self.clean_tabu_list,  # Zmienione z self.clean_tabu na self.clean_tabu_list
         )
         self.deficit_manager = EnergyDeficitManager(
             microgrid, consumergrid, osd, info_logger, error_logger
@@ -93,6 +96,10 @@ class EnergyManager:
         )
         self.operator_actions = {"pending_actions": [], "completed_actions": []}
         self.EPSILON = 1e-6  # Dodaj tę linię
+        self.tabu_list = {}
+        self.tabu_duration = 35  # 5 minut w sekundach
+        self.last_tabu_clean = time.time()
+        self.tabu_clean_interval = 60  # Czyść listę co minutę
 
     def load_configuration(self):
         try:
@@ -563,18 +570,29 @@ class EnergyManager:
         self.info_logger.info(
             f"Managing surplus in semi-automatic mode: {power_surplus} kW"
         )
+        self.log_tabu_list()  # Dodaj tę linię
+        self.clean_tabu_list()
+
+        # Użyj surplus_manager do wywołania get_proposed_actions
         all_actions = self.surplus_manager.get_proposed_actions(power_surplus)
+        filtered_actions = [
+            action
+            for action in all_actions
+            if not self.is_in_tabu_list(action["device_id"])
+        ]
 
-        self.info_logger.info(f"Generated {len(all_actions)} possible actions")
-        self.save_pending_actions(all_actions)
+        self.info_logger.info(
+            f"Generated {len(all_actions)} possible actions, {len(filtered_actions)} after tabu list filter"
+        )
+        self.save_pending_actions(filtered_actions)
 
-        operator_decisions = self.generate_operator_decisions(all_actions)
+        operator_decisions = self.generate_operator_decisions(filtered_actions)
         self.save_operator_decisions(operator_decisions)
 
         approved_actions = []
         remaining_surplus = power_surplus
 
-        for action, decision in zip(all_actions, operator_decisions):
+        for action, decision in zip(filtered_actions, operator_decisions):
             if decision["approved"]:
                 approved_actions.append(action)
                 remaining_surplus -= action["reduction"]
@@ -585,13 +603,15 @@ class EnergyManager:
                 self.info_logger.info(
                     f"Action rejected: {json.dumps(action, indent=2)}"
                 )
+                self.add_to_tabu_list(action["device_id"])
 
         self.clear_pending_actions()
         self.clear_operator_decisions()
 
         self.info_logger.info(
             f"Surplus management completed. Approved actions: {len(approved_actions)}, "
-            f"Initial surplus: {power_surplus} kW, Remaining surplus: {remaining_surplus} kW"
+            f"Initial surplus: {power_surplus} kW, Remaining surplus: {remaining_surplus} kW, "
+            f"Current tabu list size: {len(self.tabu_list)}"
         )
         return {
             "approved_actions": approved_actions,
@@ -607,7 +627,7 @@ class EnergyManager:
 
     def generate_operator_decisions(self, actions):
         decisions = [
-            {"approved": random.choice([True, True]), "action_id": action["id"]}
+            {"approved": random.choice([True, False]), "action_id": action["id"]}
             for action in actions
         ]
         self.info_logger.info("Generated operator decisions:")
@@ -990,3 +1010,36 @@ class EnergyManager:
             return "OSD"
         else:
             return type(device).__name__
+
+    def add_to_tabu_list(self, device_id):
+        self.tabu_list[str(device_id)] = time.time() + self.tabu_duration
+        self.info_logger.info(
+            f"#######Added device {device_id} to tabu list. Current list: {self.tabu_list}"
+        )
+
+    def is_in_tabu_list(self, device_id):
+        self.info_logger.info(
+            f"#######Checking if {device_id} is in tabu list: {self.tabu_list}"
+        )
+        if str(device_id) in self.tabu_list:
+            if time.time() < self.tabu_list[str(device_id)]:
+                return True
+            else:
+                del self.tabu_list[str(device_id)]
+        return False
+
+    def clean_tabu_list(self):
+        current_time = time.time()
+        if current_time - self.last_tabu_clean >= self.tabu_clean_interval:
+            expired = [
+                device_id
+                for device_id, expiry_time in self.tabu_list.items()
+                if current_time >= expiry_time
+            ]
+            for device_id in expired:
+                del self.tabu_list[device_id]
+            self.info_logger.info(f"Cleaned tabu list. Removed {len(expired)} devices")
+            self.last_tabu_clean = current_time
+
+    def log_tabu_list(self):
+        self.info_logger.info(f"##################Current tabu list: {self.tabu_list}")
