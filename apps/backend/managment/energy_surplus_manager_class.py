@@ -169,7 +169,9 @@ class EnergySurplusManager:
         price_factor = 0.1
         battery_factor = 0.2
 
-        self.info_logger.info(f"Battery ({battery_factor}) price ({price_factor} kW)")
+        self.info_logger.info(
+            f"Batteryxxx ({battery_factor}) price ({price_factor} kW)"
+        )
 
         # battery_factor = 0.77
 
@@ -473,13 +475,41 @@ class EnergySurplusManager:
             f"BESS available: {bess_available}, Export possible: {export_possible}"
         )
 
-        if bess_available:
+        if bess_available and export_possible:
+            battery_free_percentage = self.get_bess_free_percentage()
+            current_selling_price = self.osd.get_current_sell_price()
+            should_charge = self.should_prioritize_charging_or_selling(
+                remaining_surplus, battery_free_percentage, current_selling_price
+            )
+
+            if should_charge:
+                bess_action = self.prepare_bess_action(remaining_surplus)
+                if bess_action:
+                    actions.append(bess_action)
+                    remaining_surplus -= bess_action["reduction"]
+
+                if remaining_surplus > self.EPSILON:
+                    sell_action = self.prepare_sell_action(remaining_surplus)
+                    if sell_action:
+                        actions.append(sell_action)
+                        remaining_surplus -= sell_action["reduction"]
+            else:
+                sell_action = self.prepare_sell_action(remaining_surplus)
+                if sell_action:
+                    actions.append(sell_action)
+                    remaining_surplus -= sell_action["reduction"]
+
+                if remaining_surplus > self.EPSILON:
+                    bess_action = self.prepare_bess_action(remaining_surplus)
+                    if bess_action:
+                        actions.append(bess_action)
+                        remaining_surplus -= bess_action["reduction"]
+        elif bess_available:
             bess_action = self.prepare_bess_action(remaining_surplus)
             if bess_action:
                 actions.append(bess_action)
                 remaining_surplus -= bess_action["reduction"]
-
-        if export_possible and remaining_surplus > self.EPSILON:
+        elif export_possible:
             sell_action = self.prepare_sell_action(remaining_surplus)
             if sell_action:
                 actions.append(sell_action)

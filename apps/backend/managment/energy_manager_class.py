@@ -1,3 +1,4 @@
+from collections import defaultdict
 from datetime import datetime
 import json
 import os
@@ -584,7 +585,7 @@ class EnergyManager:
                 self.info_logger.info(
                     f"Action rejected: {json.dumps(action, indent=2)}"
                 )
-        time.sleep(5)
+
         self.clear_pending_actions()
         self.clear_operator_decisions()
 
@@ -606,7 +607,7 @@ class EnergyManager:
 
     def generate_operator_decisions(self, actions):
         decisions = [
-            {"approved": random.choice([True, False]), "action_id": action["id"]}
+            {"approved": random.choice([True, True]), "action_id": action["id"]}
             for action in actions
         ]
         self.info_logger.info("Generated operator decisions:")
