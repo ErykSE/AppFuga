@@ -72,9 +72,9 @@
             "id": 7,
             "name": "BESS 1",
             "capacity": 350,
-            "charge_level": 200,
-            "switch_status": true,
-            "device_status": "online"
+            "charge_level": 0,
+            "switch_status": false,
+            "device_status": "offline"
         }
     ],
     "non_adjustable_devices": [

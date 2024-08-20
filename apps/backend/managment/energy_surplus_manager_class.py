@@ -184,8 +184,8 @@ class EnergySurplusManager:
         # price_factor = max(0, min(price_factor, 1))
 
         # battery_factor = 1 - (battery_free_percentage / 100)
-        price_factor = 0.1
-        battery_factor = 0.2
+        price_factor = 0.2
+        battery_factor = 0.1
 
         self.info_logger.info(
             f"Batteryxxx ({battery_factor}) price ({price_factor} kW)"
@@ -489,7 +489,8 @@ class EnergySurplusManager:
         self.info_logger.info(
             f"BESS in tabu: {self.is_in_tabu(self.microgrid.bess.id)}"
         )
-        bess = self.microgrid.bess  # Zakładamy, że BESS jest dostępny przez microgrid
+
+        bess = self.microgrid.bess
         osd = self.osd
 
         bess_available = (
@@ -513,26 +514,51 @@ class EnergySurplusManager:
             f"OSD remaining sale capacity: {osd.get_remaining_sale_capacity()} kWh"
         )
 
+        actions = []
+        remaining_surplus = power_surplus
+
         if bess_available and export_possible:
             self.info_logger.info(
-                "XXXXXXXXXXXXXXXXXXSelected action: SurplusAction.BOTH"
+                "#################Selected action: SurplusAction.BOTH"
             )
-            return self.prepare_both_actions(power_surplus)
+            actions = self.prepare_both_actions(remaining_surplus)
         elif bess_available:
             self.info_logger.info(
-                "XXXXXXXXXXXXXXXXSelected action: SurplusAction.CHARGE_BATTERY"
+                "##################Selected action: SurplusAction.CHARGE_BATTERY"
             )
-            return [self.prepare_bess_action(power_surplus)]
+            bess_action = self.prepare_bess_action(remaining_surplus)
+            if bess_action:
+                actions.append(bess_action)
         elif export_possible:
             self.info_logger.info(
-                "XXXXXXXXXXXXXXXXSelected action: SurplusAction.SELL_ENERGY"
+                "##############Selected action: SurplusAction.SELL_ENERGY"
             )
-            return [self.prepare_sell_action(power_surplus)]
+            sell_action = self.prepare_sell_action(remaining_surplus)
+            if sell_action:
+                actions.append(sell_action)
         else:
             self.info_logger.info(
-                "XXXXXXXXXXXXXXXXXXXSelected action: SurplusAction.LIMIT_GENERATION"
+                "##############Selected action: SurplusAction.LIMIT_GENERATION"
             )
-            return self.prepare_limit_actions(power_surplus)
+            actions = self.prepare_limit_actions(remaining_surplus)
+            return actions  # Zwracamy tylko akcje limitowania, jeśli to jedyna opcja
+
+        # Oblicz pozostałą nadwyżkę po zaproponowanych akcjach
+        for action in actions:
+            remaining_surplus -= action["reduction"]
+
+        # Jeśli nadal jest nadwyżka, dodaj akcję LIMIT_GENERATION
+        if remaining_surplus > self.EPSILON:
+            self.info_logger.info(
+                f"Remaining surplus after primary actions: {remaining_surplus:.2f} kW"
+            )
+            self.info_logger.info(
+                "Adding LIMIT_GENERATION action for remaining surplus"
+            )
+            limit_actions = self.prepare_limit_actions(remaining_surplus)
+            actions.extend(limit_actions)
+
+        return actions
 
     def prepare_both_actions(self, power_surplus):
         battery_free_percentage = self.get_bess_free_percentage()
@@ -586,13 +612,13 @@ class EnergySurplusManager:
             return []
 
     def prepare_bess_action(self, power_surplus):
-        if not self.can_charge_bess(power_surplus):
-            self.info_logger.info("BESS cannot be charged at the moment.")
+        bess = self.microgrid.bess
+        free_capacity = bess.get_capacity() - bess.get_charge_level()
+        amount_to_charge = min(power_surplus, free_capacity)
+
+        if amount_to_charge <= self.EPSILON:
             return None
 
-        bess = self.microgrid.bess
-        free_capacity = self.get_bess_free_capacity()
-        amount_to_charge = min(power_surplus, free_capacity)
         return {
             "id": str(uuid.uuid4()),
             "device_id": bess.id,
@@ -605,25 +631,22 @@ class EnergySurplusManager:
         }
 
     def prepare_sell_action(self, power_surplus):
-        if not self.is_export_possible():
+        remaining_sale_capacity = self.osd.get_remaining_sale_capacity()
+        amount_to_sell = min(power_surplus, remaining_sale_capacity)
+
+        if amount_to_sell <= self.EPSILON:
             return None
 
-        sale_limit = self.osd.get_sale_limit()
-        sold_power = self.osd.get_sold_power()
-        remaining_sale_capacity = sale_limit - sold_power
-        if remaining_sale_capacity > 0:
-            amount_to_sell = min(power_surplus, remaining_sale_capacity)
-            return {
-                "id": str(uuid.uuid4()),
-                "device_id": "OSD",
-                "device_name": "OSD",
-                "device_type": "OSD",
-                "action": f"sell:{amount_to_sell}",
-                "current_output": sold_power,
-                "proposed_output": sold_power + amount_to_sell,
-                "reduction": amount_to_sell,
-            }
-        return None
+        return {
+            "id": str(uuid.uuid4()),
+            "device_id": "OSD",
+            "device_name": "OSD",
+            "device_type": "OSD",
+            "action": f"sell:{amount_to_sell}",
+            "current_output": self.osd.get_sold_power(),
+            "proposed_output": self.osd.get_sold_power() + amount_to_sell,
+            "reduction": amount_to_sell,
+        }
 
     def prepare_limit_actions(self, power_surplus):
         actions = []

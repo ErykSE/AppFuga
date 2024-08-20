@@ -59,7 +59,7 @@ class EnergyManager:
             self.execute_action,
             self.add_to_tabu_list,
             self.is_in_tabu_list,
-            self.clean_tabu_list,  # Zmienione z self.clean_tabu na self.clean_tabu_list
+            self.clean_tabu_list,
         )
         self.deficit_manager = EnergyDeficitManager(
             microgrid, consumergrid, osd, info_logger, error_logger
@@ -97,7 +97,7 @@ class EnergyManager:
         self.operator_actions = {"pending_actions": [], "completed_actions": []}
         self.EPSILON = 1e-6  # Dodaj tę linię
         self.tabu_list = {}
-        self.tabu_duration = 35  # 5 minut w sekundach
+        self.tabu_duration = 25  # 5 minut w sekundach
         self.last_tabu_clean = time.time()
         self.tabu_clean_interval = 60  # Czyść listę co minutę
 
@@ -627,7 +627,7 @@ class EnergyManager:
 
     def generate_operator_decisions(self, actions):
         decisions = [
-            {"approved": random.choice([True, False]), "action_id": action["id"]}
+            {"approved": random.choice([True, True]), "action_id": action["id"]}
             for action in actions
         ]
         self.info_logger.info("Generated operator decisions:")
@@ -1038,7 +1038,9 @@ class EnergyManager:
             ]
             for device_id in expired:
                 del self.tabu_list[device_id]
-            self.info_logger.info(f"Cleaned tabu list. Removed {len(expired)} devices")
+            self.info_logger.info(
+                f"#################Cleaned tabu list. Removed {len(expired)} devices"
+            )
             self.last_tabu_clean = current_time
 
     def log_tabu_list(self):
