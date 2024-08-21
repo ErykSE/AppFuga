@@ -110,18 +110,18 @@
             "id": 10,
             "name": "Adjustable Device 1",
             "priority": 2,
-            "power": 84,
+            "power": 80.0,
             "switch_status": true,
-            "min_power": 50,
+            "min_power": 80,
             "max_power": 100
         },
         {
             "id": 11,
             "name": "Adjustable Device 2",
             "priority": 1,
-            "power": 999,
+            "power": 900.0,
             "switch_status": true,
-            "min_power": 50,
+            "min_power": 900,
             "max_power": 1000
         }
     ]

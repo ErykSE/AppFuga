@@ -71,3 +71,9 @@ class AdjustableDevice(EnergyPoint):
         base_dict = super().to_dict()
         base_dict.update({"min_power": self.min_power, "max_power": self.max_power})
         return base_dict
+
+    def get_actual_output(self):
+        return self.power
+
+    def get_max_output(self):
+        return self.max_power

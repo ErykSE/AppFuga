@@ -1,10 +1,1 @@
-2024-08-21 12:26:39,095 - ERROR - Communication error detected with PV Panel 1 (ID: 1). Device status is offline but meter reading indicates power generation of 15 kW.
-2024-08-21 12:27:00,297 - ERROR - Unknown device type: AdjustableDevice
-2024-08-21 12:27:00,298 - ERROR - Device not found: ID 11, type AdjustableDevice
-2024-08-21 12:27:00,298 - ERROR - Device not found for action: {'id': '5b0b16e4-eb28-41d3-8c20-004d3233f488', 'device_id': 11, 'device_name': 'Adjustable Device 2', 'device_type': 'AdjustableDevice', 'action': 'reduce:136.0', 'current_output': 999, 'proposed_output': 863.0, 'reduction': 136.0}
-2024-08-21 12:27:15,348 - ERROR - Unknown device type: AdjustableDevice
-2024-08-21 12:27:15,348 - ERROR - Device not found: ID 11, type AdjustableDevice
-2024-08-21 12:27:15,352 - ERROR - Device not found for action: {'id': '69f455c1-d3fb-4668-9afd-61a8b57e37ea', 'device_id': 11, 'device_name': 'Adjustable Device 2', 'device_type': 'AdjustableDevice', 'action': 'reduce:143.0', 'current_output': 999, 'proposed_output': 856.0, 'reduction': 143.0}
-2024-08-21 12:27:30,404 - ERROR - Unknown device type: AdjustableDevice
-2024-08-21 12:27:30,405 - ERROR - Device not found: ID 11, type AdjustableDevice
-2024-08-21 12:27:30,405 - ERROR - Device not found for action: {'id': '04c49755-c49e-4ffd-bc83-cf37c78e0b2b', 'device_id': 11, 'device_name': 'Adjustable Device 2', 'device_type': 'AdjustableDevice', 'action': 'reduce:143.0', 'current_output': 999, 'proposed_output': 856.0, 'reduction': 143.0}
+2024-08-21 15:36:02,380 - ERROR - Communication error detected with PV Panel 1 (ID: 1). Device status is offline but meter reading indicates power generation of 15 kW.

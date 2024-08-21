@@ -1028,11 +1028,20 @@ class EnergyManager:
 
     def get_device_by_id_and_type(self, device_id, device_type):
         self.info_logger.info(
-            f"Searching for device with ID: {device_id}, type: {device_type}"
+            f"[DEBUG] Type of device_id: {type(device_id)}, Value: {device_id}"
         )
+        self.info_logger.info(
+            f"[DEBUG] Type of device_type: {type(device_type)}, Value: {device_type}"
+        )
+        self.info_logger.info(
+            f"[DEBUG] Entering get_device_by_id_and_type: ID={device_id}, type={device_type}"
+        )
+
         if device_type == "OSD":
+            self.info_logger.info("[DEBUG] Returning OSD device")
             return self.osd
         if device_type == "BESS":
+            self.info_logger.info("[DEBUG] Checking BESS device")
             return (
                 self.microgrid.bess
                 if self.microgrid.bess and self.microgrid.bess.id == device_id
@@ -1049,27 +1058,54 @@ class EnergyManager:
             "NonAdjustableDevice": self.consumergrid.non_adjustable_devices,
         }
 
-        if device_type in device_lists:
-            for device in device_lists[device_type]:
-                if device.id == device_id:
-                    self.info_logger.info(f"Found device: {device.name}")
-                    return device
-        else:
-            self.error_logger.error(f"Unknown device type: {device_type}")
+        self.info_logger.info(
+            f"[DEBUG] Available device types: {list(device_lists.keys())}"
+        )
+        self.info_logger.info(f"[DEBUG] Searching for device type: {device_type}")
 
-        self.error_logger.error(f"Device not found: ID {device_id}, type {device_type}")
+        if device_type in device_lists:
+            self.info_logger.info(
+                f"[DEBUG] Device type {device_type} found in device_lists"
+            )
+            device_list = device_lists[device_type]
+            self.info_logger.info(
+                f"[DEBUG] Searching in {device_type} list. List length: {len(device_list)}"
+            )
+            for device in device_list:
+                self.info_logger.info(
+                    f"[DEBUG] Checking device: ID={device.id}, Name={device.name}, Type={type(device).__name__}"
+                )
+                if str(device.id) == str(device_id):
+                    self.info_logger.info(
+                        f"[DEBUG] Found matching device: {device.name}"
+                    )
+                    return device
+            self.info_logger.info(
+                f"[DEBUG] No device found with ID {device_id} in {device_type} list"
+            )
+        else:
+            self.error_logger.error(f"[DEBUG] Unknown device type: {device_type}")
+
+        self.error_logger.error(
+            f"[DEBUG] Device not found: ID {device_id}, type {device_type}"
+        )
         return None
 
     def execute_approved_actions(self, approved_actions):
         self.info_logger.info("Executing approved actions:")
         for action in approved_actions:
-            self.info_logger.info(f"Processing action: {action}")
+            self.info_logger.info(f"[DEBUG] Processing action: {action}")
             if action.get("executed", False):
                 self.info_logger.info(
-                    f"Action already executed: {action['action']} for {action['device_name']}"
+                    f"[DEBUG] Action already executed: {action['action']} for {action['device_name']}"
                 )
                 continue
-
+            self.info_logger.info(
+                f"[DEBUG] Action details before get_device_by_id_and_type: {action}"
+            )
+            self.info_logger.info(
+                f"[DEBUG] Consumergrid adjustable_devices: {[f'ID={d.id}, Name={d.name}, Type={type(d).__name__}' for d in self.consumergrid.adjustable_devices]}"
+            )
             device = self.get_device_by_id_and_type(
                 action["device_id"], action["device_type"]
             )
@@ -1077,7 +1113,7 @@ class EnergyManager:
                 device_name = self.get_device_name(device)
                 device_type = type(device).__name__
                 self.info_logger.info(
-                    f"Device found: {device_name}, type: {device_type}"
+                    f"[DEBUG] Device found: {device_name}, type: {device_type}"
                 )
 
                 if isinstance(device, BESS):
@@ -1120,10 +1156,12 @@ class EnergyManager:
                         )
                 else:
                     self.error_logger.error(
-                        f"Failed to execute action {action['action']} for {device_name}: {result.get('reason', 'Unknown reason')}"
+                        f"[DEBUG] Failed to execute action {action['action']} for {device_name}: {result.get('reason', 'Unknown reason')}"
                     )
             else:
-                self.error_logger.error(f"Device not found for action: {action}")
+                self.error_logger.error(
+                    f"[DEBUG] Device not found for action: {action}"
+                )
 
         self.log_system_summary()
 
@@ -1137,11 +1175,14 @@ class EnergyManager:
 
     def get_device_by_id_and_type(self, device_id, device_type):
         self.info_logger.info(
-            f"Searching for device with ID: {device_id}, type: {device_type}"
+            f"[DEBUG] Entering get_device_by_id_and_type: ID={device_id}, type={device_type}"
         )
+
         if device_type == "OSD":
+            self.info_logger.info("[DEBUG] Returning OSD device")
             return self.osd
         if device_type == "BESS":
+            self.info_logger.info("[DEBUG] Checking BESS device")
             return (
                 self.microgrid.bess
                 if self.microgrid.bess and self.microgrid.bess.id == device_id
@@ -1154,17 +1195,44 @@ class EnergyManager:
             "WindTurbine": self.microgrid.wind_turbines,
             "FuelTurbine": self.microgrid.fuel_turbines,
             "FuelCell": self.microgrid.fuel_cells,
+            "AdjustableDevice": self.consumergrid.adjustable_devices,
+            "NonAdjustableDevice": self.consumergrid.non_adjustable_devices,
         }
 
-        if device_type in device_lists:
-            for device in device_lists[device_type]:
-                if device.id == device_id:
-                    self.info_logger.info(f"Found device: {device.name}")
-                    return device
-        else:
-            self.error_logger.error(f"Unknown device type: {device_type}")
+        self.info_logger.info(
+            f"[DEBUG] Available device types: {list(device_lists.keys())}"
+        )
+        self.info_logger.info(f"[DEBUG] Searching for device type: {device_type}")
 
-        self.error_logger.error(f"Device not found: ID {device_id}, type {device_type}")
+        if device_type in device_lists:
+            self.info_logger.info(
+                f"[DEBUG] Device type {device_type} found in device_lists"
+            )
+            device_list = device_lists[device_type]
+            self.info_logger.info(
+                f"[DEBUG] Searching in {device_type} list. List length: {len(device_list)}"
+            )
+            for device in device_list:
+                self.info_logger.info(
+                    f"[DEBUG] Checking device: ID={device.id}, Name={device.name}, Type={type(device).__name__}"
+                )
+                self.info_logger.info(
+                    f"[DEBUG] Comparing: '{str(device.id)}' == '{str(device_id)}' (types: {type(device.id)} and {type(device_id)})"
+                )
+                if str(device.id) == str(device_id):
+                    self.info_logger.info(
+                        f"[DEBUG] Found matching device: {device.name}"
+                    )
+                    return device
+            self.info_logger.info(
+                f"[DEBUG] No device found with ID {device_id} in {device_type} list"
+            )
+        else:
+            self.error_logger.error(f"[DEBUG] Unknown device type: {device_type}")
+
+        self.error_logger.error(
+            f"[DEBUG] Device not found: ID {device_id}, type {device_type}"
+        )
         return None
 
     def get_device_type(self, device):

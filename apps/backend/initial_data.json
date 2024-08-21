@@ -100,7 +100,7 @@
             "priority": 2,
             "power": 84,
             "switch_status": true,
-            "min_power": 50,
+            "min_power": 80,
             "max_power": 100
         },
         {
@@ -109,7 +109,7 @@
             "priority": 1,
             "power": 999,
             "switch_status": true,
-            "min_power": 50,
+            "min_power": 900,
             "max_power": 1000
         }
     ],
