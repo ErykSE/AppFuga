@@ -16,7 +16,7 @@
             "priority": 1,
             "max_output": 120,
             "min_output": 15,
-            "actual_output": 100,
+            "actual_output": 20,
             "switch_status": true,
             "device_status": "online"
         }
@@ -28,7 +28,7 @@
             "priority": 2,
             "max_output": 200,
             "min_output": 20,
-            "actual_output": 40,
+            "actual_output": 20,
             "switch_status": true,
             "device_status": "online"
         },
@@ -50,7 +50,7 @@
             "priority": 4,
             "max_output": 300,
             "min_output": 30,
-            "actual_output": 40,
+            "actual_output": 30,
             "switch_status": true,
             "device_status": "online"
         }
@@ -82,7 +82,7 @@
             "id": 8,
             "name": "Non Adjustable Device 1",
             "priority": 1,
-            "power": 1,
+            "power": 100,
             "switch_status": true
         },
         {
@@ -97,20 +97,20 @@
         {
             "id": 10,
             "name": "Adjustable Device 1",
-            "priority": 1,
-            "power": 54,
+            "priority": 2,
+            "power": 84,
             "switch_status": true,
             "min_power": 50,
-            "max_power": 1000
+            "max_power": 100
         },
         {
             "id": 11,
             "name": "Adjustable Device 2",
-            "priority": 2,
-            "power": 44,
+            "priority": 1,
+            "power": 999,
             "switch_status": true,
-            "min_power": 40,
-            "max_power": 120
+            "min_power": 50,
+            "max_power": 1000
         }
     ],
     "power_meters": [

@@ -18,6 +18,7 @@ from apps.backend.devices.pv_class import PV
 from apps.backend.devices.wind_turbine_class import WindTurbine
 from apps.backend.devices.fuel_cell_class import FuelCell
 from apps.backend.devices.fuel_turbine_class import FuelTurbine
+from apps.backend.devices.adjustable_devices import AdjustableDevice
 
 
 class EnergyManager:
@@ -62,9 +63,16 @@ class EnergyManager:
             self.clean_tabu_list,
         )
         self.deficit_manager = EnergyDeficitManager(
-            microgrid, consumergrid, osd, info_logger, error_logger
+            microgrid,
+            consumergrid,
+            osd,
+            info_logger,
+            error_logger,
+            self.execute_action,
+            self.add_to_tabu_list,
+            self.is_in_tabu_list,
+            self.clean_tabu_list,
         )
-
         self.check_interval = check_interval
         self.running = False
         self.stop_event = Event()
@@ -398,6 +406,95 @@ class EnergyManager:
                         "amount": 0,
                         "reason": f"Failed to set output for {device_name}",
                     }
+            elif action.startswith("increase:"):
+                _, amount = action.split(":")
+                amount = float(amount)
+                current_output = device.get_actual_output()
+                new_output = min(current_output + amount, device.get_max_output())
+                success = device.set_output(new_output)
+                if success:
+                    actual_increase = new_output - current_output
+                    self.info_logger.info(
+                        f"Increased output of {device_name} from {current_output} kW to {new_output} kW"
+                    )
+                    return {"success": True, "amount": actual_increase}
+                else:
+                    return {
+                        "success": False,
+                        "amount": 0,
+                        "reason": f"Failed to increase output for {device_name}",
+                    }
+            elif action.startswith("activate:"):
+                _, amount = action.split(":")
+                amount = float(amount)
+                if device.try_activate():
+                    new_output = min(amount, device.get_max_output())
+                    success = device.set_output(new_output)
+                    if success:
+                        self.info_logger.info(
+                            f"Activated {device_name} and set output to {new_output} kW"
+                        )
+                        return {"success": True, "amount": new_output}
+                    else:
+                        return {
+                            "success": False,
+                            "amount": 0,
+                            "reason": f"Failed to set output for {device_name} after activation",
+                        }
+                else:
+                    return {
+                        "success": False,
+                        "amount": 0,
+                        "reason": f"Failed to activate {device_name}",
+                    }
+            elif action.startswith("discharge:"):
+                _, amount = action.split(":")
+                amount = float(amount)
+                if isinstance(device, BESS):
+                    discharged = device.try_discharge(amount)
+                    if discharged is not None:
+                        percent_discharged, amount_discharged = discharged
+                        self.info_logger.info(
+                            f"BESS discharged by {amount_discharged} kWh"
+                        )
+                        return {"success": True, "amount": amount_discharged}
+                    else:
+                        return {
+                            "success": False,
+                            "amount": 0,
+                            "reason": "Failed to discharge BESS",
+                        }
+                else:
+                    return {
+                        "success": False,
+                        "amount": 0,
+                        "reason": "Device is not BESS",
+                    }
+            elif action.startswith("buy:"):
+                _, amount = action.split(":")
+                amount = float(amount)
+                return self.deficit_manager.buy_energy(amount)
+            elif action.startswith("reduce:"):
+                _, amount = action.split(":")
+                amount = float(amount)
+                if isinstance(device, AdjustableDevice):
+                    actual_reduction = device.decrease_power(amount)
+                    return {"success": True, "amount": actual_reduction}
+                else:
+                    return {
+                        "success": False,
+                        "amount": 0,
+                        "reason": f"Cannot reduce power for non-adjustable device {device_name}",
+                    }
+            elif action == "deactivate":
+                if device.deactivate():
+                    return {"success": True, "amount": device.power}
+                else:
+                    return {
+                        "success": False,
+                        "amount": 0,
+                        "reason": f"Failed to deactivate {device_name}",
+                    }
             else:
                 self.error_logger.error(f"Unknown action: {action}")
                 return {
@@ -566,6 +663,26 @@ class EnergyManager:
                 "Surplus management completed. The entire surplus has been dissolved."
             )
 
+    def manage_deficit_automatic(self, power_deficit):
+        result = self.deficit_manager.handle_deficit_automatic(power_deficit)
+        managed_amount = result["amount_managed"]
+        remaining_deficit = result["remaining_deficit"]
+
+        self.info_logger.info(
+            f"Managed {managed_amount} kW of deficit. Remaining: {remaining_deficit} kW"
+        )
+
+        if remaining_deficit > 0:
+            self.info_logger.warning(
+                f"Deficit management completed. Remaining unresolved deficit: {remaining_deficit} kW"
+            )
+        else:
+            self.info_logger.info(
+                "Deficit management completed. The entire deficit has been resolved."
+            )
+
+        return result
+
     def manage_surplus_semi_automatic(self, power_surplus):
         self.info_logger.info(
             f"Managing surplus in semi-automatic mode: {power_surplus} kW"
@@ -617,6 +734,58 @@ class EnergyManager:
             "approved_actions": approved_actions,
             "initial_surplus": power_surplus,
             "remaining_surplus": remaining_surplus,
+        }
+
+    def manage_deficit_semi_automatic(self, power_deficit):
+        self.info_logger.info(
+            f"Managing deficit in semi-automatic mode: {power_deficit} kW"
+        )
+        self.log_tabu_list()
+        self.clean_tabu_list()
+
+        all_actions = self.deficit_manager.get_proposed_actions(power_deficit)
+        filtered_actions = [
+            action
+            for action in all_actions
+            if not self.is_in_tabu_list(action["device_id"])
+        ]
+
+        self.info_logger.info(
+            f"Generated {len(all_actions)} possible actions, {len(filtered_actions)} after tabu list filter"
+        )
+        self.save_pending_actions(filtered_actions)
+
+        operator_decisions = self.generate_operator_decisions(filtered_actions)
+        self.save_operator_decisions(operator_decisions)
+
+        approved_actions = []
+        remaining_deficit = power_deficit
+
+        for action, decision in zip(filtered_actions, operator_decisions):
+            if decision["approved"]:
+                approved_actions.append(action)
+                remaining_deficit -= action["reduction"]
+                self.info_logger.info(
+                    f"Action approved: {json.dumps(action, indent=2)}"
+                )
+            else:
+                self.info_logger.info(
+                    f"Action rejected: {json.dumps(action, indent=2)}"
+                )
+                self.add_to_tabu_list(action["device_id"])
+
+        self.clear_pending_actions()
+        self.clear_operator_decisions()
+
+        self.info_logger.info(
+            f"Deficit management completed. Approved actions: {len(approved_actions)}, "
+            f"Initial deficit: {power_deficit} kW, Remaining deficit: {remaining_deficit} kW, "
+            f"Current tabu list size: {len(self.tabu_list)}"
+        )
+        return {
+            "approved_actions": approved_actions,
+            "initial_deficit": power_deficit,
+            "remaining_deficit": remaining_deficit,
         }
 
     def clear_pending_actions(self):
@@ -677,22 +846,10 @@ class EnergyManager:
         return decision
 
     def manage_deficit(self, power_deficit):
-        result = self.deficit_manager.handle_deficit(power_deficit)
-        managed_amount = result["amount_managed"]
-        remaining_deficit = result["remaining_deficit"]
-
-        self.info_logger.info(
-            f"Managed {managed_amount} kW of deficit. Remaining: {remaining_deficit} kW"
-        )
-
-        if remaining_deficit > 0:
-            self.info_logger.warning(
-                f"Deficit management completed. Remaining unresolved deficit: {remaining_deficit} kW"
-            )
+        if self.operation_mode == OperationMode.AUTOMATIC:
+            return self.manage_deficit_automatic(power_deficit)
         else:
-            self.info_logger.info(
-                "Deficit management completed. The entire deficit has been resolved."
-            )
+            return self.manage_deficit_semi_automatic(power_deficit)
 
     def clear_operator_decision(self):
         with open(self.operator_decisions_path, "w") as file:
@@ -870,23 +1027,38 @@ class EnergyManager:
         return {"success": False, "amount": 0}
 
     def get_device_by_id_and_type(self, device_id, device_type):
+        self.info_logger.info(
+            f"Searching for device with ID: {device_id}, type: {device_type}"
+        )
         if device_type == "OSD":
             return self.osd
-        elif device_type == "BESS":
+        if device_type == "BESS":
             return (
                 self.microgrid.bess
                 if self.microgrid.bess and self.microgrid.bess.id == device_id
                 else None
             )
+
+        device_lists = {
+            "PV": self.microgrid.pv_panels,
+            "PVPanel": self.microgrid.pv_panels,
+            "WindTurbine": self.microgrid.wind_turbines,
+            "FuelTurbine": self.microgrid.fuel_turbines,
+            "FuelCell": self.microgrid.fuel_cells,
+            "AdjustableDevice": self.consumergrid.adjustable_devices,
+            "NonAdjustableDevice": self.consumergrid.non_adjustable_devices,
+        }
+
+        if device_type in device_lists:
+            for device in device_lists[device_type]:
+                if device.id == device_id:
+                    self.info_logger.info(f"Found device: {device.name}")
+                    return device
         else:
-            return next(
-                (
-                    device
-                    for device in self.microgrid.get_all_devices()
-                    if device.id == device_id
-                ),
-                None,
-            )
+            self.error_logger.error(f"Unknown device type: {device_type}")
+
+        self.error_logger.error(f"Device not found: ID {device_id}, type {device_type}")
+        return None
 
     def execute_approved_actions(self, approved_actions):
         self.info_logger.info("Executing approved actions:")

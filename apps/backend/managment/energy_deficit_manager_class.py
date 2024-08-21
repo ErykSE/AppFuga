@@ -1,3 +1,4 @@
+import uuid
 from apps.backend.managment.deficit_action import DeficitAction
 from apps.backend.devices.adjustable_devices import AdjustableDevice
 from apps.backend.devices.non_adjustable import NonAdjustableDevice
@@ -22,15 +23,30 @@ class EnergyDeficitManager:
         previous_discharge_decision (bool): Flaga przechowująca poprzednią decyzję o rozładowaniu dla histerezy.
     """
 
-    def __init__(self, microgrid, consumergrid, osd, info_logger, error_logger):
+    def __init__(
+        self,
+        microgrid,
+        consumergrid,
+        osd,
+        info_logger,
+        error_logger,
+        execute_action_func,
+        add_to_tabu_func,
+        is_in_tabu_func,
+        clean_tabu_func,
+    ):
         self.microgrid = microgrid
         self.consumergrid = consumergrid
         self.osd = osd
         self.info_logger = info_logger
         self.error_logger = error_logger
-        self.previous_discharge_decision = False  # Domyślna wartość
+        self.execute_action_func = execute_action_func
+        self.add_to_tabu = add_to_tabu_func
+        self.is_in_tabu = is_in_tabu_func
+        self.clean_tabu_list = clean_tabu_func
+        self.previous_discharge_decision = False
 
-    def handle_deficit(self, power_deficit):
+    def handle_deficit_automatic(self, power_deficit):
         """
         Zarządza deficytem energii poprzez wykonywanie odpowiednich działań.
 
@@ -603,3 +619,161 @@ class EnergyDeficitManager:
             if activated_power >= power_deficit and not can_handle_surplus:
                 break
         return {"success": activated_power > 0, "amount": activated_power}
+
+    def get_proposed_actions(self, power_deficit):
+        self.info_logger.info(f"Proposing actions for deficit: {power_deficit} kW")
+        actions = []
+        remaining_deficit = power_deficit
+
+        # 1. Zwiększenie mocy aktywnych urządzeń
+        increase_actions = self.prepare_increase_output_actions(remaining_deficit)
+        actions.extend(increase_actions)
+        remaining_deficit -= sum(action["reduction"] for action in increase_actions)
+
+        # 2. Aktywacja nieaktywnych urządzeń
+        if remaining_deficit > 0:
+            activate_actions = self.prepare_activate_device_actions(remaining_deficit)
+            actions.extend(activate_actions)
+            remaining_deficit -= sum(action["reduction"] for action in activate_actions)
+
+        # 3. Rozładowanie BESS lub zakup energii
+        if remaining_deficit > 0:
+            bess_available = self.is_bess_available()
+            can_buy_energy = self.can_buy_energy()
+
+            if bess_available and can_buy_energy:
+                bess_energy = self.microgrid.bess.get_charge_level()
+                current_buy_price = self.osd.get_current_buy_price()
+                if self.should_discharge_bess(
+                    remaining_deficit, bess_energy, current_buy_price
+                ):
+                    bess_action = self.prepare_bess_discharge_action(remaining_deficit)
+                    if bess_action:
+                        actions.append(bess_action)
+                        remaining_deficit -= bess_action["reduction"]
+                else:
+                    buy_action = self.prepare_buy_energy_action(remaining_deficit)
+                    if buy_action:
+                        actions.append(buy_action)
+                        remaining_deficit -= buy_action["reduction"]
+            elif bess_available:
+                bess_action = self.prepare_bess_discharge_action(remaining_deficit)
+                if bess_action:
+                    actions.append(bess_action)
+                    remaining_deficit -= bess_action["reduction"]
+            elif can_buy_energy:
+                buy_action = self.prepare_buy_energy_action(remaining_deficit)
+                if buy_action:
+                    actions.append(buy_action)
+                    remaining_deficit -= buy_action["reduction"]
+
+        # 4. Ograniczenie zużycia jako ostateczność
+        if remaining_deficit > 0:
+            limit_actions = self.prepare_limit_consumption_actions(remaining_deficit)
+            actions.extend(limit_actions)
+
+        return actions
+
+    def prepare_buy_energy_action(self, power_deficit):
+        remaining_purchase_capacity = (
+            self.osd.get_purchase_limit() - self.osd.get_bought_power()
+        )
+        amount_to_buy = min(power_deficit, remaining_purchase_capacity)
+        return {
+            "id": str(uuid.uuid4()),
+            "device_id": "OSD",
+            "device_name": "OSD",
+            "device_type": "OSD",
+            "action": f"buy:{amount_to_buy}",
+            "current_output": self.osd.get_bought_power(),
+            "proposed_output": self.osd.get_bought_power() + amount_to_buy,
+            "reduction": amount_to_buy,
+        }
+
+    def prepare_limit_consumption_actions(self, power_deficit):
+        actions = []
+        remaining_deficit = power_deficit
+        all_devices = sorted(
+            self.consumergrid.adjustable_devices
+            + self.consumergrid.non_adjustable_devices,
+            key=lambda x: (not isinstance(x, AdjustableDevice), x.priority),
+        )
+
+        for device in all_devices:
+            if remaining_deficit <= 0:
+                break
+
+            if isinstance(device, AdjustableDevice) and device.switch_status:
+                reducible_power = device.power - device.min_power
+                reduction = min(reducible_power, remaining_deficit)
+                if reduction > 0:
+                    actions.append(
+                        {
+                            "id": str(uuid.uuid4()),
+                            "device_id": device.id,
+                            "device_name": device.name,
+                            "device_type": "AdjustableDevice",  # Zmiana tutaj
+                            "action": f"reduce:{reduction}",
+                            "current_output": device.power,
+                            "proposed_output": device.power - reduction,
+                            "reduction": reduction,
+                        }
+                    )
+                    remaining_deficit -= reduction
+            elif isinstance(device, NonAdjustableDevice) and device.switch_status:
+                if device.power <= remaining_deficit:
+                    actions.append(
+                        {
+                            "id": str(uuid.uuid4()),
+                            "device_id": device.id,
+                            "device_name": device.name,
+                            "device_type": "NonAdjustableDevice",
+                            "action": "deactivate",
+                            "current_output": device.power,
+                            "proposed_output": 0,
+                            "reduction": device.power,
+                        }
+                    )
+                    remaining_deficit -= device.power
+
+        return actions
+
+    def prepare_increase_output_actions(self, power_deficit):
+        actions = []
+        for device in self.microgrid.get_active_devices():
+            if device.get_actual_output() < device.get_max_output():
+                increase = min(
+                    device.get_max_output() - device.get_actual_output(), power_deficit
+                )
+                actions.append(
+                    {
+                        "id": str(uuid.uuid4()),
+                        "device_id": device.id,
+                        "device_name": device.name,
+                        "device_type": type(device).__name__,
+                        "action": f"increase:{increase}",
+                        "current_output": device.get_actual_output(),
+                        "proposed_output": device.get_actual_output() + increase,
+                        "reduction": increase,
+                    }
+                )
+        return actions
+
+    def prepare_activate_device_actions(self, power_deficit):
+        actions = []
+        for device in self.microgrid.get_inactive_devices():
+            if power_deficit > 0:
+                actions.append(
+                    {
+                        "id": str(uuid.uuid4()),
+                        "device_id": device.id,
+                        "device_name": device.name,
+                        "device_type": type(device).__name__,
+                        "action": f"activate:{min(device.get_max_output(), power_deficit)}",
+                        "current_output": 0,
+                        "proposed_output": min(device.get_max_output(), power_deficit),
+                        "reduction": min(device.get_max_output(), power_deficit),
+                    }
+                )
+                power_deficit -= min(device.get_max_output(), power_deficit)
+        return actions
