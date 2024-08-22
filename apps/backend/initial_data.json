@@ -90,7 +90,7 @@
             "name": "Non Adjustable Device 2",
             "priority": 2,
             "power": 10,
-            "switch_status": false
+            "switch_status": true
         }
     ],
     "adjustable_devices": [

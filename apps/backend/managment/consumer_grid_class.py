@@ -127,3 +127,15 @@ class EnergyConsumerGrid:
         for device_type in ["non_adjustable_device", "adjustable_device"]:
             for device_data in data.get(f"{device_type}s", []):
                 self.update_device(device_data, device_type)
+
+        print(f"[DEBUG] Loaded devices:")
+        print(f"[DEBUG] Adjustable devices: {len(self.adjustable_devices)}")
+        for device in self.adjustable_devices:
+            print(
+                f"[DEBUG]   - {device.name}: Power={device.power}, Status={device.switch_status}"
+            )
+        print(f"[DEBUG] Non-adjustable devices: {len(self.non_adjustable_devices)}")
+        for device in self.non_adjustable_devices:
+            print(
+                f"[DEBUG]   - {device.name}: Power={device.power}, Status={device.switch_status}"
+            )

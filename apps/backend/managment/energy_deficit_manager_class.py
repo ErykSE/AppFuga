@@ -311,22 +311,86 @@ class EnergyDeficitManager:
                 f"Iteration {iteration}, remaining deficit: {remaining_deficit} kW"
             )
 
-            action = self.decide_deficit_action(remaining_deficit)
-            self.info_logger.info(f"Selected action: {action}")
-            result = self.execute_action(action, remaining_deficit)
+            bess_available = self.is_bess_available()
+            can_buy_energy = self.can_buy_energy()
 
-            if result["success"]:
-                total_managed += result["amount"]
-                remaining_deficit -= result["amount"]
-                self.info_logger.info(
-                    f"Action {action} managed {result['amount']} kW. Remaining deficit: {remaining_deficit} kW"
+            if bess_available and can_buy_energy:
+                bess_energy = self.microgrid.bess.get_charge_level()
+                current_buy_price = self.osd.get_current_buy_price()
+
+                primary_action = self.decide_deficit_action(remaining_deficit)
+                secondary_action = (
+                    DeficitAction.DISCHARGE_BESS
+                    if primary_action == DeficitAction.BUY_ENERGY
+                    else DeficitAction.BUY_ENERGY
                 )
+
+                # Wykonaj pierwszą akcję
+                result = self.execute_action(primary_action, remaining_deficit)
+                if result["success"]:
+                    total_managed += result["amount"]
+                    remaining_deficit -= result["amount"]
+                    self.info_logger.info(
+                        f"Primary action {primary_action} managed {result['amount']} kW. Remaining deficit: {remaining_deficit} kW"
+                    )
+
+                # Jeśli nadal jest deficyt, wykonaj drugą akcję
+                if remaining_deficit > 0:
+                    result = self.execute_action(secondary_action, remaining_deficit)
+                    if result["success"]:
+                        total_managed += result["amount"]
+                        remaining_deficit -= result["amount"]
+                        self.info_logger.info(
+                            f"Secondary action {secondary_action} managed {result['amount']} kW. Remaining deficit: {remaining_deficit} kW"
+                        )
+
+            elif bess_available:
+                result = self.execute_action(
+                    DeficitAction.DISCHARGE_BESS, remaining_deficit
+                )
+                if result["success"]:
+                    total_managed += result["amount"]
+                    remaining_deficit -= result["amount"]
+                    self.info_logger.info(
+                        f"BESS discharge managed {result['amount']} kW. Remaining deficit: {remaining_deficit} kW"
+                    )
+
+            elif can_buy_energy:
+                result = self.execute_action(
+                    DeficitAction.BUY_ENERGY, remaining_deficit
+                )
+                if result["success"]:
+                    total_managed += result["amount"]
+                    remaining_deficit -= result["amount"]
+                    self.info_logger.info(
+                        f"Energy purchase managed {result['amount']} kW. Remaining deficit: {remaining_deficit} kW"
+                    )
+
             else:
-                self.info_logger.warning(
-                    f"Action {action} has failed. Reason: {result.get('error', 'Nieznany')}"
+                # Tylko jeśli nie można ani rozładować BESS, ani kupić energii, próbujemy ograniczyć zużycie
+                result = self.execute_action(
+                    DeficitAction.LIMIT_CONSUMPTION, remaining_deficit
                 )
-                if action == DeficitAction.LIMIT_CONSUMPTION:
-                    break
+                if result["success"]:
+                    total_managed += result["amount"]
+                    remaining_deficit -= result["amount"]
+                    self.info_logger.info(
+                        f"Consumption limitation managed {result['amount']} kW. Remaining deficit: {remaining_deficit} kW"
+                    )
+                    if "devices_affected" in result:
+                        for device in result["devices_affected"]:
+                            self.info_logger.info(f"  - {device}")
+                else:
+                    self.info_logger.warning(
+                        f"Failed to limit consumption. Reason: {result.get('error', 'Unknown')}"
+                    )
+                    if remaining_deficit == result.get(
+                        "remaining_deficit", remaining_deficit
+                    ):
+                        self.info_logger.error(
+                            "No further reduction possible. Exiting loop."
+                        )
+                        break
 
             self.info_logger.info(
                 f"After iteration {iteration}: A total managed {total_managed} kW, remaining deficit {remaining_deficit} kW"
@@ -366,14 +430,22 @@ class EnergyDeficitManager:
         return DeficitAction.LIMIT_CONSUMPTION
 
     def execute_action(self, action, deficit):
-        if action == DeficitAction.DISCHARGE_BESS:
-            return self.discharge_bess(deficit)
-        elif action == DeficitAction.BUY_ENERGY:
-            return self.buy_energy(deficit)
-        elif action == DeficitAction.LIMIT_CONSUMPTION:
-            return self.limit_consumption(deficit)
-        else:
-            raise ValueError(f"Unknown action: {action}")
+        self.info_logger.info(f"Executing action: {action} for deficit: {deficit} kW")
+        try:
+            if action == DeficitAction.DISCHARGE_BESS:
+                result = self.discharge_bess(deficit)
+            elif action == DeficitAction.BUY_ENERGY:
+                result = self.buy_energy(deficit)
+            elif action == DeficitAction.LIMIT_CONSUMPTION:
+                result = self.limit_consumption(deficit)
+            else:
+                raise ValueError(f"Unknown action: {action}")
+
+            self.info_logger.info(f"Action result: {result}")
+            return result
+        except Exception as e:
+            self.error_logger.error(f"Error executing action {action}: {str(e)}")
+            return {"success": False, "amount": 0, "error": str(e)}
 
     def is_bess_available(self):
 
@@ -474,22 +546,9 @@ class EnergyDeficitManager:
         return {"success": False, "amount": 0}
 
     def limit_consumption(self, power_deficit):
-        """
-        Ogranicza zużycie energii w celu pokrycia deficytu.
-
-        Ta metoda redukuje moc urządzeń odbiorczych, zaczynając od
-        urządzeń o najniższym priorytecie, aż do osiągnięcia wymaganej
-        redukcji lub rozważenia wszystkich urządzeń.
-
-        Argumenty:
-            power_deficit (float): Ilość deficytu energii do pokrycia poprzez ograniczenie zużycia w kW.
-
-        Zwraca:
-            dict: Słownik zawierający informacje o sukcesie operacji,
-                  ilości zredukowanej mocy i ewentualnym pozostałym deficycie.
-        """
         self.info_logger.info(f"Attempting to limit consumption by {power_deficit} kW")
         total_reduced = 0
+        devices_affected = []
 
         all_devices = sorted(
             self.consumergrid.adjustable_devices
@@ -497,36 +556,66 @@ class EnergyDeficitManager:
             key=lambda x: (not isinstance(x, AdjustableDevice), x.priority),
         )
 
+        self.info_logger.info(f"Total devices: {len(all_devices)}")
+        self.info_logger.info(
+            f"Adjustable devices: {len(self.consumergrid.adjustable_devices)}"
+        )
+        self.info_logger.info(
+            f"Non-adjustable devices: {len(self.consumergrid.non_adjustable_devices)}"
+        )
+
         for device in all_devices:
+            self.info_logger.info(
+                f"Considering device: {device.name}, Type: {type(device).__name__}, Power: {device.get_current_power()}, Switch status: {device.switch_status}"
+            )
+
             if total_reduced >= power_deficit:
                 break
 
             if isinstance(device, AdjustableDevice) and device.switch_status:
-                reducible_power = device.power - device.min_power
+                reducible_power = device.get_current_power() - device.min_power
                 reduction_needed = min(reducible_power, power_deficit - total_reduced)
                 if reduction_needed > 0:
                     actual_reduction = device.decrease_power(reduction_needed)
                     total_reduced += actual_reduction
+                    devices_affected.append(
+                        f"Reduced {device.name} power by {actual_reduction} kW"
+                    )
                     self.info_logger.info(
                         f"Reduced {device.name} power by {actual_reduction} kW"
                     )
 
             elif isinstance(device, NonAdjustableDevice) and device.switch_status:
-                if total_reduced + device.power <= power_deficit:
-                    device.deactivate()
-                    total_reduced += device.power
-                    self.info_logger.info(
-                        f"Deactivated {device.name}, saved {device.power} kW"
+                saved_power = device.get_current_power()
+                if device.deactivate():
+                    total_reduced += saved_power
+                    devices_affected.append(
+                        f"Deactivated {device.name}, saved {saved_power} kW"
                     )
+                    self.info_logger.info(
+                        f"Deactivated {device.name}, saved {saved_power} kW"
+                    )
+                else:
+                    self.info_logger.warning(f"Failed to deactivate {device.name}")
 
-        remaining_deficit = power_deficit - total_reduced
+        remaining_deficit = max(0, power_deficit - total_reduced)
         self.info_logger.info(f"Total power reduced: {total_reduced} kW")
         self.info_logger.info(f"Remaining deficit: {remaining_deficit} kW")
+
+        if devices_affected:
+            self.info_logger.info("Devices affected:")
+            for device in devices_affected:
+                self.info_logger.info(f"  - {device}")
+        else:
+            self.info_logger.warning(
+                "No devices were affected during consumption limitation"
+            )
 
         return {
             "success": total_reduced > 0,
             "amount": total_reduced,
             "remaining_deficit": remaining_deficit,
+            "devices_affected": devices_affected,
         }
 
     def should_discharge_bess(self, deficit, bess_energy, current_buy_price):

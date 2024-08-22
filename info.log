@@ -1,348 +1,519 @@
-2024-08-22 11:26:37,898 - INFO - Attempting to update pv_panel: {'id': 1, 'name': 'PV Panel 1', 'priority': 1, 'max_output': 100, 'min_output': 10, 'actual_output': 0, 'switch_status': False, 'device_status': 'offline'}
-2024-08-22 11:26:37,899 - INFO - Successfully created pv_panel instance: PV Panel 1
-2024-08-22 11:26:37,899 - INFO - Added pv_panel: PV Panel 1 (Status: offline)
-2024-08-22 11:26:37,899 - INFO - Attempting to update pv_panel: {'id': 2, 'name': 'PV Panel 2', 'priority': 1, 'max_output': 120, 'min_output': 15, 'actual_output': 20, 'switch_status': True, 'device_status': 'online'}
-2024-08-22 11:26:37,899 - INFO - Successfully created pv_panel instance: PV Panel 2
-2024-08-22 11:26:37,900 - INFO - Added pv_panel: PV Panel 2 (Status: online)
-2024-08-22 11:26:37,900 - INFO - Attempting to update wind_turbine: {'id': 3, 'name': 'Wind Turbine 1', 'priority': 2, 'max_output': 200, 'min_output': 20, 'actual_output': 20, 'switch_status': True, 'device_status': 'online'}
-2024-08-22 11:26:37,900 - INFO - Successfully created wind_turbine instance: Wind Turbine 1
-2024-08-22 11:26:37,900 - INFO - Added wind_turbine: Wind Turbine 1 (Status: online)
-2024-08-22 11:26:37,900 - INFO - Attempting to update wind_turbine: {'id': 4, 'name': 'Wind Turbine 2', 'priority': 2, 'max_output': 180, 'min_output': 20, 'actual_output': 0, 'switch_status': False, 'device_status': 'offline'}
-2024-08-22 11:26:37,901 - INFO - Successfully created wind_turbine instance: Wind Turbine 2
-2024-08-22 11:26:37,901 - INFO - Added wind_turbine: Wind Turbine 2 (Status: offline)
-2024-08-22 11:26:37,901 - INFO - Attempting to update fuel_turbine: {'id': 5, 'name': 'Fuel Turbine 1', 'priority': 4, 'max_output': 300, 'min_output': 30, 'actual_output': 30, 'switch_status': True, 'device_status': 'online'}
-2024-08-22 11:26:37,901 - INFO - Successfully created fuel_turbine instance: Fuel Turbine 1
-2024-08-22 11:26:37,901 - INFO - Added fuel_turbine: Fuel Turbine 1 (Status: online)
-2024-08-22 11:26:37,902 - INFO - Attempting to update fuel_cell: {'id': 6, 'name': 'Fuel Cell 1', 'priority': 3, 'max_output': 150, 'min_output': 15, 'actual_output': 25, 'switch_status': True, 'device_status': 'online'}
-2024-08-22 11:26:37,902 - INFO - Successfully created fuel_cell instance: Fuel Cell 1
-2024-08-22 11:26:37,902 - INFO - Added fuel_cell: Fuel Cell 1 (Status: online)
-2024-08-22 11:26:37,902 - INFO - Attempting to update bess: {'id': 7, 'name': 'BESS 1', 'capacity': 350, 'charge_level': 150, 'switch_status': True, 'device_status': 'online'}
-2024-08-22 11:26:37,903 - INFO - Successfully created bess instance: BESS 1
-2024-08-22 11:26:37,903 - INFO - New BESS added: BESS 1
-2024-08-22 11:26:37,903 - INFO - Added power meter: Meter for PV Panel 1 for device ID: 1
-2024-08-22 11:26:37,903 - INFO - Loaded power meter: Meter for PV Panel 1, Status: online, Reading: 15 kW, Device ID: 1
-2024-08-22 11:26:37,903 - INFO - Added power meter: Meter for PV Panel 2 for device ID: 2
-2024-08-22 11:26:37,903 - INFO - Loaded power meter: Meter for PV Panel 2, Status: online, Reading: 98 kW, Device ID: 2
-2024-08-22 11:26:37,904 - INFO - Added power meter: Meter for Wind Turbine 1 for device ID: 3
-2024-08-22 11:26:37,904 - INFO - Loaded power meter: Meter for Wind Turbine 1, Status: online, Reading: 42 kW, Device ID: 3
-2024-08-22 11:26:37,904 - INFO - Added power meter: Meter for Fuel Turbine 1 for device ID: 5
-2024-08-22 11:26:37,904 - INFO - Loaded power meter: Meter for Fuel Turbine 1, Status: online, Reading: 38 kW, Device ID: 5
-2024-08-22 11:26:37,904 - INFO - Data loaded successfully.
-2024-08-22 11:26:37,909 - INFO - Energy management started
-2024-08-22 11:26:37,910 - INFO - Loaded operation mode: automatic
-2024-08-22 11:26:37,910 - INFO - Attempting to update pv_panel: {'id': 1, 'name': 'PV Panel 1', 'priority': 1, 'max_output': 100, 'min_output': 10, 'actual_output': 0, 'switch_status': False, 'device_status': 'offline'}
-2024-08-22 11:26:37,910 - INFO - Pv_panel PV Panel 1 updated successfully.
-2024-08-22 11:26:37,910 - INFO - Attempting to update pv_panel: {'id': 2, 'name': 'PV Panel 2', 'priority': 1, 'max_output': 120, 'min_output': 15, 'actual_output': 20, 'switch_status': True, 'device_status': 'online'}
-2024-08-22 11:26:37,911 - INFO - Pv_panel PV Panel 2 updated successfully.
-2024-08-22 11:26:37,911 - INFO - Attempting to update wind_turbine: {'id': 3, 'name': 'Wind Turbine 1', 'priority': 2, 'max_output': 200, 'min_output': 20, 'actual_output': 20, 'switch_status': True, 'device_status': 'online'}
-2024-08-22 11:26:37,911 - INFO - Wind_turbine Wind Turbine 1 updated successfully.
-2024-08-22 11:26:37,911 - INFO - Attempting to update wind_turbine: {'id': 4, 'name': 'Wind Turbine 2', 'priority': 2, 'max_output': 180, 'min_output': 20, 'actual_output': 0, 'switch_status': False, 'device_status': 'offline'}
-2024-08-22 11:26:37,911 - INFO - Wind_turbine Wind Turbine 2 updated successfully.
-2024-08-22 11:26:37,911 - INFO - Attempting to update fuel_turbine: {'id': 5, 'name': 'Fuel Turbine 1', 'priority': 4, 'max_output': 300, 'min_output': 30, 'actual_output': 30, 'switch_status': True, 'device_status': 'online'}
-2024-08-22 11:26:37,912 - INFO - Fuel_turbine Fuel Turbine 1 updated successfully.
-2024-08-22 11:26:37,912 - INFO - Attempting to update fuel_cell: {'id': 6, 'name': 'Fuel Cell 1', 'priority': 3, 'max_output': 150, 'min_output': 15, 'actual_output': 25, 'switch_status': True, 'device_status': 'online'}
-2024-08-22 11:26:37,912 - INFO - Fuel_cell Fuel Cell 1 updated successfully.
-2024-08-22 11:26:37,912 - INFO - Attempting to update bess: {'id': 7, 'name': 'BESS 1', 'capacity': 350, 'charge_level': 150, 'switch_status': True, 'device_status': 'online'}
-2024-08-22 11:26:37,912 - INFO - BESS BESS 1 updated successfully.
-2024-08-22 11:26:37,912 - INFO - Added power meter: Meter for PV Panel 1 for device ID: 1
-2024-08-22 11:26:37,913 - INFO - Loaded power meter: Meter for PV Panel 1, Status: online, Reading: 15 kW, Device ID: 1
-2024-08-22 11:26:37,913 - INFO - Added power meter: Meter for PV Panel 2 for device ID: 2
-2024-08-22 11:26:37,913 - INFO - Loaded power meter: Meter for PV Panel 2, Status: online, Reading: 98 kW, Device ID: 2
-2024-08-22 11:26:37,913 - INFO - Added power meter: Meter for Wind Turbine 1 for device ID: 3
-2024-08-22 11:26:37,913 - INFO - Loaded power meter: Meter for Wind Turbine 1, Status: online, Reading: 42 kW, Device ID: 3
-2024-08-22 11:26:37,913 - INFO - Added power meter: Meter for Fuel Turbine 1 for device ID: 5
-2024-08-22 11:26:37,913 - INFO - Loaded power meter: Meter for Fuel Turbine 1, Status: online, Reading: 38 kW, Device ID: 5
-2024-08-22 11:26:37,914 - INFO - Data loaded successfully.
-2024-08-22 11:26:37,918 - INFO - Loaded initial data
-2024-08-22 11:26:37,918 - INFO - Starting a new iteration in automatic mode
-2024-08-22 11:26:37,918 - INFO - Starting device update based on meter readings
-2024-08-22 11:26:37,919 - INFO - Checking 6 devices for updates based on meter readings
-2024-08-22 11:26:37,919 - INFO - Checking device PV Panel 1 (ID: 1). Device status: offline, Meter status: online, Meter reading: 15 kW
-2024-08-22 11:26:37,919 - WARNING - Updated PV Panel 1 status to online and set actual output to 15 kW based on meter reading. Please check the device communication.
-2024-08-22 11:26:37,919 - INFO - Checking device PV Panel 2 (ID: 2). Device status: online, Meter status: online, Meter reading: 98 kW
-2024-08-22 11:26:37,920 - INFO - Checking device Wind Turbine 1 (ID: 3). Device status: online, Meter status: online, Meter reading: 42 kW
-2024-08-22 11:26:37,920 - INFO - No meter found for device Wind Turbine 2 (ID: 4)
-2024-08-22 11:26:37,920 - INFO - Checking device Fuel Turbine 1 (ID: 5). Device status: online, Meter status: online, Meter reading: 38 kW
-2024-08-22 11:26:37,920 - INFO - No meter found for device Fuel Cell 1 (ID: 6)
-2024-08-22 11:26:37,920 - INFO - Updated 1 devices based on meter readings
-2024-08-22 11:26:37,920 - INFO - Updated device: PV Panel 1 (ID: 1), New status: online, New output: 15 kW
-2024-08-22 11:26:37,921 - INFO - System status summary:
-2024-08-22 11:26:37,921 - INFO - Total generated power: 110 kW
-2024-08-22 11:26:37,921 - INFO - Total demand: 1193 kW
-2024-08-22 11:26:37,921 - INFO - Number of active generating devices: 5
-2024-08-22 11:26:37,921 - INFO - Number of inactive generating devices: 1
-2024-08-22 11:26:37,922 - INFO - Active generating devices:
-2024-08-22 11:26:37,922 - INFO -   - PV Panel 1: 15 kW / 100 kW
-2024-08-22 11:26:37,922 - INFO -   - PV Panel 2: 20 kW / 120 kW
-2024-08-22 11:26:37,922 - INFO -   - Wind Turbine 1: 20 kW / 200 kW
-2024-08-22 11:26:37,923 - INFO -   - Fuel Turbine 1: 30 kW / 300 kW
-2024-08-22 11:26:37,923 - INFO -   - Fuel Cell 1: 25 kW / 150 kW
-2024-08-22 11:26:37,923 - INFO - Inactive generating devices:
-2024-08-22 11:26:37,923 - INFO -   - Wind Turbine 2: max output 180 kW
-2024-08-22 11:26:37,923 - INFO - BESS charge level: 150 kWh / 350 kWh
-2024-08-22 11:26:37,923 - INFO - Energy purchase: Available (Limit: 300 kWh, Current: 150 kWh)
-2024-08-22 11:26:37,924 - INFO - Energy sale: Available (Limit: 200 kWh, Current: 50 kWh)
-2024-08-22 11:26:37,924 - INFO - BESS charge level before actions: 150.00 kWh
-2024-08-22 11:26:37,924 - INFO - Total generated power: 110 kW
-2024-08-22 11:26:37,924 - INFO - Total demand power: 1193 kW
-2024-08-22 11:26:37,924 - INFO - Power deficit detected: 1083 kW - starting deficit management
-2024-08-22 11:26:37,924 - INFO - Start managing power deficit:: 1083 kW
-2024-08-22 11:26:37,925 - INFO - Current output: 110 kW
-2024-08-22 11:26:37,925 - INFO - Max potential output: 1050 kW
-2024-08-22 11:26:37,925 - INFO - Power deficit: 1083 kW
-2024-08-22 11:26:37,925 - INFO - Potential surplus: -143 kW
-2024-08-22 11:26:37,925 - INFO - BESS free capacity: 200 kWh
-2024-08-22 11:26:37,925 - INFO - Available sale capacity: 150 kWh
-2024-08-22 11:26:37,925 - INFO - Total available capacity: 350 kWh
-2024-08-22 11:26:37,926 - INFO - Handleable additional power: -143 kW
-2024-08-22 11:26:37,926 - INFO - Current output: 110 kW
-2024-08-22 11:26:37,926 - INFO - Max potential output: 1050 kW
-2024-08-22 11:26:37,926 - INFO - Power deficit: 1083 kW
-2024-08-22 11:26:37,926 - INFO - Handleable power: -143 kW
-2024-08-22 11:26:37,926 - INFO - Target output: 1050 kW
-2024-08-22 11:26:37,927 - INFO - Increased power of PV Panel 1 (priority: 1) from 15 kW to 100 kW
-2024-08-22 11:26:37,927 - INFO - Increased power of PV Panel 2 (priority: 1) from 20 kW to 120 kW
-2024-08-22 11:26:37,928 - INFO - Increased power of Wind Turbine 1 (priority: 2) from 20 kW to 200 kW
-2024-08-22 11:26:37,928 - INFO - Increased power of Fuel Cell 1 (priority: 3) from 25 kW to 150 kW
-2024-08-22 11:26:37,929 - INFO - Increased power of Fuel Turbine 1 (priority: 4) from 30 kW to 300 kW
-2024-08-22 11:26:42,931 - INFO - Activated Wind Turbine 2 (priority: 2) and set power to 180 kW
-2024-08-22 11:26:42,931 - INFO - In total, power was increased by 940 kW
-2024-08-22 11:26:42,931 - INFO - Final output: 1050 kW
-2024-08-22 11:26:42,932 - INFO - Power was ordered by increasing production: 940 kW
-2024-08-22 11:26:42,932 - INFO - Remaining deficit after maximisation of equipment operation: 143 kW
-2024-08-22 11:26:42,932 - INFO - Iteration 1, remaining deficit: 143 kW
-2024-08-22 11:26:42,933 - INFO - Start of the decision-making function concerning the discharge or purchase 
-2024-08-22 11:26:42,933 - INFO - Selected action: DeficitAction.DISCHARGE_BESS
-2024-08-22 11:26:42,934 - INFO - Attempting to discharge BESS by 143 kW
-2024-08-22 11:26:43,934 - INFO - BESS was discharged by 143.0 kWh
-2024-08-22 11:26:43,934 - INFO - BESS charge level: before 150 kWh, after 7.0 kWh
-2024-08-22 11:26:43,934 - INFO - Action DeficitAction.DISCHARGE_BESS managed 143.0 kW. Remaining deficit: 0.0 kW
-2024-08-22 11:26:43,935 - INFO - After iteration 1: A total managed 143.0 kW, remaining deficit 0.0 kW
-2024-08-22 11:26:43,935 - INFO - Deficit management completed. A total of managed: 1083.0 kW. Remaining deficit: 0.0 kW
-2024-08-22 11:26:43,935 - INFO - Managed 1083.0 kW of deficit. Remaining: 0.0 kW
-2024-08-22 11:26:43,935 - INFO - Deficit management completed. The entire deficit has been resolved.
-2024-08-22 11:26:43,935 - INFO - System status summary:
-2024-08-22 11:26:43,936 - INFO - Total generated power: 1050 kW
-2024-08-22 11:26:43,936 - INFO - Total demand: 1193 kW
-2024-08-22 11:26:43,936 - INFO - Number of active generating devices: 6
-2024-08-22 11:26:43,936 - INFO - Number of inactive generating devices: 0
-2024-08-22 11:26:43,937 - INFO - Active generating devices:
-2024-08-22 11:26:43,937 - INFO -   - PV Panel 1: 100 kW / 100 kW
-2024-08-22 11:26:43,937 - INFO -   - PV Panel 2: 120 kW / 120 kW
-2024-08-22 11:26:43,937 - INFO -   - Wind Turbine 1: 200 kW / 200 kW
-2024-08-22 11:26:43,938 - INFO -   - Wind Turbine 2: 180 kW / 180 kW
-2024-08-22 11:26:43,938 - INFO -   - Fuel Turbine 1: 300 kW / 300 kW
-2024-08-22 11:26:43,938 - INFO -   - Fuel Cell 1: 150 kW / 150 kW
-2024-08-22 11:26:43,938 - INFO - BESS charge level: 7.0 kWh / 350 kWh
-2024-08-22 11:26:43,939 - INFO - Energy purchase: Available (Limit: 300 kWh, Current: 150 kWh)
-2024-08-22 11:26:43,939 - INFO - Energy sale: Available (Limit: 200 kWh, Current: 50 kWh)
-2024-08-22 11:26:43,940 - INFO - Live data saved to live_data.json
-2024-08-22 11:26:43,940 - INFO - Live contract data saved to live_contract_data.json
-2024-08-22 11:26:44,067 - INFO - Iteration completed in 6.15 seconds
-2024-08-22 11:26:44,067 - INFO - BESS charge level after actions: 7.00 kWh
-2024-08-22 11:26:44,067 - INFO - Waiting 30 seconds for next iteration
-2024-08-22 11:27:14,073 - INFO - Loaded operation mode: automatic
-2024-08-22 11:27:14,075 - INFO - Attempting to update pv_panel: {'id': 1, 'name': 'PV Panel 1', 'priority': 1, 'max_output': 100, 'min_output': 10, 'actual_output': 100, 'switch_status': True, 'device_status': 'online', 'pending_action': None, 'action_approved': None}
-2024-08-22 11:27:14,076 - INFO - Pv_panel PV Panel 1 updated successfully.
-2024-08-22 11:27:14,077 - INFO - Attempting to update pv_panel: {'id': 2, 'name': 'PV Panel 2', 'priority': 1, 'max_output': 120, 'min_output': 15, 'actual_output': 120, 'switch_status': True, 'device_status': 'online', 'pending_action': None, 'action_approved': None}
-2024-08-22 11:27:14,078 - INFO - Pv_panel PV Panel 2 updated successfully.
-2024-08-22 11:27:14,079 - INFO - Attempting to update wind_turbine: {'id': 3, 'name': 'Wind Turbine 1', 'priority': 2, 'max_output': 200, 'min_output': 20, 'actual_output': 200, 'switch_status': True, 'device_status': 'online', 'pending_action': None, 'action_approved': None}
-2024-08-22 11:27:14,079 - INFO - Wind_turbine Wind Turbine 1 updated successfully.
-2024-08-22 11:27:14,080 - INFO - Attempting to update wind_turbine: {'id': 4, 'name': 'Wind Turbine 2', 'priority': 2, 'max_output': 180, 'min_output': 20, 'actual_output': 180, 'switch_status': True, 'device_status': 'online', 'pending_action': None, 'action_approved': None}
-2024-08-22 11:27:14,080 - INFO - Wind_turbine Wind Turbine 2 updated successfully.
-2024-08-22 11:27:14,080 - INFO - Attempting to update fuel_turbine: {'id': 5, 'name': 'Fuel Turbine 1', 'priority': 4, 'max_output': 300, 'min_output': 30, 'actual_output': 300, 'switch_status': True, 'device_status': 'online', 'pending_action': None, 'action_approved': None}
-2024-08-22 11:27:14,081 - INFO - Fuel_turbine Fuel Turbine 1 updated successfully.
-2024-08-22 11:27:14,081 - INFO - Attempting to update fuel_cell: {'id': 6, 'name': 'Fuel Cell 1', 'priority': 3, 'max_output': 150, 'min_output': 15, 'actual_output': 150, 'switch_status': True, 'device_status': 'online', 'pending_action': None, 'action_approved': None}
-2024-08-22 11:27:14,082 - INFO - Fuel_cell Fuel Cell 1 updated successfully.
-2024-08-22 11:27:14,082 - INFO - Attempting to update bess: {'id': 7, 'name': 'BESS 1', 'capacity': 350, 'charge_level': 7.0, 'switch_status': True, 'device_status': 'online'}
-2024-08-22 11:27:14,082 - INFO - BESS BESS 1 updated successfully.
-2024-08-22 11:27:14,083 - INFO - Data loaded successfully.
-2024-08-22 11:27:14,089 - INFO - Loaded live data
-2024-08-22 11:27:14,090 - INFO - Starting a new iteration in automatic mode
-2024-08-22 11:27:14,090 - INFO - Starting device update based on meter readings
-2024-08-22 11:27:14,091 - INFO - Checking 6 devices for updates based on meter readings
-2024-08-22 11:27:14,091 - INFO - Checking device PV Panel 1 (ID: 1). Device status: online, Meter status: online, Meter reading: 15 kW
-2024-08-22 11:27:14,091 - INFO - Checking device PV Panel 2 (ID: 2). Device status: online, Meter status: online, Meter reading: 98 kW
-2024-08-22 11:27:14,092 - INFO - Checking device Wind Turbine 1 (ID: 3). Device status: online, Meter status: online, Meter reading: 42 kW
-2024-08-22 11:27:14,092 - INFO - No meter found for device Wind Turbine 2 (ID: 4)
-2024-08-22 11:27:14,092 - INFO - Checking device Fuel Turbine 1 (ID: 5). Device status: online, Meter status: online, Meter reading: 38 kW
-2024-08-22 11:27:14,093 - INFO - No meter found for device Fuel Cell 1 (ID: 6)
-2024-08-22 11:27:14,093 - INFO - System status summary:
-2024-08-22 11:27:14,093 - INFO - Total generated power: 1050 kW
-2024-08-22 11:27:14,093 - INFO - Total demand: 1193 kW
-2024-08-22 11:27:14,094 - INFO - Number of active generating devices: 6
-2024-08-22 11:27:14,094 - INFO - Number of inactive generating devices: 0
-2024-08-22 11:27:14,094 - INFO - Active generating devices:
-2024-08-22 11:27:14,095 - INFO -   - PV Panel 1: 100 kW / 100 kW
-2024-08-22 11:27:14,095 - INFO -   - PV Panel 2: 120 kW / 120 kW
-2024-08-22 11:27:14,095 - INFO -   - Wind Turbine 1: 200 kW / 200 kW
-2024-08-22 11:27:14,095 - INFO -   - Wind Turbine 2: 180 kW / 180 kW
-2024-08-22 11:27:14,096 - INFO -   - Fuel Turbine 1: 300 kW / 300 kW
-2024-08-22 11:27:14,096 - INFO -   - Fuel Cell 1: 150 kW / 150 kW
-2024-08-22 11:27:14,096 - INFO - BESS charge level: 7.0 kWh / 350 kWh
-2024-08-22 11:27:14,097 - INFO - Energy purchase: Available (Limit: 300 kWh, Current: 150 kWh)
-2024-08-22 11:27:14,097 - INFO - Energy sale: Available (Limit: 200 kWh, Current: 50 kWh)
-2024-08-22 11:27:14,097 - INFO - BESS charge level before actions: 7.00 kWh
-2024-08-22 11:27:14,097 - INFO - Total generated power: 1050 kW
-2024-08-22 11:27:14,098 - INFO - Total demand power: 1193 kW
-2024-08-22 11:27:14,098 - INFO - Power deficit detected: 143 kW - starting deficit management
-2024-08-22 11:27:14,098 - INFO - Start managing power deficit:: 143 kW
-2024-08-22 11:27:14,098 - INFO - Current output: 1050 kW
-2024-08-22 11:27:14,099 - INFO - Max potential output: 1050 kW
-2024-08-22 11:27:14,099 - INFO - Power deficit: 143 kW
-2024-08-22 11:27:14,099 - INFO - Potential surplus: -143 kW
-2024-08-22 11:27:14,100 - INFO - BESS free capacity: 343.0 kWh
-2024-08-22 11:27:14,100 - INFO - Available sale capacity: 150 kWh
-2024-08-22 11:27:14,100 - INFO - Total available capacity: 493.0 kWh
-2024-08-22 11:27:14,100 - INFO - Handleable additional power: -143 kW
-2024-08-22 11:27:14,101 - INFO - Current output: 1050 kW
-2024-08-22 11:27:14,101 - INFO - Max potential output: 1050 kW
-2024-08-22 11:27:14,101 - INFO - Power deficit: 143 kW
-2024-08-22 11:27:14,102 - INFO - Handleable power: -143 kW
-2024-08-22 11:27:14,102 - INFO - Target output: 1050 kW
-2024-08-22 11:27:14,102 - INFO - In total, power was increased by 0 kW
-2024-08-22 11:27:14,102 - INFO - Final output: 1050 kW
-2024-08-22 11:27:14,103 - INFO - Power was ordered by increasing production: 0 kW
-2024-08-22 11:27:14,103 - INFO - Remaining deficit after maximisation of equipment operation: 143 kW
-2024-08-22 11:27:14,103 - INFO - Iteration 1, remaining deficit: 143 kW
-2024-08-22 11:27:14,104 - INFO - Start of the decision-making function concerning the discharge or purchase 
-2024-08-22 11:27:14,104 - INFO - Purchase priority - low battery (2.0%)
-2024-08-22 11:27:14,105 - INFO - Selected action: DeficitAction.BUY_ENERGY
-2024-08-22 11:27:14,105 - INFO - Action DeficitAction.BUY_ENERGY managed 143 kW. Remaining deficit: 0 kW
-2024-08-22 11:27:14,105 - INFO - After iteration 1: A total managed 143 kW, remaining deficit 0 kW
-2024-08-22 11:27:14,106 - INFO - Deficit management completed. A total of managed: 143 kW. Remaining deficit: 0 kW
-2024-08-22 11:27:14,106 - INFO - Managed 143 kW of deficit. Remaining: 0 kW
-2024-08-22 11:27:14,106 - INFO - Deficit management completed. The entire deficit has been resolved.
-2024-08-22 11:27:14,107 - INFO - System status summary:
-2024-08-22 11:27:14,107 - INFO - Total generated power: 1050 kW
-2024-08-22 11:27:14,107 - INFO - Total demand: 1193 kW
-2024-08-22 11:27:14,107 - INFO - Number of active generating devices: 6
-2024-08-22 11:27:14,107 - INFO - Number of inactive generating devices: 0
-2024-08-22 11:27:14,108 - INFO - Active generating devices:
-2024-08-22 11:27:14,108 - INFO -   - PV Panel 1: 100 kW / 100 kW
-2024-08-22 11:27:14,109 - INFO -   - PV Panel 2: 120 kW / 120 kW
-2024-08-22 11:27:14,109 - INFO -   - Wind Turbine 1: 200 kW / 200 kW
-2024-08-22 11:27:14,109 - INFO -   - Wind Turbine 2: 180 kW / 180 kW
-2024-08-22 11:27:14,109 - INFO -   - Fuel Turbine 1: 300 kW / 300 kW
-2024-08-22 11:27:14,109 - INFO -   - Fuel Cell 1: 150 kW / 150 kW
-2024-08-22 11:27:14,110 - INFO - BESS charge level: 7.0 kWh / 350 kWh
-2024-08-22 11:27:14,110 - INFO - Energy purchase: Available (Limit: 300 kWh, Current: 293 kWh)
-2024-08-22 11:27:14,110 - INFO - Energy sale: Available (Limit: 200 kWh, Current: 50 kWh)
-2024-08-22 11:27:14,111 - INFO - Live data saved to live_data.json
-2024-08-22 11:27:14,111 - INFO - Live contract data saved to live_contract_data.json
-2024-08-22 11:27:14,233 - INFO - Iteration completed in 0.14 seconds
-2024-08-22 11:27:14,234 - INFO - BESS charge level after actions: 7.00 kWh
-2024-08-22 11:27:14,234 - INFO - Waiting 30 seconds for next iteration
-2024-08-22 11:27:44,243 - INFO - Loaded operation mode: automatic
-2024-08-22 11:27:44,244 - INFO - Attempting to update pv_panel: {'id': 1, 'name': 'PV Panel 1', 'priority': 1, 'max_output': 100, 'min_output': 10, 'actual_output': 100, 'switch_status': True, 'device_status': 'online', 'pending_action': None, 'action_approved': None}
-2024-08-22 11:27:44,244 - INFO - Pv_panel PV Panel 1 updated successfully.
-2024-08-22 11:27:44,246 - INFO - Attempting to update pv_panel: {'id': 2, 'name': 'PV Panel 2', 'priority': 1, 'max_output': 120, 'min_output': 15, 'actual_output': 120, 'switch_status': True, 'device_status': 'online', 'pending_action': None, 'action_approved': None}
-2024-08-22 11:27:44,247 - INFO - Pv_panel PV Panel 2 updated successfully.
-2024-08-22 11:27:44,248 - INFO - Attempting to update wind_turbine: {'id': 3, 'name': 'Wind Turbine 1', 'priority': 2, 'max_output': 200, 'min_output': 20, 'actual_output': 200, 'switch_status': True, 'device_status': 'online', 'pending_action': None, 'action_approved': None}
-2024-08-22 11:27:44,249 - INFO - Wind_turbine Wind Turbine 1 updated successfully.
-2024-08-22 11:27:44,250 - INFO - Attempting to update wind_turbine: {'id': 4, 'name': 'Wind Turbine 2', 'priority': 2, 'max_output': 180, 'min_output': 20, 'actual_output': 180, 'switch_status': True, 'device_status': 'online', 'pending_action': None, 'action_approved': None}
-2024-08-22 11:27:44,251 - INFO - Wind_turbine Wind Turbine 2 updated successfully.
-2024-08-22 11:27:44,251 - INFO - Attempting to update fuel_turbine: {'id': 5, 'name': 'Fuel Turbine 1', 'priority': 4, 'max_output': 300, 'min_output': 30, 'actual_output': 300, 'switch_status': True, 'device_status': 'online', 'pending_action': None, 'action_approved': None}
-2024-08-22 11:27:44,252 - INFO - Fuel_turbine Fuel Turbine 1 updated successfully.
-2024-08-22 11:27:44,252 - INFO - Attempting to update fuel_cell: {'id': 6, 'name': 'Fuel Cell 1', 'priority': 3, 'max_output': 150, 'min_output': 15, 'actual_output': 150, 'switch_status': True, 'device_status': 'online', 'pending_action': None, 'action_approved': None}
-2024-08-22 11:27:44,253 - INFO - Fuel_cell Fuel Cell 1 updated successfully.
-2024-08-22 11:27:44,253 - INFO - Attempting to update bess: {'id': 7, 'name': 'BESS 1', 'capacity': 350, 'charge_level': 7.0, 'switch_status': True, 'device_status': 'online'}
-2024-08-22 11:27:44,253 - INFO - BESS BESS 1 updated successfully.
-2024-08-22 11:27:44,254 - INFO - Data loaded successfully.
-2024-08-22 11:27:44,260 - INFO - Loaded live data
-2024-08-22 11:27:44,260 - INFO - Starting a new iteration in automatic mode
-2024-08-22 11:27:44,261 - INFO - Starting device update based on meter readings
-2024-08-22 11:27:44,261 - INFO - Checking 6 devices for updates based on meter readings
-2024-08-22 11:27:44,261 - INFO - Checking device PV Panel 1 (ID: 1). Device status: online, Meter status: online, Meter reading: 15 kW
-2024-08-22 11:27:44,261 - INFO - Checking device PV Panel 2 (ID: 2). Device status: online, Meter status: online, Meter reading: 98 kW
-2024-08-22 11:27:44,262 - INFO - Checking device Wind Turbine 1 (ID: 3). Device status: online, Meter status: online, Meter reading: 42 kW
-2024-08-22 11:27:44,262 - INFO - No meter found for device Wind Turbine 2 (ID: 4)
-2024-08-22 11:27:44,262 - INFO - Checking device Fuel Turbine 1 (ID: 5). Device status: online, Meter status: online, Meter reading: 38 kW
-2024-08-22 11:27:44,263 - INFO - No meter found for device Fuel Cell 1 (ID: 6)
-2024-08-22 11:27:44,263 - INFO - System status summary:
-2024-08-22 11:27:44,263 - INFO - Total generated power: 1050 kW
-2024-08-22 11:27:44,263 - INFO - Total demand: 1193 kW
-2024-08-22 11:27:44,264 - INFO - Number of active generating devices: 6
-2024-08-22 11:27:44,264 - INFO - Number of inactive generating devices: 0
-2024-08-22 11:27:44,264 - INFO - Active generating devices:
-2024-08-22 11:27:44,264 - INFO -   - PV Panel 1: 100 kW / 100 kW
-2024-08-22 11:27:44,265 - INFO -   - PV Panel 2: 120 kW / 120 kW
-2024-08-22 11:27:44,265 - INFO -   - Wind Turbine 1: 200 kW / 200 kW
-2024-08-22 11:27:44,265 - INFO -   - Wind Turbine 2: 180 kW / 180 kW
-2024-08-22 11:27:44,265 - INFO -   - Fuel Turbine 1: 300 kW / 300 kW
-2024-08-22 11:27:44,266 - INFO -   - Fuel Cell 1: 150 kW / 150 kW
-2024-08-22 11:27:44,266 - INFO - BESS charge level: 7.0 kWh / 350 kWh
-2024-08-22 11:27:44,266 - INFO - Energy purchase: Available (Limit: 300 kWh, Current: 293 kWh)
-2024-08-22 11:27:44,267 - INFO - Energy sale: Available (Limit: 200 kWh, Current: 50 kWh)
-2024-08-22 11:27:44,267 - INFO - BESS charge level before actions: 7.00 kWh
-2024-08-22 11:27:44,267 - INFO - Total generated power: 1050 kW
-2024-08-22 11:27:44,267 - INFO - Total demand power: 1193 kW
-2024-08-22 11:27:44,268 - INFO - Power deficit detected: 143 kW - starting deficit management
-2024-08-22 11:27:44,268 - INFO - Start managing power deficit:: 143 kW
-2024-08-22 11:27:44,268 - INFO - Current output: 1050 kW
-2024-08-22 11:27:44,268 - INFO - Max potential output: 1050 kW
-2024-08-22 11:27:44,269 - INFO - Power deficit: 143 kW
-2024-08-22 11:27:44,269 - INFO - Potential surplus: -143 kW
-2024-08-22 11:27:44,269 - INFO - BESS free capacity: 343.0 kWh
-2024-08-22 11:27:44,269 - INFO - Available sale capacity: 150 kWh
-2024-08-22 11:27:44,270 - INFO - Total available capacity: 493.0 kWh
-2024-08-22 11:27:44,270 - INFO - Handleable additional power: -143 kW
-2024-08-22 11:27:44,270 - INFO - Current output: 1050 kW
-2024-08-22 11:27:44,270 - INFO - Max potential output: 1050 kW
-2024-08-22 11:27:44,271 - INFO - Power deficit: 143 kW
-2024-08-22 11:27:44,271 - INFO - Handleable power: -143 kW
-2024-08-22 11:27:44,271 - INFO - Target output: 1050 kW
-2024-08-22 11:27:44,271 - INFO - In total, power was increased by 0 kW
-2024-08-22 11:27:44,272 - INFO - Final output: 1050 kW
-2024-08-22 11:27:44,272 - INFO - Power was ordered by increasing production: 0 kW
-2024-08-22 11:27:44,272 - INFO - Remaining deficit after maximisation of equipment operation: 143 kW
-2024-08-22 11:27:44,273 - INFO - Iteration 1, remaining deficit: 143 kW
-2024-08-22 11:27:44,273 - INFO - Start of the decision-making function concerning the discharge or purchase 
-2024-08-22 11:27:44,273 - INFO - Purchase priority - low battery (2.0%)
-2024-08-22 11:27:44,274 - INFO - Selected action: DeficitAction.BUY_ENERGY
-2024-08-22 11:27:44,274 - INFO - Action DeficitAction.BUY_ENERGY managed 7 kW. Remaining deficit: 136 kW
-2024-08-22 11:27:44,274 - INFO - After iteration 1: A total managed 7 kW, remaining deficit 136 kW
-2024-08-22 11:27:44,275 - INFO - Iteration 2, remaining deficit: 136 kW
-2024-08-22 11:27:44,275 - INFO - Start of the decision-making function concerning the discharge or purchase 
-2024-08-22 11:27:44,275 - INFO - Purchase priority - low battery (2.0%)
-2024-08-22 11:27:44,276 - INFO - Selected action: DeficitAction.LIMIT_CONSUMPTION
-2024-08-22 11:27:44,276 - INFO - Attempting to limit consumption by 136 kW
-2024-08-22 11:27:44,276 - INFO - Reduced Adjustable Device 2 power by 99 kW
-2024-08-22 11:27:44,277 - INFO - Reduced Adjustable Device 1 power by 4 kW
-2024-08-22 11:27:44,277 - INFO - Total power reduced: 103 kW
-2024-08-22 11:27:44,277 - INFO - Remaining deficit: 33 kW
-2024-08-22 11:27:44,278 - INFO - Action DeficitAction.LIMIT_CONSUMPTION managed 103 kW. Remaining deficit: 33 kW
-2024-08-22 11:27:44,278 - INFO - After iteration 2: A total managed 110 kW, remaining deficit 33 kW
-2024-08-22 11:27:44,278 - INFO - Iteration 3, remaining deficit: 33 kW
-2024-08-22 11:27:44,279 - INFO - Start of the decision-making function concerning the discharge or purchase 
-2024-08-22 11:27:44,279 - INFO - Purchase priority - low battery (2.0%)
-2024-08-22 11:27:44,280 - INFO - Selected action: DeficitAction.LIMIT_CONSUMPTION
-2024-08-22 11:27:44,280 - INFO - Attempting to limit consumption by 33 kW
-2024-08-22 11:27:44,280 - INFO - Total power reduced: 0 kW
-2024-08-22 11:27:44,281 - INFO - Remaining deficit: 33 kW
-2024-08-22 11:27:44,281 - WARNING - Action DeficitAction.LIMIT_CONSUMPTION has failed. Reason: Nieznany
-2024-08-22 11:27:44,281 - INFO - Deficit management completed. A total of managed: 110 kW. Remaining deficit: 33 kW
-2024-08-22 11:27:44,281 - INFO - Managed 110 kW of deficit. Remaining: 33 kW
-2024-08-22 11:27:44,282 - WARNING - Deficit management completed. Remaining unresolved deficit: 33 kW
-2024-08-22 11:27:44,282 - INFO - System status summary:
-2024-08-22 11:27:44,282 - INFO - Total generated power: 1050 kW
-2024-08-22 11:27:44,282 - INFO - Total demand: 1090 kW
-2024-08-22 11:27:44,282 - INFO - Number of active generating devices: 6
-2024-08-22 11:27:44,282 - INFO - Number of inactive generating devices: 0
-2024-08-22 11:27:44,283 - INFO - Active generating devices:
-2024-08-22 11:27:44,283 - INFO -   - PV Panel 1: 100 kW / 100 kW
-2024-08-22 11:27:44,283 - INFO -   - PV Panel 2: 120 kW / 120 kW
-2024-08-22 11:27:44,283 - INFO -   - Wind Turbine 1: 200 kW / 200 kW
-2024-08-22 11:27:44,283 - INFO -   - Wind Turbine 2: 180 kW / 180 kW
-2024-08-22 11:27:44,283 - INFO -   - Fuel Turbine 1: 300 kW / 300 kW
-2024-08-22 11:27:44,284 - INFO -   - Fuel Cell 1: 150 kW / 150 kW
-2024-08-22 11:27:44,284 - INFO - BESS charge level: 7.0 kWh / 350 kWh
-2024-08-22 11:27:44,284 - INFO - Energy purchase: Not available (Limit: 300 kWh, Current: 300 kWh)
-2024-08-22 11:27:44,284 - INFO - Energy sale: Available (Limit: 200 kWh, Current: 50 kWh)
-2024-08-22 11:27:44,285 - INFO - Live data saved to live_data.json
-2024-08-22 11:27:44,286 - INFO - Live contract data saved to live_contract_data.json
-2024-08-22 11:27:44,401 - INFO - Iteration completed in 0.14 seconds
-2024-08-22 11:27:44,401 - INFO - BESS charge level after actions: 7.00 kWh
-2024-08-22 11:27:44,402 - INFO - Waiting 30 seconds for next iteration
-2024-08-22 11:28:13,488 - INFO - Energy management stopping
-2024-08-22 11:28:13,488 - INFO - Energy management stopped
+2024-08-22 13:04:18,314 - INFO - Attempting to update pv_panel: {'id': 1, 'name': 'PV Panel 1', 'priority': 1, 'max_output': 100, 'min_output': 10, 'actual_output': 0, 'switch_status': False, 'device_status': 'offline'}
+2024-08-22 13:04:18,314 - INFO - Successfully created pv_panel instance: PV Panel 1
+2024-08-22 13:04:18,314 - INFO - Added pv_panel: PV Panel 1 (Status: offline)
+2024-08-22 13:04:18,315 - INFO - Attempting to update pv_panel: {'id': 2, 'name': 'PV Panel 2', 'priority': 1, 'max_output': 120, 'min_output': 15, 'actual_output': 20, 'switch_status': True, 'device_status': 'online'}
+2024-08-22 13:04:18,315 - INFO - Successfully created pv_panel instance: PV Panel 2
+2024-08-22 13:04:18,315 - INFO - Added pv_panel: PV Panel 2 (Status: online)
+2024-08-22 13:04:18,317 - INFO - Attempting to update wind_turbine: {'id': 3, 'name': 'Wind Turbine 1', 'priority': 2, 'max_output': 200, 'min_output': 20, 'actual_output': 20, 'switch_status': True, 'device_status': 'online'}
+2024-08-22 13:04:18,318 - INFO - Successfully created wind_turbine instance: Wind Turbine 1
+2024-08-22 13:04:18,319 - INFO - Added wind_turbine: Wind Turbine 1 (Status: online)
+2024-08-22 13:04:18,319 - INFO - Attempting to update wind_turbine: {'id': 4, 'name': 'Wind Turbine 2', 'priority': 2, 'max_output': 180, 'min_output': 20, 'actual_output': 0, 'switch_status': False, 'device_status': 'offline'}
+2024-08-22 13:04:18,320 - INFO - Successfully created wind_turbine instance: Wind Turbine 2
+2024-08-22 13:04:18,320 - INFO - Added wind_turbine: Wind Turbine 2 (Status: offline)
+2024-08-22 13:04:18,321 - INFO - Attempting to update fuel_turbine: {'id': 5, 'name': 'Fuel Turbine 1', 'priority': 4, 'max_output': 300, 'min_output': 30, 'actual_output': 30, 'switch_status': True, 'device_status': 'online'}
+2024-08-22 13:04:18,321 - INFO - Successfully created fuel_turbine instance: Fuel Turbine 1
+2024-08-22 13:04:18,321 - INFO - Added fuel_turbine: Fuel Turbine 1 (Status: online)
+2024-08-22 13:04:18,322 - INFO - Attempting to update fuel_cell: {'id': 6, 'name': 'Fuel Cell 1', 'priority': 3, 'max_output': 150, 'min_output': 15, 'actual_output': 25, 'switch_status': True, 'device_status': 'online'}
+2024-08-22 13:04:18,322 - INFO - Successfully created fuel_cell instance: Fuel Cell 1
+2024-08-22 13:04:18,322 - INFO - Added fuel_cell: Fuel Cell 1 (Status: online)
+2024-08-22 13:04:18,322 - INFO - Attempting to update bess: {'id': 7, 'name': 'BESS 1', 'capacity': 350, 'charge_level': 150, 'switch_status': True, 'device_status': 'online'}
+2024-08-22 13:04:18,323 - INFO - Successfully created bess instance: BESS 1
+2024-08-22 13:04:18,323 - INFO - New BESS added: BESS 1
+2024-08-22 13:04:18,324 - INFO - Added power meter: Meter for PV Panel 1 for device ID: 1
+2024-08-22 13:04:18,324 - INFO - Loaded power meter: Meter for PV Panel 1, Status: online, Reading: 15 kW, Device ID: 1
+2024-08-22 13:04:18,324 - INFO - Added power meter: Meter for PV Panel 2 for device ID: 2
+2024-08-22 13:04:18,325 - INFO - Loaded power meter: Meter for PV Panel 2, Status: online, Reading: 98 kW, Device ID: 2
+2024-08-22 13:04:18,325 - INFO - Added power meter: Meter for Wind Turbine 1 for device ID: 3
+2024-08-22 13:04:18,325 - INFO - Loaded power meter: Meter for Wind Turbine 1, Status: online, Reading: 42 kW, Device ID: 3
+2024-08-22 13:04:18,325 - INFO - Added power meter: Meter for Fuel Turbine 1 for device ID: 5
+2024-08-22 13:04:18,326 - INFO - Loaded power meter: Meter for Fuel Turbine 1, Status: online, Reading: 38 kW, Device ID: 5
+2024-08-22 13:04:18,326 - INFO - Data loaded successfully.
+2024-08-22 13:04:18,335 - INFO - Energy management started
+2024-08-22 13:04:18,335 - INFO - Loaded operation mode: automatic
+2024-08-22 13:04:18,336 - INFO - Attempting to update pv_panel: {'id': 1, 'name': 'PV Panel 1', 'priority': 1, 'max_output': 100, 'min_output': 10, 'actual_output': 0, 'switch_status': False, 'device_status': 'offline'}
+2024-08-22 13:04:18,336 - INFO - Pv_panel PV Panel 1 updated successfully.
+2024-08-22 13:04:18,336 - INFO - Attempting to update pv_panel: {'id': 2, 'name': 'PV Panel 2', 'priority': 1, 'max_output': 120, 'min_output': 15, 'actual_output': 20, 'switch_status': True, 'device_status': 'online'}
+2024-08-22 13:04:18,337 - INFO - Pv_panel PV Panel 2 updated successfully.
+2024-08-22 13:04:18,337 - INFO - Attempting to update wind_turbine: {'id': 3, 'name': 'Wind Turbine 1', 'priority': 2, 'max_output': 200, 'min_output': 20, 'actual_output': 20, 'switch_status': True, 'device_status': 'online'}
+2024-08-22 13:04:18,337 - INFO - Wind_turbine Wind Turbine 1 updated successfully.
+2024-08-22 13:04:18,338 - INFO - Attempting to update wind_turbine: {'id': 4, 'name': 'Wind Turbine 2', 'priority': 2, 'max_output': 180, 'min_output': 20, 'actual_output': 0, 'switch_status': False, 'device_status': 'offline'}
+2024-08-22 13:04:18,338 - INFO - Wind_turbine Wind Turbine 2 updated successfully.
+2024-08-22 13:04:18,338 - INFO - Attempting to update fuel_turbine: {'id': 5, 'name': 'Fuel Turbine 1', 'priority': 4, 'max_output': 300, 'min_output': 30, 'actual_output': 30, 'switch_status': True, 'device_status': 'online'}
+2024-08-22 13:04:18,339 - INFO - Fuel_turbine Fuel Turbine 1 updated successfully.
+2024-08-22 13:04:18,339 - INFO - Attempting to update fuel_cell: {'id': 6, 'name': 'Fuel Cell 1', 'priority': 3, 'max_output': 150, 'min_output': 15, 'actual_output': 25, 'switch_status': True, 'device_status': 'online'}
+2024-08-22 13:04:18,339 - INFO - Fuel_cell Fuel Cell 1 updated successfully.
+2024-08-22 13:04:18,340 - INFO - Attempting to update bess: {'id': 7, 'name': 'BESS 1', 'capacity': 350, 'charge_level': 150, 'switch_status': True, 'device_status': 'online'}
+2024-08-22 13:04:18,340 - INFO - BESS BESS 1 updated successfully.
+2024-08-22 13:04:18,340 - INFO - Added power meter: Meter for PV Panel 1 for device ID: 1
+2024-08-22 13:04:18,340 - INFO - Loaded power meter: Meter for PV Panel 1, Status: online, Reading: 15 kW, Device ID: 1
+2024-08-22 13:04:18,341 - INFO - Added power meter: Meter for PV Panel 2 for device ID: 2
+2024-08-22 13:04:18,341 - INFO - Loaded power meter: Meter for PV Panel 2, Status: online, Reading: 98 kW, Device ID: 2
+2024-08-22 13:04:18,341 - INFO - Added power meter: Meter for Wind Turbine 1 for device ID: 3
+2024-08-22 13:04:18,341 - INFO - Loaded power meter: Meter for Wind Turbine 1, Status: online, Reading: 42 kW, Device ID: 3
+2024-08-22 13:04:18,342 - INFO - Added power meter: Meter for Fuel Turbine 1 for device ID: 5
+2024-08-22 13:04:18,342 - INFO - Loaded power meter: Meter for Fuel Turbine 1, Status: online, Reading: 38 kW, Device ID: 5
+2024-08-22 13:04:18,342 - INFO - Data loaded successfully.
+2024-08-22 13:04:18,349 - INFO - Loaded initial data
+2024-08-22 13:04:18,349 - INFO - Starting a new iteration in automatic mode
+2024-08-22 13:04:18,350 - INFO - Starting device update based on meter readings
+2024-08-22 13:04:18,350 - INFO - Checking 6 devices for updates based on meter readings
+2024-08-22 13:04:18,350 - INFO - Checking device PV Panel 1 (ID: 1). Device status: offline, Meter status: online, Meter reading: 15 kW
+2024-08-22 13:04:18,350 - WARNING - Updated PV Panel 1 status to online and set actual output to 15 kW based on meter reading. Please check the device communication.
+2024-08-22 13:04:18,351 - INFO - Checking device PV Panel 2 (ID: 2). Device status: online, Meter status: online, Meter reading: 98 kW
+2024-08-22 13:04:18,351 - INFO - Checking device Wind Turbine 1 (ID: 3). Device status: online, Meter status: online, Meter reading: 42 kW
+2024-08-22 13:04:18,351 - INFO - No meter found for device Wind Turbine 2 (ID: 4)
+2024-08-22 13:04:18,351 - INFO - Checking device Fuel Turbine 1 (ID: 5). Device status: online, Meter status: online, Meter reading: 38 kW
+2024-08-22 13:04:18,351 - INFO - No meter found for device Fuel Cell 1 (ID: 6)
+2024-08-22 13:04:18,351 - INFO - Updated 1 devices based on meter readings
+2024-08-22 13:04:18,351 - INFO - Updated device: PV Panel 1 (ID: 1), New status: online, New output: 15 kW
+2024-08-22 13:04:18,352 - INFO - System status summary:
+2024-08-22 13:04:18,352 - INFO - Total generated power: 110 kW
+2024-08-22 13:04:18,352 - INFO - Total demand: 1193 kW
+2024-08-22 13:04:18,352 - INFO - Number of active generating devices: 5
+2024-08-22 13:04:18,353 - INFO - Number of inactive generating devices: 1
+2024-08-22 13:04:18,353 - INFO - Active generating devices:
+2024-08-22 13:04:18,353 - INFO -   - PV Panel 1: 15 kW / 100 kW
+2024-08-22 13:04:18,353 - INFO -   - PV Panel 2: 20 kW / 120 kW
+2024-08-22 13:04:18,353 - INFO -   - Wind Turbine 1: 20 kW / 200 kW
+2024-08-22 13:04:18,353 - INFO -   - Fuel Turbine 1: 30 kW / 300 kW
+2024-08-22 13:04:18,353 - INFO -   - Fuel Cell 1: 25 kW / 150 kW
+2024-08-22 13:04:18,353 - INFO - Inactive generating devices:
+2024-08-22 13:04:18,354 - INFO -   - Wind Turbine 2: max output 180 kW
+2024-08-22 13:04:18,354 - INFO - BESS charge level: 150 kWh / 350 kWh
+2024-08-22 13:04:18,354 - INFO - Energy purchase: Available (Limit: 300 kWh, Current: 150 kWh)
+2024-08-22 13:04:18,354 - INFO - Energy sale: Available (Limit: 200 kWh, Current: 50 kWh)
+2024-08-22 13:04:18,354 - INFO - BESS charge level before actions: 150.00 kWh
+2024-08-22 13:04:18,355 - INFO - Total generated power: 110 kW
+2024-08-22 13:04:18,355 - INFO - Total demand power: 1193 kW
+2024-08-22 13:04:18,355 - INFO - Power deficit detected: 1083 kW - starting deficit management
+2024-08-22 13:04:18,356 - INFO - Start managing power deficit:: 1083 kW
+2024-08-22 13:04:18,356 - INFO - Current output: 110 kW
+2024-08-22 13:04:18,356 - INFO - Max potential output: 1050 kW
+2024-08-22 13:04:18,356 - INFO - Power deficit: 1083 kW
+2024-08-22 13:04:18,356 - INFO - Potential surplus: -143 kW
+2024-08-22 13:04:18,356 - INFO - BESS free capacity: 200 kWh
+2024-08-22 13:04:18,356 - INFO - Available sale capacity: 150 kWh
+2024-08-22 13:04:18,357 - INFO - Total available capacity: 350 kWh
+2024-08-22 13:04:18,357 - INFO - Handleable additional power: -143 kW
+2024-08-22 13:04:18,357 - INFO - Current output: 110 kW
+2024-08-22 13:04:18,357 - INFO - Max potential output: 1050 kW
+2024-08-22 13:04:18,357 - INFO - Power deficit: 1083 kW
+2024-08-22 13:04:18,357 - INFO - Handleable power: -143 kW
+2024-08-22 13:04:18,358 - INFO - Target output: 1050 kW
+2024-08-22 13:04:18,358 - INFO - Increased power of PV Panel 1 (priority: 1) from 15 kW to 100 kW
+2024-08-22 13:04:18,359 - INFO - Increased power of PV Panel 2 (priority: 1) from 20 kW to 120 kW
+2024-08-22 13:04:18,359 - INFO - Increased power of Wind Turbine 1 (priority: 2) from 20 kW to 200 kW
+2024-08-22 13:04:18,360 - INFO - Increased power of Fuel Cell 1 (priority: 3) from 25 kW to 150 kW
+2024-08-22 13:04:18,360 - INFO - Increased power of Fuel Turbine 1 (priority: 4) from 30 kW to 300 kW
+2024-08-22 13:04:23,363 - INFO - Activated Wind Turbine 2 (priority: 2) and set power to 180 kW
+2024-08-22 13:04:23,364 - INFO - In total, power was increased by 940 kW
+2024-08-22 13:04:23,364 - INFO - Final output: 1050 kW
+2024-08-22 13:04:23,364 - INFO - Power was ordered by increasing production: 940 kW
+2024-08-22 13:04:23,365 - INFO - Remaining deficit after maximisation of equipment operation: 143 kW
+2024-08-22 13:04:23,365 - INFO - Iteration 1, remaining deficit: 143 kW
+2024-08-22 13:04:23,366 - INFO - Start of the decision-making function concerning the discharge or purchase 
+2024-08-22 13:04:23,367 - INFO - Executing action: DeficitAction.DISCHARGE_BESS for deficit: 143 kW
+2024-08-22 13:04:23,367 - INFO - Attempting to discharge BESS by 143 kW
+2024-08-22 13:04:24,369 - INFO - BESS was discharged by 143.0 kWh
+2024-08-22 13:04:24,371 - INFO - BESS charge level: before 150 kWh, after 7.0 kWh
+2024-08-22 13:04:24,372 - INFO - Action result: {'success': True, 'amount': 143.0}
+2024-08-22 13:04:24,373 - INFO - Primary action DeficitAction.DISCHARGE_BESS managed 143.0 kW. Remaining deficit: 0.0 kW
+2024-08-22 13:04:24,374 - INFO - After iteration 1: A total managed 143.0 kW, remaining deficit 0.0 kW
+2024-08-22 13:04:24,374 - INFO - Deficit management completed. A total of managed: 1083.0 kW. Remaining deficit: 0.0 kW
+2024-08-22 13:04:24,375 - INFO - Managed 1083.0 kW of deficit. Remaining: 0.0 kW
+2024-08-22 13:04:24,375 - INFO - Deficit management completed. The entire deficit has been resolved.
+2024-08-22 13:04:24,375 - INFO - System status summary:
+2024-08-22 13:04:24,376 - INFO - Total generated power: 1050 kW
+2024-08-22 13:04:24,376 - INFO - Total demand: 1193 kW
+2024-08-22 13:04:24,376 - INFO - Number of active generating devices: 6
+2024-08-22 13:04:24,377 - INFO - Number of inactive generating devices: 0
+2024-08-22 13:04:24,377 - INFO - Active generating devices:
+2024-08-22 13:04:24,378 - INFO -   - PV Panel 1: 100 kW / 100 kW
+2024-08-22 13:04:24,378 - INFO -   - PV Panel 2: 120 kW / 120 kW
+2024-08-22 13:04:24,378 - INFO -   - Wind Turbine 1: 200 kW / 200 kW
+2024-08-22 13:04:24,379 - INFO -   - Wind Turbine 2: 180 kW / 180 kW
+2024-08-22 13:04:24,379 - INFO -   - Fuel Turbine 1: 300 kW / 300 kW
+2024-08-22 13:04:24,379 - INFO -   - Fuel Cell 1: 150 kW / 150 kW
+2024-08-22 13:04:24,380 - INFO - BESS charge level: 7.0 kWh / 350 kWh
+2024-08-22 13:04:24,381 - INFO - Energy purchase: Available (Limit: 300 kWh, Current: 150 kWh)
+2024-08-22 13:04:24,381 - INFO - Energy sale: Available (Limit: 200 kWh, Current: 50 kWh)
+2024-08-22 13:04:24,382 - INFO - Live data saved to live_data.json
+2024-08-22 13:04:24,384 - INFO - Live contract data saved to live_contract_data.json
+2024-08-22 13:04:24,516 - INFO - Iteration completed in 6.17 seconds
+2024-08-22 13:04:24,516 - INFO - BESS charge level after actions: 7.00 kWh
+2024-08-22 13:04:24,516 - INFO - Waiting 15 seconds for next iteration
+2024-08-22 13:04:39,524 - INFO - Loaded operation mode: automatic
+2024-08-22 13:04:39,527 - INFO - Attempting to update pv_panel: {'id': 1, 'name': 'PV Panel 1', 'priority': 1, 'max_output': 100, 'min_output': 10, 'actual_output': 100, 'switch_status': True, 'device_status': 'online', 'pending_action': None, 'action_approved': None}
+2024-08-22 13:04:39,528 - INFO - Pv_panel PV Panel 1 updated successfully.
+2024-08-22 13:04:39,529 - INFO - Attempting to update pv_panel: {'id': 2, 'name': 'PV Panel 2', 'priority': 1, 'max_output': 120, 'min_output': 15, 'actual_output': 120, 'switch_status': True, 'device_status': 'online', 'pending_action': None, 'action_approved': None}
+2024-08-22 13:04:39,529 - INFO - Pv_panel PV Panel 2 updated successfully.
+2024-08-22 13:04:39,530 - INFO - Attempting to update wind_turbine: {'id': 3, 'name': 'Wind Turbine 1', 'priority': 2, 'max_output': 200, 'min_output': 20, 'actual_output': 200, 'switch_status': True, 'device_status': 'online', 'pending_action': None, 'action_approved': None}
+2024-08-22 13:04:39,530 - INFO - Wind_turbine Wind Turbine 1 updated successfully.
+2024-08-22 13:04:39,531 - INFO - Attempting to update wind_turbine: {'id': 4, 'name': 'Wind Turbine 2', 'priority': 2, 'max_output': 180, 'min_output': 20, 'actual_output': 180, 'switch_status': True, 'device_status': 'online', 'pending_action': None, 'action_approved': None}
+2024-08-22 13:04:39,532 - INFO - Wind_turbine Wind Turbine 2 updated successfully.
+2024-08-22 13:04:39,532 - INFO - Attempting to update fuel_turbine: {'id': 5, 'name': 'Fuel Turbine 1', 'priority': 4, 'max_output': 300, 'min_output': 30, 'actual_output': 300, 'switch_status': True, 'device_status': 'online', 'pending_action': None, 'action_approved': None}
+2024-08-22 13:04:39,532 - INFO - Fuel_turbine Fuel Turbine 1 updated successfully.
+2024-08-22 13:04:39,533 - INFO - Attempting to update fuel_cell: {'id': 6, 'name': 'Fuel Cell 1', 'priority': 3, 'max_output': 150, 'min_output': 15, 'actual_output': 150, 'switch_status': True, 'device_status': 'online', 'pending_action': None, 'action_approved': None}
+2024-08-22 13:04:39,534 - INFO - Fuel_cell Fuel Cell 1 updated successfully.
+2024-08-22 13:04:39,534 - INFO - Attempting to update bess: {'id': 7, 'name': 'BESS 1', 'capacity': 350, 'charge_level': 7.0, 'switch_status': True, 'device_status': 'online'}
+2024-08-22 13:04:39,534 - INFO - BESS BESS 1 updated successfully.
+2024-08-22 13:04:39,534 - INFO - Data loaded successfully.
+2024-08-22 13:04:39,542 - INFO - Loaded live data
+2024-08-22 13:04:39,542 - INFO - Starting a new iteration in automatic mode
+2024-08-22 13:04:39,542 - INFO - Starting device update based on meter readings
+2024-08-22 13:04:39,543 - INFO - Checking 6 devices for updates based on meter readings
+2024-08-22 13:04:39,543 - INFO - Checking device PV Panel 1 (ID: 1). Device status: online, Meter status: online, Meter reading: 15 kW
+2024-08-22 13:04:39,544 - INFO - Checking device PV Panel 2 (ID: 2). Device status: online, Meter status: online, Meter reading: 98 kW
+2024-08-22 13:04:39,544 - INFO - Checking device Wind Turbine 1 (ID: 3). Device status: online, Meter status: online, Meter reading: 42 kW
+2024-08-22 13:04:39,544 - INFO - No meter found for device Wind Turbine 2 (ID: 4)
+2024-08-22 13:04:39,544 - INFO - Checking device Fuel Turbine 1 (ID: 5). Device status: online, Meter status: online, Meter reading: 38 kW
+2024-08-22 13:04:39,545 - INFO - No meter found for device Fuel Cell 1 (ID: 6)
+2024-08-22 13:04:39,545 - INFO - System status summary:
+2024-08-22 13:04:39,545 - INFO - Total generated power: 1050 kW
+2024-08-22 13:04:39,546 - INFO - Total demand: 1193 kW
+2024-08-22 13:04:39,546 - INFO - Number of active generating devices: 6
+2024-08-22 13:04:39,546 - INFO - Number of inactive generating devices: 0
+2024-08-22 13:04:39,547 - INFO - Active generating devices:
+2024-08-22 13:04:39,547 - INFO -   - PV Panel 1: 100 kW / 100 kW
+2024-08-22 13:04:39,547 - INFO -   - PV Panel 2: 120 kW / 120 kW
+2024-08-22 13:04:39,548 - INFO -   - Wind Turbine 1: 200 kW / 200 kW
+2024-08-22 13:04:39,548 - INFO -   - Wind Turbine 2: 180 kW / 180 kW
+2024-08-22 13:04:39,548 - INFO -   - Fuel Turbine 1: 300 kW / 300 kW
+2024-08-22 13:04:39,549 - INFO -   - Fuel Cell 1: 150 kW / 150 kW
+2024-08-22 13:04:39,549 - INFO - BESS charge level: 7.0 kWh / 350 kWh
+2024-08-22 13:04:39,549 - INFO - Energy purchase: Available (Limit: 300 kWh, Current: 150 kWh)
+2024-08-22 13:04:39,550 - INFO - Energy sale: Available (Limit: 200 kWh, Current: 50 kWh)
+2024-08-22 13:04:39,550 - INFO - BESS charge level before actions: 7.00 kWh
+2024-08-22 13:04:39,550 - INFO - Total generated power: 1050 kW
+2024-08-22 13:04:39,551 - INFO - Total demand power: 1193 kW
+2024-08-22 13:04:39,551 - INFO - Power deficit detected: 143 kW - starting deficit management
+2024-08-22 13:04:39,551 - INFO - Start managing power deficit:: 143 kW
+2024-08-22 13:04:39,551 - INFO - Current output: 1050 kW
+2024-08-22 13:04:39,552 - INFO - Max potential output: 1050 kW
+2024-08-22 13:04:39,552 - INFO - Power deficit: 143 kW
+2024-08-22 13:04:39,552 - INFO - Potential surplus: -143 kW
+2024-08-22 13:04:39,553 - INFO - BESS free capacity: 343.0 kWh
+2024-08-22 13:04:39,553 - INFO - Available sale capacity: 150 kWh
+2024-08-22 13:04:39,553 - INFO - Total available capacity: 493.0 kWh
+2024-08-22 13:04:39,554 - INFO - Handleable additional power: -143 kW
+2024-08-22 13:04:39,554 - INFO - Current output: 1050 kW
+2024-08-22 13:04:39,554 - INFO - Max potential output: 1050 kW
+2024-08-22 13:04:39,554 - INFO - Power deficit: 143 kW
+2024-08-22 13:04:39,555 - INFO - Handleable power: -143 kW
+2024-08-22 13:04:39,555 - INFO - Target output: 1050 kW
+2024-08-22 13:04:39,555 - INFO - In total, power was increased by 0 kW
+2024-08-22 13:04:39,555 - INFO - Final output: 1050 kW
+2024-08-22 13:04:39,556 - INFO - Power was ordered by increasing production: 0 kW
+2024-08-22 13:04:39,556 - INFO - Remaining deficit after maximisation of equipment operation: 143 kW
+2024-08-22 13:04:39,557 - INFO - Iteration 1, remaining deficit: 143 kW
+2024-08-22 13:04:39,557 - INFO - Start of the decision-making function concerning the discharge or purchase 
+2024-08-22 13:04:39,557 - INFO - Purchase priority - low battery (2.0%)
+2024-08-22 13:04:39,558 - INFO - Executing action: DeficitAction.BUY_ENERGY for deficit: 143 kW
+2024-08-22 13:04:39,558 - INFO - Action result: {'success': True, 'amount': 143}
+2024-08-22 13:04:39,558 - INFO - Primary action DeficitAction.BUY_ENERGY managed 143 kW. Remaining deficit: 0 kW
+2024-08-22 13:04:39,558 - INFO - After iteration 1: A total managed 143 kW, remaining deficit 0 kW
+2024-08-22 13:04:39,558 - INFO - Deficit management completed. A total of managed: 143 kW. Remaining deficit: 0 kW
+2024-08-22 13:04:39,559 - INFO - Managed 143 kW of deficit. Remaining: 0 kW
+2024-08-22 13:04:39,559 - INFO - Deficit management completed. The entire deficit has been resolved.
+2024-08-22 13:04:39,559 - INFO - System status summary:
+2024-08-22 13:04:39,559 - INFO - Total generated power: 1050 kW
+2024-08-22 13:04:39,559 - INFO - Total demand: 1193 kW
+2024-08-22 13:04:39,559 - INFO - Number of active generating devices: 6
+2024-08-22 13:04:39,559 - INFO - Number of inactive generating devices: 0
+2024-08-22 13:04:39,560 - INFO - Active generating devices:
+2024-08-22 13:04:39,560 - INFO -   - PV Panel 1: 100 kW / 100 kW
+2024-08-22 13:04:39,560 - INFO -   - PV Panel 2: 120 kW / 120 kW
+2024-08-22 13:04:39,560 - INFO -   - Wind Turbine 1: 200 kW / 200 kW
+2024-08-22 13:04:39,560 - INFO -   - Wind Turbine 2: 180 kW / 180 kW
+2024-08-22 13:04:39,560 - INFO -   - Fuel Turbine 1: 300 kW / 300 kW
+2024-08-22 13:04:39,561 - INFO -   - Fuel Cell 1: 150 kW / 150 kW
+2024-08-22 13:04:39,561 - INFO - BESS charge level: 7.0 kWh / 350 kWh
+2024-08-22 13:04:39,561 - INFO - Energy purchase: Available (Limit: 300 kWh, Current: 293 kWh)
+2024-08-22 13:04:39,561 - INFO - Energy sale: Available (Limit: 200 kWh, Current: 50 kWh)
+2024-08-22 13:04:39,562 - INFO - Live data saved to live_data.json
+2024-08-22 13:04:39,563 - INFO - Live contract data saved to live_contract_data.json
+2024-08-22 13:04:39,694 - INFO - Iteration completed in 0.15 seconds
+2024-08-22 13:04:39,694 - INFO - BESS charge level after actions: 7.00 kWh
+2024-08-22 13:04:39,695 - INFO - Waiting 15 seconds for next iteration
+2024-08-22 13:04:54,705 - INFO - Loaded operation mode: automatic
+2024-08-22 13:04:54,707 - INFO - Attempting to update pv_panel: {'id': 1, 'name': 'PV Panel 1', 'priority': 1, 'max_output': 100, 'min_output': 10, 'actual_output': 100, 'switch_status': True, 'device_status': 'online', 'pending_action': None, 'action_approved': None}
+2024-08-22 13:04:54,709 - INFO - Pv_panel PV Panel 1 updated successfully.
+2024-08-22 13:04:54,710 - INFO - Attempting to update pv_panel: {'id': 2, 'name': 'PV Panel 2', 'priority': 1, 'max_output': 120, 'min_output': 15, 'actual_output': 120, 'switch_status': True, 'device_status': 'online', 'pending_action': None, 'action_approved': None}
+2024-08-22 13:04:54,711 - INFO - Pv_panel PV Panel 2 updated successfully.
+2024-08-22 13:04:54,712 - INFO - Attempting to update wind_turbine: {'id': 3, 'name': 'Wind Turbine 1', 'priority': 2, 'max_output': 200, 'min_output': 20, 'actual_output': 200, 'switch_status': True, 'device_status': 'online', 'pending_action': None, 'action_approved': None}
+2024-08-22 13:04:54,714 - INFO - Wind_turbine Wind Turbine 1 updated successfully.
+2024-08-22 13:04:54,714 - INFO - Attempting to update wind_turbine: {'id': 4, 'name': 'Wind Turbine 2', 'priority': 2, 'max_output': 180, 'min_output': 20, 'actual_output': 180, 'switch_status': True, 'device_status': 'online', 'pending_action': None, 'action_approved': None}
+2024-08-22 13:04:54,715 - INFO - Wind_turbine Wind Turbine 2 updated successfully.
+2024-08-22 13:04:54,716 - INFO - Attempting to update fuel_turbine: {'id': 5, 'name': 'Fuel Turbine 1', 'priority': 4, 'max_output': 300, 'min_output': 30, 'actual_output': 300, 'switch_status': True, 'device_status': 'online', 'pending_action': None, 'action_approved': None}
+2024-08-22 13:04:54,716 - INFO - Fuel_turbine Fuel Turbine 1 updated successfully.
+2024-08-22 13:04:54,717 - INFO - Attempting to update fuel_cell: {'id': 6, 'name': 'Fuel Cell 1', 'priority': 3, 'max_output': 150, 'min_output': 15, 'actual_output': 150, 'switch_status': True, 'device_status': 'online', 'pending_action': None, 'action_approved': None}
+2024-08-22 13:04:54,717 - INFO - Fuel_cell Fuel Cell 1 updated successfully.
+2024-08-22 13:04:54,718 - INFO - Attempting to update bess: {'id': 7, 'name': 'BESS 1', 'capacity': 350, 'charge_level': 7.0, 'switch_status': True, 'device_status': 'online'}
+2024-08-22 13:04:54,719 - INFO - BESS BESS 1 updated successfully.
+2024-08-22 13:04:54,719 - INFO - Data loaded successfully.
+2024-08-22 13:04:54,728 - INFO - Loaded live data
+2024-08-22 13:04:54,728 - INFO - Starting a new iteration in automatic mode
+2024-08-22 13:04:54,728 - INFO - Starting device update based on meter readings
+2024-08-22 13:04:54,729 - INFO - Checking 6 devices for updates based on meter readings
+2024-08-22 13:04:54,729 - INFO - Checking device PV Panel 1 (ID: 1). Device status: online, Meter status: online, Meter reading: 15 kW
+2024-08-22 13:04:54,729 - INFO - Checking device PV Panel 2 (ID: 2). Device status: online, Meter status: online, Meter reading: 98 kW
+2024-08-22 13:04:54,730 - INFO - Checking device Wind Turbine 1 (ID: 3). Device status: online, Meter status: online, Meter reading: 42 kW
+2024-08-22 13:04:54,730 - INFO - No meter found for device Wind Turbine 2 (ID: 4)
+2024-08-22 13:04:54,730 - INFO - Checking device Fuel Turbine 1 (ID: 5). Device status: online, Meter status: online, Meter reading: 38 kW
+2024-08-22 13:04:54,730 - INFO - No meter found for device Fuel Cell 1 (ID: 6)
+2024-08-22 13:04:54,731 - INFO - System status summary:
+2024-08-22 13:04:54,731 - INFO - Total generated power: 1050 kW
+2024-08-22 13:04:54,731 - INFO - Total demand: 1193 kW
+2024-08-22 13:04:54,732 - INFO - Number of active generating devices: 6
+2024-08-22 13:04:54,732 - INFO - Number of inactive generating devices: 0
+2024-08-22 13:04:54,732 - INFO - Active generating devices:
+2024-08-22 13:04:54,733 - INFO -   - PV Panel 1: 100 kW / 100 kW
+2024-08-22 13:04:54,733 - INFO -   - PV Panel 2: 120 kW / 120 kW
+2024-08-22 13:04:54,733 - INFO -   - Wind Turbine 1: 200 kW / 200 kW
+2024-08-22 13:04:54,733 - INFO -   - Wind Turbine 2: 180 kW / 180 kW
+2024-08-22 13:04:54,734 - INFO -   - Fuel Turbine 1: 300 kW / 300 kW
+2024-08-22 13:04:54,734 - INFO -   - Fuel Cell 1: 150 kW / 150 kW
+2024-08-22 13:04:54,735 - INFO - BESS charge level: 7.0 kWh / 350 kWh
+2024-08-22 13:04:54,735 - INFO - Energy purchase: Available (Limit: 300 kWh, Current: 293 kWh)
+2024-08-22 13:04:54,735 - INFO - Energy sale: Available (Limit: 200 kWh, Current: 50 kWh)
+2024-08-22 13:04:54,735 - INFO - BESS charge level before actions: 7.00 kWh
+2024-08-22 13:04:54,736 - INFO - Total generated power: 1050 kW
+2024-08-22 13:04:54,736 - INFO - Total demand power: 1193 kW
+2024-08-22 13:04:54,736 - INFO - Power deficit detected: 143 kW - starting deficit management
+2024-08-22 13:04:54,736 - INFO - Start managing power deficit:: 143 kW
+2024-08-22 13:04:54,737 - INFO - Current output: 1050 kW
+2024-08-22 13:04:54,737 - INFO - Max potential output: 1050 kW
+2024-08-22 13:04:54,737 - INFO - Power deficit: 143 kW
+2024-08-22 13:04:54,737 - INFO - Potential surplus: -143 kW
+2024-08-22 13:04:54,737 - INFO - BESS free capacity: 343.0 kWh
+2024-08-22 13:04:54,737 - INFO - Available sale capacity: 150 kWh
+2024-08-22 13:04:54,737 - INFO - Total available capacity: 493.0 kWh
+2024-08-22 13:04:54,738 - INFO - Handleable additional power: -143 kW
+2024-08-22 13:04:54,738 - INFO - Current output: 1050 kW
+2024-08-22 13:04:54,738 - INFO - Max potential output: 1050 kW
+2024-08-22 13:04:54,738 - INFO - Power deficit: 143 kW
+2024-08-22 13:04:54,738 - INFO - Handleable power: -143 kW
+2024-08-22 13:04:54,739 - INFO - Target output: 1050 kW
+2024-08-22 13:04:54,739 - INFO - In total, power was increased by 0 kW
+2024-08-22 13:04:54,739 - INFO - Final output: 1050 kW
+2024-08-22 13:04:54,739 - INFO - Power was ordered by increasing production: 0 kW
+2024-08-22 13:04:54,739 - INFO - Remaining deficit after maximisation of equipment operation: 143 kW
+2024-08-22 13:04:54,739 - INFO - Iteration 1, remaining deficit: 143 kW
+2024-08-22 13:04:54,740 - INFO - Start of the decision-making function concerning the discharge or purchase 
+2024-08-22 13:04:54,740 - INFO - Purchase priority - low battery (2.0%)
+2024-08-22 13:04:54,740 - INFO - Executing action: DeficitAction.BUY_ENERGY for deficit: 143 kW
+2024-08-22 13:04:54,740 - INFO - Action result: {'success': True, 'amount': 7}
+2024-08-22 13:04:54,740 - INFO - Primary action DeficitAction.BUY_ENERGY managed 7 kW. Remaining deficit: 136 kW
+2024-08-22 13:04:54,741 - INFO - Executing action: DeficitAction.DISCHARGE_BESS for deficit: 136 kW
+2024-08-22 13:04:54,741 - INFO - Attempting to discharge BESS by 136 kW
+2024-08-22 13:04:55,742 - INFO - BESS was discharged by 7.0 kWh
+2024-08-22 13:04:55,742 - INFO - BESS charge level: before 7.0 kWh, after 0.0 kWh
+2024-08-22 13:04:55,743 - INFO - Action result: {'success': True, 'amount': 7.0}
+2024-08-22 13:04:55,743 - INFO - Secondary action DeficitAction.DISCHARGE_BESS managed 7.0 kW. Remaining deficit: 129.0 kW
+2024-08-22 13:04:55,744 - INFO - After iteration 1: A total managed 14.0 kW, remaining deficit 129.0 kW
+2024-08-22 13:04:55,744 - INFO - Iteration 2, remaining deficit: 129.0 kW
+2024-08-22 13:04:55,745 - INFO - Executing action: DeficitAction.LIMIT_CONSUMPTION for deficit: 129.0 kW
+2024-08-22 13:04:55,745 - INFO - Attempting to limit consumption by 129.0 kW
+2024-08-22 13:04:55,745 - INFO - Total devices: 4
+2024-08-22 13:04:55,746 - INFO - Adjustable devices: 2
+2024-08-22 13:04:55,746 - INFO - Non-adjustable devices: 2
+2024-08-22 13:04:55,746 - INFO - Considering device: Adjustable Device 2, Type: AdjustableDevice, Power: 999, Switch status: True
+2024-08-22 13:04:55,747 - INFO - Reduced Adjustable Device 2 power by 99 kW
+2024-08-22 13:04:55,747 - INFO - Considering device: Adjustable Device 1, Type: AdjustableDevice, Power: 84, Switch status: True
+2024-08-22 13:04:55,747 - INFO - Reduced Adjustable Device 1 power by 4 kW
+2024-08-22 13:04:55,748 - INFO - Considering device: Non Adjustable Device 1, Type: NonAdjustableDevice, Power: 100, Switch status: True
+2024-08-22 13:04:55,748 - INFO - Deactivated Non Adjustable Device 1, saved 100 kW
+2024-08-22 13:04:55,748 - INFO - Considering device: Non Adjustable Device 2, Type: NonAdjustableDevice, Power: 10, Switch status: True
+2024-08-22 13:04:55,749 - INFO - Total power reduced: 203 kW
+2024-08-22 13:04:55,749 - INFO - Remaining deficit: 0 kW
+2024-08-22 13:04:55,749 - INFO - Devices affected:
+2024-08-22 13:04:55,750 - INFO -   - Reduced Adjustable Device 2 power by 99 kW
+2024-08-22 13:04:55,750 - INFO -   - Reduced Adjustable Device 1 power by 4 kW
+2024-08-22 13:04:55,750 - INFO -   - Deactivated Non Adjustable Device 1, saved 100 kW
+2024-08-22 13:04:55,751 - INFO - Action result: {'success': True, 'amount': 203, 'remaining_deficit': 0, 'devices_affected': ['Reduced Adjustable Device 2 power by 99 kW', 'Reduced Adjustable Device 1 power by 4 kW', 'Deactivated Non Adjustable Device 1, saved 100 kW']}
+2024-08-22 13:04:55,751 - INFO - Consumption limitation managed 203 kW. Remaining deficit: -74.0 kW
+2024-08-22 13:04:55,751 - INFO -   - Reduced Adjustable Device 2 power by 99 kW
+2024-08-22 13:04:55,751 - INFO -   - Reduced Adjustable Device 1 power by 4 kW
+2024-08-22 13:04:55,752 - INFO -   - Deactivated Non Adjustable Device 1, saved 100 kW
+2024-08-22 13:04:55,752 - INFO - After iteration 2: A total managed 217.0 kW, remaining deficit -74.0 kW
+2024-08-22 13:04:55,752 - INFO - Deficit management completed. A total of managed: 217.0 kW. Remaining deficit: -74.0 kW
+2024-08-22 13:04:55,753 - INFO - Managed 217.0 kW of deficit. Remaining: -74.0 kW
+2024-08-22 13:04:55,753 - INFO - Deficit management completed. The entire deficit has been resolved.
+2024-08-22 13:04:55,753 - INFO - System status summary:
+2024-08-22 13:04:55,754 - INFO - Total generated power: 1050 kW
+2024-08-22 13:04:55,754 - INFO - Total demand: 990 kW
+2024-08-22 13:04:55,754 - INFO - Number of active generating devices: 6
+2024-08-22 13:04:55,754 - INFO - Number of inactive generating devices: 0
+2024-08-22 13:04:55,755 - INFO - Active generating devices:
+2024-08-22 13:04:55,755 - INFO -   - PV Panel 1: 100 kW / 100 kW
+2024-08-22 13:04:55,755 - INFO -   - PV Panel 2: 120 kW / 120 kW
+2024-08-22 13:04:55,755 - INFO -   - Wind Turbine 1: 200 kW / 200 kW
+2024-08-22 13:04:55,755 - INFO -   - Wind Turbine 2: 180 kW / 180 kW
+2024-08-22 13:04:55,756 - INFO -   - Fuel Turbine 1: 300 kW / 300 kW
+2024-08-22 13:04:55,756 - INFO -   - Fuel Cell 1: 150 kW / 150 kW
+2024-08-22 13:04:55,756 - INFO - BESS charge level: 0.0 kWh / 350 kWh
+2024-08-22 13:04:55,756 - INFO - Energy purchase: Not available (Limit: 300 kWh, Current: 300 kWh)
+2024-08-22 13:04:55,756 - INFO - Energy sale: Available (Limit: 200 kWh, Current: 50 kWh)
+2024-08-22 13:04:55,757 - INFO - Live data saved to live_data.json
+2024-08-22 13:04:55,758 - INFO - Live contract data saved to live_contract_data.json
+2024-08-22 13:04:55,877 - INFO - Iteration completed in 1.15 seconds
+2024-08-22 13:04:55,878 - INFO - BESS charge level after actions: 0.00 kWh
+2024-08-22 13:04:55,878 - INFO - Waiting 15 seconds for next iteration
+2024-08-22 13:05:10,882 - INFO - Loaded operation mode: automatic
+2024-08-22 13:05:10,884 - INFO - Attempting to update pv_panel: {'id': 1, 'name': 'PV Panel 1', 'priority': 1, 'max_output': 100, 'min_output': 10, 'actual_output': 100, 'switch_status': True, 'device_status': 'online', 'pending_action': None, 'action_approved': None}
+2024-08-22 13:05:10,885 - INFO - Pv_panel PV Panel 1 updated successfully.
+2024-08-22 13:05:10,886 - INFO - Attempting to update pv_panel: {'id': 2, 'name': 'PV Panel 2', 'priority': 1, 'max_output': 120, 'min_output': 15, 'actual_output': 120, 'switch_status': True, 'device_status': 'online', 'pending_action': None, 'action_approved': None}
+2024-08-22 13:05:10,887 - INFO - Pv_panel PV Panel 2 updated successfully.
+2024-08-22 13:05:10,888 - INFO - Attempting to update wind_turbine: {'id': 3, 'name': 'Wind Turbine 1', 'priority': 2, 'max_output': 200, 'min_output': 20, 'actual_output': 200, 'switch_status': True, 'device_status': 'online', 'pending_action': None, 'action_approved': None}
+2024-08-22 13:05:10,888 - INFO - Wind_turbine Wind Turbine 1 updated successfully.
+2024-08-22 13:05:10,889 - INFO - Attempting to update wind_turbine: {'id': 4, 'name': 'Wind Turbine 2', 'priority': 2, 'max_output': 180, 'min_output': 20, 'actual_output': 180, 'switch_status': True, 'device_status': 'online', 'pending_action': None, 'action_approved': None}
+2024-08-22 13:05:10,889 - INFO - Wind_turbine Wind Turbine 2 updated successfully.
+2024-08-22 13:05:10,889 - INFO - Attempting to update fuel_turbine: {'id': 5, 'name': 'Fuel Turbine 1', 'priority': 4, 'max_output': 300, 'min_output': 30, 'actual_output': 300, 'switch_status': True, 'device_status': 'online', 'pending_action': None, 'action_approved': None}
+2024-08-22 13:05:10,890 - INFO - Fuel_turbine Fuel Turbine 1 updated successfully.
+2024-08-22 13:05:10,890 - INFO - Attempting to update fuel_cell: {'id': 6, 'name': 'Fuel Cell 1', 'priority': 3, 'max_output': 150, 'min_output': 15, 'actual_output': 150, 'switch_status': True, 'device_status': 'online', 'pending_action': None, 'action_approved': None}
+2024-08-22 13:05:10,891 - INFO - Fuel_cell Fuel Cell 1 updated successfully.
+2024-08-22 13:05:10,891 - INFO - Attempting to update bess: {'id': 7, 'name': 'BESS 1', 'capacity': 350, 'charge_level': 0.0, 'switch_status': True, 'device_status': 'online'}
+2024-08-22 13:05:10,891 - INFO - BESS BESS 1 updated successfully.
+2024-08-22 13:05:10,892 - INFO - Data loaded successfully.
+2024-08-22 13:05:10,899 - INFO - Loaded live data
+2024-08-22 13:05:10,900 - INFO - Starting a new iteration in automatic mode
+2024-08-22 13:05:10,900 - INFO - Starting device update based on meter readings
+2024-08-22 13:05:10,900 - INFO - Checking 6 devices for updates based on meter readings
+2024-08-22 13:05:10,901 - INFO - Checking device PV Panel 1 (ID: 1). Device status: online, Meter status: online, Meter reading: 15 kW
+2024-08-22 13:05:10,901 - INFO - Checking device PV Panel 2 (ID: 2). Device status: online, Meter status: online, Meter reading: 98 kW
+2024-08-22 13:05:10,901 - INFO - Checking device Wind Turbine 1 (ID: 3). Device status: online, Meter status: online, Meter reading: 42 kW
+2024-08-22 13:05:10,902 - INFO - No meter found for device Wind Turbine 2 (ID: 4)
+2024-08-22 13:05:10,902 - INFO - Checking device Fuel Turbine 1 (ID: 5). Device status: online, Meter status: online, Meter reading: 38 kW
+2024-08-22 13:05:10,902 - INFO - No meter found for device Fuel Cell 1 (ID: 6)
+2024-08-22 13:05:10,903 - INFO - System status summary:
+2024-08-22 13:05:10,903 - INFO - Total generated power: 1050 kW
+2024-08-22 13:05:10,903 - INFO - Total demand: 990 kW
+2024-08-22 13:05:10,903 - INFO - Number of active generating devices: 6
+2024-08-22 13:05:10,904 - INFO - Number of inactive generating devices: 0
+2024-08-22 13:05:10,904 - INFO - Active generating devices:
+2024-08-22 13:05:10,904 - INFO -   - PV Panel 1: 100 kW / 100 kW
+2024-08-22 13:05:10,905 - INFO -   - PV Panel 2: 120 kW / 120 kW
+2024-08-22 13:05:10,905 - INFO -   - Wind Turbine 1: 200 kW / 200 kW
+2024-08-22 13:05:10,905 - INFO -   - Wind Turbine 2: 180 kW / 180 kW
+2024-08-22 13:05:10,905 - INFO -   - Fuel Turbine 1: 300 kW / 300 kW
+2024-08-22 13:05:10,906 - INFO -   - Fuel Cell 1: 150 kW / 150 kW
+2024-08-22 13:05:10,906 - INFO - BESS charge level: 0.0 kWh / 350 kWh
+2024-08-22 13:05:10,906 - INFO - Energy purchase: Not available (Limit: 300 kWh, Current: 300 kWh)
+2024-08-22 13:05:10,906 - INFO - Energy sale: Available (Limit: 200 kWh, Current: 50 kWh)
+2024-08-22 13:05:10,906 - INFO - BESS charge level before actions: 0.00 kWh
+2024-08-22 13:05:10,906 - INFO - Total generated power: 1050 kW
+2024-08-22 13:05:10,907 - INFO - Total demand power: 990 kW
+2024-08-22 13:05:10,907 - INFO - Power surplus detected: 60 kW - starting surplus management
+2024-08-22 13:05:10,907 - INFO - Iteration 1, surplus remaining: 60.000000 kW
+2024-08-22 13:05:10,907 - INFO - Attempting to perform the action: SurplusAction.BOTH
+2024-08-22 13:05:10,907 - INFO - Executing action: SurplusAction.BOTH, type: <enum 'SurplusAction'>
+2024-08-22 13:05:10,907 - INFO - XXXXXXXXXXXXXXXXXXXXXXXXXExecuting actionxdxdxdd: SurplusAction.BOTH
+2024-08-22 13:05:10,907 - INFO - Remaining surplus: 60.000000
+2024-08-22 13:05:10,908 - INFO - Batteryxxx (0.1) price (0.2 kW)
+2024-08-22 13:05:10,908 - INFO - Sales priority: price factor (0.20) > battery factor (0.10)
+2024-08-22 13:05:10,908 - INFO - Selling 60 kW of surplus energy. Total energy sold: 110 kW.
+2024-08-22 13:05:10,908 - INFO - Successfully sold 60.000000 kW of energy.
+2024-08-22 13:05:10,908 - INFO - Action result: {'success': True, 'amount': 60}
+2024-08-22 13:05:10,908 - INFO - Action SurplusAction.BOTH managed 60.000000 kW. Surplus remaining: 0.000000 kW
+2024-08-22 13:05:10,909 - INFO - Managed 60 kW of surplus. Remaining: 0 kW
+2024-08-22 13:05:10,909 - INFO - Surplus management completed. The entire surplus has been dissolved.
+2024-08-22 13:05:10,909 - INFO - System status summary:
+2024-08-22 13:05:10,909 - INFO - Total generated power: 1050 kW
+2024-08-22 13:05:10,909 - INFO - Total demand: 990 kW
+2024-08-22 13:05:10,909 - INFO - Number of active generating devices: 6
+2024-08-22 13:05:10,910 - INFO - Number of inactive generating devices: 0
+2024-08-22 13:05:10,910 - INFO - Active generating devices:
+2024-08-22 13:05:10,910 - INFO -   - PV Panel 1: 100 kW / 100 kW
+2024-08-22 13:05:10,911 - INFO -   - PV Panel 2: 120 kW / 120 kW
+2024-08-22 13:05:10,911 - INFO -   - Wind Turbine 1: 200 kW / 200 kW
+2024-08-22 13:05:10,911 - INFO -   - Wind Turbine 2: 180 kW / 180 kW
+2024-08-22 13:05:10,911 - INFO -   - Fuel Turbine 1: 300 kW / 300 kW
+2024-08-22 13:05:10,912 - INFO -   - Fuel Cell 1: 150 kW / 150 kW
+2024-08-22 13:05:10,912 - INFO - BESS charge level: 0.0 kWh / 350 kWh
+2024-08-22 13:05:10,912 - INFO - Energy purchase: Not available (Limit: 300 kWh, Current: 300 kWh)
+2024-08-22 13:05:10,912 - INFO - Energy sale: Available (Limit: 200 kWh, Current: 110 kWh)
+2024-08-22 13:05:10,913 - INFO - Live data saved to live_data.json
+2024-08-22 13:05:10,914 - INFO - Live contract data saved to live_contract_data.json
+2024-08-22 13:05:11,032 - INFO - Iteration completed in 0.13 seconds
+2024-08-22 13:05:11,032 - INFO - BESS charge level after actions: 0.00 kWh
+2024-08-22 13:05:11,032 - INFO - Waiting 15 seconds for next iteration
+2024-08-22 13:05:26,034 - INFO - Loaded operation mode: automatic
+2024-08-22 13:05:26,035 - INFO - Attempting to update pv_panel: {'id': 1, 'name': 'PV Panel 1', 'priority': 1, 'max_output': 100, 'min_output': 10, 'actual_output': 100, 'switch_status': True, 'device_status': 'online', 'pending_action': None, 'action_approved': None}
+2024-08-22 13:05:26,035 - INFO - Pv_panel PV Panel 1 updated successfully.
+2024-08-22 13:05:26,035 - INFO - Attempting to update pv_panel: {'id': 2, 'name': 'PV Panel 2', 'priority': 1, 'max_output': 120, 'min_output': 15, 'actual_output': 120, 'switch_status': True, 'device_status': 'online', 'pending_action': None, 'action_approved': None}
+2024-08-22 13:05:26,036 - INFO - Pv_panel PV Panel 2 updated successfully.
+2024-08-22 13:05:26,036 - INFO - Attempting to update wind_turbine: {'id': 3, 'name': 'Wind Turbine 1', 'priority': 2, 'max_output': 200, 'min_output': 20, 'actual_output': 200, 'switch_status': True, 'device_status': 'online', 'pending_action': None, 'action_approved': None}
+2024-08-22 13:05:26,037 - INFO - Wind_turbine Wind Turbine 1 updated successfully.
+2024-08-22 13:05:26,037 - INFO - Attempting to update wind_turbine: {'id': 4, 'name': 'Wind Turbine 2', 'priority': 2, 'max_output': 180, 'min_output': 20, 'actual_output': 180, 'switch_status': True, 'device_status': 'online', 'pending_action': None, 'action_approved': None}
+2024-08-22 13:05:26,037 - INFO - Wind_turbine Wind Turbine 2 updated successfully.
+2024-08-22 13:05:26,038 - INFO - Attempting to update fuel_turbine: {'id': 5, 'name': 'Fuel Turbine 1', 'priority': 4, 'max_output': 300, 'min_output': 30, 'actual_output': 300, 'switch_status': True, 'device_status': 'online', 'pending_action': None, 'action_approved': None}
+2024-08-22 13:05:26,038 - INFO - Fuel_turbine Fuel Turbine 1 updated successfully.
+2024-08-22 13:05:26,038 - INFO - Attempting to update fuel_cell: {'id': 6, 'name': 'Fuel Cell 1', 'priority': 3, 'max_output': 150, 'min_output': 15, 'actual_output': 150, 'switch_status': True, 'device_status': 'online', 'pending_action': None, 'action_approved': None}
+2024-08-22 13:05:26,038 - INFO - Fuel_cell Fuel Cell 1 updated successfully.
+2024-08-22 13:05:26,038 - INFO - Attempting to update bess: {'id': 7, 'name': 'BESS 1', 'capacity': 350, 'charge_level': 0.0, 'switch_status': True, 'device_status': 'online'}
+2024-08-22 13:05:26,039 - INFO - BESS BESS 1 updated successfully.
+2024-08-22 13:05:26,039 - INFO - Data loaded successfully.
+2024-08-22 13:05:26,046 - INFO - Loaded live data
+2024-08-22 13:05:26,046 - INFO - Starting a new iteration in automatic mode
+2024-08-22 13:05:26,046 - INFO - Starting device update based on meter readings
+2024-08-22 13:05:26,047 - INFO - Checking 6 devices for updates based on meter readings
+2024-08-22 13:05:26,047 - INFO - Checking device PV Panel 1 (ID: 1). Device status: online, Meter status: online, Meter reading: 15 kW
+2024-08-22 13:05:26,047 - INFO - Checking device PV Panel 2 (ID: 2). Device status: online, Meter status: online, Meter reading: 98 kW
+2024-08-22 13:05:26,047 - INFO - Checking device Wind Turbine 1 (ID: 3). Device status: online, Meter status: online, Meter reading: 42 kW
+2024-08-22 13:05:26,047 - INFO - No meter found for device Wind Turbine 2 (ID: 4)
+2024-08-22 13:05:26,048 - INFO - Checking device Fuel Turbine 1 (ID: 5). Device status: online, Meter status: online, Meter reading: 38 kW
+2024-08-22 13:05:26,048 - INFO - No meter found for device Fuel Cell 1 (ID: 6)
+2024-08-22 13:05:26,048 - INFO - System status summary:
+2024-08-22 13:05:26,048 - INFO - Total generated power: 1050 kW
+2024-08-22 13:05:26,049 - INFO - Total demand: 990 kW
+2024-08-22 13:05:26,049 - INFO - Number of active generating devices: 6
+2024-08-22 13:05:26,049 - INFO - Number of inactive generating devices: 0
+2024-08-22 13:05:26,050 - INFO - Active generating devices:
+2024-08-22 13:05:26,050 - INFO -   - PV Panel 1: 100 kW / 100 kW
+2024-08-22 13:05:26,050 - INFO -   - PV Panel 2: 120 kW / 120 kW
+2024-08-22 13:05:26,050 - INFO -   - Wind Turbine 1: 200 kW / 200 kW
+2024-08-22 13:05:26,050 - INFO -   - Wind Turbine 2: 180 kW / 180 kW
+2024-08-22 13:05:26,050 - INFO -   - Fuel Turbine 1: 300 kW / 300 kW
+2024-08-22 13:05:26,051 - INFO -   - Fuel Cell 1: 150 kW / 150 kW
+2024-08-22 13:05:26,051 - INFO - BESS charge level: 0.0 kWh / 350 kWh
+2024-08-22 13:05:26,051 - INFO - Energy purchase: Not available (Limit: 300 kWh, Current: 300 kWh)
+2024-08-22 13:05:26,051 - INFO - Energy sale: Available (Limit: 200 kWh, Current: 110 kWh)
+2024-08-22 13:05:26,051 - INFO - BESS charge level before actions: 0.00 kWh
+2024-08-22 13:05:26,051 - INFO - Total generated power: 1050 kW
+2024-08-22 13:05:26,052 - INFO - Total demand power: 990 kW
+2024-08-22 13:05:26,052 - INFO - Power surplus detected: 60 kW - starting surplus management
+2024-08-22 13:05:26,052 - INFO - Iteration 1, surplus remaining: 60.000000 kW
+2024-08-22 13:05:26,052 - INFO - Attempting to perform the action: SurplusAction.BOTH
+2024-08-22 13:05:26,052 - INFO - Executing action: SurplusAction.BOTH, type: <enum 'SurplusAction'>
+2024-08-22 13:05:26,053 - INFO - XXXXXXXXXXXXXXXXXXXXXXXXXExecuting actionxdxdxdd: SurplusAction.BOTH
+2024-08-22 13:05:26,053 - INFO - Remaining surplus: 60.000000
+2024-08-22 13:05:26,053 - INFO - Batteryxxx (0.1) price (0.2 kW)
+2024-08-22 13:05:26,053 - INFO - Sales priority: price factor (0.20) > battery factor (0.10)
+2024-08-22 13:05:26,053 - INFO - Selling 60 kW of surplus energy. Total energy sold: 170 kW.
+2024-08-22 13:05:26,054 - INFO - Successfully sold 60.000000 kW of energy.
+2024-08-22 13:05:26,054 - INFO - Action result: {'success': True, 'amount': 60}
+2024-08-22 13:05:26,054 - INFO - Action SurplusAction.BOTH managed 60.000000 kW. Surplus remaining: 0.000000 kW
+2024-08-22 13:05:26,054 - INFO - Managed 60 kW of surplus. Remaining: 0 kW
+2024-08-22 13:05:26,054 - INFO - Surplus management completed. The entire surplus has been dissolved.
+2024-08-22 13:05:26,055 - INFO - System status summary:
+2024-08-22 13:05:26,056 - INFO - Total generated power: 1050 kW
+2024-08-22 13:05:26,056 - INFO - Total demand: 990 kW
+2024-08-22 13:05:26,056 - INFO - Number of active generating devices: 6
+2024-08-22 13:05:26,056 - INFO - Number of inactive generating devices: 0
+2024-08-22 13:05:26,056 - INFO - Active generating devices:
+2024-08-22 13:05:26,057 - INFO -   - PV Panel 1: 100 kW / 100 kW
+2024-08-22 13:05:26,057 - INFO -   - PV Panel 2: 120 kW / 120 kW
+2024-08-22 13:05:26,057 - INFO -   - Wind Turbine 1: 200 kW / 200 kW
+2024-08-22 13:05:26,057 - INFO -   - Wind Turbine 2: 180 kW / 180 kW
+2024-08-22 13:05:26,057 - INFO -   - Fuel Turbine 1: 300 kW / 300 kW
+2024-08-22 13:05:26,057 - INFO -   - Fuel Cell 1: 150 kW / 150 kW
+2024-08-22 13:05:26,057 - INFO - BESS charge level: 0.0 kWh / 350 kWh
+2024-08-22 13:05:26,058 - INFO - Energy purchase: Not available (Limit: 300 kWh, Current: 300 kWh)
+2024-08-22 13:05:26,058 - INFO - Energy sale: Available (Limit: 200 kWh, Current: 170 kWh)
+2024-08-22 13:05:26,059 - INFO - Live data saved to live_data.json
+2024-08-22 13:05:26,059 - INFO - Live contract data saved to live_contract_data.json
+2024-08-22 13:05:26,167 - INFO - Iteration completed in 0.12 seconds
+2024-08-22 13:05:26,167 - INFO - BESS charge level after actions: 0.00 kWh
+2024-08-22 13:05:26,167 - INFO - Waiting 15 seconds for next iteration
+2024-08-22 13:05:29,933 - INFO - Energy management stopping
+2024-08-22 13:05:29,933 - INFO - Energy management stopped

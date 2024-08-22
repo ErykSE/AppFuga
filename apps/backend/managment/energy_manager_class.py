@@ -92,7 +92,7 @@ class EnergyManager:
             lat=50.86,
             lon=16.32,
         )
-        self.auto_interval = 30  # 30 sekund dla trybu automatycznego
+        self.auto_interval = 15  # 30 sekund dla trybu automatycznego
         self.semi_auto_interval = 15  # 5 minut dla trybu półautomatycznego
         self.operation_mode = OperationMode.AUTOMATIC
         self.action_timeout = 60  # 1 minuta na decyzję operatora

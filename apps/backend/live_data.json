@@ -84,7 +84,7 @@
             "id": 7,
             "name": "BESS 1",
             "capacity": 350,
-            "charge_level": 7.0,
+            "charge_level": 0.0,
             "switch_status": true,
             "device_status": "online"
         }
@@ -94,15 +94,15 @@
             "id": 8,
             "name": "Non Adjustable Device 1",
             "priority": 1,
-            "power": 100,
-            "switch_status": true
+            "power": 0,
+            "switch_status": false
         },
         {
             "id": 9,
             "name": "Non Adjustable Device 2",
             "priority": 2,
             "power": 10,
-            "switch_status": false
+            "switch_status": true
         }
     ],
     "adjustable_devices": [
