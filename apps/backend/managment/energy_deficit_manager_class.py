@@ -566,13 +566,15 @@ class EnergyDeficitManager:
         price_factor = (current_buy_price - MIN_BUY_PRICE) / (
             MAX_BUY_PRICE - MIN_BUY_PRICE
         )
+
+        # price_factor = max(0, min(price_factor, 1))
+        # bess_factor = bess_percentage / 100
+
+        price_factor = 0.6
+        bess_factor = 0.8
+
         print("current", current_buy_price)
         print("priceFactor1", price_factor)
-        price_factor = max(0, min(price_factor, 1))
-
-        # price_factor = 0.3
-        bess_factor = bess_percentage / 100
-
         print("bessFactor", bess_factor)
 
         if price_factor < PRICE_THRESHOLD and deficit < 50:
@@ -623,7 +625,9 @@ class EnergyDeficitManager:
         return {"success": activated_power > 0, "amount": activated_power}
 
     def get_proposed_actions(self, power_deficit):
-        self.info_logger.info(f"Proposing actions for deficit: {power_deficit} kW")
+        self.info_logger.info(
+            f"[DEBUG] Proposing actions for deficit: {power_deficit} kW"
+        )
         actions = []
         remaining_deficit = power_deficit
 
@@ -646,18 +650,35 @@ class EnergyDeficitManager:
             if bess_available and can_buy_energy:
                 bess_energy = self.microgrid.bess.get_charge_level()
                 current_buy_price = self.osd.get_current_buy_price()
+
                 if self.should_discharge_bess(
                     remaining_deficit, bess_energy, current_buy_price
                 ):
+                    # Priorytet dla BESS
                     bess_action = self.prepare_bess_discharge_action(remaining_deficit)
                     if bess_action:
                         actions.append(bess_action)
                         remaining_deficit -= bess_action["reduction"]
+
+                    if remaining_deficit > 0:
+                        buy_action = self.prepare_buy_energy_action(remaining_deficit)
+                        if buy_action:
+                            actions.append(buy_action)
+                            remaining_deficit -= buy_action["reduction"]
                 else:
+                    # Priorytet dla zakupu energii
                     buy_action = self.prepare_buy_energy_action(remaining_deficit)
                     if buy_action:
                         actions.append(buy_action)
                         remaining_deficit -= buy_action["reduction"]
+
+                    if remaining_deficit > 0:
+                        bess_action = self.prepare_bess_discharge_action(
+                            remaining_deficit
+                        )
+                        if bess_action:
+                            actions.append(bess_action)
+                            remaining_deficit -= bess_action["reduction"]
             elif bess_available:
                 bess_action = self.prepare_bess_discharge_action(remaining_deficit)
                 if bess_action:
@@ -673,7 +694,12 @@ class EnergyDeficitManager:
         if remaining_deficit > 0:
             limit_actions = self.prepare_limit_consumption_actions(remaining_deficit)
             actions.extend(limit_actions)
+            remaining_deficit -= sum(action["reduction"] for action in limit_actions)
 
+        self.info_logger.info(f"[DEBUG] Proposed actions: {actions}")
+        self.info_logger.info(
+            f"[DEBUG] Remaining deficit after proposing actions: {remaining_deficit}"
+        )
         return actions
 
     def prepare_buy_energy_action(self, power_deficit):
@@ -693,10 +719,13 @@ class EnergyDeficitManager:
         }
 
     def prepare_bess_discharge_action(self, power_deficit):
+        self.info_logger.info(
+            f"[DEBUG] Preparing BESS discharge action for deficit: {power_deficit}"
+        )
         if self.microgrid.bess:
             available_energy = self.microgrid.bess.get_charge_level()
             discharge_amount = min(power_deficit, available_energy)
-            return {
+            action = {
                 "id": str(uuid.uuid4()),
                 "device_id": str(self.microgrid.bess.id),
                 "device_name": self.microgrid.bess.name,
@@ -706,6 +735,10 @@ class EnergyDeficitManager:
                 "proposed_output": discharge_amount,
                 "reduction": discharge_amount,
             }
+            self.info_logger.info(f"[DEBUG] Prepared BESS action: {action}")
+            return action
+        else:
+            self.info_logger.info("[DEBUG] BESS not available for discharge action")
         return None
 
     def prepare_limit_consumption_actions(self, power_deficit):

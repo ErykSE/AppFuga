@@ -895,14 +895,24 @@ class EnergyManager:
         )
 
     def get_device_by_id_and_type(self, device_id, device_type):
+        self.info_logger.info(
+            f"[DEBUG] Entering get_device_by_id_and_type: ID={device_id}, type={device_type}"
+        )
+
         if device_type == "OSD":
+            self.info_logger.info("[DEBUG] Returning OSD device")
             return self.osd
         if device_type == "BESS":
-            return (
-                self.microgrid.bess
-                if self.microgrid.bess and str(self.microgrid.bess.id) == str(device_id)
-                else None
-            )
+            self.info_logger.info("[DEBUG] Checking BESS device")
+            if self.microgrid.bess and str(self.microgrid.bess.id) == str(device_id):
+                self.info_logger.info(
+                    f"[DEBUG] BESS device found: ID={self.microgrid.bess.id}"
+                )
+                return self.microgrid.bess
+            else:
+                self.info_logger.info(
+                    f"[DEBUG] BESS device not found or ID mismatch. BESS ID: {self.microgrid.bess.id if self.microgrid.bess else 'None'}"
+                )
 
         device_lists = {
             "PV": self.microgrid.pv_panels,
@@ -914,9 +924,16 @@ class EnergyManager:
         }
 
         if device_type in device_lists:
+            self.info_logger.info(f"[DEBUG] Searching in {device_type} list")
             for device in device_lists[device_type]:
                 if str(device.id) == str(device_id):
+                    self.info_logger.info(f"[DEBUG] Device found: {device.name}")
                     return device
+            self.info_logger.info(
+                f"[DEBUG] No device found with ID {device_id} in {device_type} list"
+            )
+        else:
+            self.info_logger.info(f"[DEBUG] Unknown device type: {device_type}")
 
         self.error_logger.error(
             f"[DEBUG] Device not found: ID {device_id}, type {device_type}"
@@ -972,11 +989,7 @@ class EnergyManager:
             return self.osd
         if device_type == "BESS":
             self.info_logger.info("[DEBUG] Checking BESS device")
-            return (
-                self.microgrid.bess
-                if self.microgrid.bess and self.microgrid.bess.id == device_id
-                else None
-            )
+            return self.microgrid.bess if self.microgrid.bess else None
 
         device_lists = {
             "PV": self.microgrid.pv_panels,
