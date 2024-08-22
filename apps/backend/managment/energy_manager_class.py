@@ -19,6 +19,8 @@ from apps.backend.devices.wind_turbine_class import WindTurbine
 from apps.backend.devices.fuel_cell_class import FuelCell
 from apps.backend.devices.fuel_turbine_class import FuelTurbine
 from apps.backend.devices.adjustable_devices import AdjustableDevice
+from apps.backend.devices.energy_point_class import EnergyPoint
+from apps.backend.devices.energy_source_class import EnergySource
 
 
 class EnergyManager:
@@ -370,140 +372,28 @@ class EnergyManager:
 
     def perform_action(self, device, action):
         device_name = self.get_device_name(device)
-        self.info_logger.info(f"Performing action: {device_name} - {action}")
+        device_type = type(device).__name__
+        self.info_logger.info(
+            f"[DEBUG] Performing action: {device_name} ({device_type}) - {action}"
+        )
 
         try:
-            if action.startswith("charge:"):
-                _, amount = action.split(":")
-                return self.surplus_manager.decide_to_charge_bess(float(amount))
-            elif action.startswith("sell:"):
-                _, amount = action.split(":")
-                return self.surplus_manager.decide_to_sell_energy(float(amount))
-            elif action.startswith("set_output:"):
-                _, value = action.split(":")
-                new_output = float(value)
-                if isinstance(device, BESS):
-                    self.error_logger.error(
-                        f"Cannot set output for BESS device: {device_name}"
-                    )
-                    return {
-                        "success": False,
-                        "amount": 0,
-                        "reason": "Cannot set output for BESS",
-                    }
-                current_output = device.get_actual_output()
-                success = device.set_output(new_output)
-                if success:
-                    actual_new_output = device.get_actual_output()
-                    reduction = current_output - actual_new_output
-                    self.info_logger.info(
-                        f"Set output for {device_name} from {current_output} kW to {actual_new_output} kW"
-                    )
-                    return {"success": True, "amount": reduction}
-                else:
-                    return {
-                        "success": False,
-                        "amount": 0,
-                        "reason": f"Failed to set output for {device_name}",
-                    }
-            elif action.startswith("increase:"):
-                _, amount = action.split(":")
-                amount = float(amount)
-                current_output = device.get_actual_output()
-                new_output = min(current_output + amount, device.get_max_output())
-                success = device.set_output(new_output)
-                if success:
-                    actual_increase = new_output - current_output
-                    self.info_logger.info(
-                        f"Increased output of {device_name} from {current_output} kW to {new_output} kW"
-                    )
-                    return {"success": True, "amount": actual_increase}
-                else:
-                    return {
-                        "success": False,
-                        "amount": 0,
-                        "reason": f"Failed to increase output for {device_name}",
-                    }
-            elif action.startswith("activate:"):
-                _, amount = action.split(":")
-                amount = float(amount)
-                if device.try_activate():
-                    new_output = min(amount, device.get_max_output())
-                    success = device.set_output(new_output)
-                    if success:
-                        self.info_logger.info(
-                            f"Activated {device_name} and set output to {new_output} kW"
-                        )
-                        return {"success": True, "amount": new_output}
-                    else:
-                        return {
-                            "success": False,
-                            "amount": 0,
-                            "reason": f"Failed to set output for {device_name} after activation",
-                        }
-                else:
-                    return {
-                        "success": False,
-                        "amount": 0,
-                        "reason": f"Failed to activate {device_name}",
-                    }
-            elif action.startswith("discharge:"):
-                _, amount = action.split(":")
-                amount = float(amount)
-                if isinstance(device, BESS):
-                    discharged = device.try_discharge(amount)
-                    if discharged is not None:
-                        percent_discharged, amount_discharged = discharged
-                        self.info_logger.info(
-                            f"BESS discharged by {amount_discharged} kWh"
-                        )
-                        return {"success": True, "amount": amount_discharged}
-                    else:
-                        return {
-                            "success": False,
-                            "amount": 0,
-                            "reason": "Failed to discharge BESS",
-                        }
-                else:
-                    return {
-                        "success": False,
-                        "amount": 0,
-                        "reason": "Device is not BESS",
-                    }
-            elif action.startswith("buy:"):
-                _, amount = action.split(":")
-                amount = float(amount)
-                return self.deficit_manager.buy_energy(amount)
-            elif action.startswith("reduce:"):
-                _, amount = action.split(":")
-                amount = float(amount)
-                if isinstance(device, AdjustableDevice):
-                    actual_reduction = device.decrease_power(amount)
-                    return {"success": True, "amount": actual_reduction}
-                else:
-                    return {
-                        "success": False,
-                        "amount": 0,
-                        "reason": f"Cannot reduce power for non-adjustable device {device_name}",
-                    }
-            elif action == "deactivate":
-                if device.deactivate():
-                    return {"success": True, "amount": device.power}
-                else:
-                    return {
-                        "success": False,
-                        "amount": 0,
-                        "reason": f"Failed to deactivate {device_name}",
-                    }
+            if isinstance(device, EnergySource):
+                return self.perform_energy_source_action(device, action)
+            elif isinstance(device, EnergyPoint):
+                return self.perform_energy_point_action(device, action)
+            elif isinstance(device, BESS):
+                return self.perform_bess_action(device, action)
+            elif isinstance(device, OSD):
+                return self.perform_osd_action(device, action)
             else:
-                self.error_logger.error(f"Unknown action: {action}")
                 return {
                     "success": False,
                     "amount": 0,
-                    "reason": f"Unknown action: {action}",
+                    "reason": f"Unknown device type: {device_type}",
                 }
         except Exception as e:
-            self.error_logger.exception(f"Error in perform_action: {str(e)}")
+            self.error_logger.exception(f"[DEBUG] Error in perform_action: {str(e)}")
             return {"success": False, "amount": 0, "reason": str(e)}
 
     def process_operator_decisions(self):
@@ -1004,53 +894,18 @@ class EnergyManager:
             current_time, consumption, generation, buy_price, sell_price
         )
 
-    def execute_approved_action(self, action):
-        self.info_logger.info(
-            f"Executing approved action: {action['action']} for {action['device_name']}"
-        )
-        device = self.get_device_by_id_and_type(
-            action["device_id"], action["device_type"]
-        )
-        if device:
-            result = self.perform_action(device, action["action"])
-            if result["success"]:
-                self.info_logger.info(
-                    f"Action executed to reduce {result['amount']:.2f} kW."
-                )
-                return {"success": True, "amount": result["amount"]}
-            else:
-                self.info_logger.warning(
-                    f"Action execution failed: {result.get('reason', 'Unknown reason')}"
-                )
-        else:
-            self.error_logger.error(f"Device not found for action: {action}")
-        return {"success": False, "amount": 0}
-
     def get_device_by_id_and_type(self, device_id, device_type):
-        self.info_logger.info(
-            f"[DEBUG] Type of device_id: {type(device_id)}, Value: {device_id}"
-        )
-        self.info_logger.info(
-            f"[DEBUG] Type of device_type: {type(device_type)}, Value: {device_type}"
-        )
-        self.info_logger.info(
-            f"[DEBUG] Entering get_device_by_id_and_type: ID={device_id}, type={device_type}"
-        )
-
         if device_type == "OSD":
-            self.info_logger.info("[DEBUG] Returning OSD device")
             return self.osd
         if device_type == "BESS":
-            self.info_logger.info("[DEBUG] Checking BESS device")
             return (
                 self.microgrid.bess
-                if self.microgrid.bess and self.microgrid.bess.id == device_id
+                if self.microgrid.bess and str(self.microgrid.bess.id) == str(device_id)
                 else None
             )
 
         device_lists = {
             "PV": self.microgrid.pv_panels,
-            "PVPanel": self.microgrid.pv_panels,
             "WindTurbine": self.microgrid.wind_turbines,
             "FuelTurbine": self.microgrid.fuel_turbines,
             "FuelCell": self.microgrid.fuel_cells,
@@ -1058,33 +913,10 @@ class EnergyManager:
             "NonAdjustableDevice": self.consumergrid.non_adjustable_devices,
         }
 
-        self.info_logger.info(
-            f"[DEBUG] Available device types: {list(device_lists.keys())}"
-        )
-        self.info_logger.info(f"[DEBUG] Searching for device type: {device_type}")
-
         if device_type in device_lists:
-            self.info_logger.info(
-                f"[DEBUG] Device type {device_type} found in device_lists"
-            )
-            device_list = device_lists[device_type]
-            self.info_logger.info(
-                f"[DEBUG] Searching in {device_type} list. List length: {len(device_list)}"
-            )
-            for device in device_list:
-                self.info_logger.info(
-                    f"[DEBUG] Checking device: ID={device.id}, Name={device.name}, Type={type(device).__name__}"
-                )
+            for device in device_lists[device_type]:
                 if str(device.id) == str(device_id):
-                    self.info_logger.info(
-                        f"[DEBUG] Found matching device: {device.name}"
-                    )
                     return device
-            self.info_logger.info(
-                f"[DEBUG] No device found with ID {device_id} in {device_type} list"
-            )
-        else:
-            self.error_logger.error(f"[DEBUG] Unknown device type: {device_type}")
 
         self.error_logger.error(
             f"[DEBUG] Device not found: ID {device_id}, type {device_type}"
@@ -1100,12 +932,7 @@ class EnergyManager:
                     f"[DEBUG] Action already executed: {action['action']} for {action['device_name']}"
                 )
                 continue
-            self.info_logger.info(
-                f"[DEBUG] Action details before get_device_by_id_and_type: {action}"
-            )
-            self.info_logger.info(
-                f"[DEBUG] Consumergrid adjustable_devices: {[f'ID={d.id}, Name={d.name}, Type={type(d).__name__}' for d in self.consumergrid.adjustable_devices]}"
-            )
+
             device = self.get_device_by_id_and_type(
                 action["device_id"], action["device_type"]
             )
@@ -1116,44 +943,14 @@ class EnergyManager:
                     f"[DEBUG] Device found: {device_name}, type: {device_type}"
                 )
 
-                if isinstance(device, BESS):
-                    self.info_logger.info(
-                        f"Before action: {device_name} charge level: {device.get_charge_level()} kWh"
-                    )
-                elif isinstance(device, OSD):
-                    self.info_logger.info(
-                        f"Before action: OSD current sold power: {device.get_sold_power()} kW"
-                    )
-                else:
-                    self.info_logger.info(
-                        f"Before action: {device_name} output: {device.get_actual_output()} kW"
-                    )
+                self.log_device_state_before_action(device)
 
                 result = self.perform_action(device, action["action"])
 
                 if result["success"]:
-                    if isinstance(device, BESS):
-                        self.info_logger.info(
-                            f"After action: {device_name} charge level: {device.get_charge_level()} kWh"
-                        )
-                        self.info_logger.info(
-                            f"Executed {action['action']} for {device_name}: Success. New charge level: {device.get_charge_level()} kWh"
-                        )
-                    elif isinstance(device, OSD):
-                        self.info_logger.info(
-                            f"After action: OSD new sold power: {device.get_sold_power()} kW"
-                        )
-                        self.info_logger.info(
-                            f"Executed {action['action']} for OSD: Success. Amount sold: {result['amount']} kW"
-                        )
-                    else:
-                        new_output = device.get_actual_output()
-                        self.info_logger.info(
-                            f"After action: {device_name} output: {new_output} kW"
-                        )
-                        self.info_logger.info(
-                            f"Executed {action['action']} for {device_name}: Success. New output: {new_output} kW"
-                        )
+                    self.log_device_state_after_action(
+                        device, action["action"], result["amount"]
+                    )
                 else:
                     self.error_logger.error(
                         f"[DEBUG] Failed to execute action {action['action']} for {device_name}: {result.get('reason', 'Unknown reason')}"
@@ -1164,14 +961,6 @@ class EnergyManager:
                 )
 
         self.log_system_summary()
-
-    def get_device_name(self, device):
-        if isinstance(device, OSD):
-            return "OSD"
-        elif hasattr(device, "name"):
-            return device.name
-        else:
-            return type(device).__name__
 
     def get_device_by_id_and_type(self, device_id, device_type):
         self.info_logger.info(
@@ -1285,3 +1074,206 @@ class EnergyManager:
 
     def log_tabu_list(self):
         self.info_logger.info(f"##################Current tabu list: {self.tabu_list}")
+
+    def perform_energy_source_action(self, device, action):
+        if action == "deactivate":
+            if device.try_deactivate():
+                return {"success": True, "amount": device.get_actual_output()}
+            else:
+                return {
+                    "success": False,
+                    "amount": 0,
+                    "reason": f"Failed to deactivate {device.name}",
+                }
+        elif action.startswith("reduce:"):
+            _, amount = action.split(":")
+            amount = float(amount)
+            _, actual_reduction = device.try_decrease_output(amount, is_percent=False)
+            if actual_reduction > 0:
+                return {"success": True, "amount": actual_reduction}
+            else:
+                return {
+                    "success": False,
+                    "amount": 0,
+                    "reason": f"Failed to reduce output of {device.name}",
+                }
+        elif action.startswith("increase:"):
+            _, amount = action.split(":")
+            amount = float(amount)
+            _, actual_increase = device.try_increase_output(amount, is_percent=False)
+            if actual_increase > 0:
+                return {"success": True, "amount": actual_increase}
+            else:
+                return {
+                    "success": False,
+                    "amount": 0,
+                    "reason": f"Failed to increase output of {device.name}",
+                }
+        elif action.startswith("activate"):
+            # Obsługa zarówno "activate" jak i "activate:X"
+            parts = action.split(":")
+            if len(parts) > 1:
+                target_output = float(parts[1])
+                if device.try_activate() and device.set_output(target_output):
+                    return {"success": True, "amount": device.get_actual_output()}
+                else:
+                    return {
+                        "success": False,
+                        "amount": 0,
+                        "reason": f"Failed to activate and set output for {device.name}",
+                    }
+            else:
+                if device.try_activate():
+                    return {"success": True, "amount": device.get_actual_output()}
+                else:
+                    return {
+                        "success": False,
+                        "amount": 0,
+                        "reason": f"Failed to activate {device.name}",
+                    }
+        else:
+            return {
+                "success": False,
+                "amount": 0,
+                "reason": f"Unknown action for EnergySource: {action}",
+            }
+
+    def perform_energy_point_action(self, device, action):
+        if action == "deactivate":
+            if device.deactivate():
+                return {"success": True, "amount": device.get_current_power()}
+            else:
+                return {
+                    "success": False,
+                    "amount": 0,
+                    "reason": f"Failed to deactivate {device.name}",
+                }
+        elif action.startswith("reduce:"):
+            if isinstance(device, AdjustableDevice):
+                _, amount = action.split(":")
+                amount = float(amount)
+                actual_reduction = device.decrease_power(amount)
+                return {"success": True, "amount": actual_reduction}
+            else:
+                return {
+                    "success": False,
+                    "amount": 0,
+                    "reason": f"Cannot reduce power for non-adjustable device {device.name}",
+                }
+        elif action == "activate":
+            device.activate()
+            return {"success": True, "amount": device.get_current_power()}
+        else:
+            return {
+                "success": False,
+                "amount": 0,
+                "reason": f"Unknown action for EnergyPoint: {action}",
+            }
+
+    def perform_bess_action(self, device, action):
+        if action.startswith("charge:"):
+            _, amount = action.split(":")
+            amount = float(amount)
+            charged = device.try_charge(amount)
+            if charged is not None:
+                return {"success": True, "amount": charged}
+            else:
+                return {
+                    "success": False,
+                    "amount": 0,
+                    "reason": f"Failed to charge BESS {device.name}",
+                }
+        elif action.startswith("discharge:"):
+            _, amount = action.split(":")
+            amount = float(amount)
+            discharged = device.try_discharge(amount)
+            if discharged is not None:
+                return {"success": True, "amount": discharged}
+            else:
+                return {
+                    "success": False,
+                    "amount": 0,
+                    "reason": f"Failed to discharge BESS {device.name}",
+                }
+        else:
+            return {
+                "success": False,
+                "amount": 0,
+                "reason": f"Unknown action for BESS: {action}",
+            }
+
+    def perform_osd_action(self, device, action):
+        if action.startswith("buy:"):
+            _, amount = action.split(":")
+            amount = float(amount)
+            if device.buy_power(amount):
+                return {"success": True, "amount": amount}
+            else:
+                return {
+                    "success": False,
+                    "amount": 0,
+                    "reason": f"Failed to buy power from OSD",
+                }
+        elif action.startswith("sell:"):
+            _, amount = action.split(":")
+            amount = float(amount)
+            if device.sell_power(amount):
+                return {"success": True, "amount": amount}
+            else:
+                return {
+                    "success": False,
+                    "amount": 0,
+                    "reason": f"Failed to sell power to OSD",
+                }
+        else:
+            return {
+                "success": False,
+                "amount": 0,
+                "reason": f"Unknown action for OSD: {action}",
+            }
+
+    def log_device_state_before_action(self, device):
+        if isinstance(device, EnergySource):
+            self.info_logger.info(
+                f"Before action: {device.name} output: {device.get_actual_output()} kW"
+            )
+        elif isinstance(device, EnergyPoint):
+            self.info_logger.info(
+                f"Before action: {device.name} power: {device.get_current_power()} kW"
+            )
+        elif isinstance(device, BESS):
+            self.info_logger.info(
+                f"Before action: {device.name} charge level: {device.get_charge_level()} kWh"
+            )
+        elif isinstance(device, OSD):
+            self.info_logger.info(
+                f"Before action: OSD current sold power: {device.get_sold_power()} kW"
+            )
+
+    def log_device_state_after_action(self, device, action, amount):
+        if isinstance(device, EnergySource):
+            self.info_logger.info(
+                f"After action: {device.name} output: {device.get_actual_output()} kW"
+            )
+        elif isinstance(device, EnergyPoint):
+            self.info_logger.info(
+                f"After action: {device.name} power: {device.get_current_power()} kW"
+            )
+        elif isinstance(device, BESS):
+            self.info_logger.info(
+                f"After action: {device.name} charge level: {device.get_charge_level()} kWh"
+            )
+        elif isinstance(device, OSD):
+            self.info_logger.info(
+                f"After action: OSD new sold power: {device.get_sold_power()} kW"
+            )
+
+        device_name = self.get_device_name(device)
+        self.info_logger.info(
+            f"Executed {action} for {device_name}: Success. Amount: {amount} kW"
+        )
+
+    def get_device_name(self, device):
+        if isinstance(device, OSD):
+            return "OSD"
+        return device.name if hasattr(device, "name") else str(device)

@@ -60,9 +60,14 @@ class EnergyPoint:
         print(f"{self.name} activated")
 
     def deactivate(self):
-        self.switch_status = False
-        self.power = 0
-        print(f"{self.name} deactivated")
+        if self.switch_status:
+            self.switch_status = False
+            self.power = 0
+            print(f"{self.name} deactivated")
+            return True
+        else:
+            print(f"{self.name} is already deactivated")
+            return False
 
     def to_dict(self):
         return {
@@ -72,3 +77,6 @@ class EnergyPoint:
             "power": self.power,
             "switch_status": self.get_switch_status(),
         }
+
+    def get_actual_output(self):
+        return self.power if self.switch_status else 0

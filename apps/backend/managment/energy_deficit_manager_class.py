@@ -569,9 +569,11 @@ class EnergyDeficitManager:
         print("current", current_buy_price)
         print("priceFactor1", price_factor)
         price_factor = max(0, min(price_factor, 1))
-        print("priceFactor2", price_factor)
+
         # price_factor = 0.3
         bess_factor = bess_percentage / 100
+
+        print("bessFactor", bess_factor)
 
         if price_factor < PRICE_THRESHOLD and deficit < 50:
             decision = False  # Kupuj energię, gdy cena jest niska i deficyt mały
@@ -690,6 +692,22 @@ class EnergyDeficitManager:
             "reduction": amount_to_buy,
         }
 
+    def prepare_bess_discharge_action(self, power_deficit):
+        if self.microgrid.bess:
+            available_energy = self.microgrid.bess.get_charge_level()
+            discharge_amount = min(power_deficit, available_energy)
+            return {
+                "id": str(uuid.uuid4()),
+                "device_id": str(self.microgrid.bess.id),
+                "device_name": self.microgrid.bess.name,
+                "device_type": "BESS",
+                "action": f"discharge:{discharge_amount}",
+                "current_output": 0,
+                "proposed_output": discharge_amount,
+                "reduction": discharge_amount,
+            }
+        return None
+
     def prepare_limit_consumption_actions(self, power_deficit):
         self.info_logger.info(
             f"[DEBUG] Entering prepare_limit_consumption_actions with power_deficit: {power_deficit}"
@@ -713,11 +731,12 @@ class EnergyDeficitManager:
                 )
                 break
 
-            if isinstance(device, AdjustableDevice) and device.switch_status:
-                reducible_power = device.power - device.min_power
+            current_output = device.get_actual_output()
+            if isinstance(device, AdjustableDevice):
+                reducible_power = current_output - device.min_power
                 reduction = min(reducible_power, remaining_deficit)
                 self.info_logger.info(
-                    f"[DEBUG] AdjustableDevice: Current power={device.power}, Min power={device.min_power}, Reducible power={reducible_power}, Proposed reduction={reduction}"
+                    f"[DEBUG] AdjustableDevice: Current output={current_output}, Min power={device.min_power}, Reducible power={reducible_power}, Proposed reduction={reduction}"
                 )
                 if reduction > 0:
                     action = {
@@ -726,8 +745,8 @@ class EnergyDeficitManager:
                         "device_name": device.name,
                         "device_type": type(device).__name__,
                         "action": f"reduce:{reduction}",
-                        "current_output": device.power,
-                        "proposed_output": device.power - reduction,
+                        "current_output": current_output,
+                        "proposed_output": current_output - reduction,
                         "reduction": reduction,
                     }
                     actions.append(action)
@@ -735,26 +754,26 @@ class EnergyDeficitManager:
                         f"[DEBUG] Created action for AdjustableDevice: {action}"
                     )
                     remaining_deficit -= reduction
-            elif isinstance(device, NonAdjustableDevice) and device.switch_status:
+            elif isinstance(device, NonAdjustableDevice):
                 self.info_logger.info(
-                    f"[DEBUG] NonAdjustableDevice: Power={device.power}, Remaining deficit={remaining_deficit}"
+                    f"[DEBUG] NonAdjustableDevice: Current output={current_output}, Remaining deficit={remaining_deficit}"
                 )
-                if device.power <= remaining_deficit:
+                if current_output > 0:
                     action = {
                         "id": str(uuid.uuid4()),
                         "device_id": str(device.id),
                         "device_name": device.name,
                         "device_type": type(device).__name__,
                         "action": "deactivate",
-                        "current_output": device.power,
+                        "current_output": current_output,
                         "proposed_output": 0,
-                        "reduction": device.power,
+                        "reduction": min(current_output, remaining_deficit),
                     }
                     actions.append(action)
                     self.info_logger.info(
                         f"[DEBUG] Created action for NonAdjustableDevice: {action}"
                     )
-                    remaining_deficit -= device.power
+                    remaining_deficit -= min(current_output, remaining_deficit)
 
             self.info_logger.info(
                 f"[DEBUG] After considering device, remaining deficit: {remaining_deficit}"

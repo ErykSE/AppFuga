@@ -6,7 +6,7 @@
             "priority": 1,
             "max_output": 100,
             "min_output": 10,
-            "actual_output": 100.0,
+            "actual_output": 15,
             "switch_status": true,
             "device_status": "online",
             "pending_action": null,
@@ -18,7 +18,7 @@
             "priority": 1,
             "max_output": 120,
             "min_output": 15,
-            "actual_output": 120.0,
+            "actual_output": 100,
             "switch_status": true,
             "device_status": "online",
             "pending_action": null,
@@ -32,7 +32,7 @@
             "priority": 2,
             "max_output": 200,
             "min_output": 20,
-            "actual_output": 200.0,
+            "actual_output": 40,
             "switch_status": true,
             "device_status": "online",
             "pending_action": null,
@@ -44,9 +44,9 @@
             "priority": 2,
             "max_output": 180,
             "min_output": 20,
-            "actual_output": 180.0,
-            "switch_status": true,
-            "device_status": "online",
+            "actual_output": 0,
+            "switch_status": false,
+            "device_status": "offline",
             "pending_action": null,
             "action_approved": null
         }
@@ -58,7 +58,7 @@
             "priority": 4,
             "max_output": 300,
             "min_output": 30,
-            "actual_output": 300.0,
+            "actual_output": 40,
             "switch_status": true,
             "device_status": "online",
             "pending_action": null,
@@ -72,7 +72,7 @@
             "priority": 3,
             "max_output": 150,
             "min_output": 15,
-            "actual_output": 150.0,
+            "actual_output": 25,
             "switch_status": true,
             "device_status": "online",
             "pending_action": null,
@@ -84,9 +84,9 @@
             "id": 7,
             "name": "BESS 1",
             "capacity": 350,
-            "charge_level": 0,
-            "switch_status": false,
-            "device_status": "offline"
+            "charge_level": 350.0,
+            "switch_status": true,
+            "device_status": "online"
         }
     ],
     "non_adjustable_devices": [
@@ -94,7 +94,7 @@
             "id": 8,
             "name": "Non Adjustable Device 1",
             "priority": 1,
-            "power": 100,
+            "power": 1,
             "switch_status": true
         },
         {
@@ -110,18 +110,18 @@
             "id": 10,
             "name": "Adjustable Device 1",
             "priority": 2,
-            "power": 80.0,
+            "power": 54,
             "switch_status": true,
-            "min_power": 80,
+            "min_power": 10,
             "max_power": 100
         },
         {
             "id": 11,
             "name": "Adjustable Device 2",
             "priority": 1,
-            "power": 900.0,
+            "power": 44,
             "switch_status": true,
-            "min_power": 900,
+            "min_power": 10,
             "max_power": 1000
         }
     ]
