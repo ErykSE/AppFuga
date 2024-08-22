@@ -1089,9 +1089,29 @@ class EnergyManager:
         self.info_logger.info(f"##################Current tabu list: {self.tabu_list}")
 
     def perform_energy_source_action(self, device, action):
-        if action == "deactivate":
+        if action.startswith("set_output:"):
+            _, new_output = action.split(":")
+            new_output = float(new_output)
+            current_output = device.get_actual_output()
+            if device.set_output(new_output):
+                actual_reduction = current_output - new_output
+                self.info_logger.info(
+                    f"Set output for {device.name} from {current_output} kW to {new_output} kW"
+                )
+                return {"success": True, "amount": actual_reduction}
+            else:
+                return {
+                    "success": False,
+                    "amount": 0,
+                    "reason": f"Failed to set output for {device.name}",
+                }
+        elif action == "deactivate":
             if device.try_deactivate():
-                return {"success": True, "amount": device.get_actual_output()}
+                saved_power = device.get_actual_output()
+                self.info_logger.info(
+                    f"Deactivated {device.name}, saved {saved_power} kW"
+                )
+                return {"success": True, "amount": saved_power}
             else:
                 return {
                     "success": False,
@@ -1103,6 +1123,9 @@ class EnergyManager:
             amount = float(amount)
             _, actual_reduction = device.try_decrease_output(amount, is_percent=False)
             if actual_reduction > 0:
+                self.info_logger.info(
+                    f"Reduced output of {device.name} by {actual_reduction} kW"
+                )
                 return {"success": True, "amount": actual_reduction}
             else:
                 return {
@@ -1115,6 +1138,9 @@ class EnergyManager:
             amount = float(amount)
             _, actual_increase = device.try_increase_output(amount, is_percent=False)
             if actual_increase > 0:
+                self.info_logger.info(
+                    f"Increased output of {device.name} by {actual_increase} kW"
+                )
                 return {"success": True, "amount": actual_increase}
             else:
                 return {
@@ -1122,28 +1148,6 @@ class EnergyManager:
                     "amount": 0,
                     "reason": f"Failed to increase output of {device.name}",
                 }
-        elif action.startswith("activate"):
-            # Obsługa zarówno "activate" jak i "activate:X"
-            parts = action.split(":")
-            if len(parts) > 1:
-                target_output = float(parts[1])
-                if device.try_activate() and device.set_output(target_output):
-                    return {"success": True, "amount": device.get_actual_output()}
-                else:
-                    return {
-                        "success": False,
-                        "amount": 0,
-                        "reason": f"Failed to activate and set output for {device.name}",
-                    }
-            else:
-                if device.try_activate():
-                    return {"success": True, "amount": device.get_actual_output()}
-                else:
-                    return {
-                        "success": False,
-                        "amount": 0,
-                        "reason": f"Failed to activate {device.name}",
-                    }
         else:
             return {
                 "success": False,
