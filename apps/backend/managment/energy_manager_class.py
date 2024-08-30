@@ -178,6 +178,7 @@ class EnergyManager:
                     f"Updated device: {device.name} (ID: {device.id}), New status: {device.device_status}, New output: {device.actual_output} kW"
                 )
         self.log_system_summary()
+
         self.info_logger.info(
             f"BESS charge level before actions: {self.microgrid.bess.get_charge_level():.2f} kWh"
         )
@@ -813,6 +814,8 @@ class EnergyManager:
         for line in summary:
             self.info_logger.info(line)
 
+        self.log_consumer_summary()
+
     def load_initial_data(self):
         self.microgrid.load_data_from_json(self.initial_data_path)
         self.consumergrid.load_data_from_json(self.initial_data_path)
@@ -1294,3 +1297,31 @@ class EnergyManager:
         if isinstance(device, OSD):
             return "OSD"
         return device.name if hasattr(device, "name") else str(device)
+
+    def log_consumer_summary(self):
+        total_consumed_power = self.consumergrid.total_power_consumed()
+        adjustable_devices = self.consumergrid.adjustable_devices
+        non_adjustable_devices = self.consumergrid.non_adjustable_devices
+
+        self.info_logger.info("Energy Consumer Grid summary:")
+        self.info_logger.info(f"Total consumed power: {total_consumed_power:.2f} kW")
+        self.info_logger.info(
+            f"Number of adjustable devices: {len(adjustable_devices)}"
+        )
+        self.info_logger.info(
+            f"Number of non-adjustable devices: {len(non_adjustable_devices)}"
+        )
+
+        if adjustable_devices:
+            self.info_logger.info("Adjustable devices:")
+            for device in adjustable_devices:
+                self.info_logger.info(
+                    f"  - {device.name}: {device.get_current_power():.2f} kW / {device.power:.2f} kW"
+                )
+
+        if non_adjustable_devices:
+            self.info_logger.info("Non-adjustable devices:")
+            for device in non_adjustable_devices:
+                self.info_logger.info(
+                    f"  - {device.name}: {device.get_current_power():.2f} kW"
+                )
