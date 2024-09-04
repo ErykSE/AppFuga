@@ -16,11 +16,11 @@ if __name__ == "__main__":
     try:
         # Inicjalizacja mikrosieci
         microgrid = Microgrid(info_logger, error_logger)
-        microgrid.load_data_from_json(initial_data_path)
+        # microgrid.load_data_from_json(initial_data_path)
 
         # Inicjalizacja sieci konsumentów
         consumergrid = EnergyConsumerGrid()
-        consumergrid.load_data_from_json(initial_data_path)
+        # consumergrid.load_data_from_json(initial_data_path)
 
         # Inicjalizacja OSD
         osd = OSD.load_data_from_json(initial_contract_path)

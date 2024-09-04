@@ -1,6 +1,7 @@
 import logging
 import os
 from logging.handlers import RotatingFileHandler
+from functools import partial
 
 
 class CustomLogger:
@@ -28,6 +29,32 @@ class CustomLogger:
 
         # Dodaj handler do loggera
         logger.addHandler(file_handler)
+
+        # Dodajemy nowe metody do loggera
+        def highlight(logger, msg):
+            logger._log(logging.INFO, f"\n{'=' * 50}\n{msg}\n{'=' * 50}", ())
+
+        def section(logger, name):
+            logger._log(logging.INFO, f"\n{'-' * 20} {name} {'-' * 20}", ())
+
+        def important(logger, msg):
+            logger._log(logging.INFO, f"!!! {msg} !!!", ())
+
+        def success(logger, msg):
+            logger._log(logging.INFO, f"[SUCCESS] {msg}", ())
+
+        def custom_warning(logger, msg):
+            logger._log(logging.WARNING, f"[WARNING] {msg}", ())
+
+        def error_highlight(logger, msg):
+            logger._log(logging.ERROR, f"\n{'!' * 50}\n{msg}\n{'!' * 50}", ())
+
+        logger.highlight = partial(highlight, logger)
+        logger.section = partial(section, logger)
+        logger.important = partial(important, logger)
+        logger.success = partial(success, logger)
+        logger.warning = partial(custom_warning, logger)
+        logger.error_highlight = partial(error_highlight, logger)
 
         return logger
 

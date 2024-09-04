@@ -77,7 +77,9 @@ class Microgrid:
             Metoda sprawdza, czy urządzenie o danym ID już istnieje. Jeśli tak, aktualizuje jego dane.
             Jeśli nie, tworzy nowe urządzenie i dodaje je do odpowiedniej listy.
         """
-        self.info_logger.info(f"Attempting to update {device_type}: {device_data}")
+        self.info_logger.info(
+            f"[DEBUG] Attempting to update {device_type}: {device_data}"
+        )
 
         if not isinstance(device_data, dict):
             self.error_logger.error(
@@ -168,7 +170,7 @@ class Microgrid:
             instance = device_class.create_instance(device_data)
             if instance:
                 self.info_logger.info(
-                    f"Successfully created {device_type} instance: {instance.name}"
+                    f"1212Successfully created {device_type} instance: {instance.name}"
                 )
                 return instance
             else:

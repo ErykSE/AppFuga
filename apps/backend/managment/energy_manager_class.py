@@ -118,7 +118,9 @@ class EnergyManager:
             ) as mode_file:
                 mode_data = json.load(mode_file)
                 self.operation_mode = OperationMode(mode_data.get("mode", "automatic"))
-            self.info_logger.info(f"Loaded operation mode: {self.operation_mode.value}")
+                self.info_logger.info(
+                    f"Loaded operation mode: {self.operation_mode.value}"
+                )
         except Exception as e:
             self.error_logger.error(f"Error loading configuration: {str(e)}")
             self.operation_mode = OperationMode.AUTOMATIC
@@ -128,18 +130,20 @@ class EnergyManager:
         self.running = True
         self.stop_event.clear()
         Thread(target=self.run_energy_management).start()
-        self.info_logger.info("Energy management started")
+        self.info_logger.important("Energy management started")
 
     def stop(self):
         """Zatrzymuje proces zarządzania energią."""
         self.running = False
         self.stop_event.set()
-        self.info_logger.info("Energy management stopping")
+        self.info_logger.important("Energy management stopping")
 
     def run_energy_management(self):
         self.first_run = True
         while self.running and not self.stop_event.is_set():
             try:
+                self.info_logger.highlight("Starting initial data loading process")
+                self.info_logger.section("Loading Initial Data")
                 self.load_configuration()
                 if self.first_run:
                     self.load_initial_data()
@@ -153,21 +157,23 @@ class EnergyManager:
                     if self.operation_mode == OperationMode.AUTOMATIC
                     else self.semi_auto_interval
                 )
-                self.info_logger.info(f"Waiting {wait_time} seconds for next iteration")
+                self.info_logger.important(
+                    f"Waiting {wait_time} seconds for next iteration"
+                )
                 if self.stop_event.wait(wait_time):
                     break
             except Exception as e:
                 self.handle_runtime_error(e)
                 break
-        self.info_logger.info("Energy management stopped")
+        self.info_logger.important("Energy management stopped")
 
     def run_single_iteration(self):
-        self.info_logger.info(
+        self.info_logger.highlight(
             f"Starting a new iteration in {self.operation_mode.value} mode"
         )
         start_time = time.time()
 
-        self.info_logger.info("Starting device update based on meter readings")
+        self.info_logger.section("Starting device update based on meter readings")
         updated_devices = self.microgrid.update_device_with_meter_data()
         if updated_devices:
             self.info_logger.info(
@@ -179,9 +185,9 @@ class EnergyManager:
                 )
         self.log_system_summary()
 
-        self.info_logger.info(
-            f"BESS charge level before actions: {self.microgrid.bess.get_charge_level():.2f} kWh"
-        )
+        # self.info_logger.info(
+        # f"BESS charge level before actions: {self.microgrid.bess.get_charge_level():.2f} kWh"
+        # )
 
         result = self.check_energy_conditions()
 
@@ -201,9 +207,9 @@ class EnergyManager:
 
         elapsed_time = time.time() - start_time
         self.info_logger.info(f"Iteration completed in {elapsed_time:.2f} seconds")
-        self.info_logger.info(
-            f"BESS charge level after actions: {self.microgrid.bess.get_charge_level():.2f} kWh"
-        )
+        # self.info_logger.info(
+        # f"BESS charge level after actions: {self.microgrid.bess.get_charge_level():.2f} kWh"
+        # )
 
         return result
 
@@ -504,24 +510,26 @@ class EnergyManager:
             total_generated_power = self.microgrid.total_power_generated()
             total_demand_power = self.consumergrid.total_power_consumed()
 
-            self.info_logger.info(f"Total generated power: {total_generated_power} kW")
-            self.info_logger.info(f"Total demand power: {total_demand_power} kW")
+            self.info_logger.info(
+                f"checkTotal generated power: {total_generated_power} kW"
+            )
+            self.info_logger.info(f"checkTotal demand power: {total_demand_power} kW")
 
             result = None
             if total_generated_power > total_demand_power:
                 power_surplus = total_generated_power - total_demand_power
-                self.info_logger.info(
+                self.info_logger.section(
                     f"Power surplus detected: {power_surplus} kW - starting surplus management"
                 )
                 result = self.manage_surplus(power_surplus)
             elif total_generated_power < total_demand_power:
                 power_deficit = total_demand_power - total_generated_power
-                self.info_logger.info(
+                self.info_logger.section(
                     f"Power deficit detected: {power_deficit} kW - starting deficit management"
                 )
                 result = self.manage_deficit(power_deficit)
             else:
-                self.info_logger.info(
+                self.info_logger.section(
                     "Power generation matches demand - no action needed"
                 )
 
@@ -541,7 +549,7 @@ class EnergyManager:
         managed_amount = result["amount_managed"]
         remaining_surplus = result["remaining_surplus"]
 
-        self.info_logger.info(
+        self.info_logger.important(
             f"Managed {managed_amount} kW of surplus. Remaining: {remaining_surplus} kW"
         )
 
@@ -559,7 +567,7 @@ class EnergyManager:
         managed_amount = result["amount_managed"]
         remaining_deficit = result["remaining_deficit"]
 
-        self.info_logger.info(
+        self.info_logger.important(
             f"Managed {managed_amount} kW of deficit. Remaining: {remaining_deficit} kW"
         )
 
@@ -776,55 +784,67 @@ class EnergyManager:
         active_devices = self.microgrid.get_active_devices()
         inactive_devices = self.microgrid.get_inactive_devices()
 
-        summary = [
-            "System status summary:",
-            f"Total generated power: {total_generated_power} kW",
-            f"Total demand: {total_demand_power} kW",
-            f"Number of active generating devices: {len(active_devices)}",
-            f"Number of inactive generating devices: {len(inactive_devices)}",
-        ]
+        # Dodajemy sekcję dla podsumowania statusu systemu
+        self.info_logger.section("System Status Summary")
+
+        # Logujemy główne informacje
+        self.info_logger.important(
+            f"Total generated power: {total_generated_power:.2f} kW"
+        )
+        self.info_logger.important(f"Total demand: {total_demand_power:.2f} kW")
+        self.info_logger.info(
+            f"Number of active generating devices: {len(active_devices)}"
+        )
+        self.info_logger.info(
+            f"Number of inactive generating devices: {len(inactive_devices)}"
+        )
 
         if active_devices:
-            summary.append("Active generating devices:")
+            self.info_logger.section("Active Generating Devices")
             for device in active_devices:
-                summary.append(
-                    f"  - {device.name}: {device.get_actual_output()} kW / {device.get_max_output()} kW"
+                self.info_logger.info(
+                    f"  - {device.name}: {device.get_actual_output():.2f} kW / {device.get_max_output():.2f} kW"
                 )
 
         if inactive_devices:
-            summary.append("Inactive generating devices:")
+            self.info_logger.section("Inactive Generating Devices")
             for device in inactive_devices:
-                summary.append(
-                    f"  - {device.name}: max output {device.get_max_output()} kW"
+                self.info_logger.info(
+                    f"  - {device.name}: max output {device.get_max_output():.2f} kW"
                 )
 
         if self.microgrid.bess:
             bess = self.microgrid.bess
-            summary.append(
-                f"BESS charge level: {bess.get_charge_level()} kWh / {bess.get_capacity()} kWh"
+            self.info_logger.section("BESS Status")
+            self.info_logger.info(
+                f"BESS charge level: {bess.get_charge_level():.2f} kWh / {bess.get_capacity():.2f} kWh"
             )
 
-        summary.extend(
-            [
-                f"Energy purchase: {'Available' if self.osd.can_buy_energy() else 'Not available'} (Limit: {self.osd.get_purchase_limit()} kWh, Current: {self.osd.get_bought_power()} kWh)",
-                f"Energy sale: {'Available' if self.osd.can_sell_energy() else 'Not available'} (Limit: {self.osd.get_sale_limit()} kWh, Current: {self.osd.get_sold_power()} kWh)",
-            ]
+        self.info_logger.section("Energy Trading Status")
+        self.info_logger.info(
+            f"Energy purchase: {'Available' if self.osd.can_buy_energy() else 'Not available'} "
+            f"(Limit: {self.osd.get_purchase_limit():.2f} kWh, Current: {self.osd.get_bought_power():.2f} kWh)"
+        )
+        self.info_logger.info(
+            f"Energy sale: {'Available' if self.osd.can_sell_energy() else 'Not available'} "
+            f"(Limit: {self.osd.get_sale_limit():.2f} kWh, Current: {self.osd.get_sold_power():.2f} kWh)"
         )
 
-        for line in summary:
-            self.info_logger.info(line)
-
+        # Wywołujemy log_consumer_summary na końcu
         self.log_consumer_summary()
 
     def load_initial_data(self):
+        self.info_logger.info("Starting to load initial data from files")
         self.microgrid.load_data_from_json(self.initial_data_path)
         self.consumergrid.load_data_from_json(self.initial_data_path)
-        self.osd = OSD.load_data_from_json(self.initial_contract_path)
+        self.osd = OSD.load_data_from_json(
+            self.initial_contract_path
+        )  # ewentualnie do wywalenia, do przemyślenia
         if self.osd is None:
             raise ValueError("Failed to load OSD data from initial contract file.")
         self.surplus_manager.osd = self.osd
         self.deficit_manager.osd = self.osd
-        self.info_logger.info("Loaded initial data")
+        self.info_logger.info("Finished loading initial data")
 
     def load_live_data(self):
         try:
@@ -1303,8 +1323,13 @@ class EnergyManager:
         adjustable_devices = self.consumergrid.adjustable_devices
         non_adjustable_devices = self.consumergrid.non_adjustable_devices
 
-        self.info_logger.info("Energy Consumer Grid summary:")
-        self.info_logger.info(f"Total consumed power: {total_consumed_power:.2f} kW")
+        # Główna sekcja podsumowania konsumentów energii
+        self.info_logger.section("Energy Consumer Grid Summary")
+
+        # Kluczowe informacje
+        self.info_logger.important(
+            f"Total consumed power: {total_consumed_power:.2f} kW"
+        )
         self.info_logger.info(
             f"Number of adjustable devices: {len(adjustable_devices)}"
         )
@@ -1312,16 +1337,21 @@ class EnergyManager:
             f"Number of non-adjustable devices: {len(non_adjustable_devices)}"
         )
 
+        # Sekcja urządzeń regulowanych
         if adjustable_devices:
-            self.info_logger.info("Adjustable devices:")
+            self.info_logger.section("Adjustable Devices")
             for device in adjustable_devices:
                 self.info_logger.info(
                     f"  - {device.name}: {device.get_current_power():.2f} kW / {device.power:.2f} kW"
                 )
 
+        # Sekcja urządzeń nieregulowanych
         if non_adjustable_devices:
-            self.info_logger.info("Non-adjustable devices:")
+            self.info_logger.section("Non-adjustable Devices")
             for device in non_adjustable_devices:
                 self.info_logger.info(
                     f"  - {device.name}: {device.get_current_power():.2f} kW"
                 )
+
+        # Podsumowanie
+        self.info_logger.success("Consumer summary logged successfully")
