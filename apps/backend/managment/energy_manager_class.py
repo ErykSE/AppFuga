@@ -884,6 +884,7 @@ class EnergyManager:
         with open(self.live_data_path, "w") as f:
             json.dump(live_data, f, indent=4)
 
+        self.info_logger.section("Ending of iteration")
         self.info_logger.info("Live data saved to live_data.json")
 
     def save_contract_data(self):
@@ -1320,8 +1321,20 @@ class EnergyManager:
 
     def log_consumer_summary(self):
         total_consumed_power = self.consumergrid.total_power_consumed()
-        adjustable_devices = self.consumergrid.adjustable_devices
-        non_adjustable_devices = self.consumergrid.non_adjustable_devices
+        active_devices = self.consumergrid.get_active_devices()
+        all_devices = self.consumergrid.get_all_devices()
+        inactive_devices = [
+            device for device in all_devices if device not in active_devices
+        ]
+
+        adjustable_devices = [
+            device for device in active_devices if isinstance(device, AdjustableDevice)
+        ]
+        non_adjustable_devices = [
+            device
+            for device in active_devices
+            if not isinstance(device, AdjustableDevice)
+        ]
 
         # Główna sekcja podsumowania konsumentów energii
         self.info_logger.section("Energy Consumer Grid Summary")
@@ -1330,28 +1343,39 @@ class EnergyManager:
         self.info_logger.important(
             f"Total consumed power: {total_consumed_power:.2f} kW"
         )
+        self.info_logger.info(f"Total number of devices: {len(all_devices)}")
+        self.info_logger.info(f"Number of active devices: {len(active_devices)}")
+        self.info_logger.info(f"Number of inactive devices: {len(inactive_devices)}")
         self.info_logger.info(
-            f"Number of adjustable devices: {len(adjustable_devices)}"
+            f"Number of active adjustable devices: {len(adjustable_devices)}"
         )
         self.info_logger.info(
-            f"Number of non-adjustable devices: {len(non_adjustable_devices)}"
+            f"Number of active non-adjustable devices: {len(non_adjustable_devices)}"
         )
 
-        # Sekcja urządzeń regulowanych
+        # Sekcja aktywnych urządzeń regulowanych
         if adjustable_devices:
-            self.info_logger.section("Adjustable Devices")
+            self.info_logger.section("Active Adjustable Devices")
             for device in adjustable_devices:
                 self.info_logger.info(
-                    f"  - {device.name}: {device.get_current_power():.2f} kW / {device.power:.2f} kW"
+                    f"  - {device.name}: Current: {device.get_current_power():.2f} kW / Max: {device.power:.2f} kW"
                 )
 
-        # Sekcja urządzeń nieregulowanych
+        # Sekcja aktywnych urządzeń nieregulowanych
         if non_adjustable_devices:
-            self.info_logger.section("Non-adjustable Devices")
+            self.info_logger.section("Active Non-adjustable Devices")
             for device in non_adjustable_devices:
                 self.info_logger.info(
                     f"  - {device.name}: {device.get_current_power():.2f} kW"
                 )
 
-        # Podsumowanie
-        self.info_logger.success("Consumer summary logged successfully")
+        # Sekcja nieaktywnych urządzeń
+        if inactive_devices:
+            self.info_logger.section("Inactive Devices")
+            for device in inactive_devices:
+                device_type = (
+                    "Adjustable"
+                    if isinstance(device, AdjustableDevice)
+                    else "Non-adjustable"
+                )
+                self.info_logger.info(f"  - {device.name} ({device_type})")

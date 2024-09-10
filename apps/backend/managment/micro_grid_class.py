@@ -187,17 +187,8 @@ class Microgrid:
         Returns:
             float: Suma mocy generowanej przez wszystkie aktywne urządzenia w kW.
         """
-        # Ta metoda oblicza całkowitą wygenerowaną moc
-        return sum(
-            device.get_actual_output()
-            for device_list in [
-                self.pv_panels,
-                self.wind_turbines,
-                self.fuel_turbines,
-                self.fuel_cells,
-            ]
-            for device in device_list
-        )
+        active_devices = self.get_active_devices()
+        return sum(device.get_actual_output() for device in active_devices)
 
     def get_all_devices(self):
         """

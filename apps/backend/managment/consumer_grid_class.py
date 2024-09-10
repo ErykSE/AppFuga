@@ -89,27 +89,39 @@ class EnergyConsumerGrid:
             print(f"Unknown device type: {device_type}")
             return None
 
+    def get_all_devices(self):
+        """
+        Zwraca listę wszystkich urządzeń konsumujących energię.
+
+        Returns:
+            list: Lista wszystkich urządzeń.
+        """
+
+        return self.non_adjustable_devices + self.adjustable_devices
+
+    def get_active_devices(self):
+        """
+        Zwraca listę wszystkich aktywnych (online) urządzeń konsumujących energię.
+
+        Returns:
+            list: Lista aktywnych urządzeń.
+        """
+        return [
+            device
+            for device in self.get_all_devices()
+            if device.get_switch_status() == True
+        ]
+
     def total_power_consumed(self):
         """
         Oblicza całkowitą moc konsumowaną przez wszystkie aktywne urządzenia w sieci.
 
         Returns:
             float: Suma mocy konsumowanej przez wszystkie aktywne urządzenia w kW.
-
-        Notes:
-            Metoda uwzględnia zarówno urządzenia regulowane, jak i nieregulowane.
         """
-        total_power = sum(
-            device.get_current_power()
-            for device in self.non_adjustable_devices
-            # if device.get_switch_status()
-        )
-        total_power += sum(
-            device.get_current_power()
-            for device in self.adjustable_devices
-            # if device.get_switch_status()
-        )
-        return total_power
+
+        active_devices = self.get_active_devices()
+        return sum(device.get_current_power() for device in active_devices)
 
     def load_data_from_json(self, file_path):
         """

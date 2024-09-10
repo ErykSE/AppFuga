@@ -99,7 +99,7 @@
             "name": "Adjustable Device 1",
             "priority": 2,
             "power": 54,
-            "switch_status": true,
+            "switch_status": false,
             "min_power": 10,
             "max_power": 100
         },
