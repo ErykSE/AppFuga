@@ -6,7 +6,7 @@
             "priority": 1,
             "max_output": 100,
             "min_output": 10,
-            "actual_output": 15,
+            "actual_output": 100.0,
             "switch_status": true,
             "device_status": "online",
             "pending_action": null,
@@ -18,7 +18,7 @@
             "priority": 1,
             "max_output": 120,
             "min_output": 15,
-            "actual_output": 100,
+            "actual_output": 120.0,
             "switch_status": true,
             "device_status": "online",
             "pending_action": null,
@@ -32,7 +32,7 @@
             "priority": 2,
             "max_output": 200,
             "min_output": 20,
-            "actual_output": 40,
+            "actual_output": 200.0,
             "switch_status": true,
             "device_status": "online",
             "pending_action": null,
@@ -58,7 +58,7 @@
             "priority": 4,
             "max_output": 300,
             "min_output": 30,
-            "actual_output": 40,
+            "actual_output": 300.0,
             "switch_status": true,
             "device_status": "online",
             "pending_action": null,
@@ -72,7 +72,7 @@
             "priority": 3,
             "max_output": 150,
             "min_output": 15,
-            "actual_output": 25,
+            "actual_output": 150.0,
             "switch_status": true,
             "device_status": "online",
             "pending_action": null,
@@ -84,9 +84,9 @@
             "id": 7,
             "name": "BESS 1",
             "capacity": 350,
-            "charge_level": 225.0,
-            "switch_status": true,
-            "device_status": "online"
+            "charge_level": 0,
+            "switch_status": false,
+            "device_status": "offline"
         }
     ],
     "non_adjustable_devices": [
@@ -94,14 +94,42 @@
             "id": 8,
             "name": "Non Adjustable Device 1",
             "priority": 1,
-            "power": 1,
-            "switch_status": true
+            "power": 0,
+            "switch_status": false
         },
         {
             "id": 9,
             "name": "Non Adjustable Device 2",
             "priority": 2,
-            "power": 10,
+            "power": 300,
+            "switch_status": false
+        },
+        {
+            "id": 12,
+            "name": "Non Adjustable Device 3",
+            "priority": 3,
+            "power": 88,
+            "switch_status": true
+        },
+        {
+            "id": 13,
+            "name": "Non Adjustable Device 4",
+            "priority": 2,
+            "power": 30,
+            "switch_status": true
+        },
+        {
+            "id": 14,
+            "name": "Non Adjustable Device 5",
+            "priority": 1,
+            "power": 0,
+            "switch_status": false
+        },
+        {
+            "id": 15,
+            "name": "Non Adjustable Device 6",
+            "priority": 1,
+            "power": 0,
             "switch_status": false
         }
     ],
@@ -110,18 +138,18 @@
             "id": 10,
             "name": "Adjustable Device 1",
             "priority": 2,
-            "power": 54,
+            "power": 80.0,
             "switch_status": false,
-            "min_power": 10,
+            "min_power": 80,
             "max_power": 100
         },
         {
             "id": 11,
             "name": "Adjustable Device 2",
             "priority": 1,
-            "power": 44,
+            "power": 930.0,
             "switch_status": true,
-            "min_power": 10,
+            "min_power": 930,
             "max_power": 1000
         }
     ]

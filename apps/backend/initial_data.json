@@ -72,9 +72,9 @@
             "id": 7,
             "name": "BESS 1",
             "capacity": 350,
-            "charge_level": 200,
-            "switch_status": true,
-            "device_status": "online"
+            "charge_level": 0,
+            "switch_status": false,
+            "device_status": "offline"
         }
     ],
     "non_adjustable_devices": [
@@ -82,15 +82,43 @@
             "id": 8,
             "name": "Non Adjustable Device 1",
             "priority": 1,
-            "power": 1,
+            "power": 311,
             "switch_status": true
         },
         {
             "id": 9,
             "name": "Non Adjustable Device 2",
             "priority": 2,
-            "power": 10,
+            "power": 300,
             "switch_status": false
+        },
+        {
+            "id": 12,
+            "name": "Non Adjustable Device 3",
+            "priority": 3,
+            "power": 88,
+            "switch_status": true
+        },
+        {
+            "id": 13,
+            "name": "Non Adjustable Device 4",
+            "priority": 2,
+            "power": 30,
+            "switch_status": true
+        },
+        {
+            "id": 14,
+            "name": "Non Adjustable Device 5",
+            "priority": 1,
+            "power": 15,
+            "switch_status": true
+        },
+        {
+            "id": 15,
+            "name": "Non Adjustable Device 6",
+            "priority": 1,
+            "power": 50,
+            "switch_status": true
         }
     ],
     "adjustable_devices": [
@@ -98,18 +126,18 @@
             "id": 10,
             "name": "Adjustable Device 1",
             "priority": 2,
-            "power": 54,
+            "power": 84,
             "switch_status": false,
-            "min_power": 10,
+            "min_power": 80,
             "max_power": 100
         },
         {
             "id": 11,
             "name": "Adjustable Device 2",
             "priority": 1,
-            "power": 44,
+            "power": 940,
             "switch_status": true,
-            "min_power": 10,
+            "min_power": 930,
             "max_power": 1000
         }
     ],

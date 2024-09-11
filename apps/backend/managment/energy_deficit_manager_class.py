@@ -1,4 +1,6 @@
 import uuid
+from collections import defaultdict
+
 from apps.backend.managment.deficit_action import DeficitAction
 from apps.backend.devices.adjustable_devices import AdjustableDevice
 from apps.backend.devices.non_adjustable import NonAdjustableDevice
@@ -45,6 +47,7 @@ class EnergyDeficitManager:
         self.is_in_tabu = is_in_tabu_func
         self.clean_tabu_list = clean_tabu_func
         self.previous_discharge_decision = False
+        self.MAX_EXCESS_PERCENTAGE = 0.85  # Dodaj tę linię
 
     def handle_deficit_automatic(self, power_deficit):
         """
@@ -550,55 +553,90 @@ class EnergyDeficitManager:
         total_reduced = 0
         devices_affected = []
 
-        all_devices = sorted(
+        all_devices = (
             self.consumergrid.adjustable_devices
-            + self.consumergrid.non_adjustable_devices,
-            key=lambda x: (not isinstance(x, AdjustableDevice), x.priority),
+            + self.consumergrid.non_adjustable_devices
         )
-
-        self.info_logger.info(f"Total devices: {len(all_devices)}")
-        self.info_logger.info(
-            f"Adjustable devices: {len(self.consumergrid.adjustable_devices)}"
-        )
-        self.info_logger.info(
-            f"Non-adjustable devices: {len(self.consumergrid.non_adjustable_devices)}"
-        )
-
+        devices_by_priority = defaultdict(list)
         for device in all_devices:
+            devices_by_priority[device.priority].append(device)
+
+        sorted_priorities = sorted(devices_by_priority.keys())
+        self.info_logger.info(f"Priorities to consider: {sorted_priorities}")
+
+        for i, priority in enumerate(sorted_priorities):
+            self.info_logger.info(f"\nConsidering priority {priority}")
+            priority_devices = devices_by_priority[priority]
+            total_power_in_priority = sum(
+                self.get_reducible_power(d) for d in priority_devices if d.switch_status
+            )
             self.info_logger.info(
-                f"Considering device: {device.name}, Type: {type(device).__name__}, Power: {device.get_current_power()}, Switch status: {device.switch_status}"
+                f"Total reducible power in priority {priority}: {total_power_in_priority} kW"
             )
 
+            if total_power_in_priority >= power_deficit - total_reduced:
+                self.info_logger.info(
+                    f"Devices in priority {priority} can cover the remaining deficit"
+                )
+                priority_reduction = self.reduce_power_for_priority_group(
+                    priority_devices, power_deficit - total_reduced
+                )
+                total_reduced += priority_reduction["amount"]
+                devices_affected.extend(priority_reduction["devices"])
+                self.info_logger.info(
+                    f"Reduced {priority_reduction['amount']} kW from priority {priority}"
+                )
+                break
+            else:
+                next_priority = (
+                    sorted_priorities[i + 1] if i + 1 < len(sorted_priorities) else None
+                )
+                if next_priority:
+                    self.info_logger.info(
+                        f"Checking for a single device in priority {next_priority}"
+                    )
+                    single_device = self.find_single_device_for_deficit(
+                        devices_by_priority[next_priority],
+                        power_deficit - total_reduced,
+                    )
+                    if single_device:
+                        self.info_logger.info(
+                            f"Found single device {single_device.name} in priority {next_priority}"
+                        )
+                        reduction = self.reduce_device_power(
+                            single_device, power_deficit - total_reduced
+                        )
+                        total_reduced += reduction
+                        devices_affected.append(
+                            f"{single_device.name} reduced by {reduction} kW"
+                        )
+                        self.info_logger.info(
+                            f"Reduced {reduction} kW from {single_device.name}"
+                        )
+                        break
+                    else:
+                        self.info_logger.info(
+                            f"No single device found in priority {next_priority}"
+                        )
+
+                self.info_logger.info(
+                    f"Reducing power from devices in priority {priority}"
+                )
+                priority_reduction = self.reduce_power_for_priority_group(
+                    priority_devices, power_deficit - total_reduced
+                )
+                total_reduced += priority_reduction["amount"]
+                devices_affected.extend(priority_reduction["devices"])
+                self.info_logger.info(
+                    f"Reduced {priority_reduction['amount']} kW from priority {priority}"
+                )
+
             if total_reduced >= power_deficit:
+                self.info_logger.info("Deficit fully covered")
                 break
 
-            if isinstance(device, AdjustableDevice) and device.switch_status:
-                reducible_power = device.get_current_power() - device.min_power
-                reduction_needed = min(reducible_power, power_deficit - total_reduced)
-                if reduction_needed > 0:
-                    actual_reduction = device.decrease_power(reduction_needed)
-                    total_reduced += actual_reduction
-                    devices_affected.append(
-                        f"Reduced {device.name} power by {actual_reduction} kW"
-                    )
-                    self.info_logger.info(
-                        f"Reduced {device.name} power by {actual_reduction} kW"
-                    )
-
-            elif isinstance(device, NonAdjustableDevice) and device.switch_status:
-                saved_power = device.get_current_power()
-                if device.deactivate():
-                    total_reduced += saved_power
-                    devices_affected.append(
-                        f"Deactivated {device.name}, saved {saved_power} kW"
-                    )
-                    self.info_logger.info(
-                        f"Deactivated {device.name}, saved {saved_power} kW"
-                    )
-                else:
-                    self.info_logger.warning(f"Failed to deactivate {device.name}")
-
         remaining_deficit = max(0, power_deficit - total_reduced)
+        self.info_logger.info(f"\nFinal results:")
         self.info_logger.info(f"Total power reduced: {total_reduced} kW")
         self.info_logger.info(f"Remaining deficit: {remaining_deficit} kW")
 
@@ -945,3 +983,111 @@ class EnergyDeficitManager:
                 )
                 power_deficit -= min(device.get_max_output(), power_deficit)
         return actions
+
+    #############################
+
+    def find_single_device_for_deficit(self, devices, deficit):
+        for device in devices:
+            if device.switch_status and self.get_reducible_power(device) >= deficit:
+                return device
+        return None
+
+    def reduce_power_for_priority_group(self, devices, target_reduction):
+        total_reduced = 0
+        affected_devices = []
+
+        self.info_logger.info(
+            f"Attempting to reduce {target_reduction} kW from priority group"
+        )
+
+        # Najpierw rozważ urządzenia regulowane
+        adjustable_devices = [
+            d for d in devices if isinstance(d, AdjustableDevice) and d.switch_status
+        ]
+        for device in adjustable_devices:
+            self.info_logger.info(
+                f"Considering adjustable device: {device.name} (current power: {device.get_current_power()} kW)"
+            )
+            if total_reduced >= target_reduction:
+                break
+            reduction = self.reduce_device_power(
+                device, target_reduction - total_reduced
+            )
+            if reduction > 0:
+                total_reduced += reduction
+                affected_devices.append(f"{device.name} reduced by {reduction} kW")
+                self.info_logger.info(f"Reduced {reduction} kW from {device.name}")
+
+        # Następnie rozważ urządzenia nieregulowane
+        if total_reduced < target_reduction:
+            non_adjustable_devices = [
+                d
+                for d in devices
+                if not isinstance(d, AdjustableDevice) and d.switch_status
+            ]
+
+            sorted_non_adjustable = sorted(
+                non_adjustable_devices,
+                key=lambda d: self.sorting_key(d, target_reduction - total_reduced),
+            )
+
+            for device in sorted_non_adjustable:
+                self.info_logger.info(
+                    f"Considering non-adjustable device: {device.name} (current power: {device.get_current_power()} kW)"
+                )
+                if total_reduced >= target_reduction:
+                    break
+                reduction = self.reduce_device_power(
+                    device, target_reduction - total_reduced
+                )
+                if reduction > 0:
+                    total_reduced += reduction
+                    affected_devices.append(f"{device.name} reduced by {reduction} kW")
+                    self.info_logger.info(
+                        f"Deactivated {device.name}, saved {reduction} kW"
+                    )
+
+        self.info_logger.info(f"Total reduced from priority group: {total_reduced} kW")
+        return {"amount": total_reduced, "devices": affected_devices}
+
+    def sorting_key(self, device, remaining_deficit):
+        power_difference = abs(remaining_deficit - device.get_current_power())
+        # Jeśli różnica mocy jest mniejsza niż 50% deficytu, preferuj urządzenia o większej mocy
+        if power_difference < 0.5 * remaining_deficit:
+            return (power_difference, -device.get_current_power())
+        return (power_difference, 0)
+
+    def reduce_device_power(self, device, target_reduction):
+        initial_power = device.get_current_power()
+        self.info_logger.info(
+            f"Attempting to reduce {target_reduction} kW from {device.name} (current power: {initial_power} kW)"
+        )
+
+        if isinstance(device, AdjustableDevice):
+            max_reduction = initial_power - device.min_power
+            actual_reduction = min(max_reduction, target_reduction)
+            device.decrease_power(actual_reduction)
+            final_power = device.get_current_power()
+            self.info_logger.info(
+                f"Reduced {device.name} from {initial_power} kW to {final_power} kW"
+            )
+            return initial_power - final_power
+        else:
+            if device.deactivate():
+                self.info_logger.info(
+                    f"Deactivated {device.name}, saved {initial_power} kW"
+                )
+                return initial_power
+            else:
+                self.info_logger.warning(f"Failed to deactivate {device.name}")
+                return 0
+
+    def get_reducible_power(self, device):
+        if not device.switch_status:
+            return 0
+        if isinstance(device, AdjustableDevice):
+            return device.get_current_power() - device.min_power
+        else:
+            return device.get_current_power()
+
+    ##########################
