@@ -1172,6 +1172,22 @@ class EnergyManager:
                     "amount": 0,
                     "reason": f"Failed to increase output of {device.name}",
                 }
+        elif action.startswith("activate:"):
+            _, new_output = action.split(":")
+        new_output = float(new_output)
+        if device.try_activate():
+            if device.set_output(new_output):
+                actual_increase = new_output - device.get_actual_output()
+                self.info_logger.info(
+                    f"Activated {device.name} and set output to {new_output} kW"
+                )
+                return {"success": True, "amount": actual_increase}
+            else:
+                return {
+                    "success": False,
+                    "amount": 0,
+                    "reason": f"Failed to set output for {device.name} after activation",
+                }
         else:
             return {
                 "success": False,

@@ -44,9 +44,9 @@
             "priority": 2,
             "max_output": 180,
             "min_output": 20,
-            "actual_output": 0,
-            "switch_status": false,
-            "device_status": "offline",
+            "actual_output": 180.0,
+            "switch_status": true,
+            "device_status": "online",
             "pending_action": null,
             "action_approved": null
         }
@@ -138,7 +138,7 @@
             "id": 10,
             "name": "Adjustable Device 1",
             "priority": 2,
-            "power": 80.0,
+            "power": 84,
             "switch_status": false,
             "min_power": 80,
             "max_power": 100

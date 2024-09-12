@@ -4,9 +4,9 @@
     "CONTRACTED_MARGIN": 0.1,
     "CONTRACTED_EXPORT_POSSIBILITY": false,
     "CONTRACTED_SALE_LIMIT": 0,
-    "CONTRACTED_PURCHASE_LIMIT": 300,
+    "CONTRACTED_PURCHASE_LIMIT": 305,
     "sold_power": 0,
-    "bought_power": 300.0,
+    "bought_power": 305.0,
     "current_tariff_buy": 0.41,
     "current_tariff_sell": 0.2
 }

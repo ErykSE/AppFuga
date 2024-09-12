@@ -216,81 +216,6 @@ class EnergyDeficitManager:
         self.info_logger.info(f"Final output: {current_output + increased_power} kW")
         return increased_power
 
-    """
-    def adjust_power_output(self, target_power):
-
-        current_power = self.microgrid.total_power_generated()
-        power_difference = target_power - current_power
-        step_size = min(
-            abs(power_difference) * 0.2, 10
-        )  # 20% różnicy lub 10 kW, cokolwiek jest mniejsze
-
-        if power_difference > 0:
-            return self.increase_power_gradually(power_difference, step_size)
-        elif power_difference < 0:
-            return self.decrease_power_gradually(-power_difference, step_size)
-        else:
-            self.info_logger.info("Power is already at an optimum level.")
-            return 0
-    
-
-    def increase_power_gradually(self, power_deficit, step_size):
-        
-        self.info_logger.info(
-            f"Gradual increase power. Deficit: {power_deficit} kW, Step: {step_size} kW"
-        )
-        increased_power = 0
-        for device in self.microgrid.get_active_devices():
-            if increased_power >= power_deficit:
-                break
-            if not device.is_at_max_output():
-                current_output = device.get_actual_output()
-                max_output = device.get_max_output()
-                increase = min(
-                    step_size,
-                    max_output - current_output,
-                    power_deficit - increased_power,
-                )
-                new_output = current_output + increase
-                device.set_output(new_output)
-                increased_power += increase
-                self.info_logger.info(
-                    f"Increased power {device.name} z {current_output} kW do {new_output} kW"
-                )
-
-        self.info_logger.info(f"In total, power was increased by {increased_power} kW")
-        return increased_power
-
-    def decrease_power_gradually(self, power_surplus, step_size):
-        
-        self.info_logger.info(
-            f"Gradual reduction in power. Surplus: {power_surplus} kW, Step: {step_size} kW"
-        )
-        decreased_power = 0
-        for device in reversed(
-            self.microgrid.get_active_devices()
-        ):  # Od najmniej priorytetowych
-            if decreased_power >= power_surplus:
-                break
-            if device.get_actual_output() > device.get_min_output():
-                current_output = device.get_actual_output()
-                min_output = device.get_min_output()
-                decrease = min(
-                    step_size,
-                    current_output - min_output,
-                    power_surplus - decreased_power,
-                )
-                new_output = current_output - decrease
-                device.set_output(new_output)
-                decreased_power += decrease
-                self.info_logger.info(
-                    f"Reduced power {device.name} from {current_output} kW to {new_output} kW"
-                )
-
-        self.info_logger.info(f"In total, power was reduced by {decreased_power} kW")
-        return decreased_power
-    """
-
     def manage_remaining_deficit(self, remaining_deficit):
         """
         Zarządza pozostałym deficytem energii po maksymalizacji produkcji.
@@ -462,50 +387,6 @@ class EnergyDeficitManager:
         result = self.osd.get_bought_power() < self.osd.get_purchase_limit()
 
         return result
-
-    """
-    def increase_active_devices_output(self, power_deficit, can_handle_surplus):
-        increased_power = 0
-        for device in self.microgrid.get_active_devices():
-            if not device.is_at_max_output():
-                initial_output = device.get_actual_output()
-                if can_handle_surplus:
-                    increase = device.increase_output_to_full_capacity()
-                else:
-                    target_output = min(
-                        initial_output + (power_deficit - increased_power),
-                        device.get_max_output(),
-                    )
-                    device.set_output(target_output)
-                    increase = device.get_actual_output() - initial_output
-                increased_power += increase
-                self.info_logger.info(
-                    f"Increased device power {device.name} z {initial_output} kW to {device.get_actual_output()} kW"
-                )
-            if increased_power >= power_deficit and not can_handle_surplus:
-                break
-        self.info_logger.info(f"In total, power was increased by {increased_power} kW")
-        return {"success": increased_power > 0, "amount": increased_power}
-
-    """
-    """
-    def are_active_devices_at_full_capacity(self):
-        active_devices = self.microgrid.get_active_devices()
-        self.info_logger.info(f"Number of active devices: {len(active_devices)}")
-        all_at_full_capacity = True
-        for device in active_devices:
-            current_output = device.get_actual_output()
-            max_output = device.get_max_output()
-            is_at_full = device.is_at_max_output()  # Zmiana tutaj
-            self.info_logger.info(
-                f"Device {device.name}: latest power {current_output} kW, maximum power {max_output} kW, at full power: {'Yes' if is_at_full else 'No'}"
-            )
-            all_at_full_capacity = all_at_full_capacity and is_at_full
-        self.info_logger.info(
-            f"All active equipment is operating at 100%: {'Yes' if all_at_full_capacity else 'No'}"
-        )
-        return all_at_full_capacity
-    """
 
     def discharge_bess(self, power_deficit):
         """
@@ -718,6 +599,7 @@ class EnergyDeficitManager:
         self.previous_discharge_decision = decision
         return decision
 
+    '''
     def activate_inactive_devices(self, power_deficit, can_handle_surplus):
         """
         Aktywuje nieaktywne urządzenia generujące w celu pokrycia deficytu energii.
@@ -745,11 +627,12 @@ class EnergyDeficitManager:
                     increase = device.get_actual_output()
                 activated_power += increase
                 self.info_logger.info(
-                    f"The device {device.name} was activated and the power was increased by {increase} kW"
+                    f"[DEBUG] The device {device.name} was activated and the power was increased by {increase} kW"
                 )
             if activated_power >= power_deficit and not can_handle_surplus:
                 break
         return {"success": activated_power > 0, "amount": activated_power}
+    '''
 
     def get_proposed_actions(self, power_deficit):
         self.info_logger.info(
@@ -870,79 +753,92 @@ class EnergyDeficitManager:
 
     def prepare_limit_consumption_actions(self, power_deficit):
         self.info_logger.info(
-            f"[DEBUG] Entering prepare_limit_consumption_actions with power_deficit: {power_deficit}"
+            f"[DEBUG] Preparing actions to limit consumption by {power_deficit} kW"
         )
-        actions = []
+        proposed_actions = []
         remaining_deficit = power_deficit
-        all_devices = sorted(
-            self.consumergrid.adjustable_devices
-            + self.consumergrid.non_adjustable_devices,
-            key=lambda x: (not isinstance(x, AdjustableDevice), x.priority),
-        )
-        self.info_logger.info(f"[DEBUG] Total devices to consider: {len(all_devices)}")
 
+        all_devices = (
+            self.consumergrid.adjustable_devices
+            + self.consumergrid.non_adjustable_devices
+        )
+        devices_by_priority = defaultdict(list)
         for device in all_devices:
-            self.info_logger.info(
-                f"[DEBUG] Considering device: ID={device.id}, Name={device.name}, Type={type(device).__name__}"
+            devices_by_priority[device.priority].append(device)
+
+        sorted_priorities = sorted(devices_by_priority.keys())
+        self.info_logger.info(f"[DEBUG] Priorities to consider: {sorted_priorities}")
+
+        for i, priority in enumerate(sorted_priorities):
+            self.info_logger.info(f"[DEBUG] Considering priority {priority}")
+            priority_devices = devices_by_priority[priority]
+            total_power_in_priority = sum(
+                self.get_reducible_power(d) for d in priority_devices if d.switch_status
             )
+            self.info_logger.info(
+                f"[DEBUG] Total reducible power in priority {priority}: {total_power_in_priority} kW"
+            )
+
+            if total_power_in_priority >= remaining_deficit:
+                self.info_logger.info(
+                    f"[DEBUG] Devices in priority {priority} can cover the remaining deficit"
+                )
+                proposed_actions.extend(
+                    self.prepare_actions_for_priority_group(
+                        priority_devices, remaining_deficit
+                    )
+                )
+                break
+            else:
+                next_priority = (
+                    sorted_priorities[i + 1] if i + 1 < len(sorted_priorities) else None
+                )
+                if next_priority:
+                    self.info_logger.info(
+                        f"[DEBUG] Checking for a single device in priority {next_priority}"
+                    )
+                    single_device = self.find_single_device_for_deficit(
+                        devices_by_priority[next_priority], remaining_deficit
+                    )
+                    if single_device:
+                        self.info_logger.info(
+                            f"[DEBUG] Found single device {single_device.name} in priority {next_priority}"
+                        )
+                        proposed_actions.append(
+                            self.prepare_action_for_device(
+                                single_device, remaining_deficit
+                            )
+                        )
+                        break
+                    else:
+                        self.info_logger.info(
+                            f"[DEBUG] No single device found in priority {next_priority}"
+                        )
+
+                self.info_logger.info(
+                    f"[DEBUG] Preparing actions for devices in priority {priority}"
+                )
+                priority_actions = self.prepare_actions_for_priority_group(
+                    priority_devices, remaining_deficit
+                )
+                proposed_actions.extend(priority_actions)
+                remaining_deficit -= sum(
+                    action["reduction"] for action in priority_actions
+                )
+
             if remaining_deficit <= 0:
                 self.info_logger.info(
-                    "[DEBUG] Remaining deficit is 0 or less, breaking the loop"
+                    "[DEBUG] Deficit fully covered by proposed actions"
                 )
                 break
 
-            current_output = device.get_actual_output()
-            if isinstance(device, AdjustableDevice):
-                reducible_power = current_output - device.min_power
-                reduction = min(reducible_power, remaining_deficit)
-                self.info_logger.info(
-                    f"[DEBUG] AdjustableDevice: Current output={current_output}, Min power={device.min_power}, Reducible power={reducible_power}, Proposed reduction={reduction}"
-                )
-                if reduction > 0:
-                    action = {
-                        "id": str(uuid.uuid4()),
-                        "device_id": str(device.id),
-                        "device_name": device.name,
-                        "device_type": type(device).__name__,
-                        "action": f"reduce:{reduction}",
-                        "current_output": current_output,
-                        "proposed_output": current_output - reduction,
-                        "reduction": reduction,
-                    }
-                    actions.append(action)
-                    self.info_logger.info(
-                        f"[DEBUG] Created action for AdjustableDevice: {action}"
-                    )
-                    remaining_deficit -= reduction
-            elif isinstance(device, NonAdjustableDevice):
-                self.info_logger.info(
-                    f"[DEBUG] NonAdjustableDevice: Current output={current_output}, Remaining deficit={remaining_deficit}"
-                )
-                if current_output > 0:
-                    action = {
-                        "id": str(uuid.uuid4()),
-                        "device_id": str(device.id),
-                        "device_name": device.name,
-                        "device_type": type(device).__name__,
-                        "action": "deactivate",
-                        "current_output": current_output,
-                        "proposed_output": 0,
-                        "reduction": min(current_output, remaining_deficit),
-                    }
-                    actions.append(action)
-                    self.info_logger.info(
-                        f"[DEBUG] Created action for NonAdjustableDevice: {action}"
-                    )
-                    remaining_deficit -= min(current_output, remaining_deficit)
-
-            self.info_logger.info(
-                f"[DEBUG] After considering device, remaining deficit: {remaining_deficit}"
-            )
-
         self.info_logger.info(
-            f"[DEBUG] Exiting prepare_limit_consumption_actions. Total actions created: {len(actions)}, Remaining deficit: {remaining_deficit}"
+            f"[DEBUG] Total proposed actions: {len(proposed_actions)}"
         )
-        return actions
+        self.info_logger.info(
+            f"[DEBUG] Remaining deficit after proposing actions: {remaining_deficit} kW"
+        )
+        return proposed_actions
 
     def prepare_increase_output_actions(self, power_deficit):
         actions = []
@@ -966,22 +862,51 @@ class EnergyDeficitManager:
         return actions
 
     def prepare_activate_device_actions(self, power_deficit):
+        self.info_logger.info(
+            f"[DEBUG] Preparing activation actions for deficit: {power_deficit} kW"
+        )
         actions = []
-        for device in self.microgrid.get_inactive_devices():
-            if power_deficit > 0:
-                actions.append(
-                    {
-                        "id": str(uuid.uuid4()),
-                        "device_id": device.id,
-                        "device_name": device.name,
-                        "device_type": type(device).__name__,
-                        "action": f"activate:{min(device.get_max_output(), power_deficit)}",
-                        "current_output": 0,
-                        "proposed_output": min(device.get_max_output(), power_deficit),
-                        "reduction": min(device.get_max_output(), power_deficit),
-                    }
-                )
-                power_deficit -= min(device.get_max_output(), power_deficit)
+        remaining_deficit = power_deficit
+        current_output = self.microgrid.total_power_generated()
+
+        inactive_devices = sorted(
+            self.microgrid.get_inactive_devices(), key=lambda d: d.priority
+        )
+
+        for device in inactive_devices:
+            if remaining_deficit <= 0:
+                break
+
+            max_output = device.get_max_output()
+            proposed_output = min(max_output, remaining_deficit)
+
+            actions.append(
+                {
+                    "id": str(uuid.uuid4()),
+                    "device_id": device.id,
+                    "device_name": device.name,
+                    "device_type": type(device).__name__,
+                    "action": f"activate:{proposed_output}",
+                    "current_output": 0,
+                    "proposed_output": proposed_output,
+                    "reduction": proposed_output,  # W kontekście deficytu, aktywacja urządzenia "redukuje" deficyt
+                }
+            )
+
+            self.info_logger.info(
+                f"[DEBUG] Proposed activation of {device.name} with output {proposed_output} kW"
+            )
+
+            remaining_deficit -= proposed_output
+            current_output += proposed_output
+
+        self.info_logger.info(
+            f"[DEBUG] Total activation actions proposed: {len(actions)}"
+        )
+        self.info_logger.info(
+            f"[DEBUG] Remaining deficit after proposed activations: {remaining_deficit} kW"
+        )
+
         return actions
 
     #############################
@@ -1091,3 +1016,87 @@ class EnergyDeficitManager:
             return device.get_current_power()
 
     ##########################
+
+    def prepare_actions_for_priority_group(self, devices, target_reduction):
+        proposed_actions = []
+        total_reduction = 0
+
+        self.info_logger.info(
+            f"[DEBUG] Preparing actions to reduce {target_reduction} kW from priority group"
+        )
+
+        # Najpierw rozważ urządzenia regulowane
+        adjustable_devices = [
+            d for d in devices if isinstance(d, AdjustableDevice) and d.switch_status
+        ]
+        for device in adjustable_devices:
+            self.info_logger.info(
+                f"[DEBUG] Considering adjustable device: {device.name} (current power: {device.get_current_power()} kW)"
+            )
+            if total_reduction >= target_reduction:
+                break
+            action = self.prepare_action_for_device(
+                device, target_reduction - total_reduction
+            )
+            if action:
+                proposed_actions.append(action)
+                total_reduction += action["reduction"]
+
+        # Następnie rozważ urządzenia nieregulowane
+        if total_reduction < target_reduction:
+            non_adjustable_devices = [
+                d
+                for d in devices
+                if not isinstance(d, AdjustableDevice) and d.switch_status
+            ]
+            sorted_non_adjustable = sorted(
+                non_adjustable_devices,
+                key=lambda d: self.sorting_key(d, target_reduction - total_reduction),
+            )
+
+            for device in sorted_non_adjustable:
+                self.info_logger.info(
+                    f"[DEBUG] Considering non-adjustable device: {device.name} (current power: {device.get_current_power()} kW)"
+                )
+                if total_reduction >= target_reduction:
+                    break
+                action = self.prepare_action_for_device(
+                    device, target_reduction - total_reduction
+                )
+                if action:
+                    proposed_actions.append(action)
+                    total_reduction += action["reduction"]
+
+        self.info_logger.info(
+            f"[DEBUG] Total reduction proposed for priority group: {total_reduction} kW"
+        )
+        return proposed_actions
+
+    def prepare_action_for_device(self, device, target_reduction):
+        if isinstance(device, AdjustableDevice):
+            max_reduction = device.get_current_power() - device.min_power
+            reduction = min(max_reduction, target_reduction)
+            if reduction > 0:
+                return {
+                    "id": str(uuid.uuid4()),
+                    "device_id": device.id,
+                    "device_name": device.name,
+                    "device_type": type(device).__name__,
+                    "action": f"reduce:{reduction}",
+                    "current_output": device.get_current_power(),
+                    "proposed_output": device.get_current_power() - reduction,
+                    "reduction": reduction,
+                }
+        else:  # NonAdjustableDevice
+            if device.get_current_power() > 0:
+                return {
+                    "id": str(uuid.uuid4()),
+                    "device_id": device.id,
+                    "device_name": device.name,
+                    "device_type": type(device).__name__,
+                    "action": "deactivate",
+                    "current_output": device.get_current_power(),
+                    "proposed_output": 0,
+                    "reduction": device.get_current_power(),
+                }
+        return None

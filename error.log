@@ -1,7 +1,3 @@
-2024-09-11 08:56:47,801 - ERROR - Communication error detected with PV Panel 1 (ID: 1). Device status is offline but meter reading indicates power generation of 15 kW.
-2024-09-11 08:57:12,825 - ERROR - [DEBUG] Failed to execute action activate:180 for Wind Turbine 2: Unknown action for EnergySource: activate:180
-2024-09-11 08:57:12,900 - ERROR - Error updating weather data: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))
-2024-09-11 08:57:12,962 - ERROR - Error updating power profile: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))
-2024-09-11 08:57:27,990 - ERROR - [DEBUG] Failed to execute action activate:180 for Wind Turbine 2: Unknown action for EnergySource: activate:180
-2024-09-11 08:57:28,087 - ERROR - Error updating weather data: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))
-2024-09-11 08:57:28,134 - ERROR - Error updating power profile: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))
+2024-09-12 10:09:00,006 - ERROR - Communication error detected with PV Panel 1 (ID: 1). Device status is offline but meter reading indicates power generation of 15 kW.
+2024-09-12 10:09:30,148 - ERROR - Error updating weather data: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))
+2024-09-12 10:09:30,204 - ERROR - Error updating power profile: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))
