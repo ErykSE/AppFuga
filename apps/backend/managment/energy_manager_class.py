@@ -21,6 +21,7 @@ from apps.backend.devices.fuel_turbine_class import FuelTurbine
 from apps.backend.devices.adjustable_devices import AdjustableDevice
 from apps.backend.devices.energy_point_class import EnergyPoint
 from apps.backend.devices.energy_source_class import EnergySource
+from apps.backend.others.data_consistency_checker import DataConsistencyChecker
 
 
 class EnergyManager:
@@ -110,6 +111,17 @@ class EnergyManager:
         self.tabu_duration = 25  # 5 minut w sekundach
         self.last_tabu_clean = time.time()
         self.tabu_clean_interval = 60  # Czyść listę co minutę
+        self.data_consistency_checker = DataConsistencyChecker(
+            self.live_data_path,
+            self.live_data_path,  # Tymczasowo używamy tego samego pliku do zapisu i odczytu, docelowo powinno być initial i live
+            info_logger,
+            error_logger,
+            max_attempts=3,
+            delay=5,
+        )
+        self.last_saved_data = (
+            None  # Dodajemy atrybut do przechowywania ostatnio zapisanych danych
+        )
 
     def load_configuration(self):
         try:
@@ -142,16 +154,27 @@ class EnergyManager:
         self.first_run = True
         while self.running and not self.stop_event.is_set():
             try:
-                self.info_logger.highlight("Starting initial data loading process")
-                self.info_logger.section("Loading Initial Data")
+                self.info_logger.highlight("Starting new iteration")
                 self.load_configuration()
+
                 if self.first_run:
                     self.load_initial_data()
                     self.first_run = False
                 else:
+                    # Sprawdzanie spójności danych
+                    if not self.data_consistency_checker.check_and_retry_consistency():
+                        self.error_logger.error(
+                            "Failed to achieve data consistency after retries"
+                        )
+                        # Możesz tutaj dodać kod do powiadomienia operatora, jeśli to konieczne
+
                     self.load_live_data()
 
+                # Normalne działanie algorytmu
                 result = self.run_single_iteration()
+                self.save_live_data()
+
+                # Oczekiwanie na następną iterację
                 wait_time = (
                     self.auto_interval
                     if self.operation_mode == OperationMode.AUTOMATIC
@@ -165,6 +188,7 @@ class EnergyManager:
             except Exception as e:
                 self.handle_runtime_error(e)
                 break
+
         self.info_logger.important("Energy management stopped")
 
     def run_single_iteration(self):

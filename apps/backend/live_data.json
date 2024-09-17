@@ -58,9 +58,9 @@
             "priority": 4,
             "max_output": 100,
             "min_output": 0,
-            "actual_output": 0,
-            "switch_status": false,
-            "device_status": "offline",
+            "actual_output": 38,
+            "switch_status": true,
+            "device_status": "online",
             "pending_action": null,
             "action_approved": null
         }

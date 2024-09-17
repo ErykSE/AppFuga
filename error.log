@@ -1,3 +1,11 @@
-2024-09-17 10:12:21,289 - ERROR - Communication error detected with PV Panel 1 (ID: 1). Device status is offline but meter reading indicates power generation of 15 kW.
-2024-09-17 10:12:21,373 - ERROR - Error updating weather data: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))
-2024-09-17 10:12:21,424 - ERROR - Error updating power profile: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))
+2024-09-17 11:48:52,019 - ERROR - Communication error detected with PV Panel 1 (ID: 1). Device status is offline but meter reading indicates power generation of 15 kW.
+2024-09-17 11:48:52,112 - ERROR - Error updating weather data: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))
+2024-09-17 11:48:52,162 - ERROR - Error updating power profile: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))
+2024-09-17 11:49:07,163 - WARNING - [WARNING] Data consistency check failed
+2024-09-17 11:49:12,166 - WARNING - [WARNING] Data consistency check failed
+2024-09-17 11:49:17,167 - WARNING - [WARNING] Data consistency check failed
+2024-09-17 11:49:22,168 - ERROR - Failed to achieve data consistency after retries
+2024-09-17 11:49:22,168 - ERROR - Communication error detected with Wind Turbine 1 (ID: 3). Device status is offline but meter reading indicates power generation of 42 kW.
+2024-09-17 11:49:22,168 - ERROR - Communication error detected with Fuel Turbine 1 (ID: 5). Device status is offline but meter reading indicates power generation of 38 kW.
+2024-09-17 11:49:22,249 - ERROR - Error updating weather data: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))
+2024-09-17 11:49:22,292 - ERROR - Error updating power profile: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))
