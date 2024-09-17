@@ -26,9 +26,9 @@
             "id": 3,
             "name": "Wind Turbine 1",
             "priority": 2,
-            "max_output": 200,
-            "min_output": 20,
-            "actual_output": 40,
+            "max_output": 80,
+            "min_output": 0,
+            "actual_output": 80,
             "switch_status": true,
             "device_status": "online"
         },
@@ -36,8 +36,8 @@
             "id": 4,
             "name": "Wind Turbine 2",
             "priority": 2,
-            "max_output": 180,
-            "min_output": 20,
+            "max_output": 70,
+            "min_output": 0,
             "actual_output": 0,
             "switch_status": false,
             "device_status": "offline"
@@ -48,9 +48,9 @@
             "id": 5,
             "name": "Fuel Turbine 1",
             "priority": 4,
-            "max_output": 300,
-            "min_output": 30,
-            "actual_output": 40,
+            "max_output": 100,
+            "min_output": 0,
+            "actual_output": 100,
             "switch_status": true,
             "device_status": "online"
         }
@@ -60,11 +60,11 @@
             "id": 6,
             "name": "Fuel Cell 1",
             "priority": 3,
-            "max_output": 150,
-            "min_output": 15,
-            "actual_output": 25,
-            "switch_status": true,
-            "device_status": "online"
+            "max_output": 75,
+            "min_output": 0,
+            "actual_output": 0,
+            "switch_status": false,
+            "device_status": "offline"
         }
     ],
     "bess": [
@@ -82,43 +82,15 @@
             "id": 8,
             "name": "Non Adjustable Device 1",
             "priority": 1,
-            "power": 311,
+            "power": 51,
             "switch_status": true
         },
         {
             "id": 9,
             "name": "Non Adjustable Device 2",
             "priority": 2,
-            "power": 300,
-            "switch_status": false
-        },
-        {
-            "id": 12,
-            "name": "Non Adjustable Device 3",
-            "priority": 3,
-            "power": 88,
-            "switch_status": true
-        },
-        {
-            "id": 13,
-            "name": "Non Adjustable Device 4",
-            "priority": 2,
             "power": 30,
-            "switch_status": true
-        },
-        {
-            "id": 14,
-            "name": "Non Adjustable Device 5",
-            "priority": 1,
-            "power": 15,
-            "switch_status": true
-        },
-        {
-            "id": 15,
-            "name": "Non Adjustable Device 6",
-            "priority": 1,
-            "power": 50,
-            "switch_status": true
+            "switch_status": false
         }
     ],
     "adjustable_devices": [
@@ -135,9 +107,9 @@
             "id": 11,
             "name": "Adjustable Device 2",
             "priority": 1,
-            "power": 940,
+            "power": 50,
             "switch_status": true,
-            "min_power": 930,
+            "min_power": 30,
             "max_power": 1000
         }
     ],

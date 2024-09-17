@@ -6,7 +6,7 @@
     "CONTRACTED_SALE_LIMIT": 0,
     "CONTRACTED_PURCHASE_LIMIT": 305,
     "sold_power": 0,
-    "bought_power": 305.0,
+    "bought_power": 50,
     "current_tariff_buy": 0.41,
     "current_tariff_sell": 0.2
 }

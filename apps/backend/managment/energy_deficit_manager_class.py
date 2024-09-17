@@ -178,18 +178,30 @@ class EnergyDeficitManager:
                 initial_output = device.get_actual_output()
                 max_output = device.get_max_output()
 
-                new_output = min(
-                    max_output,
-                    target_output - (current_output + increased_power) + initial_output,
-                )
-
-                device.set_output(new_output)
-                actual_increase = new_output - initial_output
-                increased_power += actual_increase
-
-                self.info_logger.info(
-                    f"Increased power of {device.name} (priority: {device.priority}) from {initial_output} kW to {new_output} kW"
-                )
+                if device.is_adjustable:
+                    new_output = min(
+                        max_output,
+                        target_output
+                        - (current_output + increased_power)
+                        + initial_output,
+                    )
+                    if device.set_output(new_output):
+                        actual_increase = new_output - initial_output
+                        increased_power += actual_increase
+                        self.info_logger.info(
+                            f"Increased power of adjustable device {device.name} "
+                            f"(priority: {device.priority}) from {initial_output} kW to {new_output} kW"
+                        )
+                else:
+                    # Dla nieregulowanych urządzeń, sprawdzamy czy są już na maksimum
+                    if initial_output < max_output:
+                        if device.set_output(max_output):
+                            actual_increase = max_output - initial_output
+                            increased_power += actual_increase
+                            self.info_logger.info(
+                                f"Set non-adjustable device {device.name} "
+                                f"(priority: {device.priority}) to maximum output: {max_output} kW"
+                            )
 
         # Jeśli nadal potrzebujemy więcej mocy, aktywujemy nieaktywne urządzenia
         if current_output + increased_power < target_output:
@@ -198,19 +210,28 @@ class EnergyDeficitManager:
                     break
 
                 if not device.get_switch_status():  # Jeśli urządzenie jest nieaktywne
-                    if device.try_activate():
+                    if device.activate():
                         max_output = device.get_max_output()
-                        new_output = min(
-                            max_output,
-                            target_output - (current_output + increased_power),
-                        )
-                        device.set_output(new_output)
-                        actual_increase = new_output
-                        increased_power += actual_increase
-
-                        self.info_logger.info(
-                            f"Activated {device.name} (priority: {device.priority}) and set power to {new_output} kW"
-                        )
+                        if device.is_adjustable:
+                            new_output = min(
+                                max_output,
+                                target_output - (current_output + increased_power),
+                            )
+                            if device.set_output(new_output):
+                                actual_increase = new_output
+                                increased_power += actual_increase
+                                self.info_logger.info(
+                                    f"Activated adjustable device {device.name} "
+                                    f"(priority: {device.priority}) and set power to {new_output} kW"
+                                )
+                        else:
+                            # Dla nieregulowanych urządzeń, aktywujemy je na pełną moc
+                            actual_increase = max_output
+                            increased_power += actual_increase
+                            self.info_logger.info(
+                                f"Activated non-adjustable device {device.name} "
+                                f"(priority: {device.priority}) at maximum power: {max_output} kW"
+                            )
 
         self.info_logger.info(f"In total, power was increased by {increased_power} kW")
         self.info_logger.info(f"Final output: {current_output + increased_power} kW")
@@ -599,41 +620,6 @@ class EnergyDeficitManager:
         self.previous_discharge_decision = decision
         return decision
 
-    '''
-    def activate_inactive_devices(self, power_deficit, can_handle_surplus):
-        """
-        Aktywuje nieaktywne urządzenia generujące w celu pokrycia deficytu energii.
-
-        Ta metoda próbuje aktywować nieaktywne urządzenia generujące i ustawić ich
-        moc wyjściową, aby pokryć istniejący deficyt energii.
-
-        Argumenty:
-            power_deficit (float): Ilość deficytu energii do pokrycia w kW.
-            can_handle_surplus (bool): Czy system może obsłużyć ewentualną nadwyżkę energii.
-
-        Zwraca:
-            dict: Słownik zawierający informacje o sukcesie operacji i ilości aktywowanej mocy.
-        """
-        activated_power = 0
-        for device in self.microgrid.get_inactive_devices():
-            if device.try_activate():
-                if can_handle_surplus:
-                    increase = device.activate_and_set_to_full_capacity()
-                else:
-                    target_output = min(
-                        power_deficit - activated_power, device.get_max_output()
-                    )
-                    device.set_output(target_output)
-                    increase = device.get_actual_output()
-                activated_power += increase
-                self.info_logger.info(
-                    f"[DEBUG] The device {device.name} was activated and the power was increased by {increase} kW"
-                )
-            if activated_power >= power_deficit and not can_handle_surplus:
-                break
-        return {"success": activated_power > 0, "amount": activated_power}
-    '''
-
     def get_proposed_actions(self, power_deficit):
         self.info_logger.info(
             f"[DEBUG] Proposing actions for deficit: {power_deficit} kW"
@@ -842,33 +828,62 @@ class EnergyDeficitManager:
 
     def prepare_increase_output_actions(self, power_deficit):
         actions = []
-        for device in self.microgrid.get_active_devices():
-            if device.get_actual_output() < device.get_max_output():
-                increase = min(
-                    device.get_max_output() - device.get_actual_output(), power_deficit
-                )
-                actions.append(
-                    {
-                        "id": str(uuid.uuid4()),
-                        "device_id": device.id,
-                        "device_name": device.name,
-                        "device_type": type(device).__name__,
-                        "action": f"increase:{increase}",
-                        "current_output": device.get_actual_output(),
-                        "proposed_output": device.get_actual_output() + increase,
-                        "reduction": increase,
-                    }
-                )
+        remaining_deficit = power_deficit
+
+        # Sortujemy aktywne urządzenia według priorytetu
+        active_devices = sorted(
+            self.microgrid.get_active_devices(), key=lambda x: x.priority
+        )
+
+        for device in active_devices:
+            if remaining_deficit <= 0:
+                break
+
+            current_output = device.get_actual_output()
+            max_output = device.get_max_output()
+
+            if device.is_adjustable:
+                new_output = min(max_output, current_output + remaining_deficit)
+                increase = new_output - current_output
+                if increase > 0:
+                    actions.append(
+                        {
+                            "id": str(uuid.uuid4()),
+                            "device_id": device.id,
+                            "device_name": device.name,
+                            "device_type": type(device).__name__,
+                            "action": f"set_output:{new_output}",
+                            "current_output": current_output,
+                            "proposed_output": new_output,
+                            "reduction": increase,
+                        }
+                    )
+                    remaining_deficit -= increase
+            else:
+                # Dla urządzeń nieregulowanych, proponujemy tylko ustawienie na maksymalną moc, jeśli nie są już na niej
+                if current_output < max_output:
+                    increase = max_output - current_output
+                    actions.append(
+                        {
+                            "id": str(uuid.uuid4()),
+                            "device_id": device.id,
+                            "device_name": device.name,
+                            "device_type": type(device).__name__,
+                            "action": f"set_output:{max_output}",
+                            "current_output": current_output,
+                            "proposed_output": max_output,
+                            "reduction": increase,
+                        }
+                    )
+                    remaining_deficit -= increase
+
         return actions
 
     def prepare_activate_device_actions(self, power_deficit):
-        self.info_logger.info(
-            f"[DEBUG] Preparing activation actions for deficit: {power_deficit} kW"
-        )
         actions = []
         remaining_deficit = power_deficit
-        current_output = self.microgrid.total_power_generated()
 
+        # Sortujemy nieaktywne urządzenia według priorytetu
         inactive_devices = sorted(
             self.microgrid.get_inactive_devices(), key=lambda d: d.priority
         )
@@ -878,7 +893,10 @@ class EnergyDeficitManager:
                 break
 
             max_output = device.get_max_output()
-            proposed_output = min(max_output, remaining_deficit)
+            if device.is_adjustable:
+                proposed_output = min(max_output, remaining_deficit)
+            else:
+                proposed_output = max_output  # Dla nieregulowanych urządzeń zawsze proponujemy pełną moc
 
             actions.append(
                 {
@@ -886,26 +904,14 @@ class EnergyDeficitManager:
                     "device_id": device.id,
                     "device_name": device.name,
                     "device_type": type(device).__name__,
-                    "action": f"activate:{proposed_output}",
+                    "action": f"activate_and_set:{proposed_output}",
                     "current_output": 0,
                     "proposed_output": proposed_output,
-                    "reduction": proposed_output,  # W kontekście deficytu, aktywacja urządzenia "redukuje" deficyt
+                    "reduction": proposed_output,
                 }
             )
 
-            self.info_logger.info(
-                f"[DEBUG] Proposed activation of {device.name} with output {proposed_output} kW"
-            )
-
             remaining_deficit -= proposed_output
-            current_output += proposed_output
-
-        self.info_logger.info(
-            f"[DEBUG] Total activation actions proposed: {len(actions)}"
-        )
-        self.info_logger.info(
-            f"[DEBUG] Remaining deficit after proposed activations: {remaining_deficit} kW"
-        )
 
         return actions
 

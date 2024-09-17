@@ -16,12 +16,13 @@ class EnergySource:
         actual_output,
         switch_status,
         device_status,
+        is_adjustable=False,
     ):
         self.id = id
         self.name = name
         self.priority = priority
         self.max_output = max_output
-        self.min_output = min_output
+        self.min_output = min_output if is_adjustable else 0
         self.actual_output = actual_output
         self.switch_status = switch_status
         self.device_status = device_status
@@ -29,6 +30,7 @@ class EnergySource:
         self.pending_action = None
         self.action_approved = None
         self.action_request_time = None
+        self.is_adjustable = is_adjustable
 
     @staticmethod
     def validate_data(data):
@@ -99,7 +101,7 @@ class EnergySource:
         return self.max_output
 
     def get_min_output(self):
-        return self.min_output
+        return self.min_output if self.is_adjustable else 0
 
     def get_status(self):
         return self.device_status
@@ -113,74 +115,22 @@ class EnergySource:
     def is_at_max_output(self):
         return self.actual_output >= self.max_output
 
-    def get_available_capacity(self):
-        return self.max_output - self.actual_output
-
-    def is_at_full_capacity(self):
-        return self.actual_output == self.max_output
-
     def activate(self):
-        self.device_status = "online"
-        self.switch_status = True
-        print(
-            f"{self.name} is now active with switch_status ERERE = {self.switch_status}."
-        )
+        if self.device_status == "offline":
+            self.device_status = "online"
+            self.switch_status = True
+            print(f"{self.name} is now active with output {self.actual_output} kW.")
+            return True
+        return False
 
     def deactivate(self):
-        self.device_status = "offline"
-        self.actual_output = 0
-        self.switch_status = False
-        print(
-            f"{self.name} is now inactive with switch_status DDSAD = {self.switch_status}."
-        )
-
-    def increase_output(self, amount, is_percent=True):
-        if self.device_status != "online":
-            print(f"{self.name} is not active.")
-            return 0, 0
-
-        initial_output = self.actual_output
-        if is_percent:
-            increase_amount = initial_output * (amount / 100)
-        else:
-            increase_amount = amount
-
-        new_output = min(initial_output + increase_amount, self.max_output)
-        actual_increase = new_output - initial_output
-        self.actual_output = new_output
-
-        percent_increase = (
-            (actual_increase / initial_output) * 100 if initial_output > 0 else 0
-        )
-
-        print(
-            f"{self.name} output increased by {actual_increase:.2f} kW ({percent_increase:.2f}%) to {self.actual_output:.2f} kW"
-        )
-        return percent_increase, actual_increase
-
-    def decrease_output(self, amount, is_percent=True):
-        if self.device_status != "online":
-            print(f"{self.name} is not active.")
-            return 0, 0
-
-        initial_output = self.actual_output
-        if is_percent:
-            decrease_amount = initial_output * (amount / 100)
-        else:
-            decrease_amount = amount
-
-        new_output = max(initial_output - decrease_amount, self.min_output)
-        actual_decrease = initial_output - new_output
-        self.actual_output = new_output
-
-        percent_decrease = (
-            (actual_decrease / initial_output) * 100 if initial_output > 0 else 0
-        )
-
-        print(
-            f"{self.name} output decreased by {actual_decrease:.2f} kW ({percent_decrease:.2f}%) to {self.actual_output:.2f} kW"
-        )
-        return percent_decrease, actual_decrease
+        if self.device_status == "online":
+            self.device_status = "offline"
+            self.actual_output = 0
+            self.switch_status = False
+            print(f"{self.name} is now inactive.")
+            return True
+        return False
 
     def set_output(self, target_output):
         print(f"Attempting to set output for {self.name} to {target_output} kW")
@@ -188,96 +138,17 @@ class EnergySource:
             print(f"{self.name} is not active.")
             return False
 
-        if target_output > self.max_output:
-            print(f"Target output {target_output} exceeds max output {self.max_output}")
-            self.actual_output = self.max_output
-            print(f"{self.name} output set to its maximum: {self.max_output} kW")
-        elif target_output < self.min_output:
-            print(
-                f"Target output {target_output} is below min output {self.min_output}"
-            )
-            self.actual_output = self.min_output
-            print(f"{self.name} output set to its minimum: {self.min_output} kW")
-        else:
+        if not self.is_adjustable and target_output != self.max_output:
+            print(f"{self.name} is not adjustable. Can only be set to maximum output.")
+            return False
+
+        if self.min_output <= target_output <= self.max_output:
             self.actual_output = target_output
             print(f"{self.name} output set to {target_output} kW")
-        return True
-
-    def increase_output_to_full_capacity(self):
-        if self.device_status != "online":
-            print(f"{self.name} is not active.")
-            return 0
-
-        increase_amount = self.max_output - self.actual_output
-        self.actual_output = self.max_output
-        print(f"{self.name} output increased to its maximum: {self.max_output} kW")
-        return increase_amount
-
-    def activate_and_set_to_full_capacity(self):
-        if self.device_status == "offline":
-            self.activate()
-
-        if self.device_status == "online":
-            return self.increase_output_to_full_capacity()
+            return True
         else:
-            print(f"Failed to activate {self.name}")
-            return 0
-
-    def try_activate(self, attempts=3, delay=5):
-        initial_status = self.device_status
-        for attempt in range(attempts):
-            self.activate()
-            time.sleep(delay)
-            if self.device_status == "online" and self.device_status != initial_status:
-                print(f"{self.name} activated successfully on attempt {attempt + 1}.")
-                return True
-            print(f"Attempt {attempt + 1} to activate {self.name} failed.")
-        print(f"Failed to activate {self.name} after {attempts} attempts.")
-        return False
-
-    def try_deactivate(self, attempts=3, delay=5):
-        initial_status = self.device_status
-        for attempt in range(attempts):
-            self.deactivate()
-            time.sleep(delay)
-            if self.device_status == "offline" and self.device_status != initial_status:
-                print(f"{self.name} deactivated successfully on attempt {attempt + 1}.")
-                return True
-            print(f"Attempt {attempt + 1} to deactivate {self.name} failed.")
-        print(f"Failed to deactivate {self.name} after {attempts} attempts.")
-        return False
-
-    def try_increase_output(self, amount, is_percent=True, attempts=3, delay=5):
-        initial_output = self.actual_output
-        for attempt in range(attempts):
-            percent_increased, amount_increased = self.increase_output(
-                amount, is_percent
-            )
-            time.sleep(delay)
-            if self.actual_output > initial_output:
-                print(
-                    f"{self.name} output increased successfully on attempt {attempt + 1}."
-                )
-                return percent_increased, amount_increased
-            print(f"Attempt {attempt + 1} to increase output of {self.name} failed.")
-        print(f"Failed to increase output of {self.name} after {attempts} attempts.")
-        return 0, 0
-
-    def try_decrease_output(self, amount, is_percent=True, attempts=3, delay=5):
-        initial_output = self.actual_output
-        for attempt in range(attempts):
-            percent_decreased, amount_decreased = self.decrease_output(
-                amount, is_percent
-            )
-            time.sleep(delay)
-            if self.actual_output < initial_output:
-                print(
-                    f"{self.name} output decreased successfully on attempt {attempt + 1}."
-                )
-                return percent_decreased, amount_decreased
-            print(f"Attempt {attempt + 1} to decrease output of {self.name} failed.")
-        print(f"Failed to decrease output of {self.name} after {attempts} attempts.")
-        return 0, 0
+            print(f"Target output {target_output} is out of range for {self.name}")
+            return False
 
     def update_state(self, data):
         """Update the state of the device with new data."""

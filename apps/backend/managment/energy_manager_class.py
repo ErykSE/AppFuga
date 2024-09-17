@@ -1113,6 +1113,7 @@ class EnergyManager:
         self.info_logger.info(f"##################Current tabu list: {self.tabu_list}")
 
     def perform_energy_source_action(self, device, action):
+        self.info_logger.info(f"Performing action: {action} on device: {device.name}")
         if action.startswith("set_output:"):
             _, new_output = action.split(":")
             new_output = float(new_output)
@@ -1130,8 +1131,9 @@ class EnergyManager:
                     "reason": f"Failed to set output for {device.name}",
                 }
         elif action == "deactivate":
-            if device.try_deactivate():
-                saved_power = device.get_actual_output()
+            current_output = device.get_actual_output()  # Dodajemy tę linię
+            if device.deactivate():
+                saved_power = current_output
                 self.info_logger.info(
                     f"Deactivated {device.name}, saved {saved_power} kW"
                 )
@@ -1142,51 +1144,29 @@ class EnergyManager:
                     "amount": 0,
                     "reason": f"Failed to deactivate {device.name}",
                 }
-        elif action.startswith("reduce:"):
-            _, amount = action.split(":")
-            amount = float(amount)
-            _, actual_reduction = device.try_decrease_output(amount, is_percent=False)
-            if actual_reduction > 0:
-                self.info_logger.info(
-                    f"Reduced output of {device.name} by {actual_reduction} kW"
-                )
-                return {"success": True, "amount": actual_reduction}
-            else:
-                return {
-                    "success": False,
-                    "amount": 0,
-                    "reason": f"Failed to reduce output of {device.name}",
-                }
-        elif action.startswith("increase:"):
-            _, amount = action.split(":")
-            amount = float(amount)
-            _, actual_increase = device.try_increase_output(amount, is_percent=False)
-            if actual_increase > 0:
-                self.info_logger.info(
-                    f"Increased output of {device.name} by {actual_increase} kW"
-                )
-                return {"success": True, "amount": actual_increase}
-            else:
-                return {
-                    "success": False,
-                    "amount": 0,
-                    "reason": f"Failed to increase output of {device.name}",
-                }
-        elif action.startswith("activate:"):
+        elif action.startswith("activate_and_set:"):
             _, new_output = action.split(":")
-        new_output = float(new_output)
-        if device.try_activate():
-            if device.set_output(new_output):
-                actual_increase = new_output - device.get_actual_output()
-                self.info_logger.info(
-                    f"Activated {device.name} and set output to {new_output} kW"
-                )
-                return {"success": True, "amount": actual_increase}
+            new_output = float(new_output)
+            initial_output = device.get_actual_output()  # Dodajemy tę linię
+            if device.activate():
+                if device.set_output(new_output):
+                    actual_increase = new_output - initial_output
+                    self.info_logger.info(
+                        f"Activated {device.name} and set output to {new_output} kW"
+                    )
+                    return {"success": True, "amount": actual_increase}
+                else:
+                    device.deactivate()  # Cofnij aktywację, jeśli nie udało się ustawić mocy
+                    return {
+                        "success": False,
+                        "amount": 0,
+                        "reason": f"Failed to set output for {device.name} after activation",
+                    }
             else:
                 return {
                     "success": False,
                     "amount": 0,
-                    "reason": f"Failed to set output for {device.name} after activation",
+                    "reason": f"Failed to activate {device.name}",
                 }
         else:
             return {

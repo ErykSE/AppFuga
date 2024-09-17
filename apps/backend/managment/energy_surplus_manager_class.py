@@ -372,19 +372,7 @@ class EnergySurplusManager:
 
     def limit_energy_generation(self, power_surplus):
         """
-        Ogranicza generację energii w celu zarządzania nadwyżką mocy. Gdy
-        pozostałe metody zawiodły wywoływana jest ta metoda jako ostateczność.
-
-        Ta metoda redukuje moc wyjściową urządzeń generujących w mikrosieci,
-        zaczynając od urządzeń o najniższym priorytecie, aż do osiągnięcia
-        wymaganej redukcji lub rozważenia wszystkich urządzeń.
-
-        Argumenty:
-            power_surplus (float): Ilość nadwyżki mocy do zredukowania w kW.
-
-        Zwraca:
-            dict: Słownik zawierający informacje o sukcesie operacji,
-                  ilości zredukowanej mocy i ewentualnej pozostałej nadwyżce.
+        Ogranicza generację energii w celu zarządzania nadwyżką mocy.
         """
         self.info_logger.info(
             f"Starting limit_energy_generation with power_surplus: {power_surplus:.6f}"
@@ -424,33 +412,35 @@ class EnergySurplusManager:
                 reasons.append(f"Device {device.name} cannot be reduced further")
                 continue
 
-            reduction = min(reducible_power, power_surplus - total_reduced)
-
-            if reduction > self.EPSILON:
+            if device.is_adjustable:
+                reduction = min(reducible_power, power_surplus - total_reduced)
                 new_output = round(current_output - reduction, 6)
                 action = f"set_output:{new_output}"
-                self.info_logger.info(
-                    f"Attempting to execute action: {action} for device {device.name}"
-                )
-                result = self.execute_action_func(device, action)
-                self.info_logger.info(f"Result of execute_action_func: {result}")
+            else:
+                # Dla nieregulowanych urządzeń, możemy tylko wyłączyć
+                reduction = current_output
+                action = "deactivate"
 
-                if result.get("pending", False):
-                    self.info_logger.info(
-                        f"Action pending for {device.name}: set output to {new_output:.6f} kW"
-                    )
-                    break
-                elif result["success"]:
-                    actual_reduction = current_output - device.get_actual_output()
-                    total_reduced += actual_reduction
-                    self.info_logger.info(
-                        f"Reduced {device.name} (priority: {device.priority}) power by {actual_reduction:.6f} kW "
-                        f"from {current_output:.6f} kW to {device.get_actual_output():.6f} kW"
-                    )
-                else:
-                    reasons.append(
-                        f"Failed to reduce power for {device.name}. Reason: {result.get('reason', 'Unknown')}"
-                    )
+            self.info_logger.info(
+                f"Attempting to execute action: {action} for device {device.name}"
+            )
+            result = self.execute_action_func(device, action)
+            self.info_logger.info(f"Result of execute_action_func: {result}")
+
+            if result.get("pending", False):
+                self.info_logger.info(f"Action pending for {device.name}: {action}")
+                break
+            elif result["success"]:
+                actual_reduction = current_output - device.get_actual_output()
+                total_reduced += actual_reduction
+                self.info_logger.info(
+                    f"Reduced {device.name} (priority: {device.priority}) power by {actual_reduction:.6f} kW "
+                    f"from {current_output:.6f} kW to {device.get_actual_output():.6f} kW"
+                )
+            else:
+                reasons.append(
+                    f"Failed to reduce power for {device.name}. Reason: {result.get('reason', 'Unknown')}"
+                )
 
         remaining_surplus = power_surplus - total_reduced
         self.info_logger.info(f"Total power generation reduced: {total_reduced:.6f} kW")
@@ -666,17 +656,24 @@ class EnergySurplusManager:
             reducible_power = current_output - min_output
 
             if reducible_power > self.EPSILON:
-                reduction = min(reducible_power, remaining_surplus)
-                new_output = current_output - reduction
+                if device.is_adjustable:
+                    reduction = min(reducible_power, remaining_surplus)
+                    new_output = current_output - reduction
+                    action = f"set_output:{new_output:.2f}"
+                else:
+                    # Dla nieregulowanych urządzeń, proponujemy tylko wyłączenie
+                    reduction = current_output
+                    action = "deactivate"
+
                 actions.append(
                     {
                         "id": str(uuid.uuid4()),
                         "device_id": device.id,
                         "device_name": device.name,
                         "device_type": type(device).__name__,
-                        "action": f"set_output:{new_output:.2f}",
+                        "action": action,
                         "current_output": current_output,
-                        "proposed_output": new_output,
+                        "proposed_output": current_output - reduction,
                         "reduction": reduction,
                     }
                 )

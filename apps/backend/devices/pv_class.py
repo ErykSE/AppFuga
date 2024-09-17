@@ -26,4 +26,5 @@ class PV(EnergySource):
             actual_output,
             switch_status,
             device_status,
+            is_adjustable=True,
         )
