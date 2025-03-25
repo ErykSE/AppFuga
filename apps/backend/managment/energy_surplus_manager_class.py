@@ -251,29 +251,51 @@ class EnergySurplusManager:
             power_surplus (float): Ilość nadwyżki energii dostępnej do ładowania w kW.
 
         Zwraca:
-            dict: Słownik wskazujący na sukces próby ładowania i naładowaną ilość.
+            dict: Słownik wskazujący na sukces próby ładowania, naładowaną ilość i procent.
         """
         try:
             if not self.check_bess_availability():
-                return {"success": False, "amount": 0, "reason": "BESS not available"}
+                return {
+                    "success": False,
+                    "amount": 0,
+                    "percent": 0,
+                    "reason": "BESS not available",
+                }
 
             bess = self.microgrid.bess
             free_capacity = self.get_bess_free_capacity()
 
             if free_capacity <= self.EPSILON:
-                return {"success": False, "amount": 0, "reason": "BESS full"}
+                return {
+                    "success": False,
+                    "amount": 0,
+                    "percent": 0,
+                    "reason": "BESS full",
+                }
 
             amount_to_charge = min(power_surplus, free_capacity)
-            percent_to_charge = (amount_to_charge / bess.get_capacity()) * 100
-            charged_percent, actual_charge = bess.try_charge(percent_to_charge)
+            charged_amount, charged_percent = bess.charge(amount_to_charge)
 
-            self.info_logger.info(
-                f"BESS charged by {actual_charge:.2f} kW. New level: {bess.get_charge_level():.2f} kWh"
-            )
-            return {"success": True, "amount": round(actual_charge, 6)}
+            if charged_amount > 0:
+                self.info_logger.info(
+                    f"BESS charged by {charged_amount:.2f} kWh ({charged_percent:.2f}%). "
+                    f"New level: {bess.get_charge_level():.2f} kWh"
+                )
+                return {
+                    "success": True,
+                    "amount": round(charged_amount, 6),
+                    "percent": round(charged_percent, 2),
+                }
+            else:
+                return {
+                    "success": False,
+                    "amount": 0,
+                    "percent": 0,
+                    "reason": "Failed to charge BESS",
+                }
         except Exception as e:
             self.error_logger.error(f"Error in decide_to_charge_bess: {str(e)}")
-            return {"success": False, "amount": 0, "reason": str(e)}
+            return {"success": False, "amount": 0, "percent": 0, "reason": str(e)}
 
     def decide_to_sell_energy(self, power_surplus):
         """
@@ -603,7 +625,12 @@ class EnergySurplusManager:
 
     def prepare_bess_action(self, power_surplus):
         bess = self.microgrid.bess
-        free_capacity = bess.get_capacity() - bess.get_charge_level()
+        if not bess or not bess.get_switch_status():
+            return None
+
+        free_capacity = bess.get_capacity() - max(
+            bess.get_charge_level(), bess.min_charge_level
+        )
         amount_to_charge = min(power_surplus, free_capacity)
 
         if amount_to_charge <= self.EPSILON:
@@ -614,9 +641,11 @@ class EnergySurplusManager:
             "device_id": bess.id,
             "device_name": bess.name,
             "device_type": "BESS",
-            "action": f"charge:{amount_to_charge}",
+            "action": f"charge:{amount_to_charge:.2f}",
             "current_output": bess.get_charge_level(),
-            "proposed_output": bess.get_charge_level() + amount_to_charge,
+            "proposed_output": min(
+                bess.get_charge_level() + amount_to_charge, bess.get_capacity()
+            ),
             "reduction": amount_to_charge,
         }
 

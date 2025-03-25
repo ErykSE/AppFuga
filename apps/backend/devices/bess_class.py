@@ -11,6 +11,7 @@ class BESS:
         id,
         name,
         capacity,
+        min_charge_level,
         charge_level=0,
         switch_status=False,
         device_status="offline",
@@ -18,6 +19,7 @@ class BESS:
         self.id = id
         self.name = name
         self.capacity = capacity
+        self.min_charge_level = min_charge_level
         self.charge_level = charge_level
         self.switch_status = switch_status
         self.device_status = device_status
@@ -30,6 +32,7 @@ class BESS:
             "id",
             "name",
             "capacity",
+            "min_charge_level",
             "charge_level",
             "switch_status",
             "device_status",
@@ -54,18 +57,22 @@ class BESS:
             errors.append(f"Invalid device_status: {data['device_status']}")
 
         # Sprawdzamy warunki dla urządzenia online i włączonego
-        if data["device_status"] == "online" and data["switch_status"]:
-            if data["capacity"] == 0:
-                errors.append(
-                    "Capacity must be greater than 0 when BESS is online and switched on"
-                )
+        # if data["device_status"] == "online" and data["switch_status"]:
+        #     if data["capacity"] == 0:
+        #         errors.append(
+        #             "Capacity must be greater than 0 when BESS is online and switched on"
+        #         )
 
         # Sprawdzamy warunki dla urządzenia offline lub wyłączonego
-        if data["device_status"] == "offline" or not data["switch_status"]:
-            if data["charge_level"] > 0:
-                errors.append(
-                    "Charge level must be 0 when BESS is offline or switched off"
-                )
+        # if data["device_status"] == "offline" or not data["switch_status"]:
+        #     if data["charge_level"] > 0:
+        #         errors.append(
+        #             "Charge level must be 0 when BESS is offline or switched off"
+        #         )
+        if data["min_charge_level"] < 0 or data["min_charge_level"] > data["capacity"]:
+            errors.append(f"Invalid min_charge_level: {data['min_charge_level']}")
+        if data["charge_level"] < data["min_charge_level"]:
+            errors.append(f"Charge level cannot be lower than min_charge_level")
 
         return errors
 
@@ -82,36 +89,34 @@ class BESS:
             return None
 
     def activate(self):
-        self.device_status = "online"
-        self.switch_status = True
-        # print(f"{self.name} is now active with switch_status = {self.switch_status}.")
+        if self.charge_level > self.min_charge_level:
+            self.device_status = "online"
+            self.switch_status = True
+            return True
+        return False
 
     def deactivate(self):
         self.device_status = "offline"
         self.switch_status = False
-        # print(f"{self.name} is now inactive with switch_status = {self.switch_status}.")
+        return True
 
-    def charge(self, percent):
-        charge_amount = self.capacity * (percent / 100)
-        new_charge_level = self.charge_level + charge_amount
-        if new_charge_level > self.capacity:
-            # print(f"{self.name} charged to its maximum capacity: {self.capacity} kWh")
-            new_charge_level = self.capacity
+    def charge(self, amount):
+        new_charge_level = min(self.charge_level + amount, self.capacity)
+        charged_amount = new_charge_level - self.charge_level
         self.charge_level = new_charge_level
-        # print(f"{self.name} charged by {percent}% to {self.charge_level} kWh")
-        print(f"BESS charged: -> {new_charge_level}")  # Dodaj ten log
+        charged_percent = (charged_amount / self.capacity) * 100
+        print(f"BESS charged: -> {new_charge_level} kWh ({charged_percent:.2f}%)")
+        return charged_amount, charged_percent
 
-        return percent, charge_amount
-
-    def discharge(self, percent):
-        discharge_amount = self.capacity * (percent / 100)
-        new_charge_level = self.charge_level - discharge_amount
-        if new_charge_level < 0:
-            # print(f"{self.name} discharged to 0 kWh")
-            new_charge_level = 0
-        self.charge_level = new_charge_level
-        # print(f"{self.name} discharged by {percent}% to {self.charge_level} kWh")
-        return percent, discharge_amount
+    def discharge(self, amount):
+        available_energy = self.charge_level - self.min_charge_level
+        discharge_amount = min(amount, available_energy)
+        self.charge_level -= discharge_amount
+        discharged_percent = (discharge_amount / self.capacity) * 100
+        print(
+            f"BESS discharged: -> {self.charge_level} kWh ({discharged_percent:.2f}%)"
+        )
+        return discharge_amount, discharged_percent
 
     def get_charge_level(self):
         return self.charge_level
@@ -125,64 +130,19 @@ class BESS:
     def get_switch_status(self):
         return self.switch_status
 
+    def get_available_energy(self):
+        return self.charge_level - self.min_charge_level
+
     def is_uncharged(self):
         return self.charge_level < self.capacity
-
-    def try_activate(self, attempts=3, delay=1):
-        for attempt in range(attempts):
-            self.activate()
-            time.sleep(delay)
-            if self.device_status == "online":
-                # print(f"{self.name} activated successfully on attempt {attempt + 1}.")
-                return True
-            # print(f"Attempt {attempt + 1} to activate {self.name} failed.")
-        # print(f"Failed to activate {self.name} after {attempts} attempts.")
-        return False
-
-    def try_deactivate(self, attempts=3, delay=1):
-        for attempt in range(attempts):
-            self.deactivate()
-            time.sleep(delay)
-            if self.device_status == "offline":
-                # print(f"{self.name} deactivated successfully on attempt {attempt + 1}.")
-                return True
-            # print(f"Attempt {attempt + 1} to deactivate {self.name} failed.")
-        # print(f"Failed to deactivate {self.name} after {attempts} attempts.")
-        return False
-
-    def try_charge(self, percent, attempts=3, delay=1):
-        for attempt in range(attempts):
-            percent_charged, amount_charged = self.charge(percent)
-            time.sleep(delay)
-            if self.charge_level == self.charge_level:
-                print(f"{self.name} charged successfully on attempt {attempt + 1}.")
-                return percent_charged, amount_charged
-            # print(f"Attempt {attempt + 1} to charge {self.name} failed.")
-        # print(f"Failed to charge {self.name} after {attempts} attempts.")
-        return None
-
-    def try_discharge(self, power_needed, attempts=3, delay=1):
-        for attempt in range(attempts):
-            initial_charge = self.charge_level
-            amount_to_discharge = min(power_needed, self.charge_level)
-            percent_to_discharge = (amount_to_discharge / self.capacity) * 100
-            percent_discharged, amount_discharged = self.discharge(percent_to_discharge)
-            time.sleep(delay)
-            if self.charge_level < initial_charge:
-                print(
-                    f"{self.name} rozładowany pomyślnie o {amount_discharged} kWh na próbie {attempt + 1}."
-                )
-                return percent_discharged, amount_discharged
-            print(f"Próba {attempt + 1} rozładowania {self.name} nie powiodła się.")
-        print(f"Nie udało się rozładować {self.name} po {attempts} próbach.")
-        return None
 
     def to_dict(self):
         return {
             "id": self.id,
             "name": self.name,
             "capacity": self.capacity,
+            "min_charge_level": self.min_charge_level,
             "charge_level": self.charge_level,
             "switch_status": self.get_switch_status(),
-            "device_status": "online" if self.get_switch_status() else "offline",
+            "device_status": self.get_status(),
         }

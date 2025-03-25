@@ -1235,31 +1235,42 @@ class EnergyManager:
         if action.startswith("charge:"):
             _, amount = action.split(":")
             amount = float(amount)
-            charged = device.try_charge(amount)
-            if charged is not None:
-                return {"success": True, "amount": charged}
+            charged_amount, charged_percent = device.charge(amount)
+            if charged_amount > 0:
+                return {
+                    "success": True,
+                    "amount": charged_amount,
+                    "percent": charged_percent,
+                }
             else:
                 return {
                     "success": False,
                     "amount": 0,
+                    "percent": 0,
                     "reason": f"Failed to charge BESS {device.name}",
                 }
         elif action.startswith("discharge:"):
             _, amount = action.split(":")
             amount = float(amount)
-            discharged = device.try_discharge(amount)
-            if discharged is not None:
-                return {"success": True, "amount": discharged}
+            discharged_amount, discharged_percent = device.discharge(amount)
+            if discharged_amount > 0:
+                return {
+                    "success": True,
+                    "amount": discharged_amount,
+                    "percent": discharged_percent,
+                }
             else:
                 return {
                     "success": False,
                     "amount": 0,
+                    "percent": 0,
                     "reason": f"Failed to discharge BESS {device.name}",
                 }
         else:
             return {
                 "success": False,
                 "amount": 0,
+                "percent": 0,
                 "reason": f"Unknown action for BESS: {action}",
             }
 

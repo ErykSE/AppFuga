@@ -1,0 +1,76 @@
+2024-10-30 09:36:49,818 - ERROR - Error getting system state: HTTPConnectionPool(host='localhost', port=8080): Max retries exceeded with url: /api/scada/system-state (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000002159BF01340>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))
+2024-10-30 09:37:09,073 - ERROR - Error getting system state: HTTPConnectionPool(host='localhost', port=8080): Max retries exceeded with url: /api/scada/system-state (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000001E812433EC0>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))
+2024-10-30 09:39:53,294 - ERROR - Error getting system state: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+2024-10-30 09:41:47,582 - ERROR - Error getting system state: HTTPSConnectionPool(host='localhost', port=7106): Max retries exceeded with url: /api/scada/system-state (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self-signed certificate (_ssl.c:1000)')))
+2024-10-30 09:46:58,828 - INFO - Testing connection to https://localhost:7106/api/scada
+2024-10-30 09:47:00,707 - INFO - Successfully connected to API
+2024-10-30 09:47:00,708 - INFO - Requesting system state...
+2024-10-30 09:47:02,195 - INFO - Successfully retrieved system state
+2024-10-30 09:47:02,197 - INFO - Saved data to data\system_state_20241030_094702.json
+2024-10-30 09:48:43,489 - INFO - Testing connection to https://localhost:7106/api/scada
+2024-10-30 09:48:44,953 - INFO - Successfully connected to API
+2024-10-30 09:48:44,953 - INFO - Requesting system state...
+2024-10-30 09:48:46,366 - INFO - Successfully retrieved system state
+2024-10-30 09:48:46,368 - INFO - Saved data to data\system_state_20241030_094846.json
+2024-10-30 09:48:46,381 - INFO - Sending system state update...
+2024-10-30 09:48:47,743 - INFO - Successfully updated system state
+2024-10-30 09:57:58,415 - INFO - Testing connection to https://localhost:7106/api/scada
+2024-10-30 09:58:02,523 - ERROR - Failed to connect to API: HTTPSConnectionPool(host='localhost', port=7106): Max retries exceeded with url: /api/scada/system-state (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x0000022B1E994470>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))
+2024-10-30 09:58:21,350 - INFO - Testing connection to https://localhost:7106/api/scada
+2024-10-30 09:58:23,446 - INFO - Successfully connected to API
+2024-10-30 09:58:23,461 - INFO - Requesting system state...
+2024-10-30 09:58:25,082 - INFO - Successfully retrieved system state
+2024-10-30 09:58:25,083 - INFO - Saved data to data\system_state_20241030_095825.json
+2024-10-30 09:58:25,095 - INFO - Sending system state update...
+2024-10-30 09:58:26,682 - INFO - Successfully updated system state
+2024-10-30 09:58:44,131 - INFO - Testing connection to https://localhost:7106/api/scada
+2024-10-30 09:58:45,877 - INFO - Successfully connected to API
+2024-10-30 09:58:45,878 - INFO - Requesting system state...
+2024-10-30 09:58:47,483 - INFO - Successfully retrieved system state
+2024-10-30 09:58:47,485 - INFO - Saved data to data\system_state_20241030_095847.json
+2024-10-30 09:58:47,495 - INFO - Sending system state update...
+2024-10-30 09:58:48,887 - INFO - Successfully updated system state
+2024-10-30 10:11:47,030 - INFO - Testing connection to https://localhost:7106/api/scada
+2024-10-30 10:11:48,937 - INFO - Successfully connected to API
+2024-10-30 10:11:48,938 - INFO - Requesting system state...
+2024-10-30 10:11:50,736 - INFO - Successfully retrieved system state
+2024-10-30 10:11:50,738 - INFO - Saved data to data\system_state_20241030_101150.json
+2024-10-30 10:11:50,749 - INFO - Sending system state update...
+2024-10-30 10:11:52,347 - INFO - Successfully updated system state
+2024-10-30 10:11:52,350 - INFO - Reading updates from file: updates.json
+2024-10-30 10:11:52,351 - INFO - Successfully read updates from updates.json
+2024-10-30 10:11:52,351 - INFO - Sending system state update...
+2024-10-30 10:11:53,921 - INFO - Successfully updated system state
+2024-10-30 10:15:58,433 - INFO - Testing connection to https://localhost:7106/api/scada
+2024-10-30 10:16:00,336 - INFO - Successfully connected to API
+2024-10-30 10:16:00,337 - INFO - Requesting system state...
+2024-10-30 10:16:02,180 - INFO - Successfully retrieved system state
+2024-10-30 10:16:02,182 - INFO - Saved data to data\system_state_20241030_101602.json
+2024-10-30 10:16:02,192 - INFO - Sending system state update...
+2024-10-30 10:16:03,996 - INFO - Successfully updated system state
+2024-10-30 10:16:03,997 - INFO - Reading updates from file: updates.json
+2024-10-30 10:16:03,997 - INFO - Successfully read updates from updates.json
+2024-10-30 10:16:03,998 - INFO - Sending system state update...
+2024-10-30 10:16:05,645 - INFO - Successfully updated system state
+2024-10-30 10:16:34,223 - INFO - Testing connection to https://localhost:7106/api/scada
+2024-10-30 10:16:35,996 - INFO - Successfully connected to API
+2024-10-30 10:16:35,996 - INFO - Requesting system state...
+2024-10-30 10:16:37,748 - INFO - Successfully retrieved system state
+2024-10-30 10:16:37,750 - INFO - Saved data to data\system_state_20241030_101637.json
+2024-10-30 10:16:37,763 - INFO - Sending system state update...
+2024-10-30 10:16:39,322 - INFO - Successfully updated system state
+2024-10-30 10:16:39,324 - INFO - Reading updates from file: updates.json
+2024-10-30 10:16:39,324 - INFO - Successfully read updates from updates.json
+2024-10-30 10:16:39,324 - INFO - Sending system state update...
+2024-10-30 10:16:40,808 - INFO - Successfully updated system state
+2024-10-30 12:06:44,429 - INFO - Testing connection to https://localhost:7106/api/scada
+2024-10-30 12:06:46,528 - INFO - Successfully connected to API
+2024-10-30 12:06:46,528 - INFO - Requesting system state...
+2024-10-30 12:06:48,131 - INFO - Successfully retrieved system state
+2024-10-30 12:06:48,133 - INFO - Saved data to data\system_state_20241030_120648.json
+2024-10-30 12:06:48,145 - INFO - Sending system state update...
+2024-10-30 12:06:49,786 - INFO - Successfully updated system state
+2024-10-30 12:06:49,788 - INFO - Reading updates from file: updates.json
+2024-10-30 12:06:49,789 - INFO - Successfully read updates from updates.json
+2024-10-30 12:06:49,789 - INFO - Sending system state update...
+2024-10-30 12:06:51,302 - INFO - Successfully updated system state

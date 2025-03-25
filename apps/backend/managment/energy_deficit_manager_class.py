@@ -192,16 +192,14 @@ class EnergyDeficitManager:
                             f"Increased power of adjustable device {device.name} "
                             f"(priority: {device.priority}) from {initial_output} kW to {new_output} kW"
                         )
-                else:
-                    # Dla nieregulowanych urządzeń, sprawdzamy czy są już na maksimum
-                    if initial_output < max_output:
-                        if device.set_output(max_output):
-                            actual_increase = max_output - initial_output
-                            increased_power += actual_increase
-                            self.info_logger.info(
-                                f"Set non-adjustable device {device.name} "
-                                f"(priority: {device.priority}) to maximum output: {max_output} kW"
-                            )
+                elif initial_output < max_output:
+                    if device.set_output(max_output):
+                        actual_increase = max_output - initial_output
+                        increased_power += actual_increase
+                        self.info_logger.info(
+                            f"Set non-adjustable device {device.name} "
+                            f"(priority: {device.priority}) to maximum output: {max_output} kW"
+                        )
 
         # Jeśli nadal potrzebujemy więcej mocy, aktywujemy nieaktywne urządzenia
         if current_output + increased_power < target_output:
@@ -225,13 +223,13 @@ class EnergyDeficitManager:
                                     f"(priority: {device.priority}) and set power to {new_output} kW"
                                 )
                         else:
-                            # Dla nieregulowanych urządzeń, aktywujemy je na pełną moc
-                            actual_increase = max_output
-                            increased_power += actual_increase
-                            self.info_logger.info(
-                                f"Activated non-adjustable device {device.name} "
-                                f"(priority: {device.priority}) at maximum power: {max_output} kW"
-                            )
+                            if device.set_output(max_output):
+                                actual_increase = max_output
+                                increased_power += actual_increase
+                                self.info_logger.info(
+                                    f"Activated non-adjustable device {device.name} "
+                                    f"(priority: {device.priority}) and set to maximum power: {max_output} kW"
+                                )
 
         self.info_logger.info(f"In total, power was increased by {increased_power} kW")
         self.info_logger.info(f"Final output: {current_output + increased_power} kW")
@@ -413,32 +411,43 @@ class EnergyDeficitManager:
         """
         Próbuje rozładować System Magazynowania Energii w Akumulatorach (BESS) w celu pokrycia deficytu.
 
-        Ta metoda sprawdza dostępność BESS i próbuje go rozładować, aby pokryć
-        istniejący deficyt energii.
-
         Argumenty:
             power_deficit (float): Ilość deficytu energii do pokrycia w kW.
 
         Zwraca:
             dict: Słownik zawierający informacje o sukcesie operacji i ilości rozładowanej energii.
         """
-        if self.microgrid.bess and self.microgrid.bess.get_switch_status():
-            self.info_logger.info(f"Attempting to discharge BESS by {power_deficit} kW")
-            initial_charge = self.microgrid.bess.get_charge_level()
-            discharged = self.microgrid.bess.try_discharge(power_deficit)
-            if discharged is not None:
-                percent_discharged, amount_discharged = discharged
-                new_charge = self.microgrid.bess.get_charge_level()
-                self.info_logger.info(f"BESS was discharged by {amount_discharged} kWh")
-                self.info_logger.info(
-                    f"BESS charge level: before {initial_charge} kWh, after {new_charge} kWh"
-                )
-                return {"success": True, "amount": amount_discharged}
-            else:
-                self.info_logger.warning("Failure to discharge BESS")
+        if not self.microgrid.bess:
+            self.info_logger.warning("BESS is not available")
+            return {"success": False, "amount": 0, "percent": 0}
+
+        if not self.microgrid.bess.get_switch_status():
+            self.info_logger.warning("BESS is not active")
+            return {"success": False, "amount": 0, "percent": 0}
+
+        self.info_logger.info(f"Attempting to discharge BESS by {power_deficit} kW")
+        initial_charge = self.microgrid.bess.get_charge_level()
+
+        discharged_amount, discharged_percent = self.microgrid.bess.discharge(
+            power_deficit
+        )
+
+        if discharged_amount > 0:
+            new_charge = self.microgrid.bess.get_charge_level()
+            self.info_logger.info(
+                f"BESS was discharged by {discharged_amount} kWh ({discharged_percent:.2f}%)"
+            )
+            self.info_logger.info(
+                f"BESS charge level: before {initial_charge} kWh, after {new_charge} kWh"
+            )
+            return {
+                "success": True,
+                "amount": discharged_amount,
+                "percent": discharged_percent,
+            }
         else:
-            self.info_logger.warning("BESS is not available for discharge")
-        return {"success": False, "amount": 0}
+            self.info_logger.warning("Failed to discharge BESS")
+            return {"success": False, "amount": 0, "percent": 0}
 
     def buy_energy(self, power_deficit):
         remaining_purchase_capacity = (
@@ -718,24 +727,33 @@ class EnergyDeficitManager:
         self.info_logger.info(
             f"[DEBUG] Preparing BESS discharge action for deficit: {power_deficit}"
         )
-        if self.microgrid.bess:
-            available_energy = self.microgrid.bess.get_charge_level()
-            discharge_amount = min(power_deficit, available_energy)
-            action = {
-                "id": str(uuid.uuid4()),
-                "device_id": str(self.microgrid.bess.id),
-                "device_name": self.microgrid.bess.name,
-                "device_type": "BESS",
-                "action": f"discharge:{discharge_amount}",
-                "current_output": 0,
-                "proposed_output": discharge_amount,
-                "reduction": discharge_amount,
-            }
-            self.info_logger.info(f"[DEBUG] Prepared BESS action: {action}")
-            return action
-        else:
-            self.info_logger.info("[DEBUG] BESS not available for discharge action")
-        return None
+
+        if not self.microgrid.bess or not self.microgrid.bess.get_switch_status():
+            self.info_logger.info(
+                "[DEBUG] BESS not available or not active for discharge action"
+            )
+            return None
+
+        available_energy = self.microgrid.bess.get_available_energy()
+        discharge_amount = min(power_deficit, available_energy)
+
+        if discharge_amount <= 0:
+            self.info_logger.info("[DEBUG] No energy available for discharge from BESS")
+            return None
+
+        action = {
+            "id": str(uuid.uuid4()),
+            "device_id": str(self.microgrid.bess.id),
+            "device_name": self.microgrid.bess.name,
+            "device_type": "BESS",
+            "action": f"discharge:{discharge_amount:.2f}",
+            "current_output": 0,
+            "proposed_output": discharge_amount,
+            "reduction": discharge_amount,
+        }
+
+        self.info_logger.info(f"[DEBUG] Prepared BESS action: {action}")
+        return action
 
     def prepare_limit_consumption_actions(self, power_deficit):
         self.info_logger.info(

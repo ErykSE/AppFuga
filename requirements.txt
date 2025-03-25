@@ -1,8 +1,10 @@
+beautifulsoup4==4.12.3
 black==24.4.2
 certifi==2024.7.4
 charset-normalizer==3.3.2
 click==8.1.7
 colorama==0.4.6
+entsoe-py==0.6.8
 idna==3.7
 iniconfig==2.0.0
 joblib==1.4.2
@@ -26,6 +28,7 @@ requests==2.32.3
 scikit-learn==1.5.1
 scipy==1.13.1
 six==1.16.0
+soupsieve==2.6
 statsmodels==0.14.2
 threadpoolctl==3.5.0
 tzdata==2024.1
