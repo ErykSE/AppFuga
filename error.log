@@ -1,0 +1,16 @@
+2025-04-04 14:09:57,000 - ERROR - Error loading configuration: [Errno 2] No such file or directory: 'C:/eryk/AppFuga/apps/backend/operation_mode.json'
+2025-04-04 14:09:57,001 - ERROR - Error: File not found: C:/eryk/AppFuga/apps/backend/initial_data.json
+2025-04-04 14:09:57,001 - ERROR - Error in energy management: [Errno 2] No such file or directory: 'C:/eryk/AppFuga/apps/backend/initial_data.json'
+2025-04-04 14:09:57,001 - ERROR - Full traceback:
+Traceback (most recent call last):
+  File "C:\Users\Julia\Desktop\Fuga\AppFuga\apps\backend\managment\energy_manager_class.py", line 161, in run_energy_management
+    self.load_initial_data()
+    ~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Julia\Desktop\Fuga\AppFuga\apps\backend\managment\energy_manager_class.py", line 863, in load_initial_data
+    self.consumergrid.load_data_from_json(self.initial_data_path)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Julia\Desktop\Fuga\AppFuga\apps\backend\managment\consumer_grid_class.py", line 137, in load_data_from_json
+    with open(file_path, "r") as file:
+         ~~~~^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'C:/eryk/AppFuga/apps/backend/initial_data.json'
+2025-04-04 14:09:57,007 - ERROR - An error occurred. Stopping the algorithm.
