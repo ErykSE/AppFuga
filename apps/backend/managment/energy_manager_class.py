@@ -228,6 +228,8 @@ class EnergyManager:
         self.save_live_data()
         self.save_contract_data()
         self.update_power_profile(datetime.now())
+        self.push_to_scada()
+
 
         elapsed_time = time.time() - start_time
         self.info_logger.info(f"Iteration completed in {elapsed_time:.2f} seconds")
@@ -931,6 +933,31 @@ class EnergyManager:
             json.dump(contract_data, f, indent=4)
 
         self.info_logger.info("Live contract data saved to live_contract_data.json")
+
+    def push_to_scada(self):
+        try:
+            with open(self.live_data_path, "r") as live_data_file:
+                live_data = json.load(live_data_file)
+
+            with open(self.live_contract_path, "r") as contract_file:
+                contract_data = json.load(contract_file)
+
+            scada_url_data = "http://scada-system/api/live-data"  
+            scada_url_contract = "http://scada-system/api/live-contract-data"  
+
+            headers = {"Content-Type": "application/json"}
+
+            response_data = requests.post(scada_url_data, json=live_data, headers=headers)
+            response_contract = requests.post(scada_url_contract, json=contract_data, headers=headers)
+
+            if response_data.status_code == 200 and response_contract.status_code == 200:
+                self.info_logger.info("Successfully pushed live data and contract data to SCADA.")
+            else:
+                self.error_logger.error(
+                    f"Failed to push data to SCADA. Data status: {response_data.status_code}, Contract status: {response_contract.status_code}"
+                )
+        except Exception as e:
+            self.error_logger.exception(f"Exception occurred during SCADA push: {str(e)}")
 
     def update_power_profile(self, current_time):
         consumption = self.consumergrid.total_power_consumed()
