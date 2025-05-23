@@ -1,0 +1,12 @@
+{
+    "contracted_type": "Type B",
+    "contracted_duration": 12,
+    "contracted_margin": 0.1,
+    "contracted_export_possibility": false,
+    "contracted_sale_limit": 0,
+    "contracted_purchase_limit": 105,
+    "sold_power": 0,
+    "bought_power": 70,
+    "current_tariff_buy": 0.41,
+    "current_tariff_sell": 0.2
+}

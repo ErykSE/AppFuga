@@ -1,0 +1,60 @@
+{
+    "pv_panels": [],
+    "wind_turbines": [
+        {
+            "name": "Wind Turbine 1",
+            "actual_output": 80,
+            "switch_status": true
+        },
+        {
+            "name": "Wind Turbine 2",
+            "actual_output": 0,
+            "switch_status": false
+        }
+    ],
+    "fuel_turbines": [
+        {
+            "name": "Fuel Turbine 1",
+            "actual_output": 100,
+            "switch_status": true
+        }
+    ],
+    "fuel_cells": [
+        {
+            "name": "Fuel Cell 1",
+            "actual_output": 0,
+            "switch_status": false
+        }
+    ],
+    "bess": [
+        {
+            "name": "BESS 1",
+            "actual_output": 0,
+            "switch_status": true
+        }
+    ],
+    "non_adjustable_devices": [
+        {
+            "name": "Non Adjustable Device 1",
+            "actual_output": 31,
+            "switch_status": true
+        },
+        {
+            "name": "Non Adjustable Device 2",
+            "actual_output": 300,
+            "switch_status": false
+        }
+    ],
+    "adjustable_devices": [
+        {
+            "name": "Adjustable Device 1",
+            "actual_output": 84,
+            "switch_status": false
+        },
+        {
+            "name": "Adjustable Device 2",
+            "actual_output": 100,
+            "switch_status": true
+        }
+    ]
+}

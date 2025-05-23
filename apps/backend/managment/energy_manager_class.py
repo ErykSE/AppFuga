@@ -6,6 +6,8 @@ import random
 from threading import Thread, Event
 import time
 import uuid
+
+import requests
 from apps.backend.devices.bess_class import BESS
 from apps.backend.managment.energy_surplus_manager_class import EnergySurplusManager
 from apps.backend.managment.energy_deficit_manager_class import EnergyDeficitManager
@@ -22,6 +24,7 @@ from apps.backend.devices.adjustable_devices import AdjustableDevice
 from apps.backend.devices.energy_point_class import EnergyPoint
 from apps.backend.devices.energy_source_class import EnergySource
 from apps.backend.others.data_consistency_checker import DataConsistencyChecker
+from apps.backend.managment.api_manager import ApiManager
 
 
 class EnergyManager:
@@ -48,13 +51,30 @@ class EnergyManager:
     """
 
     def __init__(
-        self, microgrid, consumergrid, osd, info_logger, error_logger, check_interval=60
+        self, microgrid, consumergrid, osd, info_logger, error_logger, check_interval=60, api_base_url="http://localhost:5002", use_api=True
     ):
         self.microgrid = microgrid
         self.consumergrid = consumergrid
         self.osd = osd
         self.info_logger = info_logger
         self.error_logger = error_logger
+        
+        # Inicjalizacja ścieżek do plików w sposób niezależny od środowiska
+        self.base_path = self._get_base_path()
+        
+        # Ścieżki do plików konfiguracyjnych i danych
+        self.initial_data_path = os.path.join(self.base_path, "apps", "backend", "initial_data.json")
+        self.initial_contract_path = os.path.join(self.base_path, "apps", "backend", "contract_data.json")
+        self.live_data_path = os.path.join(self.base_path, "apps", "backend", "live_data.json")
+        self.live_contract_path = os.path.join(self.base_path, "apps", "backend", "live_contract_data.json")
+        self.pending_actions_path = os.path.join(self.base_path, "apps", "backend", "pending_actions.json")
+        self.operator_decisions_path = os.path.join(self.base_path, "apps", "backend", "operator_decisions.json")
+        self.operator_actions_path = os.path.join(self.base_path, "apps", "backend", "operator_actions.json")
+
+        self.output_data_path = os.path.join(self.base_path, "apps", "backend", "output_data.json")
+        self.output_contract_path = os.path.join(self.base_path, "apps", "backend", "output_contract_data.json")
+        
+        # Inicjalizacja menedżerów
         self.surplus_manager = EnergySurplusManager(
             microgrid,
             osd,
@@ -76,58 +96,80 @@ class EnergyManager:
             self.is_in_tabu_list,
             self.clean_tabu_list,
         )
-        self.check_interval = check_interval
-        self.running = False
-        self.stop_event = Event()
-        self.restart_delay = 30  # czas oczekiwania przed ponownym startem (w sekundach)
-        self.first_run = True
-        self.initial_data_path = "C:/eryk/AppFuga/apps/backend/initial_data.json"
-        self.initial_contract_path = "C:/eryk/AppFuga/apps/backend/contract_data.json"
-        self.live_data_path = "C:/eryk/AppFuga/apps/backend/live_data.json"
-        self.live_contract_path = "C:/eryk/AppFuga/apps/backend/live_contract_data.json"
+        
+        # Inicjalizacja menedżera profili mocy
         self.power_profile_manager = PowerProfileManager(
-            "C:/eryk/AppFuga/apps/backend/power_profile",
+            os.path.join(self.base_path, "apps", "backend", "power_profile"),
             self.info_logger,
             self.error_logger,
             api_key="708e75906d18e5338d7f573cf9c01041",
             lat=50.86,
             lon=16.32,
         )
+        
+        # Reszta inicjalizacji pozostaje bez zmian
+        self.check_interval = check_interval
+        self.running = False
+        self.stop_event = Event()
+        self.restart_delay = 30  # czas oczekiwania przed ponownym startem (w sekundach)
+        self.first_run = True
         self.auto_interval = 15  # 30 sekund dla trybu automatycznego
         self.semi_auto_interval = 15  # 5 minut dla trybu półautomatycznego
         self.operation_mode = OperationMode.AUTOMATIC
         self.action_timeout = 60  # 1 minuta na decyzję operatora
-        self.pending_actions_path = os.path.join(
-            os.path.dirname(__file__),
-            "C:/eryk/AppFuga/apps/backend/pending_actions.json",
-        )
-        self.operator_decisions_path = os.path.join(
-            os.path.dirname(__file__),
-            "C:/eryk/AppFuga/apps/backend/operator_decisions.json",
-        )
         self.operator_actions = {"pending_actions": [], "completed_actions": []}
-        self.EPSILON = 1e-6  # Dodaj tę linię
+        self.EPSILON = 1e-6
         self.tabu_list = {}
         self.tabu_duration = 25  # 5 minut w sekundach
         self.last_tabu_clean = time.time()
         self.tabu_clean_interval = 60  # Czyść listę co minutę
         self.data_consistency_checker = DataConsistencyChecker(
             self.live_data_path,
-            self.live_data_path,  # Tymczasowo używamy tego samego pliku do zapisu i odczytu, docelowo powinno być initial i live
+            self.live_data_path,  # Tymczasowo używamy tego samego pliku do zapisu i odczytu
             info_logger,
             error_logger,
             max_attempts=3,
             delay=5,
         )
-        self.last_saved_data = (
-            None  # Dodajemy atrybut do przechowywania ostatnio zapisanych danych
-        )
+        self.last_saved_data = None
+
+        # Wyświetl informacje o ścieżkach (pomocne przy debugowaniu)
+        self.info_logger.info(f"Base path: {self.base_path}")
+        self.info_logger.info(f"Initial data path: {self.initial_data_path}")
+        self.info_logger.info(f"Initial contract path: {self.initial_contract_path}")
+
+        self.use_api = use_api
+    
+        # Inicjalizacja ApiManager
+        if self.use_api:
+            self.api_manager = ApiManager(
+                api_base_url=api_base_url,
+                info_logger=info_logger,
+                error_logger=error_logger,
+                verify_ssl=False
+            )
+            # Sprawdzenie połączenia z API
+            if not self.api_manager.check_api_connection():
+                self.error_logger.warning("Nie można nawiązać połączenia z API. Przełączanie na tryb lokalnych plików.")
+                self.use_api = False
+
+        self.info_logger.info(f"Using API: {self.use_api}")
+
+
+    def _get_base_path(self):
+        """
+        Zwraca bazową ścieżkę projektu, działającą zarówno lokalnie jak i w kontenerze.
+        """
+        # Sprawdź, czy jesteśmy w kontenerze
+        if os.path.exists('/app'):
+            return '/app'
+        # W przeciwnym razie zakładamy, że jesteśmy w środowisku lokalnym Windows
+        return 'C:/eryk/AppFuga'
 
     def load_configuration(self):
+        operation_mode_path = os.path.join(self.base_path, "apps", "backend", "operation_mode.json")
         try:
-            with open(
-                "C:/eryk/AppFuga/apps/backend/operation_mode.json", "r"
-            ) as mode_file:
+            with open(operation_mode_path, "r") as mode_file:
                 mode_data = json.load(mode_file)
                 self.operation_mode = OperationMode(mode_data.get("mode", "automatic"))
                 self.info_logger.info(
@@ -151,30 +193,169 @@ class EnergyManager:
         self.info_logger.important("Energy management stopping")
 
     def run_energy_management(self):
-        self.first_run = True
+        """Uruchamia proces zarządzania energią w osobnym wątku."""
         while self.running and not self.stop_event.is_set():
             try:
                 self.info_logger.highlight("Starting new iteration")
                 self.load_configuration()
 
-                if self.first_run:
-                    self.load_initial_data()
-                    self.first_run = False
-                else:
-                    # Sprawdzanie spójności danych
-                    if not self.data_consistency_checker.check_and_retry_consistency():
-                        self.error_logger.error(
-                            "Failed to achieve data consistency after retries"
-                        )
-                        # Możesz tutaj dodać kod do powiadomienia operatora, jeśli to konieczne
-
+                # 1. Pobieramy dane z API na początku każdej iteracji (jeśli używamy API)
+                if self.use_api:
+                    success = self.api_manager.fetch_and_save_data(
+                        self.live_data_path, 
+                        self.live_contract_path
+                    )
+                    if not success:
+                        self.error_logger.error("Failed to fetch data from API")
+                        # Jeśli to pierwsze uruchomienie, spróbuj użyć danych początkowych
+                        if not os.path.exists(self.live_data_path):
+                            self.load_initial_data()
+                
+                # 2. Ładujemy dane z plików (live_data lub initial_data w przypadku pierwszego uruchomienia)
+                if os.path.exists(self.live_data_path):
                     self.load_live_data()
+                else:
+                    self.load_initial_data()
 
-                # Normalne działanie algorytmu
+                # 3. Wykonujemy algorytm
                 result = self.run_single_iteration()
-                self.save_live_data()
+                
+                # 4. Zapisujemy wyniki do plików wewnętrznych
+                self.save_live_data()  # Zapisuje w formacie wewnętrznym aplikacji
+                self.save_contract_data()  # Zapisuje w formacie wewnętrznym aplikacji
+                
+                # 5. Wysyłamy dane do API (jeśli używamy API)
+                if self.use_api:
+                    # 5a. Przygotowujemy dane w formacie API
+                    api_system_data = {
+                        "pv_panels": [],
+                        "wind_turbines": [],
+                        "fuel_turbines": [],
+                        "fuel_cells": [],
+                        "bess": [],
+                        "non_adjustable_devices": [],
+                        "adjustable_devices": []
+                    }
+                    
+                    # Konwersja źródeł energii
+                    for panel in self.microgrid.pv_panels:
+                        api_system_data["pv_panels"].append({
+                            "name": panel.name,
+                            "actual_output": panel.get_actual_output(),
+                            "switch_status": panel.switch_status
+                        })
+                    
+                    for turbine in self.microgrid.wind_turbines:
+                        api_system_data["wind_turbines"].append({
+                            "name": turbine.name,
+                            "actual_output": turbine.get_actual_output(),
+                            "switch_status": turbine.switch_status
+                        })
+                    
+                    for turbine in self.microgrid.fuel_turbines:
+                        api_system_data["fuel_turbines"].append({
+                            "name": turbine.name,
+                            "actual_output": turbine.get_actual_output(),
+                            "switch_status": turbine.switch_status
+                        })
+                    
+                    for cell in self.microgrid.fuel_cells:
+                        api_system_data["fuel_cells"].append({
+                            "name": cell.name,
+                            "actual_output": cell.get_actual_output(),
+                            "switch_status": cell.switch_status
+                        })
+                    
+                    # Konwersja BESS
+                    if self.microgrid.bess:
+                        api_system_data["bess"].append({
+                            "name": self.microgrid.bess.name,
+                            "actual_output": 0,  # BESS nie ma actual_output w API
+                            "switch_status": self.microgrid.bess.switch_status
+                        })
+                    
+                    # Konwersja urządzeń konsumpcyjnych
+                    for device in self.consumergrid.non_adjustable_devices:
+                        api_system_data["non_adjustable_devices"].append({
+                            "name": device.name,
+                            "actual_output": device.get_current_power(),
+                            "switch_status": device.switch_status
+                        })
+                    
+                    for device in self.consumergrid.adjustable_devices:
+                        api_system_data["adjustable_devices"].append({
+                            "name": device.name,
+                            "actual_output": device.get_current_power(),
+                            "switch_status": device.switch_status
+                        })
+                    
+                    # 5b. Zapisujemy dane API do pliku dla referencji
+                    os.makedirs(os.path.dirname(self.output_data_path), exist_ok=True)
+                    with open(self.output_data_path, "w") as f:
+                        json.dump(api_system_data, f, indent=4)
+                    self.info_logger.info(f"API system data saved to {self.output_data_path}")
+                    
+                    # 5c. Przygotowujemy dane kontraktu w formacie API
+                    api_contract_data = {
+                        "contracted_type": self.osd.CONTRACTED_TYPE,
+                        "contracted_duration": self.osd.CONTRACTED_DURATION,
+                        "contracted_margin": self.osd.CONTRACTED_MARGIN,
+                        "contracted_export_possibility": self.osd.CONTRACTED_EXPORT_POSSIBILITY,
+                        "contracted_sale_limit": self.osd.CONTRACTED_SALE_LIMIT,
+                        "contracted_purchase_limit": self.osd.CONTRACTED_PURCHASE_LIMIT,
+                        "sold_power": self.osd.get_sold_power(),
+                        "bought_power": self.osd.get_bought_power(),
+                        "current_tariff_buy": self.osd.get_current_buy_price(),
+                        "current_tariff_sell": self.osd.get_current_sell_price()
+                    }
+                    
+                    # 5d. Zapisujemy dane kontraktu w formacie API do pliku dla referencji
+                    os.makedirs(os.path.dirname(self.output_contract_path), exist_ok=True)
+                    with open(self.output_contract_path, "w") as f:
+                        json.dump(api_contract_data, f, indent=4)
+                    self.info_logger.info(f"API contract data saved to {self.output_contract_path}")
+                    
+                    # 5e. Wysyłamy dane systemu do API
+                    system_url = f"{self.api_manager.api_base_url}/api/Scada/update-system-state"
+                    headers = {"Content-Type": "application/json"}
+                    
+                    try:
+                        system_response = requests.post(
+                            system_url, 
+                            json=api_system_data, 
+                            headers=headers, 
+                            verify=self.api_manager.verify_ssl,
+                            timeout=15
+                        )
+                        system_response.raise_for_status()
+                        self.info_logger.info("Aktualizacja stanu systemu wysłana pomyślnie")
+                    except Exception as e:
+                        self.error_logger.error(f"Błąd podczas wysyłania aktualizacji stanu systemu: {str(e)}")
+                        if hasattr(e, 'response') and e.response:
+                            self.error_logger.error(f"Odpowiedź: {e.response.text}")
+                    
+                    # 5f. Wysyłamy dane kontraktu do API
+                    contract_url = f"{self.api_manager.api_base_url}/api/Scada/update-contract"
+                    
+                    try:
+                        contract_response = requests.post(
+                            contract_url, 
+                            json=api_contract_data, 
+                            headers=headers, 
+                            verify=self.api_manager.verify_ssl,
+                            timeout=15
+                        )
+                        contract_response.raise_for_status()
+                        self.info_logger.info("Aktualizacja informacji o kontrakcie wysłana pomyślnie")
+                    except Exception as e:
+                        self.error_logger.error(f"Błąd podczas wysyłania aktualizacji informacji o kontrakcie: {str(e)}")
+                        if hasattr(e, 'response') and e.response:
+                            self.error_logger.error(f"Odpowiedź: {e.response.text}")
+                
+                # 6. Aktualizujemy profil mocy
+                self.update_power_profile(datetime.now())
 
-                # Oczekiwanie na następną iterację
+                # 7. Oczekiwanie na następną iterację
                 wait_time = (
                     self.auto_interval
                     if self.operation_mode == OperationMode.AUTOMATIC
@@ -329,38 +510,68 @@ class EnergyManager:
         try:
             with open(self.pending_actions_path, "r") as file:
                 return json.load(file)
-        except (FileNotFoundError, json.JSONDecodeError):
+        except FileNotFoundError:
+            self.info_logger.warning(f"Pending actions file not found. Creating empty file at {self.pending_actions_path}")
+            # Upewnij się, że katalog istnieje
+            os.makedirs(os.path.dirname(self.pending_actions_path), exist_ok=True)
+            with open(self.pending_actions_path, "w") as file:
+                json.dump([], file)
+            return []
+        except json.JSONDecodeError:
+            self.error_logger.error(f"Error decoding pending actions file. File may be corrupted.")
+            return []
+        except Exception as e:
+            self.error_logger.error(f"Unexpected error reading pending actions file: {str(e)}")
             return []
 
     def save_pending_actions(self, actions):
-        with open(self.pending_actions_path, "w") as f:
-            json.dump(actions, f, indent=2)
-        self.info_logger.info(f"Saved {len(actions)} pending actions")
-        for action in actions:
-            self.info_logger.info(f"Pending action: {json.dumps(action, indent=2)}")
+        try:
+            # Upewnij się, że katalog istnieje
+            os.makedirs(os.path.dirname(self.pending_actions_path), exist_ok=True)
+            
+            with open(self.pending_actions_path, "w") as f:
+                json.dump(actions, f, indent=2)
+            
+            self.info_logger.info(f"Saved {len(actions)} pending actions")
+            for action in actions:
+                self.info_logger.info(f"Pending action: {json.dumps(action, indent=2)}")
 
-        # Weryfikacja zapisu
-        self.verify_file_content(self.pending_actions_path, "pending actions")
+            # Weryfikacja zapisu
+            self.verify_file_content(self.pending_actions_path, "pending actions")
+        except Exception as e:
+            self.error_logger.error(f"Error saving pending actions: {str(e)}")
 
     def load_operator_decision(self):
         try:
             with open(self.operator_decisions_path, "r") as file:
                 decisions = json.load(file)
                 return decisions[0] if decisions else None
-        except (FileNotFoundError, json.JSONDecodeError):
+        except FileNotFoundError:
+            self.info_logger.warning(f"Operator decisions file not found at {self.operator_decisions_path}")
+            return None
+        except json.JSONDecodeError:
+            self.error_logger.error(f"Error decoding operator decisions file. File may be corrupted.")
+            return None
+        except Exception as e:
+            self.error_logger.error(f"Unexpected error reading operator decisions: {str(e)}")
             return None
 
     def save_operator_decisions(self, decisions):
-        with open(self.operator_decisions_path, "w") as f:
-            json.dump(decisions, f, indent=2)
-        self.info_logger.info(f"Saved {len(decisions)} operator decisions")
-        for decision in decisions:
-            self.info_logger.info(
-                f"Operator decision: {json.dumps(decision, indent=2)}"
-            )
+        try:
+            # Upewnij się, że katalog istnieje
+            os.makedirs(os.path.dirname(self.operator_decisions_path), exist_ok=True)
+            
+            with open(self.operator_decisions_path, "w") as f:
+                json.dump(decisions, f, indent=2)
+            
+            self.info_logger.info(f"Saved {len(decisions)} operator decisions")
+            for decision in decisions:
+                self.info_logger.info(f"Operator decision: {json.dumps(decision, indent=2)}")
 
-        # Weryfikacja zapisu
-        self.verify_file_content(self.operator_decisions_path, "operator decisions")
+            # Weryfikacja zapisu
+            self.verify_file_content(self.operator_decisions_path, "operator decisions")
+        except Exception as e:
+            self.error_logger.error(f"Error saving operator decisions: {str(e)}")
 
     def verify_file_content(self, file_path, file_description):
         try:
@@ -369,6 +580,10 @@ class EnergyManager:
             self.info_logger.info(
                 f"Successfully verified {file_description} file. Content: {json.dumps(content, indent=2)}"
             )
+        except FileNotFoundError:
+            self.error_logger.error(f"File not found during verification: {file_path}")
+        except json.JSONDecodeError:
+            self.error_logger.error(f"Invalid JSON format in {file_description} file")
         except Exception as e:
             self.error_logger.error(
                 f"Error verifying {file_description} file: {str(e)}"
@@ -474,6 +689,8 @@ class EnergyManager:
                 f"operator_actions.json not found at {self.operator_actions_path}. Creating new file."
             )
             actions = {"pending_actions": [], "completed_actions": []}
+            # Upewnij się, że katalog istnieje
+            os.makedirs(os.path.dirname(self.operator_actions_path), exist_ok=True)
             self.save_operator_actions(actions)
             return actions
         except json.JSONDecodeError:
@@ -481,10 +698,21 @@ class EnergyManager:
                 f"Error decoding operator_actions.json. File may be corrupted."
             )
             return {"pending_actions": [], "completed_actions": []}
+        except Exception as e:
+            self.error_logger.error(f"Unexpected error reading operator actions: {str(e)}")
+            return {"pending_actions": [], "completed_actions": []}
 
     def save_operator_actions(self, actions):
-        with open(self.operator_actions_path, "w") as file:
-            json.dump(actions, file, indent=2)
+        try:
+            # Upewnij się, że katalog istnieje
+            os.makedirs(os.path.dirname(self.operator_actions_path), exist_ok=True)
+            
+            with open(self.operator_actions_path, "w") as file:
+                json.dump(actions, file, indent=2)
+            
+            self.info_logger.info(f"Saved operator actions: {len(actions['pending_actions'])} pending, {len(actions['completed_actions'])} completed")
+        except Exception as e:
+            self.error_logger.error(f"Error saving operator actions: {str(e)}")
 
     def check_operator_decisions(self):
         try:
@@ -887,50 +1115,68 @@ class EnergyManager:
             self.load_initial_data()
 
     def save_live_data(self):
-        live_data = {
-            "pv_panels": [panel.to_dict() for panel in self.microgrid.pv_panels],
-            "wind_turbines": [
-                turbine.to_dict() for turbine in self.microgrid.wind_turbines
-            ],
-            "fuel_turbines": [
-                turbine.to_dict() for turbine in self.microgrid.fuel_turbines
-            ],
-            "fuel_cells": [cell.to_dict() for cell in self.microgrid.fuel_cells],
-            "bess": [self.microgrid.bess.to_dict()] if self.microgrid.bess else [],
-            "non_adjustable_devices": [
-                device.to_dict() for device in self.consumergrid.non_adjustable_devices
-            ],
-            "adjustable_devices": [
-                device.to_dict() for device in self.consumergrid.adjustable_devices
-            ],
-        }
+        """
+        Zapisuje aktualne dane do pliku wyjściowego w formacie aplikacji (do dalszego przetwarzania).
+        Zapisuje również uproszczone dane w formacie API do pliku wyjściowego (do wysłania do API).
+        """
+        try:
+            # Dane w formacie wewnętrznym aplikacji
+            live_data = {
+                "pv_panels": [panel.to_dict() for panel in self.microgrid.pv_panels],
+                "wind_turbines": [
+                    turbine.to_dict() for turbine in self.microgrid.wind_turbines
+                ],
+                "fuel_turbines": [
+                    turbine.to_dict() for turbine in self.microgrid.fuel_turbines
+                ],
+                "fuel_cells": [cell.to_dict() for cell in self.microgrid.fuel_cells],
+                "bess": [self.microgrid.bess.to_dict()] if self.microgrid.bess else [],
+                "non_adjustable_devices": [
+                    device.to_dict() for device in self.consumergrid.non_adjustable_devices
+                ],
+                "adjustable_devices": [
+                    device.to_dict() for device in self.consumergrid.adjustable_devices
+                ],
+            }
 
-        with open(self.live_data_path, "w") as f:
-            json.dump(live_data, f, indent=4)
+            # Upewnij się, że katalogi istnieją
+            os.makedirs(os.path.dirname(self.output_data_path), exist_ok=True)
 
-        self.info_logger.section("Ending of iteration")
-        self.info_logger.info("Live data saved to live_data.json")
+            # Zapisujemy dane do pliku wyjściowego
+            with open(self.output_data_path, "w") as f:
+                json.dump(live_data, f, indent=4)
+
+            self.info_logger.section("Ending of iteration")
+            self.info_logger.info(f"Live data saved to {self.output_data_path}")
+        except Exception as e:
+            self.error_logger.error(f"Error saving live data: {str(e)}")
 
     def save_contract_data(self):
         """Generuje i zapisuje aktualne dane kontraktowe do osobnego pliku JSON."""
+        try:
+            contract_data = {
+                "CONTRACTED_TYPE": self.osd.CONTRACTED_TYPE,
+                "CONTRACTED_DURATION": self.osd.CONTRACTED_DURATION,
+                "CONTRACTED_MARGIN": self.osd.CONTRACTED_MARGIN,
+                "CONTRACTED_EXPORT_POSSIBILITY": self.osd.CONTRACTED_EXPORT_POSSIBILITY,
+                "CONTRACTED_SALE_LIMIT": self.osd.CONTRACTED_SALE_LIMIT,
+                "CONTRACTED_PURCHASE_LIMIT": self.osd.CONTRACTED_PURCHASE_LIMIT,
+                "sold_power": self.osd.get_sold_power(),
+                "bought_power": self.osd.get_bought_power(),
+                "current_tariff_buy": self.osd.get_current_buy_price(),
+                "current_tariff_sell": self.osd.get_current_sell_price(),
+            }
 
-        contract_data = {
-            "CONTRACTED_TYPE": self.osd.CONTRACTED_TYPE,
-            "CONTRACTED_DURATION": self.osd.CONTRACTED_DURATION,
-            "CONTRACTED_MARGIN": self.osd.CONTRACTED_MARGIN,
-            "CONTRACTED_EXPORT_POSSIBILITY": self.osd.CONTRACTED_EXPORT_POSSIBILITY,
-            "CONTRACTED_SALE_LIMIT": self.osd.CONTRACTED_SALE_LIMIT,
-            "CONTRACTED_PURCHASE_LIMIT": self.osd.CONTRACTED_PURCHASE_LIMIT,
-            "sold_power": self.osd.get_sold_power(),
-            "bought_power": self.osd.get_bought_power(),
-            "current_tariff_buy": self.osd.get_current_buy_price(),
-            "current_tariff_sell": self.osd.get_current_sell_price(),
-        }
+            # Upewnij się, że katalogi istnieją
+            os.makedirs(os.path.dirname(self.output_contract_path), exist_ok=True)
 
-        with open(self.live_contract_path, "w") as f:
-            json.dump(contract_data, f, indent=4)
+            # Zapisujemy dane do pliku wyjściowego
+            with open(self.output_contract_path, "w") as f:
+                json.dump(contract_data, f, indent=4)
 
-        self.info_logger.info("Live contract data saved to live_contract_data.json")
+            self.info_logger.info(f"Live contract data saved to {self.output_contract_path}")
+        except Exception as e:
+            self.error_logger.error(f"Error saving contract data: {str(e)}")
 
     def update_power_profile(self, current_time):
         consumption = self.consumergrid.total_power_consumed()
@@ -938,9 +1184,13 @@ class EnergyManager:
         buy_price = self.osd.get_current_buy_price()
         sell_price = self.osd.get_current_sell_price()
 
-        self.power_profile_manager.update(
-            current_time, consumption, generation, buy_price, sell_price
-        )
+        try:
+            self.power_profile_manager.update(
+                current_time, consumption, generation, buy_price, sell_price
+            )
+            self.info_logger.info("Updated power profile")
+        except Exception as e:
+            self.error_logger.error(f"Error updating power profile: {str(e)}")
 
     def get_device_by_id_and_type(self, device_id, device_type):
         self.info_logger.info(
@@ -1410,3 +1660,79 @@ class EnergyManager:
                     else "Non-adjustable"
                 )
                 self.info_logger.info(f"  - {device.name} ({device_type})")
+
+    def prepare_system_data_for_api(self):
+        """
+        Przygotowuje dane systemu w formacie API do wysłania.
+        
+        Returns:
+            dict: Słownik zawierający dane systemu w formacie API.
+        """
+        api_data = {
+            "pv_panels": [],
+            "wind_turbines": [],
+            "fuel_turbines": [],
+            "fuel_cells": [],
+            "bess": [],
+            "non_adjustable_devices": [],
+            "adjustable_devices": []
+        }
+        
+        # Konwersja źródeł energii
+        for category, devices in [
+            ("pv_panels", self.microgrid.pv_panels),
+            ("wind_turbines", self.microgrid.wind_turbines),
+            ("fuel_turbines", self.microgrid.fuel_turbines),
+            ("fuel_cells", self.microgrid.fuel_cells)
+        ]:
+            for device in devices:
+                api_data[category].append({
+                    "name": device.name,
+                    "actual_output": device.get_actual_output(),
+                    "switch_status": device.switch_status
+                })
+        
+        # Konwersja BESS
+        if self.microgrid.bess:
+            api_data["bess"].append({
+                "name": self.microgrid.bess.name,
+                "actual_output": 0,  # BESS nie ma actual_output w API
+                "switch_status": self.microgrid.bess.switch_status
+            })
+        
+        # Konwersja urządzeń konsumpcyjnych
+        for device in self.consumergrid.non_adjustable_devices:
+            api_data["non_adjustable_devices"].append({
+                "name": device.name,
+                "actual_output": device.get_current_power(),
+                "switch_status": device.switch_status
+            })
+        
+        for device in self.consumergrid.adjustable_devices:
+            api_data["adjustable_devices"].append({
+                "name": device.name,
+                "actual_output": device.get_current_power(),
+                "switch_status": device.switch_status
+            })
+        
+        return api_data
+
+    def prepare_contract_data_for_api(self):
+        """
+        Przygotowuje dane kontraktu w formacie API do wysłania.
+        
+        Returns:
+            dict: Słownik zawierający dane kontraktu w formacie API.
+        """
+        return {
+            "contracted_type": self.osd.CONTRACTED_TYPE,
+            "contracted_duration": self.osd.CONTRACTED_DURATION,
+            "contracted_margin": self.osd.CONTRACTED_MARGIN,
+            "contracted_export_possibility": self.osd.CONTRACTED_EXPORT_POSSIBILITY,
+            "contracted_sale_limit": self.osd.CONTRACTED_SALE_LIMIT,
+            "contracted_purchase_limit": self.osd.CONTRACTED_PURCHASE_LIMIT,
+            "sold_power": self.osd.get_sold_power(),
+            "bought_power": self.osd.get_bought_power(),
+            "current_tariff_buy": self.osd.get_current_buy_price(),
+            "current_tariff_sell": self.osd.get_current_sell_price()
+        }
