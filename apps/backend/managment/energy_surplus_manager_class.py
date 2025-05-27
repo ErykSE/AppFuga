@@ -29,6 +29,7 @@ class EnergySurplusManager:
         add_to_tabu_func,
         is_in_tabu_func,
         clean_tabu_func,
+        energy_manager_ref=None  # ← DODAJ TO
     ):
         self.microgrid = microgrid
         self.osd = osd
@@ -42,6 +43,7 @@ class EnergySurplusManager:
         self.clean_tabu_list = (
             clean_tabu_func  # Zmienione z self.clean_tabu na self.clean_tabu_list
         )
+        self.energy_manager_ref = energy_manager_ref  # ← DODAJ TO
 
     def manage_surplus_energy(self, power_surplus):
         total_managed = 0
@@ -281,6 +283,17 @@ class EnergySurplusManager:
                     f"BESS charged by {charged_amount:.2f} kWh ({charged_percent:.2f}%). "
                     f"New level: {bess.get_charge_level():.2f} kWh"
                 )
+                # DODAJ TO - Śledzenie zmian BESS
+                if self.energy_manager_ref:
+                    device_change = {
+                        "device": bess,
+                        "action": f"charge:{charged_amount}",
+                        "new_value": charged_amount,
+                        "device_type": "BESS"
+                    }
+                    self.energy_manager_ref.changed_devices.append(device_change)
+                    self.info_logger.info(f"✅ DEVICE CHANGED: {bess.name} (BESS) - charge:{charged_amount}")
+                
                 return {
                     "success": True,
                     "amount": round(charged_amount, 6),
@@ -387,6 +400,17 @@ class EnergySurplusManager:
             self.info_logger.info(
                 f"Selling {power_surplus} kW of surplus energy. Total energy sold: {self.osd.get_sold_power()} kW."
             )
+            # DODAJ TO - Śledzenie zmian OSD
+            if self.energy_manager_ref:
+                device_change = {
+                    "device": self.osd,
+                    "action": f"sell:{power_surplus}",
+                    "new_value": power_surplus,
+                    "device_type": "OSD"
+                }
+                self.energy_manager_ref.changed_devices.append(device_change)
+                self.info_logger.info(f"✅ DEVICE CHANGED: OSD (OSD) - sell:{power_surplus}")
+            
             return power_surplus
         except Exception as e:
             self.error_logger.error(f"Error in sell_energy: {str(e)}")

@@ -6,9 +6,9 @@
             "priority": 1,
             "max_output": 100,
             "min_output": 10,
-            "actual_output": 0,
-            "switch_status": false,
-            "device_status": "offline"
+            "actual_output": 100,
+            "switch_status": true,
+            "device_status": "online"
         },
         {
             "id": 2,
@@ -16,7 +16,7 @@
             "priority": 1,
             "max_output": 120,
             "min_output": 15,
-            "actual_output": 100,
+            "actual_output": 54,
             "switch_status": true,
             "device_status": "online"
         }
@@ -28,9 +28,9 @@
             "priority": 2,
             "max_output": 80,
             "min_output": 0,
-            "actual_output": 80,
-            "switch_status": true,
-            "device_status": "online"
+            "actual_output": 0,
+            "switch_status": false,
+            "device_status": "offline"
         },
         {
             "id": 4,
@@ -73,7 +73,7 @@
             "name": "BESS 1",
             "capacity": 350,
             "min_charge_level": 40,
-            "charge_level": 218,
+            "charge_level": 350,
             "switch_status": true,
             "device_status": "online"
         }
@@ -108,7 +108,7 @@
             "id": 11,
             "name": "Adjustable Device 2",
             "priority": 1,
-            "power": 100,
+            "power": 225,
             "switch_status": true,
             "min_power": 30,
             "max_power": 1000

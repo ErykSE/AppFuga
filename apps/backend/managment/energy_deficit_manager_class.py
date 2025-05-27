@@ -36,6 +36,7 @@ class EnergyDeficitManager:
         add_to_tabu_func,
         is_in_tabu_func,
         clean_tabu_func,
+        energy_manager_ref=None  # ← DODAJ TO
     ):
         self.microgrid = microgrid
         self.consumergrid = consumergrid
@@ -48,6 +49,7 @@ class EnergyDeficitManager:
         self.clean_tabu_list = clean_tabu_func
         self.previous_discharge_decision = False
         self.MAX_EXCESS_PERCENTAGE = 0.85  # Dodaj tę linię
+        self.energy_manager_ref = energy_manager_ref  # ← DODAJ TO
 
     def handle_deficit_automatic(self, power_deficit):
         """
@@ -188,6 +190,17 @@ class EnergyDeficitManager:
                     if device.set_output(new_output):
                         actual_increase = new_output - initial_output
                         increased_power += actual_increase
+                        # DODAJ TO:
+                        if self.energy_manager_ref:
+                            device_change = {
+                                "device": device,
+                                "action": f"set_output:{new_output}",
+                                "new_value": actual_increase,
+                                "device_type": self.energy_manager_ref.get_device_type(device)
+                            }
+                            self.energy_manager_ref.changed_devices.append(device_change)
+                            self.info_logger.info(f"✅ DEVICE CHANGED: {device.name} ({self.energy_manager_ref.get_device_type(device)}) - set_output:{new_output}")
+                        
                         self.info_logger.info(
                             f"Increased power of adjustable device {device.name} "
                             f"(priority: {device.priority}) from {initial_output} kW to {new_output} kW"
@@ -196,6 +209,17 @@ class EnergyDeficitManager:
                     if device.set_output(max_output):
                         actual_increase = max_output - initial_output
                         increased_power += actual_increase
+                        # DODAJ TO:
+                        if self.energy_manager_ref:
+                            device_change = {
+                                "device": device,
+                                "action": f"set_output:{max_output}",
+                                "new_value": actual_increase,
+                                "device_type": self.energy_manager_ref.get_device_type(device)
+                            }
+                            self.energy_manager_ref.changed_devices.append(device_change)
+                            self.info_logger.info(f"✅ DEVICE CHANGED: {device.name} ({self.energy_manager_ref.get_device_type(device)}) - set_output:{max_output}")
+                        
                         self.info_logger.info(
                             f"Set non-adjustable device {device.name} "
                             f"(priority: {device.priority}) to maximum output: {max_output} kW"
@@ -218,6 +242,17 @@ class EnergyDeficitManager:
                             if device.set_output(new_output):
                                 actual_increase = new_output
                                 increased_power += actual_increase
+                                # DODAJ TO:
+                                if self.energy_manager_ref:
+                                    device_change = {
+                                        "device": device,
+                                        "action": f"activate_and_set:{new_output}",
+                                        "new_value": actual_increase,
+                                        "device_type": self.energy_manager_ref.get_device_type(device)
+                                    }
+                                    self.energy_manager_ref.changed_devices.append(device_change)
+                                    self.info_logger.info(f"✅ DEVICE CHANGED: {device.name} ({self.energy_manager_ref.get_device_type(device)}) - activate_and_set:{new_output}")
+                                
                                 self.info_logger.info(
                                     f"Activated adjustable device {device.name} "
                                     f"(priority: {device.priority}) and set power to {new_output} kW"
@@ -226,6 +261,17 @@ class EnergyDeficitManager:
                             if device.set_output(max_output):
                                 actual_increase = max_output
                                 increased_power += actual_increase
+                                # DODAJ TO:
+                                if self.energy_manager_ref:
+                                    device_change = {
+                                        "device": device,
+                                        "action": f"activate_and_set:{max_output}",
+                                        "new_value": actual_increase,
+                                        "device_type": self.energy_manager_ref.get_device_type(device)
+                                    }
+                                    self.energy_manager_ref.changed_devices.append(device_change)
+                                    self.info_logger.info(f"✅ DEVICE CHANGED: {device.name} ({self.energy_manager_ref.get_device_type(device)}) - activate_and_set:{max_output}")
+                                
                                 self.info_logger.info(
                                     f"Activated non-adjustable device {device.name} "
                                     f"(priority: {device.priority}) and set to maximum power: {max_output} kW"
@@ -440,6 +486,17 @@ class EnergyDeficitManager:
             self.info_logger.info(
                 f"BESS charge level: before {initial_charge} kWh, after {new_charge} kWh"
             )
+            # DODAJ TO - Śledzenie zmian BESS
+            if self.energy_manager_ref:
+                device_change = {
+                    "device": self.microgrid.bess,
+                    "action": f"discharge:{discharged_amount}",
+                    "new_value": discharged_amount,
+                    "device_type": "BESS"
+                }
+                self.energy_manager_ref.changed_devices.append(device_change)
+                self.info_logger.info(f"✅ DEVICE CHANGED: {self.microgrid.bess.name} (BESS) - discharge:{discharged_amount}")
+            
             return {
                 "success": True,
                 "amount": discharged_amount,
@@ -456,6 +513,17 @@ class EnergyDeficitManager:
         amount_to_buy = min(power_deficit, remaining_purchase_capacity)
         if amount_to_buy > 0:
             self.osd.buy_power(amount_to_buy)
+            # DODAJ TO - Śledzenie zmian OSD
+            if self.energy_manager_ref:
+                device_change = {
+                    "device": self.osd,
+                    "action": f"buy:{amount_to_buy}",
+                    "new_value": amount_to_buy,
+                    "device_type": "OSD"
+                }
+                self.energy_manager_ref.changed_devices.append(device_change)
+                self.info_logger.info(f"✅ DEVICE CHANGED: OSD (OSD) - buy:{amount_to_buy}")
+            
             return {"success": True, "amount": amount_to_buy}
         return {"success": False, "amount": 0}
 
@@ -1017,12 +1085,34 @@ class EnergyDeficitManager:
             actual_reduction = min(max_reduction, target_reduction)
             device.decrease_power(actual_reduction)
             final_power = device.get_current_power()
+            # DODAJ TO:
+            if self.energy_manager_ref and actual_reduction > 0:
+                device_change = {
+                    "device": device,
+                    "action": f"reduce:{actual_reduction}",
+                    "new_value": actual_reduction,
+                    "device_type": "AdjustableDevice"
+                }
+                self.energy_manager_ref.changed_devices.append(device_change)
+                self.info_logger.info(f"✅ DEVICE CHANGED: {device.name} (AdjustableDevice) - reduce:{actual_reduction}")
+            
             self.info_logger.info(
                 f"Reduced {device.name} from {initial_power} kW to {final_power} kW"
             )
             return initial_power - final_power
         else:
             if device.deactivate():
+                # DODAJ TO:
+                if self.energy_manager_ref:
+                    device_change = {
+                        "device": device,
+                        "action": "deactivate",
+                        "new_value": initial_power,
+                        "device_type": "NonAdjustableDevice"
+                    }
+                    self.energy_manager_ref.changed_devices.append(device_change)
+                    self.info_logger.info(f"✅ DEVICE CHANGED: {device.name} (NonAdjustableDevice) - deactivate")
+                
                 self.info_logger.info(
                     f"Deactivated {device.name}, saved {initial_power} kW"
                 )

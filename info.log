@@ -1,185 +1,1203 @@
-2025-05-26 13:46:46,068 - INFO - Base path: C:/eryk/AppFuga
-2025-05-26 13:46:46,068 - INFO - Initial data path: C:/eryk/AppFuga\apps\backend\initial_data.json
-2025-05-26 13:46:46,068 - INFO - Initial contract path: C:/eryk/AppFuga\apps\backend\contract_data.json
-2025-05-26 13:46:46,068 - INFO - Inicjalizacja ApiManager z bazowym URL: http://localhost:5002
-2025-05-26 13:46:46,068 - INFO - Retry config: max_retries=3, initial_delay=30s, max_delay=300s, exponential_backoff=True, scada_check_interval=60s
-2025-05-26 13:46:46,068 - INFO - Using API: True
-2025-05-26 13:46:46,068 - INFO - 
+2025-05-27 16:55:26,989 - INFO - Base path: C:/eryk/AppFuga
+2025-05-27 16:55:26,989 - INFO - Initial data path: C:/eryk/AppFuga\apps\backend\initial_data.json
+2025-05-27 16:55:26,989 - INFO - Initial contract path: C:/eryk/AppFuga\apps\backend\contract_data.json
+2025-05-27 16:55:26,989 - INFO - Inicjalizacja ApiManager z bazowym URL: http://localhost:5002
+2025-05-27 16:55:26,989 - INFO - Retry config: max_retries=3, initial_delay=30s, max_delay=300s, exponential_backoff=True, scada_check_interval=60s
+2025-05-27 16:55:26,989 - INFO - Using API: True
+2025-05-27 16:55:26,999 - INFO - 
 ==================================================
 Starting new iteration
 ==================================================
-2025-05-26 13:46:46,068 - INFO - !!! Energy management started !!!
-2025-05-26 13:46:46,068 - INFO - Loaded operation mode: automatic
-2025-05-26 13:46:46,068 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
-2025-05-26 13:46:46,880 - INFO - Status zapisany: All devices accessible [SYSTEM]
-2025-05-26 13:46:46,880 - INFO - Pobieranie danych kontraktu z http://localhost:5002/api/Scada/contract-info
-2025-05-26 13:46:46,906 - INFO - Dane urz¹dzeñ zapisane do C:/eryk/AppFuga\apps\backend\live_data.json [SYSTEM]
-2025-05-26 13:46:46,906 - INFO - Dane kontraktu zapisane do C:/eryk/AppFuga\apps\backend\live_contract_data.json [SYSTEM]
-2025-05-26 13:46:46,906 - INFO - Status systemu zapisany do C:/eryk/AppFuga\apps\backend\system_status.json [SYSTEM]
-2025-05-26 13:46:46,906 - INFO - [DEBUG] Attempting to update pv_panel: {'id': 1, 'name': 'PV Panel 1', 'priority': 1, 'max_output': 100, 'min_output': 10, 'actual_output': 0, 'switch_status': False, 'device_status': 'offline'}
-2025-05-26 13:46:46,906 - INFO - 1212Successfully created pv_panel instance: PV Panel 1
-2025-05-26 13:46:46,906 - INFO - Added pv_panel: PV Panel 1 (Status: offline)
-2025-05-26 13:46:46,906 - INFO - [DEBUG] Attempting to update pv_panel: {'id': 2, 'name': 'PV Panel 2', 'priority': 1, 'max_output': 120, 'min_output': 15, 'actual_output': 100, 'switch_status': True, 'device_status': 'online'}
-2025-05-26 13:46:46,906 - INFO - 1212Successfully created pv_panel instance: PV Panel 2
-2025-05-26 13:46:46,906 - INFO - Added pv_panel: PV Panel 2 (Status: online)
-2025-05-26 13:46:46,906 - INFO - [DEBUG] Attempting to update wind_turbine: {'id': 3, 'name': 'Wind Turbine 1', 'priority': 2, 'max_output': 80, 'min_output': 0, 'actual_output': 80, 'switch_status': True, 'device_status': 'online'}
-2025-05-26 13:46:46,906 - INFO - 1212Successfully created wind_turbine instance: Wind Turbine 1
-2025-05-26 13:46:46,906 - INFO - Added wind_turbine: Wind Turbine 1 (Status: online)
-2025-05-26 13:46:46,906 - INFO - [DEBUG] Attempting to update wind_turbine: {'id': 4, 'name': 'Wind Turbine 2', 'priority': 2, 'max_output': 70, 'min_output': 0, 'actual_output': 55, 'switch_status': True, 'device_status': 'online'}
-2025-05-26 13:46:46,906 - INFO - 1212Successfully created wind_turbine instance: Wind Turbine 2
-2025-05-26 13:46:46,906 - INFO - Added wind_turbine: Wind Turbine 2 (Status: online)
-2025-05-26 13:46:46,906 - INFO - [DEBUG] Attempting to update fuel_turbine: {'id': 5, 'name': 'Fuel Turbine 1', 'priority': 4, 'max_output': 100, 'min_output': 0, 'actual_output': 5, 'switch_status': True, 'device_status': 'online'}
-2025-05-26 13:46:46,906 - INFO - 1212Successfully created fuel_turbine instance: Fuel Turbine 1
-2025-05-26 13:46:46,906 - INFO - Added fuel_turbine: Fuel Turbine 1 (Status: online)
-2025-05-26 13:46:46,906 - INFO - [DEBUG] Attempting to update fuel_cell: {'id': 6, 'name': 'Fuel Cell 1', 'priority': 3, 'max_output': 75, 'min_output': 0, 'actual_output': 0, 'switch_status': False, 'device_status': 'offline'}
-2025-05-26 13:46:46,906 - INFO - 1212Successfully created fuel_cell instance: Fuel Cell 1
-2025-05-26 13:46:46,906 - INFO - Added fuel_cell: Fuel Cell 1 (Status: offline)
-2025-05-26 13:46:46,906 - INFO - [DEBUG] Attempting to update bess: {'id': 7, 'name': 'BESS 1', 'capacity': 350, 'min_charge_level': 40, 'charge_level': 218, 'switch_status': True, 'device_status': 'online'}
-2025-05-26 13:46:46,906 - INFO - 1212Successfully created bess instance: BESS 1
-2025-05-26 13:46:46,906 - INFO - New BESS added: BESS 1
-2025-05-26 13:46:46,906 - INFO - Added power meter: Meter for PV Panel 1 for device ID: 1
-2025-05-26 13:46:46,906 - INFO - Loaded power meter: Meter for PV Panel 1, Status: online, Reading: 15 kW, Device ID: 1
-2025-05-26 13:46:46,906 - INFO - Added power meter: Meter for PV Panel 2 for device ID: 2
-2025-05-26 13:46:46,906 - INFO - Loaded power meter: Meter for PV Panel 2, Status: online, Reading: 98 kW, Device ID: 2
-2025-05-26 13:46:46,906 - INFO - Added power meter: Meter for PV Wind Turbine 1 for device ID: 3
-2025-05-26 13:46:46,906 - INFO - Loaded power meter: Meter for PV Wind Turbine 1, Status: online, Reading: 42 kW, Device ID: 3
-2025-05-26 13:46:46,906 - INFO - Added power meter: Meter for Fuel Turbine 1 for device ID: 5
-2025-05-26 13:46:46,906 - INFO - Loaded power meter: Meter for Fuel Turbine 1, Status: online, Reading: 38 kW, Device ID: 5
-2025-05-26 13:46:46,906 - INFO - Data loaded successfully.
-2025-05-26 13:46:46,917 - INFO - Loaded live data
-2025-05-26 13:46:46,918 - INFO - 
+2025-05-27 16:55:26,999 - INFO - !!! Energy management started !!!
+2025-05-27 16:55:26,999 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:27,003 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:27,090 - INFO - 
 ==================================================
-Starting a new iteration in automatic mode
+Starting new iteration
 ==================================================
-2025-05-26 13:46:46,918 - INFO - 
--------------------- Starting device update based on meter readings --------------------
-2025-05-26 13:46:46,918 - INFO - Checking 6 devices for updates based on meter readings
-2025-05-26 13:46:46,918 - INFO - Checking device PV Panel 1 (ID: 1). Device status: offline, Meter status: online, Meter reading: 15 kW
-2025-05-26 13:46:46,918 - WARNING - [WARNING] Updated PV Panel 1 status to online and set actual output to 15 kW based on meter reading. Please check the device communication.
-2025-05-26 13:46:46,918 - INFO - Checking device PV Panel 2 (ID: 2). Device status: online, Meter status: online, Meter reading: 98 kW
-2025-05-26 13:46:46,918 - INFO - Checking device Wind Turbine 1 (ID: 3). Device status: online, Meter status: online, Meter reading: 42 kW
-2025-05-26 13:46:46,918 - INFO - No meter found for device Wind Turbine 2 (ID: 4)
-2025-05-26 13:46:46,918 - INFO - Checking device Fuel Turbine 1 (ID: 5). Device status: online, Meter status: online, Meter reading: 38 kW
-2025-05-26 13:46:46,918 - INFO - No meter found for device Fuel Cell 1 (ID: 6)
-2025-05-26 13:46:46,918 - INFO - Updated 1 devices based on meter readings
-2025-05-26 13:46:46,918 - INFO - Updated device: PV Panel 1 (ID: 1), New status: online, New output: 15 kW
-2025-05-26 13:46:46,918 - INFO - 
--------------------- System Status Summary --------------------
-2025-05-26 13:46:46,919 - INFO - !!! Total generated power: 255.00 kW !!!
-2025-05-26 13:46:46,919 - INFO - !!! Total demand: 131.00 kW !!!
-2025-05-26 13:46:46,919 - INFO - Number of active generating devices: 5
-2025-05-26 13:46:46,919 - INFO - Number of inactive generating devices: 1
-2025-05-26 13:46:46,919 - INFO - 
--------------------- Active Generating Devices --------------------
-2025-05-26 13:46:46,919 - INFO -   - PV Panel 1: 15.00 kW / 100.00 kW
-2025-05-26 13:46:46,919 - INFO -   - PV Panel 2: 100.00 kW / 120.00 kW
-2025-05-26 13:46:46,919 - INFO -   - Wind Turbine 1: 80.00 kW / 80.00 kW
-2025-05-26 13:46:46,919 - INFO -   - Wind Turbine 2: 55.00 kW / 70.00 kW
-2025-05-26 13:46:46,919 - INFO -   - Fuel Turbine 1: 5.00 kW / 100.00 kW
-2025-05-26 13:46:46,919 - INFO - 
--------------------- Inactive Generating Devices --------------------
-2025-05-26 13:46:46,919 - INFO -   - Fuel Cell 1: max output 75.00 kW
-2025-05-26 13:46:46,919 - INFO - 
--------------------- BESS Status --------------------
-2025-05-26 13:46:46,919 - INFO - BESS charge level: 218.00 kWh / 350.00 kWh
-2025-05-26 13:46:46,919 - INFO - 
--------------------- Energy Trading Status --------------------
-2025-05-26 13:46:46,919 - INFO - Energy purchase: Available (Limit: 105.00 kWh, Current: 70.00 kWh)
-2025-05-26 13:46:46,919 - INFO - Energy sale: Not available (Limit: 0.00 kWh, Current: 0.00 kWh)
-2025-05-26 13:46:46,919 - INFO - 
--------------------- Energy Consumer Grid Summary --------------------
-2025-05-26 13:46:46,919 - INFO - !!! Total consumed power: 131.00 kW !!!
-2025-05-26 13:46:46,919 - INFO - Total number of devices: 4
-2025-05-26 13:46:46,920 - INFO - Number of active devices: 2
-2025-05-26 13:46:46,920 - INFO - Number of inactive devices: 2
-2025-05-26 13:46:46,920 - INFO - Number of active adjustable devices: 1
-2025-05-26 13:46:46,920 - INFO - Number of active non-adjustable devices: 1
-2025-05-26 13:46:46,920 - INFO - 
--------------------- Active Adjustable Devices --------------------
-2025-05-26 13:46:46,920 - INFO -   - Adjustable Device 2: Current: 100.00 kW / Max: 100.00 kW
-2025-05-26 13:46:46,920 - INFO - 
--------------------- Active Non-adjustable Devices --------------------
-2025-05-26 13:46:46,920 - INFO -   - Non Adjustable Device 1: 31.00 kW
-2025-05-26 13:46:46,920 - INFO - 
--------------------- Inactive Devices --------------------
-2025-05-26 13:46:46,920 - INFO -   - Non Adjustable Device 2 (Non-adjustable)
-2025-05-26 13:46:46,920 - INFO -   - Adjustable Device 1 (Adjustable)
-2025-05-26 13:46:46,920 - INFO - checkTotal generated power: 255 kW
-2025-05-26 13:46:46,920 - INFO - checkTotal demand power: 131 kW
-2025-05-26 13:46:46,920 - INFO - 
--------------------- Power surplus detected: 124 kW - starting surplus management --------------------
-2025-05-26 13:46:46,920 - INFO - Iteration 1, surplus remaining: 124.000000 kW
-2025-05-26 13:46:46,920 - INFO - Attempting to perform the action: SurplusAction.CHARGE_BATTERY
-2025-05-26 13:46:46,920 - INFO - Executing action: SurplusAction.CHARGE_BATTERY, type: <enum 'SurplusAction'>
-2025-05-26 13:46:46,920 - INFO - XXXXXXXXXXXXXXXXXXXXXXXXXExecuting actionxdxdxdd: SurplusAction.CHARGE_BATTERY
-2025-05-26 13:46:46,920 - INFO - Remaining surplus: 124.000000
-2025-05-26 13:46:46,921 - INFO - BESS charged by 124.00 kWh (35.43%). New level: 342.00 kWh
-2025-05-26 13:46:46,921 - INFO - Action result: {'success': True, 'amount': 124, 'percent': 35.43}
-2025-05-26 13:46:46,921 - INFO - Action SurplusAction.CHARGE_BATTERY managed 124.000000 kW. Surplus remaining: 0.000000 kW
-2025-05-26 13:46:46,921 - INFO - !!! Managed 124 kW of surplus. Remaining: 0 kW !!!
-2025-05-26 13:46:46,921 - INFO - Surplus management completed. The entire surplus has been dissolved.
-2025-05-26 13:46:46,922 - INFO - 
--------------------- System Status Summary --------------------
-2025-05-26 13:46:46,922 - INFO - !!! Total generated power: 255.00 kW !!!
-2025-05-26 13:46:46,922 - INFO - !!! Total demand: 131.00 kW !!!
-2025-05-26 13:46:46,922 - INFO - Number of active generating devices: 5
-2025-05-26 13:46:46,922 - INFO - Number of inactive generating devices: 1
-2025-05-26 13:46:46,922 - INFO - 
--------------------- Active Generating Devices --------------------
-2025-05-26 13:46:46,922 - INFO -   - PV Panel 1: 15.00 kW / 100.00 kW
-2025-05-26 13:46:46,922 - INFO -   - PV Panel 2: 100.00 kW / 120.00 kW
-2025-05-26 13:46:46,922 - INFO -   - Wind Turbine 1: 80.00 kW / 80.00 kW
-2025-05-26 13:46:46,922 - INFO -   - Wind Turbine 2: 55.00 kW / 70.00 kW
-2025-05-26 13:46:46,922 - INFO -   - Fuel Turbine 1: 5.00 kW / 100.00 kW
-2025-05-26 13:46:46,922 - INFO - 
--------------------- Inactive Generating Devices --------------------
-2025-05-26 13:46:46,922 - INFO -   - Fuel Cell 1: max output 75.00 kW
-2025-05-26 13:46:46,922 - INFO - 
--------------------- BESS Status --------------------
-2025-05-26 13:46:46,922 - INFO - BESS charge level: 342.00 kWh / 350.00 kWh
-2025-05-26 13:46:46,922 - INFO - 
--------------------- Energy Trading Status --------------------
-2025-05-26 13:46:46,922 - INFO - Energy purchase: Available (Limit: 105.00 kWh, Current: 70.00 kWh)
-2025-05-26 13:46:46,922 - INFO - Energy sale: Not available (Limit: 0.00 kWh, Current: 0.00 kWh)
-2025-05-26 13:46:46,922 - INFO - 
--------------------- Energy Consumer Grid Summary --------------------
-2025-05-26 13:46:46,922 - INFO - !!! Total consumed power: 131.00 kW !!!
-2025-05-26 13:46:46,922 - INFO - Total number of devices: 4
-2025-05-26 13:46:46,922 - INFO - Number of active devices: 2
-2025-05-26 13:46:46,922 - INFO - Number of inactive devices: 2
-2025-05-26 13:46:46,922 - INFO - Number of active adjustable devices: 1
-2025-05-26 13:46:46,922 - INFO - Number of active non-adjustable devices: 1
-2025-05-26 13:46:46,922 - INFO - 
--------------------- Active Adjustable Devices --------------------
-2025-05-26 13:46:46,923 - INFO -   - Adjustable Device 2: Current: 100.00 kW / Max: 100.00 kW
-2025-05-26 13:46:46,923 - INFO - 
--------------------- Active Non-adjustable Devices --------------------
-2025-05-26 13:46:46,923 - INFO -   - Non Adjustable Device 1: 31.00 kW
-2025-05-26 13:46:46,923 - INFO - 
--------------------- Inactive Devices --------------------
-2025-05-26 13:46:46,923 - INFO -   - Non Adjustable Device 2 (Non-adjustable)
-2025-05-26 13:46:46,923 - INFO -   - Adjustable Device 1 (Adjustable)
-2025-05-26 13:46:46,924 - INFO - 
--------------------- Ending of iteration --------------------
-2025-05-26 13:46:46,924 - INFO - Live data saved to C:/eryk/AppFuga\apps\backend\output_data.json
-2025-05-26 13:46:46,925 - INFO - Live contract data saved to C:/eryk/AppFuga\apps\backend\output_contract_data.json
-2025-05-26 13:46:47,206 - INFO - Weather data updated at 2025-05-26 13:46:47.206316
-2025-05-26 13:46:47,269 - INFO - 5-minute data aggregated and logged at 2025-05-26 13:46:47.269465
-2025-05-26 13:46:47,579 - INFO - Weather forecast updated at 2025-05-26 13:46:47.579660
-2025-05-26 13:46:47,579 - INFO - Updated power profile
-2025-05-26 13:46:47,579 - INFO - Iteration completed in 0.66 seconds
-2025-05-26 13:46:47,589 - INFO - 
--------------------- Ending of iteration --------------------
-2025-05-26 13:46:47,589 - INFO - Live data saved to C:/eryk/AppFuga\apps\backend\output_data.json
-2025-05-26 13:46:47,589 - INFO - Live contract data saved to C:/eryk/AppFuga\apps\backend\output_contract_data.json
-2025-05-26 13:46:47,589 - INFO - Wysy³anie danych systemu (próba 1/3) [RETRY]
-2025-05-26 13:46:53,661 - INFO - Exponential backoff: próba 1, opóŸnienie 30s (obliczone: 30s, max: 300s) [RETRY]
-2025-05-26 13:46:53,661 - INFO - Ponowna próba za 30 sekund... [RETRY]
-2025-05-26 13:47:23,530 - INFO - !!! Energy management stopping !!!
-2025-05-26 13:47:23,663 - INFO - Wysy³anie danych systemu (próba 2/3) [RETRY]
-2025-05-26 13:47:25,935 - INFO - Exponential backoff: próba 2, opóŸnienie 60s (obliczone: 60s, max: 300s) [RETRY]
-2025-05-26 13:47:25,935 - INFO - Ponowna próba za 60 sekund... [RETRY]
-2025-05-26 13:48:25,942 - INFO - Wysy³anie danych systemu (próba 3/3) [RETRY]
-2025-05-26 13:48:30,032 - INFO - Updated power profile
-2025-05-26 13:48:30,032 - INFO - !!! Waiting 15 seconds for next iteration !!!
-2025-05-26 13:48:30,032 - INFO - !!! Energy management stopped !!!
+2025-05-27 16:55:27,090 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:27,090 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:27,173 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:27,173 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:27,173 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:27,257 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:27,257 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:27,257 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:27,334 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:27,334 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:27,334 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:27,420 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:27,420 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:27,420 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:27,503 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:27,503 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:27,503 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:27,578 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:27,578 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:27,578 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:27,658 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:27,658 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:27,658 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:27,740 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:27,740 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:27,740 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:27,820 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:27,820 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:27,822 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:27,894 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:27,894 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:27,894 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:27,979 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:27,979 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:27,979 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:28,063 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:28,063 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:28,064 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:28,149 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:28,149 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:28,149 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:28,257 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:28,257 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:28,257 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:28,354 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:28,354 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:28,354 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:28,456 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:28,456 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:28,456 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:28,546 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:28,546 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:28,546 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:28,636 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:28,636 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:28,636 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:28,746 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:28,746 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:28,746 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:28,843 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:28,843 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:28,843 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:28,954 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:28,954 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:28,954 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:29,048 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:29,048 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:29,048 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:29,137 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:29,137 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:29,137 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:29,214 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:29,214 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:29,214 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:29,297 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:29,297 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:29,297 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:29,376 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:29,376 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:29,376 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:29,453 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:29,453 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:29,453 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:29,546 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:29,546 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:29,546 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:29,639 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:29,639 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:29,639 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:29,719 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:29,719 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:29,719 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:29,799 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:29,799 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:29,799 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:29,879 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:29,879 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:29,879 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:29,966 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:29,966 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:29,966 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:30,047 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:30,047 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:30,047 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:30,129 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:30,129 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:30,129 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:30,217 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:30,217 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:30,217 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:30,321 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:30,321 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:30,321 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:30,421 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:30,422 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:30,422 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:30,520 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:30,520 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:30,520 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:30,620 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:30,621 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:30,621 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:30,714 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:30,714 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:30,714 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:30,828 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:30,828 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:30,828 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:30,930 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:30,930 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:30,930 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:31,035 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:31,035 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:31,035 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:31,129 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:31,139 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:31,139 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:31,216 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:31,216 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:31,216 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:31,298 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:31,302 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:31,303 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:31,380 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:31,380 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:31,380 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:31,460 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:31,460 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:31,460 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:31,542 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:31,544 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:31,544 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:31,636 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:31,636 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:31,636 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:31,720 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:31,720 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:31,720 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:31,800 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:31,800 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:31,800 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:31,881 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:31,881 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:31,881 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:31,972 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:31,972 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:31,972 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:32,065 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:32,065 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:32,065 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:32,160 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:32,160 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:32,160 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:32,256 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:32,256 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:32,256 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:32,356 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:32,356 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:32,356 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:32,456 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:32,456 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:32,456 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:32,556 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:32,556 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:32,556 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:32,646 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:32,646 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:32,646 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:32,757 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:32,757 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:32,757 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:32,846 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:32,846 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:32,846 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:32,953 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:32,953 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:32,953 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:33,047 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:33,047 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:33,047 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:33,147 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:33,147 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:33,147 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:33,241 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:33,241 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:33,241 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:33,353 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:33,353 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:33,353 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:33,453 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:33,453 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:33,453 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:33,547 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:33,547 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:33,547 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:33,647 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:33,647 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:33,647 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:33,750 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:33,750 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:33,753 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:33,854 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:33,854 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:33,854 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:33,954 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:33,954 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:33,954 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:34,053 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:34,053 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:34,054 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:34,154 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:34,154 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:34,154 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:34,227 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:34,227 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:34,227 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:34,320 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:34,320 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:34,320 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:34,403 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:34,404 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:34,404 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:34,484 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:34,484 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:34,484 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:34,572 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:34,572 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:34,573 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:34,653 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:34,653 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:34,653 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:34,737 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:34,737 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:34,737 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:34,819 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:34,820 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:34,820 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:34,897 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:34,897 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:34,897 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:34,972 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:34,982 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:34,982 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:35,063 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:35,063 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:35,063 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:35,147 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:35,147 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:35,147 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:35,220 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:35,220 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:35,220 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:35,303 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:35,303 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:35,303 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:35,387 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:35,387 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:35,387 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:35,467 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:35,467 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:35,467 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:35,557 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:35,557 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:35,557 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:35,637 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:35,637 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:35,637 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:35,721 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:35,721 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:35,721 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:35,806 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:35,807 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:35,808 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:35,889 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:35,889 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:35,889 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:35,972 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:35,972 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:35,972 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:36,054 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:36,054 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:36,054 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:36,138 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:36,139 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:36,139 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:36,220 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:36,220 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:36,220 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:36,303 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:36,303 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:36,303 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:36,386 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:36,387 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:36,387 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:36,463 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:36,463 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:36,463 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:36,569 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:36,569 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:36,569 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:36,663 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:36,663 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:36,663 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:36,749 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:36,749 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:36,749 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:36,832 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:36,832 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:36,832 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:36,922 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:36,922 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:36,922 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:37,008 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:37,008 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:37,008 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:37,083 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:37,083 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:37,083 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:37,179 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:37,179 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:37,179 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:37,279 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:37,279 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:37,279 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:37,380 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:37,380 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:37,380 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:37,470 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:37,470 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:37,470 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:37,579 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:37,579 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:37,579 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:37,675 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:37,675 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:37,675 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:37,770 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:37,770 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:37,770 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:37,866 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:37,866 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:37,866 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:37,966 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:37,966 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:37,966 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:38,056 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:38,066 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:38,066 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:38,167 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:38,167 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:38,167 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:38,256 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:38,256 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:38,266 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:38,357 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:38,357 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:38,357 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:38,459 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:38,459 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:38,459 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:38,556 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:38,556 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:38,556 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:38,663 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:38,663 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:38,663 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:38,772 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:38,772 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:38,772 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:38,876 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:38,876 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:38,876 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:38,969 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:38,969 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:38,969 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:39,077 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:39,077 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:39,077 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:39,180 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:39,180 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:39,180 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:39,296 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:39,296 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:39,296 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:39,389 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:39,389 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:39,389 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:39,493 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:39,493 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:39,493 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:39,590 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:39,591 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:39,591 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:39,687 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:39,687 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:39,687 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:39,788 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:39,788 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:39,789 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:39,880 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:39,880 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:39,880 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:39,969 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:39,969 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:39,969 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:40,070 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:40,070 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:40,070 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:40,169 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:40,169 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:40,169 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:40,270 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:40,270 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:40,270 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:40,387 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:40,387 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:40,387 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:40,476 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:40,476 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:40,476 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:40,587 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:40,587 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:40,587 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:40,689 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:40,689 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:40,689 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:40,786 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:40,786 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:40,786 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:40,888 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:40,889 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:40,889 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:40,983 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:40,983 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:40,983 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:41,078 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:41,078 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:41,078 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:41,172 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:41,172 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:41,172 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:41,280 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:41,280 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:41,280 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:41,380 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:41,380 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:41,380 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:41,470 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:41,480 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:41,480 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:41,583 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:41,583 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:41,583 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:41,704 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:41,704 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:41,704 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:41,807 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:41,807 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:41,807 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:41,902 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:41,902 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:41,902 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:42,000 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:42,000 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:42,000 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:42,119 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:42,119 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:42,119 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:42,223 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:42,224 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:42,224 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:42,324 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:42,324 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:42,324 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:42,404 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:42,404 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:42,404 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:42,485 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:42,485 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:42,485 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:42,563 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:42,563 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:42,563 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:42,652 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:42,652 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:42,653 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:42,739 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:42,739 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:42,739 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:42,825 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:42,825 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:42,825 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:42,906 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:42,906 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:42,906 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:42,988 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:42,989 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:42,989 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:43,072 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:43,072 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:43,072 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:43,154 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:43,154 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:43,154 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:43,235 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:43,236 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:43,236 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:43,316 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:43,316 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:43,316 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:43,410 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:43,411 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:43,411 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:43,488 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:43,488 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:43,488 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:43,571 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:43,571 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:43,571 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:43,652 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:43,653 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:43,653 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:43,752 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:43,752 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:43,753 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:43,837 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:43,838 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:43,838 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:43,920 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:43,921 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:43,921 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:43,996 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:43,996 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:43,996 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:44,080 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:44,080 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:44,080 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:44,155 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:44,155 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:44,155 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:44,243 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:44,243 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:44,244 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:44,322 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:44,322 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:44,322 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:44,402 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:44,402 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:44,402 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:44,479 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:44,479 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:44,479 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:44,562 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:44,563 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:44,563 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:44,647 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:44,647 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:44,647 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:44,726 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:44,726 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:44,726 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:44,803 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:44,803 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:44,803 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:44,895 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:44,895 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:44,895 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:44,973 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:44,973 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:44,973 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:45,058 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-05-27 16:55:45,058 - INFO - Loaded operation mode: automatic
+2025-05-27 16:55:45,058 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-27 16:55:45,058 - INFO - !!! Energy management stopping !!!
+2025-05-27 16:55:45,136 - INFO - !!! Energy management stopped !!!

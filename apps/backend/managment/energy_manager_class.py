@@ -86,6 +86,7 @@ class EnergyManager:
             self.add_to_tabu_list,
             self.is_in_tabu_list,
             self.clean_tabu_list,
+            energy_manager_ref=self  # ← DODAJ TO
         )
         self.deficit_manager = EnergyDeficitManager(
             microgrid,
@@ -97,6 +98,7 @@ class EnergyManager:
             self.add_to_tabu_list,
             self.is_in_tabu_list,
             self.clean_tabu_list,
+            energy_manager_ref=self  # ← DODAJ TO
         )
         
         # Inicjalizacja menedżera profili mocy
@@ -155,6 +157,8 @@ class EnergyManager:
 
         self.info_logger.info(f"Using API: {self.use_api}")
 
+        self.changed_devices = []
+
 
 
 
@@ -198,6 +202,11 @@ class EnergyManager:
         """Uruchamia proces zarządzania energią w osobnym wątku."""
         while self.running and not self.stop_event.is_set():
             try:
+                iteration_start_time = time.time()
+                
+                # Resetuj listę zmian na początku iteracji
+                self.reset_changed_devices()
+                
                 self.info_logger.highlight("Starting new iteration")
                 self.load_configuration()
 
@@ -235,30 +244,47 @@ class EnergyManager:
                 result = self.run_single_iteration()
                 
                 # 4. Zapisujemy wyniki do plików wewnętrznych
-                self.save_live_data()
+                #self.save_live_data()
                 self.save_contract_data()
                 
-                # 5. Wysyłamy dane do API (jeśli używamy API)
+                # 5. Wysyłamy tylko zmienione urządzenia do API
                 if self.use_api:
-                    # Przygotuj dane w formacie API
-                    api_system_data = self.prepare_system_data_for_api()
-                    api_contract_data = self.prepare_contract_data_for_api()
-                    
-                    # Wyślij z retry logic
-                    success = self.api_manager.send_updated_data_with_retry(
-                        api_system_data, 
-                        api_contract_data
-                    )
-                    
-                    if not success:
-                        self.error_logger.error("Failed to send data to API after all retry attempts")
+                    # 5a. Sprawdź czy są jakiekolwiek zmiany
+                    if self.has_device_changes():
+                        # Przygotuj dane TYLKO dla zmienionych urządzeń
+                        api_changed_data = self.prepare_changed_devices_for_api()
+                        api_contract_data = self.prepare_contract_data_for_api()
+                        
+                        # 5b. Zapisz TYLKO zmienione urządzenia do output_data
+                        os.makedirs(os.path.dirname(self.output_data_path), exist_ok=True)
+                        with open(self.output_data_path, "w") as f:
+                            json.dump(api_changed_data, f, indent=4)
+                        
+                        # Log podsumowania zmian
+                        self.log_changed_devices_summary()
+                        self.info_logger.info(f"Changed devices data saved to {self.output_data_path}")
+                        
+                        # 5c. Wyślij z retry logic
+                        success = self.api_manager.send_updated_data_with_retry(
+                            api_changed_data,  # Tylko zmienione urządzenia!
+                            api_contract_data
+                        )
+                        
+                        if not success:
+                            self.error_logger.error("Failed to send data to API after all retry attempts")
+                        else:
+                            self.info_logger.info("Changed devices data sent to API successfully")
                     else:
-                        self.info_logger.info("Data sent to API successfully")
+                        self.info_logger.info("No device changes detected - skipping API POST operation")
                 
                 # 6. Aktualizujemy profil mocy
                 self.update_power_profile(datetime.now())
+                
+                # 7. Loguj czas całej iteracji
+                iteration_elapsed_time = time.time() - iteration_start_time
+                self.info_logger.info(f"Complete iteration finished in {iteration_elapsed_time:.2f} seconds")
 
-                # 7. Oczekiwanie na następną iterację
+                # 8. Oczekiwanie na następną iterację
                 wait_time = (
                     self.auto_interval
                     if self.operation_mode == OperationMode.AUTOMATIC
@@ -308,7 +334,7 @@ class EnergyManager:
             self.execute_approved_actions(approved_actions)
 
         self.log_system_summary()
-        self.save_live_data()
+        #self.save_live_data()
         self.save_contract_data()
         self.update_power_profile(datetime.now())
 
@@ -527,19 +553,33 @@ class EnergyManager:
 
         try:
             if isinstance(device, EnergySource):
-                return self.perform_energy_source_action(device, action)
+                result = self.perform_energy_source_action(device, action)
             elif isinstance(device, EnergyPoint):
-                return self.perform_energy_point_action(device, action)
+                result = self.perform_energy_point_action(device, action)
             elif isinstance(device, BESS):
-                return self.perform_bess_action(device, action)
+                result = self.perform_bess_action(device, action)
             elif isinstance(device, OSD):
-                return self.perform_osd_action(device, action)
+                result = self.perform_osd_action(device, action)
             else:
-                return {
+                result = {
                     "success": False,
                     "amount": 0,
                     "reason": f"Unknown device type: {device_type}",
                 }
+            
+            # NOWE: Jeśli akcja się powiodła, zapisz zmiany do śledzenia
+            if result.get("success", False):
+                device_change = {
+                    "device": device,
+                    "action": action,
+                    "new_value": result.get("amount", 0),
+                    "device_type": self.get_device_type(device)  # Używaj tej funkcji zamiast type().__name__
+                }
+                self.changed_devices.append(device_change)
+                self.info_logger.info(f"✅ DEVICE CHANGED: {device_name} ({self.get_device_type(device)}) - {action}")
+            
+            return result
+            
         except Exception as e:
             self.error_logger.exception(f"[DEBUG] Error in perform_action: {str(e)}")
             return {"success": False, "amount": 0, "reason": str(e)}
@@ -1015,43 +1055,6 @@ class EnergyManager:
         except FileNotFoundError:
             self.error_logger.error("Live data files not found. Loading initial data.")
             self.load_initial_data()
-
-    def save_live_data(self):
-        """
-        Zapisuje aktualne dane do pliku wyjściowego w formacie aplikacji (do dalszego przetwarzania).
-        Zapisuje również uproszczone dane w formacie API do pliku wyjściowego (do wysłania do API).
-        """
-        try:
-            # Dane w formacie wewnętrznym aplikacji
-            live_data = {
-                "pv_panels": [panel.to_dict() for panel in self.microgrid.pv_panels],
-                "wind_turbines": [
-                    turbine.to_dict() for turbine in self.microgrid.wind_turbines
-                ],
-                "fuel_turbines": [
-                    turbine.to_dict() for turbine in self.microgrid.fuel_turbines
-                ],
-                "fuel_cells": [cell.to_dict() for cell in self.microgrid.fuel_cells],
-                "bess": [self.microgrid.bess.to_dict()] if self.microgrid.bess else [],
-                "non_adjustable_devices": [
-                    device.to_dict() for device in self.consumergrid.non_adjustable_devices
-                ],
-                "adjustable_devices": [
-                    device.to_dict() for device in self.consumergrid.adjustable_devices
-                ],
-            }
-
-            # Upewnij się, że katalogi istnieją
-            os.makedirs(os.path.dirname(self.output_data_path), exist_ok=True)
-
-            # Zapisujemy dane do pliku wyjściowego
-            with open(self.output_data_path, "w") as f:
-                json.dump(live_data, f, indent=4)
-
-            self.info_logger.section("Ending of iteration")
-            self.info_logger.info(f"Live data saved to {self.output_data_path}")
-        except Exception as e:
-            self.error_logger.error(f"Error saving live data: {str(e)}")
 
     def save_contract_data(self):
         """Generuje i zapisuje aktualne dane kontraktowe do osobnego pliku JSON."""
@@ -1563,61 +1566,61 @@ class EnergyManager:
                 )
                 self.info_logger.info(f"  - {device.name} ({device_type})")
 
-    def prepare_system_data_for_api(self):
-        """
-        Przygotowuje dane systemu w formacie API do wysłania.
+    # def prepare_system_data_for_api(self):
+    #     """
+    #     Przygotowuje dane systemu w formacie API do wysłania.
         
-        Returns:
-            dict: Słownik zawierający dane systemu w formacie API.
-        """
-        api_data = {
-            "pv_panels": [],
-            "wind_turbines": [],
-            "fuel_turbines": [],
-            "fuel_cells": [],
-            "bess": [],
-            "non_adjustable_devices": [],
-            "adjustable_devices": []
-        }
+    #     Returns:
+    #         dict: Słownik zawierający dane systemu w formacie API.
+    #     """
+    #     api_data = {
+    #         "pv_panels": [],
+    #         "wind_turbines": [],
+    #         "fuel_turbines": [],
+    #         "fuel_cells": [],
+    #         "bess": [],
+    #         "non_adjustable_devices": [],
+    #         "adjustable_devices": []
+    #     }
         
-        # Konwersja źródeł energii
-        for category, devices in [
-            ("pv_panels", self.microgrid.pv_panels),
-            ("wind_turbines", self.microgrid.wind_turbines),
-            ("fuel_turbines", self.microgrid.fuel_turbines),
-            ("fuel_cells", self.microgrid.fuel_cells)
-        ]:
-            for device in devices:
-                api_data[category].append({
-                    "name": device.name,
-                    "actual_output": device.get_actual_output(),
-                    "switch_status": device.switch_status
-                })
+    #     # Konwersja źródeł energii
+    #     for category, devices in [
+    #         ("pv_panels", self.microgrid.pv_panels),
+    #         ("wind_turbines", self.microgrid.wind_turbines),
+    #         ("fuel_turbines", self.microgrid.fuel_turbines),
+    #         ("fuel_cells", self.microgrid.fuel_cells)
+    #     ]:
+    #         for device in devices:
+    #             api_data[category].append({
+    #                 "name": device.name,
+    #                 "actual_output": device.get_actual_output(),
+    #                 "switch_status": device.switch_status
+    #             })
         
-        # Konwersja BESS
-        if self.microgrid.bess:
-            api_data["bess"].append({
-                "name": self.microgrid.bess.name,
-                "actual_output": 0,  # BESS nie ma actual_output w API
-                "switch_status": self.microgrid.bess.switch_status
-            })
+    #     # Konwersja BESS
+    #     if self.microgrid.bess:
+    #         api_data["bess"].append({
+    #             "name": self.microgrid.bess.name,
+    #             "actual_output": 0,  # BESS nie ma actual_output w API
+    #             "switch_status": self.microgrid.bess.switch_status
+    #         })
         
-        # Konwersja urządzeń konsumpcyjnych
-        for device in self.consumergrid.non_adjustable_devices:
-            api_data["non_adjustable_devices"].append({
-                "name": device.name,
-                "actual_output": device.get_current_power(),
-                "switch_status": device.switch_status
-            })
+    #     # Konwersja urządzeń konsumpcyjnych
+    #     for device in self.consumergrid.non_adjustable_devices:
+    #         api_data["non_adjustable_devices"].append({
+    #             "name": device.name,
+    #             "actual_output": device.get_current_power(),
+    #             "switch_status": device.switch_status
+    #         })
         
-        for device in self.consumergrid.adjustable_devices:
-            api_data["adjustable_devices"].append({
-                "name": device.name,
-                "actual_output": device.get_current_power(),
-                "switch_status": device.switch_status
-            })
+    #     for device in self.consumergrid.adjustable_devices:
+    #         api_data["adjustable_devices"].append({
+    #             "name": device.name,
+    #             "actual_output": device.get_current_power(),
+    #             "switch_status": device.switch_status
+    #         })
         
-        return api_data
+    #     return api_data
 
     def prepare_contract_data_for_api(self):
         """
@@ -1638,3 +1641,77 @@ class EnergyManager:
             "current_tariff_buy": self.osd.get_current_buy_price(),
             "current_tariff_sell": self.osd.get_current_sell_price()
         }
+    
+    def prepare_changed_devices_for_api(self):
+        """Przygotowuje dane API tylko dla urządzeń zmienionych przez algorytm."""
+        api_data = {}
+        
+        for change in self.changed_devices:
+            device = change["device"]
+            device_type = change["device_type"]
+
+            # DODAJ TO - obsługa OSD:
+            if device_type == "OSD":
+                # OSD nie jest wysyłane jako urządzenie, tylko jako dane kontraktu
+                # Więc pomijamy je tutaj - będzie obsłużone przez prepare_contract_data_for_api()
+                continue
+            
+            device_api_data = {
+                "name": device.name,
+                "switch_status": device.switch_status if hasattr(device, 'switch_status') else True
+            }
+            
+            if device_type == "BESS":
+                device_api_data["charge_level"] = device.get_charge_level()
+                if "bess" not in api_data:
+                    api_data["bess"] = []
+                api_data["bess"].append(device_api_data)
+                
+            elif device_type in ["PV", "WindTurbine", "FuelTurbine", "FuelCell"]:
+                device_api_data["actual_output"] = device.get_actual_output()
+                category_map = {
+                    "PV": "pv_panels",
+                    "WindTurbine": "wind_turbines", 
+                    "FuelTurbine": "fuel_turbines",
+                    "FuelCell": "fuel_cells"
+                }
+                category = category_map.get(device_type, "pv_panels")
+                if category not in api_data:
+                    api_data[category] = []
+                api_data[category].append(device_api_data)
+                
+            elif device_type in ["AdjustableDevice", "NonAdjustableDevice"]:
+                device_api_data["actual_output"] = device.get_current_power()
+                category = "adjustable_devices" if device_type == "AdjustableDevice" else "non_adjustable_devices"
+                if category not in api_data:
+                    api_data[category] = []
+                api_data[category].append(device_api_data)
+        
+        return api_data
+
+    def has_device_changes(self):
+        """Sprawdza czy algorytm wykonał jakiekolwiek zmiany na urządzeniach."""
+        return len(self.changed_devices) > 0
+
+    def reset_changed_devices(self):
+        """Resetuje listę zmienionych urządzeń na początku każdej iteracji."""
+        self.changed_devices = []
+        
+    def log_changed_devices_summary(self):
+        """Loguje podsumowanie zmienionych urządzeń."""
+        if not self.changed_devices:
+            self.info_logger.info("No devices were changed by the algorithm in this iteration")
+            return
+        
+        self.info_logger.section("Algorithm Changes Summary")
+        for change in self.changed_devices:
+            device = change["device"]
+            action = change["action"]
+            device_type = change["device_type"]
+            
+            if device_type == "BESS":
+                self.info_logger.info(f"  - BESS '{device.name}': {action} → charge_level: {device.get_charge_level():.2f} kWh")
+            elif hasattr(device, 'get_actual_output'):
+                self.info_logger.info(f"  - {device_type} '{device.name}': {action} → actual_output: {device.get_actual_output():.2f} kW")
+            elif hasattr(device, 'get_current_power'):
+                self.info_logger.info(f"  - {device_type} '{device.name}': {action} → power: {device.get_current_power():.2f} kW")

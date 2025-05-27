@@ -579,7 +579,9 @@ class ApiManager:
                 
                 # Sprawdź odpowiedź z API
                 response_data = response.json()
-                if "Message" in response_data and "successfully" in response_data["Message"]:
+                # Sprawdź różne warianty message/Message i czy zawiera "successfully" 
+                message = response_data.get("message", "") or response_data.get("Message", "")
+                if message and "successfully" in message.lower():
                     self._log_with_flag("SUCCESS", "Dane kontraktu wysłane pomyślnie", "NETWORK")
                     return True
                 else:
