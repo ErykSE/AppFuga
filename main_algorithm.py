@@ -27,9 +27,15 @@ if __name__ == "__main__":
         if osd is None:
             raise ValueError("Failed to load OSD data from initial contract file.")
 
-        # Inicjalizacja i uruchomienie EnergyManager
+        # Inicjalizacja i uruchomienie EnergyManager z parametrami API
         energy_manager = EnergyManager(
-            microgrid, consumergrid, osd, info_logger, error_logger
+            microgrid=microgrid, 
+            consumergrid=consumergrid, 
+            osd=osd, 
+            info_logger=info_logger, 
+            error_logger=error_logger,
+            api_base_url="http://localhost:5002",  # Zmień na adres swojego API
+            use_api=True  # Włącz używanie API
         )
 
         # Uruchomienie zarządzania energią

@@ -6,9 +6,11 @@
             "priority": 1,
             "max_output": 100,
             "min_output": 10,
-            "actual_output": 0,
-            "switch_status": false,
-            "device_status": "offline"
+            "actual_output": 15,
+            "switch_status": true,
+            "device_status": "online",
+            "pending_action": null,
+            "action_approved": null
         },
         {
             "id": 2,
@@ -18,7 +20,9 @@
             "min_output": 15,
             "actual_output": 100,
             "switch_status": true,
-            "device_status": "online"
+            "device_status": "online",
+            "pending_action": null,
+            "action_approved": null
         }
     ],
     "wind_turbines": [
@@ -30,7 +34,9 @@
             "min_output": 0,
             "actual_output": 80,
             "switch_status": true,
-            "device_status": "online"
+            "device_status": "online",
+            "pending_action": null,
+            "action_approved": null
         },
         {
             "id": 4,
@@ -40,7 +46,9 @@
             "min_output": 0,
             "actual_output": 55,
             "switch_status": true,
-            "device_status": "online"
+            "device_status": "online",
+            "pending_action": null,
+            "action_approved": null
         }
     ],
     "fuel_turbines": [
@@ -52,7 +60,9 @@
             "min_output": 0,
             "actual_output": 5,
             "switch_status": true,
-            "device_status": "online"
+            "device_status": "online",
+            "pending_action": null,
+            "action_approved": null
         }
     ],
     "fuel_cells": [
@@ -64,7 +74,9 @@
             "min_output": 0,
             "actual_output": 0,
             "switch_status": false,
-            "device_status": "offline"
+            "device_status": "offline",
+            "pending_action": null,
+            "action_approved": null
         }
     ],
     "bess": [
@@ -73,7 +85,7 @@
             "name": "BESS 1",
             "capacity": 350,
             "min_charge_level": 40,
-            "charge_level": 218,
+            "charge_level": 342,
             "switch_status": true,
             "device_status": "online"
         }
@@ -112,36 +124,6 @@
             "switch_status": true,
             "min_power": 30,
             "max_power": 1000
-        }
-    ],
-    "power_meters": [
-        {
-            "id": 101,
-            "name": "Meter for PV Panel 1",
-            "status": "online",
-            "measured_power": 15,
-            "device_id": 1
-        },
-        {
-            "id": 102,
-            "name": "Meter for PV Panel 2",
-            "status": "online",
-            "measured_power": 98,
-            "device_id": 2
-        },
-        {
-            "id": 103,
-            "name": "Meter for PV Wind Turbine 1",
-            "status": "online",
-            "measured_power": 42,
-            "device_id": 3
-        },
-        {
-            "id": 104,
-            "name": "Meter for Fuel Turbine 1",
-            "status": "online",
-            "measured_power": 38,
-            "device_id": 5
         }
     ]
 }

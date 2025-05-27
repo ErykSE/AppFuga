@@ -38,9 +38,9 @@
             "priority": 2,
             "max_output": 70,
             "min_output": 0,
-            "actual_output": 55,
-            "switch_status": true,
-            "device_status": "online"
+            "actual_output": 0,
+            "switch_status": false,
+            "device_status": "offline"
         }
     ],
     "fuel_turbines": [
@@ -50,7 +50,7 @@
             "priority": 4,
             "max_output": 100,
             "min_output": 0,
-            "actual_output": 5,
+            "actual_output": 100,
             "switch_status": true,
             "device_status": "online"
         }
@@ -73,7 +73,7 @@
             "name": "BESS 1",
             "capacity": 350,
             "min_charge_level": 40,
-            "charge_level": 218,
+            "charge_level": 200,
             "switch_status": true,
             "device_status": "online"
         }
@@ -131,7 +131,7 @@
         },
         {
             "id": 103,
-            "name": "Meter for PV Wind Turbine 1",
+            "name": "Meter for Wind Turbine 1",
             "status": "online",
             "measured_power": 42,
             "device_id": 3

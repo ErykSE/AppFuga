@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  # Twoja aplikacja Python do zarządzania energią
+  energy-manager:
+    build: .
+    container_name: energy-manager-1
+    restart: unless-stopped
+    volumes:
+      - ./:/app
+      - ./data:/app/data  # Montowanie folderu na pliki JSON i parquet
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

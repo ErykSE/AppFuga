@@ -1,3 +1,6 @@
-2024-10-07 14:06:56,908 - ERROR - Communication error detected with PV Panel 1 (ID: 1). Device status is offline but meter reading indicates power generation of 15 kW.
-2024-10-07 14:06:56,996 - ERROR - Error updating weather data: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))
-2024-10-07 14:06:57,050 - ERROR - Error updating power profile: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))
+2025-05-26 13:46:46,918 - ERROR - Communication error detected with PV Panel 1 (ID: 1). Device status is offline but meter reading indicates power generation of 15 kW.
+2025-05-26 13:46:53,661 - WARNING - [WARNING] API zwróci³o b³¹d: Partial success: 17 successful, 5 failed [RETRY]
+2025-05-26 13:47:25,935 - ERROR - B³¹d podczas wysy³ania danych systemu (próba 2): ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None)) [RETRY]
+2025-05-26 13:48:30,032 - ERROR - B³¹d podczas wysy³ania danych systemu (próba 3): HTTPConnectionPool(host='localhost', port=5002): Max retries exceeded with url: /api/Scada/update-system-state (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000001EA3056C920>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it')) [RETRY]
+2025-05-26 13:48:30,032 - CRITICAL - Przekroczono maksymaln¹ liczbê prób wys³ania danych systemu [ALERT]
+2025-05-26 13:48:30,032 - ERROR - Failed to send data to API after all retry attempts
