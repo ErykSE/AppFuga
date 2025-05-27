@@ -73,6 +73,8 @@ class EnergyManager:
 
         self.output_data_path = os.path.join(self.base_path, "apps", "backend", "output_data.json")
         self.output_contract_path = os.path.join(self.base_path, "apps", "backend", "output_contract_data.json")
+
+        self.status_path = os.path.join(self.base_path, "apps", "backend", "system_status.json")
         
         # Inicjalizacja menedżerów
         self.surplus_manager = EnergySurplusManager(
@@ -106,6 +108,8 @@ class EnergyManager:
             lat=50.86,
             lon=16.32,
         )
+
+
         
         # Reszta inicjalizacji pozostaje bez zmian
         self.check_interval = check_interval
@@ -148,12 +152,10 @@ class EnergyManager:
                 error_logger=error_logger,
                 verify_ssl=False
             )
-            # Sprawdzenie połączenia z API
-            if not self.api_manager.check_api_connection():
-                self.error_logger.warning("Nie można nawiązać połączenia z API. Przełączanie na tryb lokalnych plików.")
-                self.use_api = False
 
         self.info_logger.info(f"Using API: {self.use_api}")
+
+
 
 
     def _get_base_path(self):
@@ -199,158 +201,59 @@ class EnergyManager:
                 self.info_logger.highlight("Starting new iteration")
                 self.load_configuration()
 
-                # 1. Pobieramy dane z API na początku każdej iteracji (jeśli używamy API)
+                # 1. Pobieramy dane z API (jeśli używamy API)
                 if self.use_api:
                     success = self.api_manager.fetch_and_save_data(
                         self.live_data_path, 
-                        self.live_contract_path
+                        self.live_contract_path,
+                        self.status_path
                     )
                     if not success:
                         self.error_logger.error("Failed to fetch data from API")
-                        # Jeśli to pierwsze uruchomienie, spróbuj użyć danych początkowych
-                        if not os.path.exists(self.live_data_path):
-                            self.load_initial_data()
-                
-                # 2. Ładujemy dane z plików (live_data lub initial_data w przypadku pierwszego uruchomienia)
-                if os.path.exists(self.live_data_path):
-                    self.load_live_data()
+                        
+                        # Sprawdź czy system w trybie alarmowym
+                        if self.api_manager.system_in_alarm_mode:
+                            self.error_logger.critical("System is in ALARM MODE - STOPPING ALGORITHM!")
+                            self.stop()
+                            return
+                        
+                        # Jeśli nie tryb alarmowy, ale błąd - pomiń tę iterację
+                        self.error_logger.warning("Skipping iteration due to API failure")
+                        continue
+                    
+                    # 2. Ładujemy dane tylko z API (nie z lokalnych plików!)
+                    if os.path.exists(self.live_data_path):
+                        self.load_live_data()
+                    else:
+                        self.error_logger.error("No live data available after API fetch")
+                        continue
                 else:
+                    # Tryb bez API - użyj danych początkowych (tylko do testów)
                     self.load_initial_data()
 
                 # 3. Wykonujemy algorytm
                 result = self.run_single_iteration()
                 
                 # 4. Zapisujemy wyniki do plików wewnętrznych
-                self.save_live_data()  # Zapisuje w formacie wewnętrznym aplikacji
-                self.save_contract_data()  # Zapisuje w formacie wewnętrznym aplikacji
+                self.save_live_data()
+                self.save_contract_data()
                 
                 # 5. Wysyłamy dane do API (jeśli używamy API)
                 if self.use_api:
-                    # 5a. Przygotowujemy dane w formacie API
-                    api_system_data = {
-                        "pv_panels": [],
-                        "wind_turbines": [],
-                        "fuel_turbines": [],
-                        "fuel_cells": [],
-                        "bess": [],
-                        "non_adjustable_devices": [],
-                        "adjustable_devices": []
-                    }
+                    # Przygotuj dane w formacie API
+                    api_system_data = self.prepare_system_data_for_api()
+                    api_contract_data = self.prepare_contract_data_for_api()
                     
-                    # Konwersja źródeł energii
-                    for panel in self.microgrid.pv_panels:
-                        api_system_data["pv_panels"].append({
-                            "name": panel.name,
-                            "actual_output": panel.get_actual_output(),
-                            "switch_status": panel.switch_status
-                        })
+                    # Wyślij z retry logic
+                    success = self.api_manager.send_updated_data_with_retry(
+                        api_system_data, 
+                        api_contract_data
+                    )
                     
-                    for turbine in self.microgrid.wind_turbines:
-                        api_system_data["wind_turbines"].append({
-                            "name": turbine.name,
-                            "actual_output": turbine.get_actual_output(),
-                            "switch_status": turbine.switch_status
-                        })
-                    
-                    for turbine in self.microgrid.fuel_turbines:
-                        api_system_data["fuel_turbines"].append({
-                            "name": turbine.name,
-                            "actual_output": turbine.get_actual_output(),
-                            "switch_status": turbine.switch_status
-                        })
-                    
-                    for cell in self.microgrid.fuel_cells:
-                        api_system_data["fuel_cells"].append({
-                            "name": cell.name,
-                            "actual_output": cell.get_actual_output(),
-                            "switch_status": cell.switch_status
-                        })
-                    
-                    # Konwersja BESS
-                    if self.microgrid.bess:
-                        api_system_data["bess"].append({
-                            "name": self.microgrid.bess.name,
-                            "actual_output": 0,  # BESS nie ma actual_output w API
-                            "switch_status": self.microgrid.bess.switch_status
-                        })
-                    
-                    # Konwersja urządzeń konsumpcyjnych
-                    for device in self.consumergrid.non_adjustable_devices:
-                        api_system_data["non_adjustable_devices"].append({
-                            "name": device.name,
-                            "actual_output": device.get_current_power(),
-                            "switch_status": device.switch_status
-                        })
-                    
-                    for device in self.consumergrid.adjustable_devices:
-                        api_system_data["adjustable_devices"].append({
-                            "name": device.name,
-                            "actual_output": device.get_current_power(),
-                            "switch_status": device.switch_status
-                        })
-                    
-                    # 5b. Zapisujemy dane API do pliku dla referencji
-                    os.makedirs(os.path.dirname(self.output_data_path), exist_ok=True)
-                    with open(self.output_data_path, "w") as f:
-                        json.dump(api_system_data, f, indent=4)
-                    self.info_logger.info(f"API system data saved to {self.output_data_path}")
-                    
-                    # 5c. Przygotowujemy dane kontraktu w formacie API
-                    api_contract_data = {
-                        "contracted_type": self.osd.CONTRACTED_TYPE,
-                        "contracted_duration": self.osd.CONTRACTED_DURATION,
-                        "contracted_margin": self.osd.CONTRACTED_MARGIN,
-                        "contracted_export_possibility": self.osd.CONTRACTED_EXPORT_POSSIBILITY,
-                        "contracted_sale_limit": self.osd.CONTRACTED_SALE_LIMIT,
-                        "contracted_purchase_limit": self.osd.CONTRACTED_PURCHASE_LIMIT,
-                        "sold_power": self.osd.get_sold_power(),
-                        "bought_power": self.osd.get_bought_power(),
-                        "current_tariff_buy": self.osd.get_current_buy_price(),
-                        "current_tariff_sell": self.osd.get_current_sell_price()
-                    }
-                    
-                    # 5d. Zapisujemy dane kontraktu w formacie API do pliku dla referencji
-                    os.makedirs(os.path.dirname(self.output_contract_path), exist_ok=True)
-                    with open(self.output_contract_path, "w") as f:
-                        json.dump(api_contract_data, f, indent=4)
-                    self.info_logger.info(f"API contract data saved to {self.output_contract_path}")
-                    
-                    # 5e. Wysyłamy dane systemu do API
-                    system_url = f"{self.api_manager.api_base_url}/api/Scada/update-system-state"
-                    headers = {"Content-Type": "application/json"}
-                    
-                    try:
-                        system_response = requests.post(
-                            system_url, 
-                            json=api_system_data, 
-                            headers=headers, 
-                            verify=self.api_manager.verify_ssl,
-                            timeout=15
-                        )
-                        system_response.raise_for_status()
-                        self.info_logger.info("Aktualizacja stanu systemu wysłana pomyślnie")
-                    except Exception as e:
-                        self.error_logger.error(f"Błąd podczas wysyłania aktualizacji stanu systemu: {str(e)}")
-                        if hasattr(e, 'response') and e.response:
-                            self.error_logger.error(f"Odpowiedź: {e.response.text}")
-                    
-                    # 5f. Wysyłamy dane kontraktu do API
-                    contract_url = f"{self.api_manager.api_base_url}/api/Scada/update-contract"
-                    
-                    try:
-                        contract_response = requests.post(
-                            contract_url, 
-                            json=api_contract_data, 
-                            headers=headers, 
-                            verify=self.api_manager.verify_ssl,
-                            timeout=15
-                        )
-                        contract_response.raise_for_status()
-                        self.info_logger.info("Aktualizacja informacji o kontrakcie wysłana pomyślnie")
-                    except Exception as e:
-                        self.error_logger.error(f"Błąd podczas wysyłania aktualizacji informacji o kontrakcie: {str(e)}")
-                        if hasattr(e, 'response') and e.response:
-                            self.error_logger.error(f"Odpowiedź: {e.response.text}")
+                    if not success:
+                        self.error_logger.error("Failed to send data to API after all retry attempts")
+                    else:
+                        self.info_logger.info("Data sent to API successfully")
                 
                 # 6. Aktualizujemy profil mocy
                 self.update_power_profile(datetime.now())
@@ -361,11 +264,10 @@ class EnergyManager:
                     if self.operation_mode == OperationMode.AUTOMATIC
                     else self.semi_auto_interval
                 )
-                self.info_logger.important(
-                    f"Waiting {wait_time} seconds for next iteration"
-                )
+                self.info_logger.important(f"Waiting {wait_time} seconds for next iteration")
                 if self.stop_event.wait(wait_time):
                     break
+                    
             except Exception as e:
                 self.handle_runtime_error(e)
                 break

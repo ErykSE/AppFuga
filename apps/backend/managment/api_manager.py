@@ -143,51 +143,79 @@ class ApiManager:
         except requests.exceptions.RequestException as e:
             self.error_logger.error(f"Błąd podczas pobierania statusu systemu: {str(e)}")
             return None
+
     
-    def wait_for_scada_connection(self) -> bool:
+    def retry_system_state_connection(self, system_url: str) -> bool:
         """
-        Monitoruje połączenie z SCADA i czeka na jego przywrócenie.
-        Zamiast zatrzymywania systemu, przechodzi w tryb alarmowy.
+        5 prób pobrania danych z /system-state z exponential backoff.
         
-        Returns:
-            bool: True gdy połączenie zostało przywrócone, False przy przekroczeniu limitu prób
-        """
-        self._log_with_flag("WARNING", "Brak połączenia z SCADA. Rozpoczynam monitorowanie...", "SYSTEM")
-        attempts = 0
-        
-        while attempts < self.retry_config.max_consecutive_failures:
-            attempts += 1
+        Args:
+            system_url: URL do endpointa system-state
             
+        Returns:
+            bool: True jeśli udało się pobrać dane, False w przeciwnym razie
+        """
+        self._log_with_flag("WARNING", "Rozpoczynam 5 prób połączenia z system-state...", "RETRY")
+        
+        for attempt in range(1, self.retry_config.max_consecutive_failures + 1):
             self._log_with_flag("INFO", 
-                               f"Próba sprawdzenia połączenia z SCADA ({attempts}/{self.retry_config.max_consecutive_failures})", 
+                               f"Próba połączenia z system-state ({attempt}/{self.retry_config.max_consecutive_failures})", 
                                "RETRY")
             
-            status = self.get_system_status()
-            if status and status.scada_connected:
-                self._log_with_flag("SUCCESS", "Połączenie z SCADA zostało przywrócone!", "SYSTEM")
+            try:
+                response = requests.get(system_url, verify=self.verify_ssl, 
+                                     timeout=self.retry_config.connection_timeout)
+                response.raise_for_status()
+                
+                # Sukces!
+                self._log_with_flag("SUCCESS", "Połączenie z system-state przywrócone!", "SYSTEM")
                 self.consecutive_failures = 0
                 self.last_successful_connection = time.time()
                 self.system_in_alarm_mode = False
                 return True
-            
-            # Exponential backoff dla sprawdzania SCADA
-            if attempts < self.retry_config.max_consecutive_failures:
-                delay = self._calculate_scada_check_delay(attempts)
-                self._log_with_flag("WARNING", 
-                                   f"Połączenie z SCADA nadal niedostępne. Kolejna próba za {delay} sekund...", 
+                
+            except requests.exceptions.RequestException as e:
+                self._log_with_flag("ERROR", 
+                                   f"Próba {attempt} nieudana: {str(e)}", 
                                    "RETRY")
-                time.sleep(delay)
+                
+                if attempt < self.retry_config.max_consecutive_failures:
+                    delay = self._calculate_scada_check_delay(attempt)
+                    self._log_with_flag("WARNING", 
+                                       f"Następna próba za {delay} sekund...", 
+                                       "RETRY")
+                    time.sleep(delay)
         
-        # Zamiast zatrzymywania - przejdź w tryb alarmowy
-        self.system_in_alarm_mode = True
+        # Wszystkie próby nieudane
         self._log_with_flag("CRITICAL", 
-                           f"ALARM: Nie udało się przywrócić połączenia z SCADA po {attempts} próbach. "
-                           f"System kontynuuje pracę w trybie ALARMOWYM!", 
+                           f"Nie udało się połączyć z system-state po {self.retry_config.max_consecutive_failures} próbach", 
                            "ALERT")
-        
         return False
     
-    def _calculate_scada_check_delay(self, attempt: int) -> int:
+    def log_final_scada_status(self):
+        """
+        Wykonuje GET /status dla diagnostyki i loguje wynik.
+        Wywoływane po nieudanych próbach połączenia z system-state.
+        """
+        self._log_with_flag("INFO", "Wykonuję diagnostyczne sprawdzenie GET /status...", "SYSTEM")
+        
+        status_url = f"{self.api_base_url}/api/Scada/status"
+        try:
+            response = requests.get(status_url, verify=self.verify_ssl, 
+                                timeout=self.retry_config.connection_timeout)
+            response.raise_for_status()
+            status_data = response.json()
+            
+            self._log_with_flag("INFO", f"Status SCADA - diagnostyka:", "SYSTEM")
+            self._log_with_flag("INFO", f"  - scadaConnected: {status_data.get('scadaConnected', 'unknown')}", "SYSTEM")
+            self._log_with_flag("INFO", f"  - code: {status_data.get('code', 'unknown')}", "SYSTEM") 
+            self._log_with_flag("INFO", f"  - message: {status_data.get('message', 'unknown')}", "SYSTEM")
+            self._log_with_flag("INFO", f"  - missingDevices: {status_data.get('missingDevices', [])}", "SYSTEM")
+            
+        except requests.exceptions.RequestException as e:
+            self._log_with_flag("ERROR", f"Nie udało się pobrać statusu diagnostycznego: {str(e)}", "SYSTEM")
+
+    def _calculate_scada_check_delay(self, attempt: int = 1) -> int:
         """Oblicza opóźnienie dla sprawdzania połączenia SCADA."""
         if not self.retry_config.use_exponential_backoff:
             return self.retry_config.scada_check_interval
@@ -209,40 +237,73 @@ class ApiManager:
             bool: True jeśli operacja się powiodła, False w przeciwnym razie
         """
         try:
-            # 1. Najpierw sprawdź status systemu
+            # 1. Próba pobrania danych z system-state
             system_url = f"{self.api_base_url}/api/Scada/system-state"
             self.info_logger.info(f"Pobieranie danych stanu systemu z {system_url}")
-            system_response = requests.get(system_url, verify=self.verify_ssl, 
-                                         timeout=self.retry_config.connection_timeout)
-            system_response.raise_for_status()
-            system_data_raw = system_response.json()
             
-            # 2. Wydziel status z odpowiedzi
-            status_info = system_data_raw.get("status", {})
-            
-            # 3. Sprawdź czy SCADA jest połączona
-            if not status_info.get("scada_connected", False):
-                self._log_with_flag("WARNING", "SCADA nie jest połączona. Próba przywrócenia połączenia...", "SYSTEM")
-                
-                # Zapisz status awarii
-                self.save_status_data(status_path, status_info)
-                
-                # Czekaj na przywrócenie połączenia
-                if not self.wait_for_scada_connection():
-                    # System w trybie alarmowym - kontynuuj ale z ostrzeżeniem
-                    self._log_with_flag("CRITICAL", 
-                                       "System kontynuuje pracę w trybie ALARMOWYM - SCADA niedostępna!", 
-                                       "ALERT")
-                    return False
-                
-                # Ponów pobieranie danych po przywróceniu połączenia
+            try:
                 system_response = requests.get(system_url, verify=self.verify_ssl, 
                                              timeout=self.retry_config.connection_timeout)
                 system_response.raise_for_status()
                 system_data_raw = system_response.json()
-                status_info = system_data_raw.get("status", {})
+                
+            except requests.exceptions.HTTPError as e:
+                if e.response.status_code == 503:
+                    self._log_with_flag("WARNING", "API zwróciło 503 - SCADA prawdopodobnie niedostępna", "SYSTEM")
+                    
+                    # Zapisz status awarii do pliku
+                    error_status = {
+                        "code": "scada_unavailable", 
+                        "message": "SCADA system unavailable (503 error)",
+                        "scada_connected": False,
+                        "missing_devices": [],
+                        "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+                    }
+                    self.save_status_data(status_path, error_status)
+                    
+                    # 5 prób ponownego połączenia z system-state
+                    if not self.retry_system_state_connection(system_url):
+                        # Po nieudanych próbach - diagnostyka i zatrzymanie
+                        self.log_final_scada_status()
+                        
+                        self.system_in_alarm_mode = True
+                        self._log_with_flag("CRITICAL", 
+                                           "SCADA niedostępna po wszystkich próbach - ZATRZYMANIE ALGORYTMU!", 
+                                           "ALERT")
+                        return False
+                    
+                    # Sukces po retry - pobierz dane ponownie
+                    system_response = requests.get(system_url, verify=self.verify_ssl, 
+                                                 timeout=self.retry_config.connection_timeout)
+                    system_response.raise_for_status()
+                    system_data_raw = system_response.json()
+                else:
+                    raise  # Inny błąd HTTP - propaguj dalej
             
-            # 4. Sprawdź czy są brakujące urządzenia
+            except requests.exceptions.RequestException as e:
+                # Błędy połączenia (timeout, connection error itp.)
+                self._log_with_flag("ERROR", f"Błąd połączenia z system-state: {str(e)}", "NETWORK")
+                
+                # Próby ponownego połączenia
+                if not self.retry_system_state_connection(system_url):
+                    self.log_final_scada_status()
+                    
+                    self.system_in_alarm_mode = True
+                    self._log_with_flag("CRITICAL", 
+                                       "Błąd połączenia po wszystkich próbach - ZATRZYMANIE ALGORYTMU!", 
+                                       "ALERT")
+                    return False
+                
+                # Sukces po retry
+                system_response = requests.get(system_url, verify=self.verify_ssl, 
+                                             timeout=self.retry_config.connection_timeout)
+                system_response.raise_for_status()
+                system_data_raw = system_response.json()
+            
+            # 2. Wydziel status z odpowiedzi
+            status_info = system_data_raw.get("status", {})
+            
+            # 3. Sprawdź czy są brakujące urządzenia (pozostała logika bez zmian)
             missing_devices = status_info.get("missing_devices", [])
             if missing_devices:
                 self._log_with_flag("WARNING", 

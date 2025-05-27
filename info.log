@@ -1,590 +1,185 @@
-2025-05-19 11:34:16,305 - INFO - Base path: C:/eryk/AppFuga
-2025-05-19 11:34:16,306 - INFO - Initial data path: C:/eryk/AppFuga\apps\backend\initial_data.json
-2025-05-19 11:34:16,306 - INFO - Initial contract path: C:/eryk/AppFuga\apps\backend\contract_data.json
-2025-05-19 11:34:16,306 - INFO - Inicjalizacja ApiManager z bazowym URL: http://localhost:5002
-2025-05-19 11:34:16,646 - INFO - Po³¹czenie z API zosta³o nawi¹zane pomyœlnie
-2025-05-19 11:34:16,646 - INFO - Using API: True
-2025-05-19 11:34:16,648 - INFO - 
+2025-05-26 13:46:46,068 - INFO - Base path: C:/eryk/AppFuga
+2025-05-26 13:46:46,068 - INFO - Initial data path: C:/eryk/AppFuga\apps\backend\initial_data.json
+2025-05-26 13:46:46,068 - INFO - Initial contract path: C:/eryk/AppFuga\apps\backend\contract_data.json
+2025-05-26 13:46:46,068 - INFO - Inicjalizacja ApiManager z bazowym URL: http://localhost:5002
+2025-05-26 13:46:46,068 - INFO - Retry config: max_retries=3, initial_delay=30s, max_delay=300s, exponential_backoff=True, scada_check_interval=60s
+2025-05-26 13:46:46,068 - INFO - Using API: True
+2025-05-26 13:46:46,068 - INFO - 
 ==================================================
 Starting new iteration
 ==================================================
-2025-05-19 11:34:16,648 - INFO - !!! Energy management started !!!
-2025-05-19 11:34:16,648 - INFO - Loaded operation mode: automatic
-2025-05-19 11:34:16,649 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
-2025-05-19 11:34:17,207 - INFO - Otrzymane dane non_adjustable_devices: [{"actual_power": 31, "id": 8, "name": "Non Adjustable Device 1", "priority": 1, "switch_status": true}, {"actual_power": 300, "id": 9, "name": "Non Adjustable Device 2", "priority": 2, "switch_status": false}]
-2025-05-19 11:34:17,207 - INFO - Otrzymane dane adjustable_devices: [{"min_power": 80, "max_power": 100, "actual_power": 84, "id": 10, "name": "Adjustable Device 1", "priority": 2, "switch_status": false}, {"min_power": 30, "max_power": 1000, "actual_power": 100, "id": 11, "name": "Adjustable Device 2", "priority": 1, "switch_status": true}]
-2025-05-19 11:34:17,207 - INFO - Pobieranie danych kontraktu z http://localhost:5002/api/Scada/contract-info
-2025-05-19 11:34:17,720 - INFO - Przetworzone dane non_adjustable_devices: [{"id": 8, "name": "Non Adjustable Device 1", "priority": 1, "power": 31, "switch_status": true}, {"id": 9, "name": "Non Adjustable Device 2", "priority": 2, "power": 300, "switch_status": false}]
-2025-05-19 11:34:17,720 - INFO - Przetworzone dane adjustable_devices: [{"id": 10, "name": "Adjustable Device 1", "priority": 2, "power": 84, "switch_status": false, "min_power": 80, "max_power": 100}, {"id": 11, "name": "Adjustable Device 2", "priority": 1, "power": 100, "switch_status": true, "min_power": 30, "max_power": 1000}]
-2025-05-19 11:34:17,722 - INFO - Dane systemu zapisane do C:/eryk/AppFuga\apps\backend\live_data.json
-2025-05-19 11:34:17,722 - INFO - Dane kontraktu zapisane do C:/eryk/AppFuga\apps\backend\live_contract_data.json
-2025-05-19 11:34:17,723 - INFO - [DEBUG] Attempting to update wind_turbine: {'id': 3, 'name': 'Wind Turbine 1', 'priority': 2, 'max_output': 80, 'min_output': 0, 'actual_output': 80, 'switch_status': True, 'device_status': 'online'}
-2025-05-19 11:34:17,723 - INFO - 1212Successfully created wind_turbine instance: Wind Turbine 1
-2025-05-19 11:34:17,723 - INFO - Added wind_turbine: Wind Turbine 1 (Status: online)
-2025-05-19 11:34:17,723 - INFO - [DEBUG] Attempting to update wind_turbine: {'id': 4, 'name': 'Wind Turbine 2', 'priority': 2, 'max_output': 70, 'min_output': 0, 'actual_output': 0, 'switch_status': False, 'device_status': 'offline'}
-2025-05-19 11:34:17,724 - INFO - 1212Successfully created wind_turbine instance: Wind Turbine 2
-2025-05-19 11:34:17,724 - INFO - Added wind_turbine: Wind Turbine 2 (Status: offline)
-2025-05-19 11:34:17,724 - INFO - [DEBUG] Attempting to update fuel_turbine: {'id': 5, 'name': 'Fuel Turbine 1', 'priority': 4, 'max_output': 100, 'min_output': 0, 'actual_output': 100, 'switch_status': True, 'device_status': 'online'}
-2025-05-19 11:34:17,724 - INFO - 1212Successfully created fuel_turbine instance: Fuel Turbine 1
-2025-05-19 11:34:17,724 - INFO - Added fuel_turbine: Fuel Turbine 1 (Status: online)
-2025-05-19 11:34:17,724 - INFO - [DEBUG] Attempting to update fuel_cell: {'id': 6, 'name': 'Fuel Cell 1', 'priority': 3, 'max_output': 75, 'min_output': 0, 'actual_output': 0, 'switch_status': False, 'device_status': 'offline'}
-2025-05-19 11:34:17,724 - INFO - 1212Successfully created fuel_cell instance: Fuel Cell 1
-2025-05-19 11:34:17,724 - INFO - Added fuel_cell: Fuel Cell 1 (Status: offline)
-2025-05-19 11:34:17,724 - INFO - [DEBUG] Attempting to update bess: {'id': 7, 'name': 'BESS 1', 'capacity': 350, 'min_charge_level': 40, 'charge_level': 200, 'switch_status': True, 'device_status': 'online'}
-2025-05-19 11:34:17,724 - INFO - 1212Successfully created bess instance: BESS 1
-2025-05-19 11:34:17,724 - INFO - New BESS added: BESS 1
-2025-05-19 11:34:17,725 - INFO - Data loaded successfully.
-2025-05-19 11:34:17,731 - INFO - Loaded live data
-2025-05-19 11:34:17,731 - INFO - 
+2025-05-26 13:46:46,068 - INFO - !!! Energy management started !!!
+2025-05-26 13:46:46,068 - INFO - Loaded operation mode: automatic
+2025-05-26 13:46:46,068 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-05-26 13:46:46,880 - INFO - Status zapisany: All devices accessible [SYSTEM]
+2025-05-26 13:46:46,880 - INFO - Pobieranie danych kontraktu z http://localhost:5002/api/Scada/contract-info
+2025-05-26 13:46:46,906 - INFO - Dane urz¹dzeñ zapisane do C:/eryk/AppFuga\apps\backend\live_data.json [SYSTEM]
+2025-05-26 13:46:46,906 - INFO - Dane kontraktu zapisane do C:/eryk/AppFuga\apps\backend\live_contract_data.json [SYSTEM]
+2025-05-26 13:46:46,906 - INFO - Status systemu zapisany do C:/eryk/AppFuga\apps\backend\system_status.json [SYSTEM]
+2025-05-26 13:46:46,906 - INFO - [DEBUG] Attempting to update pv_panel: {'id': 1, 'name': 'PV Panel 1', 'priority': 1, 'max_output': 100, 'min_output': 10, 'actual_output': 0, 'switch_status': False, 'device_status': 'offline'}
+2025-05-26 13:46:46,906 - INFO - 1212Successfully created pv_panel instance: PV Panel 1
+2025-05-26 13:46:46,906 - INFO - Added pv_panel: PV Panel 1 (Status: offline)
+2025-05-26 13:46:46,906 - INFO - [DEBUG] Attempting to update pv_panel: {'id': 2, 'name': 'PV Panel 2', 'priority': 1, 'max_output': 120, 'min_output': 15, 'actual_output': 100, 'switch_status': True, 'device_status': 'online'}
+2025-05-26 13:46:46,906 - INFO - 1212Successfully created pv_panel instance: PV Panel 2
+2025-05-26 13:46:46,906 - INFO - Added pv_panel: PV Panel 2 (Status: online)
+2025-05-26 13:46:46,906 - INFO - [DEBUG] Attempting to update wind_turbine: {'id': 3, 'name': 'Wind Turbine 1', 'priority': 2, 'max_output': 80, 'min_output': 0, 'actual_output': 80, 'switch_status': True, 'device_status': 'online'}
+2025-05-26 13:46:46,906 - INFO - 1212Successfully created wind_turbine instance: Wind Turbine 1
+2025-05-26 13:46:46,906 - INFO - Added wind_turbine: Wind Turbine 1 (Status: online)
+2025-05-26 13:46:46,906 - INFO - [DEBUG] Attempting to update wind_turbine: {'id': 4, 'name': 'Wind Turbine 2', 'priority': 2, 'max_output': 70, 'min_output': 0, 'actual_output': 55, 'switch_status': True, 'device_status': 'online'}
+2025-05-26 13:46:46,906 - INFO - 1212Successfully created wind_turbine instance: Wind Turbine 2
+2025-05-26 13:46:46,906 - INFO - Added wind_turbine: Wind Turbine 2 (Status: online)
+2025-05-26 13:46:46,906 - INFO - [DEBUG] Attempting to update fuel_turbine: {'id': 5, 'name': 'Fuel Turbine 1', 'priority': 4, 'max_output': 100, 'min_output': 0, 'actual_output': 5, 'switch_status': True, 'device_status': 'online'}
+2025-05-26 13:46:46,906 - INFO - 1212Successfully created fuel_turbine instance: Fuel Turbine 1
+2025-05-26 13:46:46,906 - INFO - Added fuel_turbine: Fuel Turbine 1 (Status: online)
+2025-05-26 13:46:46,906 - INFO - [DEBUG] Attempting to update fuel_cell: {'id': 6, 'name': 'Fuel Cell 1', 'priority': 3, 'max_output': 75, 'min_output': 0, 'actual_output': 0, 'switch_status': False, 'device_status': 'offline'}
+2025-05-26 13:46:46,906 - INFO - 1212Successfully created fuel_cell instance: Fuel Cell 1
+2025-05-26 13:46:46,906 - INFO - Added fuel_cell: Fuel Cell 1 (Status: offline)
+2025-05-26 13:46:46,906 - INFO - [DEBUG] Attempting to update bess: {'id': 7, 'name': 'BESS 1', 'capacity': 350, 'min_charge_level': 40, 'charge_level': 218, 'switch_status': True, 'device_status': 'online'}
+2025-05-26 13:46:46,906 - INFO - 1212Successfully created bess instance: BESS 1
+2025-05-26 13:46:46,906 - INFO - New BESS added: BESS 1
+2025-05-26 13:46:46,906 - INFO - Added power meter: Meter for PV Panel 1 for device ID: 1
+2025-05-26 13:46:46,906 - INFO - Loaded power meter: Meter for PV Panel 1, Status: online, Reading: 15 kW, Device ID: 1
+2025-05-26 13:46:46,906 - INFO - Added power meter: Meter for PV Panel 2 for device ID: 2
+2025-05-26 13:46:46,906 - INFO - Loaded power meter: Meter for PV Panel 2, Status: online, Reading: 98 kW, Device ID: 2
+2025-05-26 13:46:46,906 - INFO - Added power meter: Meter for PV Wind Turbine 1 for device ID: 3
+2025-05-26 13:46:46,906 - INFO - Loaded power meter: Meter for PV Wind Turbine 1, Status: online, Reading: 42 kW, Device ID: 3
+2025-05-26 13:46:46,906 - INFO - Added power meter: Meter for Fuel Turbine 1 for device ID: 5
+2025-05-26 13:46:46,906 - INFO - Loaded power meter: Meter for Fuel Turbine 1, Status: online, Reading: 38 kW, Device ID: 5
+2025-05-26 13:46:46,906 - INFO - Data loaded successfully.
+2025-05-26 13:46:46,917 - INFO - Loaded live data
+2025-05-26 13:46:46,918 - INFO - 
 ==================================================
 Starting a new iteration in automatic mode
 ==================================================
-2025-05-19 11:34:17,731 - INFO - 
+2025-05-26 13:46:46,918 - INFO - 
 -------------------- Starting device update based on meter readings --------------------
-2025-05-19 11:34:17,731 - INFO - Checking 4 devices for updates based on meter readings
-2025-05-19 11:34:17,731 - INFO - No meter found for device Wind Turbine 1 (ID: 3)
-2025-05-19 11:34:17,731 - INFO - No meter found for device Wind Turbine 2 (ID: 4)
-2025-05-19 11:34:17,731 - INFO - No meter found for device Fuel Turbine 1 (ID: 5)
-2025-05-19 11:34:17,731 - INFO - No meter found for device Fuel Cell 1 (ID: 6)
-2025-05-19 11:34:17,731 - INFO - 
+2025-05-26 13:46:46,918 - INFO - Checking 6 devices for updates based on meter readings
+2025-05-26 13:46:46,918 - INFO - Checking device PV Panel 1 (ID: 1). Device status: offline, Meter status: online, Meter reading: 15 kW
+2025-05-26 13:46:46,918 - WARNING - [WARNING] Updated PV Panel 1 status to online and set actual output to 15 kW based on meter reading. Please check the device communication.
+2025-05-26 13:46:46,918 - INFO - Checking device PV Panel 2 (ID: 2). Device status: online, Meter status: online, Meter reading: 98 kW
+2025-05-26 13:46:46,918 - INFO - Checking device Wind Turbine 1 (ID: 3). Device status: online, Meter status: online, Meter reading: 42 kW
+2025-05-26 13:46:46,918 - INFO - No meter found for device Wind Turbine 2 (ID: 4)
+2025-05-26 13:46:46,918 - INFO - Checking device Fuel Turbine 1 (ID: 5). Device status: online, Meter status: online, Meter reading: 38 kW
+2025-05-26 13:46:46,918 - INFO - No meter found for device Fuel Cell 1 (ID: 6)
+2025-05-26 13:46:46,918 - INFO - Updated 1 devices based on meter readings
+2025-05-26 13:46:46,918 - INFO - Updated device: PV Panel 1 (ID: 1), New status: online, New output: 15 kW
+2025-05-26 13:46:46,918 - INFO - 
 -------------------- System Status Summary --------------------
-2025-05-19 11:34:17,731 - INFO - !!! Total generated power: 180.00 kW !!!
-2025-05-19 11:34:17,731 - INFO - !!! Total demand: 131.00 kW !!!
-2025-05-19 11:34:17,731 - INFO - Number of active generating devices: 2
-2025-05-19 11:34:17,731 - INFO - Number of inactive generating devices: 2
-2025-05-19 11:34:17,731 - INFO - 
+2025-05-26 13:46:46,919 - INFO - !!! Total generated power: 255.00 kW !!!
+2025-05-26 13:46:46,919 - INFO - !!! Total demand: 131.00 kW !!!
+2025-05-26 13:46:46,919 - INFO - Number of active generating devices: 5
+2025-05-26 13:46:46,919 - INFO - Number of inactive generating devices: 1
+2025-05-26 13:46:46,919 - INFO - 
 -------------------- Active Generating Devices --------------------
-2025-05-19 11:34:17,732 - INFO -   - Wind Turbine 1: 80.00 kW / 80.00 kW
-2025-05-19 11:34:17,732 - INFO -   - Fuel Turbine 1: 100.00 kW / 100.00 kW
-2025-05-19 11:34:17,732 - INFO - 
+2025-05-26 13:46:46,919 - INFO -   - PV Panel 1: 15.00 kW / 100.00 kW
+2025-05-26 13:46:46,919 - INFO -   - PV Panel 2: 100.00 kW / 120.00 kW
+2025-05-26 13:46:46,919 - INFO -   - Wind Turbine 1: 80.00 kW / 80.00 kW
+2025-05-26 13:46:46,919 - INFO -   - Wind Turbine 2: 55.00 kW / 70.00 kW
+2025-05-26 13:46:46,919 - INFO -   - Fuel Turbine 1: 5.00 kW / 100.00 kW
+2025-05-26 13:46:46,919 - INFO - 
 -------------------- Inactive Generating Devices --------------------
-2025-05-19 11:34:17,732 - INFO -   - Wind Turbine 2: max output 70.00 kW
-2025-05-19 11:34:17,732 - INFO -   - Fuel Cell 1: max output 75.00 kW
-2025-05-19 11:34:17,732 - INFO - 
+2025-05-26 13:46:46,919 - INFO -   - Fuel Cell 1: max output 75.00 kW
+2025-05-26 13:46:46,919 - INFO - 
 -------------------- BESS Status --------------------
-2025-05-19 11:34:17,732 - INFO - BESS charge level: 200.00 kWh / 350.00 kWh
-2025-05-19 11:34:17,732 - INFO - 
+2025-05-26 13:46:46,919 - INFO - BESS charge level: 218.00 kWh / 350.00 kWh
+2025-05-26 13:46:46,919 - INFO - 
 -------------------- Energy Trading Status --------------------
-2025-05-19 11:34:17,732 - INFO - Energy purchase: Available (Limit: 105.00 kWh, Current: 70.00 kWh)
-2025-05-19 11:34:17,732 - INFO - Energy sale: Not available (Limit: 0.00 kWh, Current: 0.00 kWh)
-2025-05-19 11:34:17,732 - INFO - 
+2025-05-26 13:46:46,919 - INFO - Energy purchase: Available (Limit: 105.00 kWh, Current: 70.00 kWh)
+2025-05-26 13:46:46,919 - INFO - Energy sale: Not available (Limit: 0.00 kWh, Current: 0.00 kWh)
+2025-05-26 13:46:46,919 - INFO - 
 -------------------- Energy Consumer Grid Summary --------------------
-2025-05-19 11:34:17,732 - INFO - !!! Total consumed power: 131.00 kW !!!
-2025-05-19 11:34:17,732 - INFO - Total number of devices: 4
-2025-05-19 11:34:17,732 - INFO - Number of active devices: 2
-2025-05-19 11:34:17,732 - INFO - Number of inactive devices: 2
-2025-05-19 11:34:17,732 - INFO - Number of active adjustable devices: 1
-2025-05-19 11:34:17,732 - INFO - Number of active non-adjustable devices: 1
-2025-05-19 11:34:17,732 - INFO - 
+2025-05-26 13:46:46,919 - INFO - !!! Total consumed power: 131.00 kW !!!
+2025-05-26 13:46:46,919 - INFO - Total number of devices: 4
+2025-05-26 13:46:46,920 - INFO - Number of active devices: 2
+2025-05-26 13:46:46,920 - INFO - Number of inactive devices: 2
+2025-05-26 13:46:46,920 - INFO - Number of active adjustable devices: 1
+2025-05-26 13:46:46,920 - INFO - Number of active non-adjustable devices: 1
+2025-05-26 13:46:46,920 - INFO - 
 -------------------- Active Adjustable Devices --------------------
-2025-05-19 11:34:17,733 - INFO -   - Adjustable Device 2: Current: 100.00 kW / Max: 100.00 kW
-2025-05-19 11:34:17,733 - INFO - 
+2025-05-26 13:46:46,920 - INFO -   - Adjustable Device 2: Current: 100.00 kW / Max: 100.00 kW
+2025-05-26 13:46:46,920 - INFO - 
 -------------------- Active Non-adjustable Devices --------------------
-2025-05-19 11:34:17,733 - INFO -   - Non Adjustable Device 1: 31.00 kW
-2025-05-19 11:34:17,733 - INFO - 
+2025-05-26 13:46:46,920 - INFO -   - Non Adjustable Device 1: 31.00 kW
+2025-05-26 13:46:46,920 - INFO - 
 -------------------- Inactive Devices --------------------
-2025-05-19 11:34:17,733 - INFO -   - Non Adjustable Device 2 (Non-adjustable)
-2025-05-19 11:34:17,733 - INFO -   - Adjustable Device 1 (Adjustable)
-2025-05-19 11:34:17,733 - INFO - checkTotal generated power: 180 kW
-2025-05-19 11:34:17,733 - INFO - checkTotal demand power: 131 kW
-2025-05-19 11:34:17,734 - INFO - 
--------------------- Power surplus detected: 49 kW - starting surplus management --------------------
-2025-05-19 11:34:17,734 - INFO - Iteration 1, surplus remaining: 49.000000 kW
-2025-05-19 11:34:17,734 - INFO - Attempting to perform the action: SurplusAction.CHARGE_BATTERY
-2025-05-19 11:34:17,734 - INFO - Executing action: SurplusAction.CHARGE_BATTERY, type: <enum 'SurplusAction'>
-2025-05-19 11:34:17,734 - INFO - XXXXXXXXXXXXXXXXXXXXXXXXXExecuting actionxdxdxdd: SurplusAction.CHARGE_BATTERY
-2025-05-19 11:34:17,734 - INFO - Remaining surplus: 49.000000
-2025-05-19 11:34:17,734 - INFO - BESS charged by 49.00 kWh (14.00%). New level: 249.00 kWh
-2025-05-19 11:34:17,734 - INFO - Action result: {'success': True, 'amount': 49, 'percent': 14.0}
-2025-05-19 11:34:17,734 - INFO - Action SurplusAction.CHARGE_BATTERY managed 49.000000 kW. Surplus remaining: 0.000000 kW
-2025-05-19 11:34:17,734 - INFO - !!! Managed 49 kW of surplus. Remaining: 0 kW !!!
-2025-05-19 11:34:17,734 - INFO - Surplus management completed. The entire surplus has been dissolved.
-2025-05-19 11:34:17,734 - INFO - 
+2025-05-26 13:46:46,920 - INFO -   - Non Adjustable Device 2 (Non-adjustable)
+2025-05-26 13:46:46,920 - INFO -   - Adjustable Device 1 (Adjustable)
+2025-05-26 13:46:46,920 - INFO - checkTotal generated power: 255 kW
+2025-05-26 13:46:46,920 - INFO - checkTotal demand power: 131 kW
+2025-05-26 13:46:46,920 - INFO - 
+-------------------- Power surplus detected: 124 kW - starting surplus management --------------------
+2025-05-26 13:46:46,920 - INFO - Iteration 1, surplus remaining: 124.000000 kW
+2025-05-26 13:46:46,920 - INFO - Attempting to perform the action: SurplusAction.CHARGE_BATTERY
+2025-05-26 13:46:46,920 - INFO - Executing action: SurplusAction.CHARGE_BATTERY, type: <enum 'SurplusAction'>
+2025-05-26 13:46:46,920 - INFO - XXXXXXXXXXXXXXXXXXXXXXXXXExecuting actionxdxdxdd: SurplusAction.CHARGE_BATTERY
+2025-05-26 13:46:46,920 - INFO - Remaining surplus: 124.000000
+2025-05-26 13:46:46,921 - INFO - BESS charged by 124.00 kWh (35.43%). New level: 342.00 kWh
+2025-05-26 13:46:46,921 - INFO - Action result: {'success': True, 'amount': 124, 'percent': 35.43}
+2025-05-26 13:46:46,921 - INFO - Action SurplusAction.CHARGE_BATTERY managed 124.000000 kW. Surplus remaining: 0.000000 kW
+2025-05-26 13:46:46,921 - INFO - !!! Managed 124 kW of surplus. Remaining: 0 kW !!!
+2025-05-26 13:46:46,921 - INFO - Surplus management completed. The entire surplus has been dissolved.
+2025-05-26 13:46:46,922 - INFO - 
 -------------------- System Status Summary --------------------
-2025-05-19 11:34:17,735 - INFO - !!! Total generated power: 180.00 kW !!!
-2025-05-19 11:34:17,735 - INFO - !!! Total demand: 131.00 kW !!!
-2025-05-19 11:34:17,735 - INFO - Number of active generating devices: 2
-2025-05-19 11:34:17,735 - INFO - Number of inactive generating devices: 2
-2025-05-19 11:34:17,735 - INFO - 
+2025-05-26 13:46:46,922 - INFO - !!! Total generated power: 255.00 kW !!!
+2025-05-26 13:46:46,922 - INFO - !!! Total demand: 131.00 kW !!!
+2025-05-26 13:46:46,922 - INFO - Number of active generating devices: 5
+2025-05-26 13:46:46,922 - INFO - Number of inactive generating devices: 1
+2025-05-26 13:46:46,922 - INFO - 
 -------------------- Active Generating Devices --------------------
-2025-05-19 11:34:17,735 - INFO -   - Wind Turbine 1: 80.00 kW / 80.00 kW
-2025-05-19 11:34:17,735 - INFO -   - Fuel Turbine 1: 100.00 kW / 100.00 kW
-2025-05-19 11:34:17,735 - INFO - 
+2025-05-26 13:46:46,922 - INFO -   - PV Panel 1: 15.00 kW / 100.00 kW
+2025-05-26 13:46:46,922 - INFO -   - PV Panel 2: 100.00 kW / 120.00 kW
+2025-05-26 13:46:46,922 - INFO -   - Wind Turbine 1: 80.00 kW / 80.00 kW
+2025-05-26 13:46:46,922 - INFO -   - Wind Turbine 2: 55.00 kW / 70.00 kW
+2025-05-26 13:46:46,922 - INFO -   - Fuel Turbine 1: 5.00 kW / 100.00 kW
+2025-05-26 13:46:46,922 - INFO - 
 -------------------- Inactive Generating Devices --------------------
-2025-05-19 11:34:17,735 - INFO -   - Wind Turbine 2: max output 70.00 kW
-2025-05-19 11:34:17,735 - INFO -   - Fuel Cell 1: max output 75.00 kW
-2025-05-19 11:34:17,735 - INFO - 
+2025-05-26 13:46:46,922 - INFO -   - Fuel Cell 1: max output 75.00 kW
+2025-05-26 13:46:46,922 - INFO - 
 -------------------- BESS Status --------------------
-2025-05-19 11:34:17,735 - INFO - BESS charge level: 249.00 kWh / 350.00 kWh
-2025-05-19 11:34:17,735 - INFO - 
+2025-05-26 13:46:46,922 - INFO - BESS charge level: 342.00 kWh / 350.00 kWh
+2025-05-26 13:46:46,922 - INFO - 
 -------------------- Energy Trading Status --------------------
-2025-05-19 11:34:17,735 - INFO - Energy purchase: Available (Limit: 105.00 kWh, Current: 70.00 kWh)
-2025-05-19 11:34:17,735 - INFO - Energy sale: Not available (Limit: 0.00 kWh, Current: 0.00 kWh)
-2025-05-19 11:34:17,735 - INFO - 
+2025-05-26 13:46:46,922 - INFO - Energy purchase: Available (Limit: 105.00 kWh, Current: 70.00 kWh)
+2025-05-26 13:46:46,922 - INFO - Energy sale: Not available (Limit: 0.00 kWh, Current: 0.00 kWh)
+2025-05-26 13:46:46,922 - INFO - 
 -------------------- Energy Consumer Grid Summary --------------------
-2025-05-19 11:34:17,735 - INFO - !!! Total consumed power: 131.00 kW !!!
-2025-05-19 11:34:17,735 - INFO - Total number of devices: 4
-2025-05-19 11:34:17,735 - INFO - Number of active devices: 2
-2025-05-19 11:34:17,735 - INFO - Number of inactive devices: 2
-2025-05-19 11:34:17,735 - INFO - Number of active adjustable devices: 1
-2025-05-19 11:34:17,736 - INFO - Number of active non-adjustable devices: 1
-2025-05-19 11:34:17,736 - INFO - 
+2025-05-26 13:46:46,922 - INFO - !!! Total consumed power: 131.00 kW !!!
+2025-05-26 13:46:46,922 - INFO - Total number of devices: 4
+2025-05-26 13:46:46,922 - INFO - Number of active devices: 2
+2025-05-26 13:46:46,922 - INFO - Number of inactive devices: 2
+2025-05-26 13:46:46,922 - INFO - Number of active adjustable devices: 1
+2025-05-26 13:46:46,922 - INFO - Number of active non-adjustable devices: 1
+2025-05-26 13:46:46,922 - INFO - 
 -------------------- Active Adjustable Devices --------------------
-2025-05-19 11:34:17,736 - INFO -   - Adjustable Device 2: Current: 100.00 kW / Max: 100.00 kW
-2025-05-19 11:34:17,736 - INFO - 
+2025-05-26 13:46:46,923 - INFO -   - Adjustable Device 2: Current: 100.00 kW / Max: 100.00 kW
+2025-05-26 13:46:46,923 - INFO - 
 -------------------- Active Non-adjustable Devices --------------------
-2025-05-19 11:34:17,736 - INFO -   - Non Adjustable Device 1: 31.00 kW
-2025-05-19 11:34:17,736 - INFO - 
+2025-05-26 13:46:46,923 - INFO -   - Non Adjustable Device 1: 31.00 kW
+2025-05-26 13:46:46,923 - INFO - 
 -------------------- Inactive Devices --------------------
-2025-05-19 11:34:17,736 - INFO -   - Non Adjustable Device 2 (Non-adjustable)
-2025-05-19 11:34:17,736 - INFO -   - Adjustable Device 1 (Adjustable)
-2025-05-19 11:34:17,737 - INFO - 
+2025-05-26 13:46:46,923 - INFO -   - Non Adjustable Device 2 (Non-adjustable)
+2025-05-26 13:46:46,923 - INFO -   - Adjustable Device 1 (Adjustable)
+2025-05-26 13:46:46,924 - INFO - 
 -------------------- Ending of iteration --------------------
-2025-05-19 11:34:17,737 - INFO - Live data saved to C:/eryk/AppFuga\apps\backend\output_data.json
-2025-05-19 11:34:17,738 - INFO - Live contract data saved to C:/eryk/AppFuga\apps\backend\output_contract_data.json
-2025-05-19 11:34:17,839 - INFO - Updated power profile
-2025-05-19 11:34:17,839 - INFO - Iteration completed in 0.11 seconds
-2025-05-19 11:34:17,841 - INFO - 
+2025-05-26 13:46:46,924 - INFO - Live data saved to C:/eryk/AppFuga\apps\backend\output_data.json
+2025-05-26 13:46:46,925 - INFO - Live contract data saved to C:/eryk/AppFuga\apps\backend\output_contract_data.json
+2025-05-26 13:46:47,206 - INFO - Weather data updated at 2025-05-26 13:46:47.206316
+2025-05-26 13:46:47,269 - INFO - 5-minute data aggregated and logged at 2025-05-26 13:46:47.269465
+2025-05-26 13:46:47,579 - INFO - Weather forecast updated at 2025-05-26 13:46:47.579660
+2025-05-26 13:46:47,579 - INFO - Updated power profile
+2025-05-26 13:46:47,579 - INFO - Iteration completed in 0.66 seconds
+2025-05-26 13:46:47,589 - INFO - 
 -------------------- Ending of iteration --------------------
-2025-05-19 11:34:17,841 - INFO - Live data saved to C:/eryk/AppFuga\apps\backend\output_data.json
-2025-05-19 11:34:17,842 - INFO - Live contract data saved to C:/eryk/AppFuga\apps\backend\output_contract_data.json
-2025-05-19 11:34:17,843 - INFO - API system data saved to C:/eryk/AppFuga\apps\backend\output_data.json
-2025-05-19 11:34:17,844 - INFO - API contract data saved to C:/eryk/AppFuga\apps\backend\output_contract_data.json
-2025-05-19 11:34:18,271 - INFO - Aktualizacja stanu systemu wys³ana pomyœlnie
-2025-05-19 11:34:18,713 - INFO - Aktualizacja informacji o kontrakcie wys³ana pomyœlnie
-2025-05-19 11:34:18,794 - INFO - Updated power profile
-2025-05-19 11:34:18,795 - INFO - !!! Waiting 15 seconds for next iteration !!!
-2025-05-19 11:34:33,798 - INFO - 
-==================================================
-Starting new iteration
-==================================================
-2025-05-19 11:34:33,799 - INFO - Loaded operation mode: automatic
-2025-05-19 11:34:33,800 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
-2025-05-19 11:34:34,357 - INFO - Otrzymane dane non_adjustable_devices: [{"actual_power": 31, "id": 8, "name": "Non Adjustable Device 1", "priority": 1, "switch_status": true}, {"actual_power": 300, "id": 9, "name": "Non Adjustable Device 2", "priority": 2, "switch_status": false}]
-2025-05-19 11:34:34,357 - INFO - Otrzymane dane adjustable_devices: [{"min_power": 80, "max_power": 100, "actual_power": 84, "id": 10, "name": "Adjustable Device 1", "priority": 2, "switch_status": false}, {"min_power": 30, "max_power": 1000, "actual_power": 100, "id": 11, "name": "Adjustable Device 2", "priority": 1, "switch_status": true}]
-2025-05-19 11:34:34,357 - INFO - Pobieranie danych kontraktu z http://localhost:5002/api/Scada/contract-info
-2025-05-19 11:34:34,833 - INFO - Przetworzone dane non_adjustable_devices: [{"id": 8, "name": "Non Adjustable Device 1", "priority": 1, "power": 31, "switch_status": true}, {"id": 9, "name": "Non Adjustable Device 2", "priority": 2, "power": 300, "switch_status": false}]
-2025-05-19 11:34:34,834 - INFO - Przetworzone dane adjustable_devices: [{"id": 10, "name": "Adjustable Device 1", "priority": 2, "power": 84, "switch_status": false, "min_power": 80, "max_power": 100}, {"id": 11, "name": "Adjustable Device 2", "priority": 1, "power": 100, "switch_status": true, "min_power": 30, "max_power": 1000}]
-2025-05-19 11:34:34,837 - INFO - Dane systemu zapisane do C:/eryk/AppFuga\apps\backend\live_data.json
-2025-05-19 11:34:34,837 - INFO - Dane kontraktu zapisane do C:/eryk/AppFuga\apps\backend\live_contract_data.json
-2025-05-19 11:34:34,838 - INFO - [DEBUG] Attempting to update wind_turbine: {'id': 3, 'name': 'Wind Turbine 1', 'priority': 2, 'max_output': 80, 'min_output': 0, 'actual_output': 80, 'switch_status': True, 'device_status': 'online'}
-2025-05-19 11:34:34,838 - INFO - Wind_turbine Wind Turbine 1 updated successfully.
-2025-05-19 11:34:34,838 - INFO - [DEBUG] Attempting to update wind_turbine: {'id': 4, 'name': 'Wind Turbine 2', 'priority': 2, 'max_output': 70, 'min_output': 0, 'actual_output': 0, 'switch_status': False, 'device_status': 'offline'}
-2025-05-19 11:34:34,838 - INFO - Wind_turbine Wind Turbine 2 updated successfully.
-2025-05-19 11:34:34,838 - INFO - [DEBUG] Attempting to update fuel_turbine: {'id': 5, 'name': 'Fuel Turbine 1', 'priority': 4, 'max_output': 100, 'min_output': 0, 'actual_output': 100, 'switch_status': True, 'device_status': 'online'}
-2025-05-19 11:34:34,838 - INFO - Fuel_turbine Fuel Turbine 1 updated successfully.
-2025-05-19 11:34:34,838 - INFO - [DEBUG] Attempting to update fuel_cell: {'id': 6, 'name': 'Fuel Cell 1', 'priority': 3, 'max_output': 75, 'min_output': 0, 'actual_output': 0, 'switch_status': False, 'device_status': 'offline'}
-2025-05-19 11:34:34,838 - INFO - Fuel_cell Fuel Cell 1 updated successfully.
-2025-05-19 11:34:34,838 - INFO - [DEBUG] Attempting to update bess: {'id': 7, 'name': 'BESS 1', 'capacity': 350, 'min_charge_level': 40, 'charge_level': 200, 'switch_status': True, 'device_status': 'online'}
-2025-05-19 11:34:34,838 - INFO - BESS BESS 1 updated successfully.
-2025-05-19 11:34:34,838 - INFO - Data loaded successfully.
-2025-05-19 11:34:34,847 - INFO - Loaded live data
-2025-05-19 11:34:34,847 - INFO - 
-==================================================
-Starting a new iteration in automatic mode
-==================================================
-2025-05-19 11:34:34,847 - INFO - 
--------------------- Starting device update based on meter readings --------------------
-2025-05-19 11:34:34,847 - INFO - Checking 4 devices for updates based on meter readings
-2025-05-19 11:34:34,847 - INFO - No meter found for device Wind Turbine 1 (ID: 3)
-2025-05-19 11:34:34,847 - INFO - No meter found for device Wind Turbine 2 (ID: 4)
-2025-05-19 11:34:34,847 - INFO - No meter found for device Fuel Turbine 1 (ID: 5)
-2025-05-19 11:34:34,847 - INFO - No meter found for device Fuel Cell 1 (ID: 6)
-2025-05-19 11:34:34,847 - INFO - 
--------------------- System Status Summary --------------------
-2025-05-19 11:34:34,847 - INFO - !!! Total generated power: 180.00 kW !!!
-2025-05-19 11:34:34,847 - INFO - !!! Total demand: 131.00 kW !!!
-2025-05-19 11:34:34,847 - INFO - Number of active generating devices: 2
-2025-05-19 11:34:34,848 - INFO - Number of inactive generating devices: 2
-2025-05-19 11:34:34,848 - INFO - 
--------------------- Active Generating Devices --------------------
-2025-05-19 11:34:34,848 - INFO -   - Wind Turbine 1: 80.00 kW / 80.00 kW
-2025-05-19 11:34:34,848 - INFO -   - Fuel Turbine 1: 100.00 kW / 100.00 kW
-2025-05-19 11:34:34,848 - INFO - 
--------------------- Inactive Generating Devices --------------------
-2025-05-19 11:34:34,848 - INFO -   - Wind Turbine 2: max output 70.00 kW
-2025-05-19 11:34:34,848 - INFO -   - Fuel Cell 1: max output 75.00 kW
-2025-05-19 11:34:34,848 - INFO - 
--------------------- BESS Status --------------------
-2025-05-19 11:34:34,848 - INFO - BESS charge level: 200.00 kWh / 350.00 kWh
-2025-05-19 11:34:34,848 - INFO - 
--------------------- Energy Trading Status --------------------
-2025-05-19 11:34:34,848 - INFO - Energy purchase: Available (Limit: 105.00 kWh, Current: 70.00 kWh)
-2025-05-19 11:34:34,848 - INFO - Energy sale: Not available (Limit: 0.00 kWh, Current: 0.00 kWh)
-2025-05-19 11:34:34,848 - INFO - 
--------------------- Energy Consumer Grid Summary --------------------
-2025-05-19 11:34:34,848 - INFO - !!! Total consumed power: 131.00 kW !!!
-2025-05-19 11:34:34,848 - INFO - Total number of devices: 4
-2025-05-19 11:34:34,848 - INFO - Number of active devices: 2
-2025-05-19 11:34:34,848 - INFO - Number of inactive devices: 2
-2025-05-19 11:34:34,848 - INFO - Number of active adjustable devices: 1
-2025-05-19 11:34:34,848 - INFO - Number of active non-adjustable devices: 1
-2025-05-19 11:34:34,848 - INFO - 
--------------------- Active Adjustable Devices --------------------
-2025-05-19 11:34:34,848 - INFO -   - Adjustable Device 2: Current: 100.00 kW / Max: 100.00 kW
-2025-05-19 11:34:34,848 - INFO - 
--------------------- Active Non-adjustable Devices --------------------
-2025-05-19 11:34:34,848 - INFO -   - Non Adjustable Device 1: 31.00 kW
-2025-05-19 11:34:34,849 - INFO - 
--------------------- Inactive Devices --------------------
-2025-05-19 11:34:34,849 - INFO -   - Non Adjustable Device 2 (Non-adjustable)
-2025-05-19 11:34:34,849 - INFO -   - Adjustable Device 1 (Adjustable)
-2025-05-19 11:34:34,849 - INFO - checkTotal generated power: 180 kW
-2025-05-19 11:34:34,849 - INFO - checkTotal demand power: 131 kW
-2025-05-19 11:34:34,849 - INFO - 
--------------------- Power surplus detected: 49 kW - starting surplus management --------------------
-2025-05-19 11:34:34,849 - INFO - Iteration 1, surplus remaining: 49.000000 kW
-2025-05-19 11:34:34,849 - INFO - Attempting to perform the action: SurplusAction.CHARGE_BATTERY
-2025-05-19 11:34:34,849 - INFO - Executing action: SurplusAction.CHARGE_BATTERY, type: <enum 'SurplusAction'>
-2025-05-19 11:34:34,849 - INFO - XXXXXXXXXXXXXXXXXXXXXXXXXExecuting actionxdxdxdd: SurplusAction.CHARGE_BATTERY
-2025-05-19 11:34:34,849 - INFO - Remaining surplus: 49.000000
-2025-05-19 11:34:34,849 - INFO - BESS charged by 49.00 kWh (14.00%). New level: 249.00 kWh
-2025-05-19 11:34:34,850 - INFO - Action result: {'success': True, 'amount': 49, 'percent': 14.0}
-2025-05-19 11:34:34,850 - INFO - Action SurplusAction.CHARGE_BATTERY managed 49.000000 kW. Surplus remaining: 0.000000 kW
-2025-05-19 11:34:34,850 - INFO - !!! Managed 49 kW of surplus. Remaining: 0 kW !!!
-2025-05-19 11:34:34,850 - INFO - Surplus management completed. The entire surplus has been dissolved.
-2025-05-19 11:34:34,850 - INFO - 
--------------------- System Status Summary --------------------
-2025-05-19 11:34:34,850 - INFO - !!! Total generated power: 180.00 kW !!!
-2025-05-19 11:34:34,850 - INFO - !!! Total demand: 131.00 kW !!!
-2025-05-19 11:34:34,850 - INFO - Number of active generating devices: 2
-2025-05-19 11:34:34,850 - INFO - Number of inactive generating devices: 2
-2025-05-19 11:34:34,850 - INFO - 
--------------------- Active Generating Devices --------------------
-2025-05-19 11:34:34,850 - INFO -   - Wind Turbine 1: 80.00 kW / 80.00 kW
-2025-05-19 11:34:34,850 - INFO -   - Fuel Turbine 1: 100.00 kW / 100.00 kW
-2025-05-19 11:34:34,850 - INFO - 
--------------------- Inactive Generating Devices --------------------
-2025-05-19 11:34:34,850 - INFO -   - Wind Turbine 2: max output 70.00 kW
-2025-05-19 11:34:34,850 - INFO -   - Fuel Cell 1: max output 75.00 kW
-2025-05-19 11:34:34,850 - INFO - 
--------------------- BESS Status --------------------
-2025-05-19 11:34:34,850 - INFO - BESS charge level: 249.00 kWh / 350.00 kWh
-2025-05-19 11:34:34,851 - INFO - 
--------------------- Energy Trading Status --------------------
-2025-05-19 11:34:34,851 - INFO - Energy purchase: Available (Limit: 105.00 kWh, Current: 70.00 kWh)
-2025-05-19 11:34:34,851 - INFO - Energy sale: Not available (Limit: 0.00 kWh, Current: 0.00 kWh)
-2025-05-19 11:34:34,851 - INFO - 
--------------------- Energy Consumer Grid Summary --------------------
-2025-05-19 11:34:34,851 - INFO - !!! Total consumed power: 131.00 kW !!!
-2025-05-19 11:34:34,851 - INFO - Total number of devices: 4
-2025-05-19 11:34:34,851 - INFO - Number of active devices: 2
-2025-05-19 11:34:34,851 - INFO - Number of inactive devices: 2
-2025-05-19 11:34:34,851 - INFO - Number of active adjustable devices: 1
-2025-05-19 11:34:34,851 - INFO - Number of active non-adjustable devices: 1
-2025-05-19 11:34:34,851 - INFO - 
--------------------- Active Adjustable Devices --------------------
-2025-05-19 11:34:34,851 - INFO -   - Adjustable Device 2: Current: 100.00 kW / Max: 100.00 kW
-2025-05-19 11:34:34,851 - INFO - 
--------------------- Active Non-adjustable Devices --------------------
-2025-05-19 11:34:34,851 - INFO -   - Non Adjustable Device 1: 31.00 kW
-2025-05-19 11:34:34,851 - INFO - 
--------------------- Inactive Devices --------------------
-2025-05-19 11:34:34,851 - INFO -   - Non Adjustable Device 2 (Non-adjustable)
-2025-05-19 11:34:34,851 - INFO -   - Adjustable Device 1 (Adjustable)
-2025-05-19 11:34:34,853 - INFO - 
--------------------- Ending of iteration --------------------
-2025-05-19 11:34:34,853 - INFO - Live data saved to C:/eryk/AppFuga\apps\backend\output_data.json
-2025-05-19 11:34:34,854 - INFO - Live contract data saved to C:/eryk/AppFuga\apps\backend\output_contract_data.json
-2025-05-19 11:34:34,967 - INFO - Updated power profile
-2025-05-19 11:34:34,968 - INFO - Iteration completed in 0.12 seconds
-2025-05-19 11:34:34,970 - INFO - 
--------------------- Ending of iteration --------------------
-2025-05-19 11:34:34,970 - INFO - Live data saved to C:/eryk/AppFuga\apps\backend\output_data.json
-2025-05-19 11:34:34,972 - INFO - Live contract data saved to C:/eryk/AppFuga\apps\backend\output_contract_data.json
-2025-05-19 11:34:34,972 - INFO - API system data saved to C:/eryk/AppFuga\apps\backend\output_data.json
-2025-05-19 11:34:34,973 - INFO - API contract data saved to C:/eryk/AppFuga\apps\backend\output_contract_data.json
-2025-05-19 11:34:35,460 - INFO - Aktualizacja stanu systemu wys³ana pomyœlnie
-2025-05-19 11:34:35,858 - INFO - Aktualizacja informacji o kontrakcie wys³ana pomyœlnie
-2025-05-19 11:34:36,104 - INFO - Updated power profile
-2025-05-19 11:34:36,104 - INFO - !!! Waiting 15 seconds for next iteration !!!
-2025-05-19 11:34:51,110 - INFO - 
-==================================================
-Starting new iteration
-==================================================
-2025-05-19 11:34:51,110 - INFO - Loaded operation mode: automatic
-2025-05-19 11:34:51,110 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
-2025-05-19 11:34:51,579 - INFO - Otrzymane dane non_adjustable_devices: [{"actual_power": 31, "id": 8, "name": "Non Adjustable Device 1", "priority": 1, "switch_status": true}, {"actual_power": 300, "id": 9, "name": "Non Adjustable Device 2", "priority": 2, "switch_status": false}]
-2025-05-19 11:34:51,579 - INFO - Otrzymane dane adjustable_devices: [{"min_power": 80, "max_power": 100, "actual_power": 84, "id": 10, "name": "Adjustable Device 1", "priority": 2, "switch_status": false}, {"min_power": 30, "max_power": 1000, "actual_power": 100, "id": 11, "name": "Adjustable Device 2", "priority": 1, "switch_status": true}]
-2025-05-19 11:34:51,579 - INFO - Pobieranie danych kontraktu z http://localhost:5002/api/Scada/contract-info
-2025-05-19 11:34:52,083 - INFO - Przetworzone dane non_adjustable_devices: [{"id": 8, "name": "Non Adjustable Device 1", "priority": 1, "power": 31, "switch_status": true}, {"id": 9, "name": "Non Adjustable Device 2", "priority": 2, "power": 300, "switch_status": false}]
-2025-05-19 11:34:52,083 - INFO - Przetworzone dane adjustable_devices: [{"id": 10, "name": "Adjustable Device 1", "priority": 2, "power": 84, "switch_status": false, "min_power": 80, "max_power": 100}, {"id": 11, "name": "Adjustable Device 2", "priority": 1, "power": 100, "switch_status": true, "min_power": 30, "max_power": 1000}]
-2025-05-19 11:34:52,085 - INFO - Dane systemu zapisane do C:/eryk/AppFuga\apps\backend\live_data.json
-2025-05-19 11:34:52,086 - INFO - Dane kontraktu zapisane do C:/eryk/AppFuga\apps\backend\live_contract_data.json
-2025-05-19 11:34:52,086 - INFO - [DEBUG] Attempting to update wind_turbine: {'id': 3, 'name': 'Wind Turbine 1', 'priority': 2, 'max_output': 80, 'min_output': 0, 'actual_output': 80, 'switch_status': True, 'device_status': 'online'}
-2025-05-19 11:34:52,086 - INFO - Wind_turbine Wind Turbine 1 updated successfully.
-2025-05-19 11:34:52,086 - INFO - [DEBUG] Attempting to update wind_turbine: {'id': 4, 'name': 'Wind Turbine 2', 'priority': 2, 'max_output': 70, 'min_output': 0, 'actual_output': 0, 'switch_status': False, 'device_status': 'offline'}
-2025-05-19 11:34:52,087 - INFO - Wind_turbine Wind Turbine 2 updated successfully.
-2025-05-19 11:34:52,087 - INFO - [DEBUG] Attempting to update fuel_turbine: {'id': 5, 'name': 'Fuel Turbine 1', 'priority': 4, 'max_output': 100, 'min_output': 0, 'actual_output': 100, 'switch_status': True, 'device_status': 'online'}
-2025-05-19 11:34:52,087 - INFO - Fuel_turbine Fuel Turbine 1 updated successfully.
-2025-05-19 11:34:52,087 - INFO - [DEBUG] Attempting to update fuel_cell: {'id': 6, 'name': 'Fuel Cell 1', 'priority': 3, 'max_output': 75, 'min_output': 0, 'actual_output': 0, 'switch_status': False, 'device_status': 'offline'}
-2025-05-19 11:34:52,087 - INFO - Fuel_cell Fuel Cell 1 updated successfully.
-2025-05-19 11:34:52,087 - INFO - [DEBUG] Attempting to update bess: {'id': 7, 'name': 'BESS 1', 'capacity': 350, 'min_charge_level': 40, 'charge_level': 200, 'switch_status': True, 'device_status': 'online'}
-2025-05-19 11:34:52,087 - INFO - BESS BESS 1 updated successfully.
-2025-05-19 11:34:52,087 - INFO - Data loaded successfully.
-2025-05-19 11:34:52,095 - INFO - Loaded live data
-2025-05-19 11:34:52,095 - INFO - 
-==================================================
-Starting a new iteration in automatic mode
-==================================================
-2025-05-19 11:34:52,095 - INFO - 
--------------------- Starting device update based on meter readings --------------------
-2025-05-19 11:34:52,095 - INFO - Checking 4 devices for updates based on meter readings
-2025-05-19 11:34:52,095 - INFO - No meter found for device Wind Turbine 1 (ID: 3)
-2025-05-19 11:34:52,095 - INFO - No meter found for device Wind Turbine 2 (ID: 4)
-2025-05-19 11:34:52,095 - INFO - No meter found for device Fuel Turbine 1 (ID: 5)
-2025-05-19 11:34:52,095 - INFO - No meter found for device Fuel Cell 1 (ID: 6)
-2025-05-19 11:34:52,095 - INFO - 
--------------------- System Status Summary --------------------
-2025-05-19 11:34:52,096 - INFO - !!! Total generated power: 180.00 kW !!!
-2025-05-19 11:34:52,096 - INFO - !!! Total demand: 131.00 kW !!!
-2025-05-19 11:34:52,096 - INFO - Number of active generating devices: 2
-2025-05-19 11:34:52,096 - INFO - Number of inactive generating devices: 2
-2025-05-19 11:34:52,096 - INFO - 
--------------------- Active Generating Devices --------------------
-2025-05-19 11:34:52,096 - INFO -   - Wind Turbine 1: 80.00 kW / 80.00 kW
-2025-05-19 11:34:52,096 - INFO -   - Fuel Turbine 1: 100.00 kW / 100.00 kW
-2025-05-19 11:34:52,096 - INFO - 
--------------------- Inactive Generating Devices --------------------
-2025-05-19 11:34:52,096 - INFO -   - Wind Turbine 2: max output 70.00 kW
-2025-05-19 11:34:52,096 - INFO -   - Fuel Cell 1: max output 75.00 kW
-2025-05-19 11:34:52,096 - INFO - 
--------------------- BESS Status --------------------
-2025-05-19 11:34:52,096 - INFO - BESS charge level: 200.00 kWh / 350.00 kWh
-2025-05-19 11:34:52,096 - INFO - 
--------------------- Energy Trading Status --------------------
-2025-05-19 11:34:52,096 - INFO - Energy purchase: Available (Limit: 105.00 kWh, Current: 70.00 kWh)
-2025-05-19 11:34:52,096 - INFO - Energy sale: Not available (Limit: 0.00 kWh, Current: 0.00 kWh)
-2025-05-19 11:34:52,096 - INFO - 
--------------------- Energy Consumer Grid Summary --------------------
-2025-05-19 11:34:52,096 - INFO - !!! Total consumed power: 131.00 kW !!!
-2025-05-19 11:34:52,097 - INFO - Total number of devices: 4
-2025-05-19 11:34:52,097 - INFO - Number of active devices: 2
-2025-05-19 11:34:52,097 - INFO - Number of inactive devices: 2
-2025-05-19 11:34:52,097 - INFO - Number of active adjustable devices: 1
-2025-05-19 11:34:52,097 - INFO - Number of active non-adjustable devices: 1
-2025-05-19 11:34:52,097 - INFO - 
--------------------- Active Adjustable Devices --------------------
-2025-05-19 11:34:52,097 - INFO -   - Adjustable Device 2: Current: 100.00 kW / Max: 100.00 kW
-2025-05-19 11:34:52,097 - INFO - 
--------------------- Active Non-adjustable Devices --------------------
-2025-05-19 11:34:52,097 - INFO -   - Non Adjustable Device 1: 31.00 kW
-2025-05-19 11:34:52,097 - INFO - 
--------------------- Inactive Devices --------------------
-2025-05-19 11:34:52,097 - INFO -   - Non Adjustable Device 2 (Non-adjustable)
-2025-05-19 11:34:52,097 - INFO -   - Adjustable Device 1 (Adjustable)
-2025-05-19 11:34:52,097 - INFO - checkTotal generated power: 180 kW
-2025-05-19 11:34:52,097 - INFO - checkTotal demand power: 131 kW
-2025-05-19 11:34:52,097 - INFO - 
--------------------- Power surplus detected: 49 kW - starting surplus management --------------------
-2025-05-19 11:34:52,097 - INFO - Iteration 1, surplus remaining: 49.000000 kW
-2025-05-19 11:34:52,097 - INFO - Attempting to perform the action: SurplusAction.CHARGE_BATTERY
-2025-05-19 11:34:52,097 - INFO - Executing action: SurplusAction.CHARGE_BATTERY, type: <enum 'SurplusAction'>
-2025-05-19 11:34:52,097 - INFO - XXXXXXXXXXXXXXXXXXXXXXXXXExecuting actionxdxdxdd: SurplusAction.CHARGE_BATTERY
-2025-05-19 11:34:52,097 - INFO - Remaining surplus: 49.000000
-2025-05-19 11:34:52,098 - INFO - BESS charged by 49.00 kWh (14.00%). New level: 249.00 kWh
-2025-05-19 11:34:52,098 - INFO - Action result: {'success': True, 'amount': 49, 'percent': 14.0}
-2025-05-19 11:34:52,098 - INFO - Action SurplusAction.CHARGE_BATTERY managed 49.000000 kW. Surplus remaining: 0.000000 kW
-2025-05-19 11:34:52,098 - INFO - !!! Managed 49 kW of surplus. Remaining: 0 kW !!!
-2025-05-19 11:34:52,098 - INFO - Surplus management completed. The entire surplus has been dissolved.
-2025-05-19 11:34:52,098 - INFO - 
--------------------- System Status Summary --------------------
-2025-05-19 11:34:52,098 - INFO - !!! Total generated power: 180.00 kW !!!
-2025-05-19 11:34:52,098 - INFO - !!! Total demand: 131.00 kW !!!
-2025-05-19 11:34:52,098 - INFO - Number of active generating devices: 2
-2025-05-19 11:34:52,098 - INFO - Number of inactive generating devices: 2
-2025-05-19 11:34:52,098 - INFO - 
--------------------- Active Generating Devices --------------------
-2025-05-19 11:34:52,099 - INFO -   - Wind Turbine 1: 80.00 kW / 80.00 kW
-2025-05-19 11:34:52,099 - INFO -   - Fuel Turbine 1: 100.00 kW / 100.00 kW
-2025-05-19 11:34:52,099 - INFO - 
--------------------- Inactive Generating Devices --------------------
-2025-05-19 11:34:52,099 - INFO -   - Wind Turbine 2: max output 70.00 kW
-2025-05-19 11:34:52,099 - INFO -   - Fuel Cell 1: max output 75.00 kW
-2025-05-19 11:34:52,099 - INFO - 
--------------------- BESS Status --------------------
-2025-05-19 11:34:52,099 - INFO - BESS charge level: 249.00 kWh / 350.00 kWh
-2025-05-19 11:34:52,099 - INFO - 
--------------------- Energy Trading Status --------------------
-2025-05-19 11:34:52,099 - INFO - Energy purchase: Available (Limit: 105.00 kWh, Current: 70.00 kWh)
-2025-05-19 11:34:52,099 - INFO - Energy sale: Not available (Limit: 0.00 kWh, Current: 0.00 kWh)
-2025-05-19 11:34:52,099 - INFO - 
--------------------- Energy Consumer Grid Summary --------------------
-2025-05-19 11:34:52,099 - INFO - !!! Total consumed power: 131.00 kW !!!
-2025-05-19 11:34:52,099 - INFO - Total number of devices: 4
-2025-05-19 11:34:52,099 - INFO - Number of active devices: 2
-2025-05-19 11:34:52,099 - INFO - Number of inactive devices: 2
-2025-05-19 11:34:52,099 - INFO - Number of active adjustable devices: 1
-2025-05-19 11:34:52,099 - INFO - Number of active non-adjustable devices: 1
-2025-05-19 11:34:52,099 - INFO - 
--------------------- Active Adjustable Devices --------------------
-2025-05-19 11:34:52,099 - INFO -   - Adjustable Device 2: Current: 100.00 kW / Max: 100.00 kW
-2025-05-19 11:34:52,099 - INFO - 
--------------------- Active Non-adjustable Devices --------------------
-2025-05-19 11:34:52,099 - INFO -   - Non Adjustable Device 1: 31.00 kW
-2025-05-19 11:34:52,099 - INFO - 
--------------------- Inactive Devices --------------------
-2025-05-19 11:34:52,099 - INFO -   - Non Adjustable Device 2 (Non-adjustable)
-2025-05-19 11:34:52,099 - INFO -   - Adjustable Device 1 (Adjustable)
-2025-05-19 11:34:52,101 - INFO - 
--------------------- Ending of iteration --------------------
-2025-05-19 11:34:52,101 - INFO - Live data saved to C:/eryk/AppFuga\apps\backend\output_data.json
-2025-05-19 11:34:52,102 - INFO - Live contract data saved to C:/eryk/AppFuga\apps\backend\output_contract_data.json
-2025-05-19 11:34:52,182 - INFO - Updated power profile
-2025-05-19 11:34:52,183 - INFO - Iteration completed in 0.09 seconds
-2025-05-19 11:34:52,184 - INFO - 
--------------------- Ending of iteration --------------------
-2025-05-19 11:34:52,184 - INFO - Live data saved to C:/eryk/AppFuga\apps\backend\output_data.json
-2025-05-19 11:34:52,185 - INFO - Live contract data saved to C:/eryk/AppFuga\apps\backend\output_contract_data.json
-2025-05-19 11:34:52,186 - INFO - API system data saved to C:/eryk/AppFuga\apps\backend\output_data.json
-2025-05-19 11:34:52,187 - INFO - API contract data saved to C:/eryk/AppFuga\apps\backend\output_contract_data.json
-2025-05-19 11:34:52,814 - INFO - Aktualizacja stanu systemu wys³ana pomyœlnie
-2025-05-19 11:34:55,017 - INFO - Aktualizacja informacji o kontrakcie wys³ana pomyœlnie
-2025-05-19 11:34:55,122 - INFO - Updated power profile
-2025-05-19 11:34:55,122 - INFO - !!! Waiting 15 seconds for next iteration !!!
-2025-05-19 11:35:10,126 - INFO - 
-==================================================
-Starting new iteration
-==================================================
-2025-05-19 11:35:10,126 - INFO - Loaded operation mode: automatic
-2025-05-19 11:35:10,126 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
-2025-05-19 11:35:10,610 - INFO - Otrzymane dane non_adjustable_devices: [{"actual_power": 31, "id": 8, "name": "Non Adjustable Device 1", "priority": 1, "switch_status": true}, {"actual_power": 300, "id": 9, "name": "Non Adjustable Device 2", "priority": 2, "switch_status": false}]
-2025-05-19 11:35:10,610 - INFO - Otrzymane dane adjustable_devices: [{"min_power": 80, "max_power": 100, "actual_power": 84, "id": 10, "name": "Adjustable Device 1", "priority": 2, "switch_status": false}, {"min_power": 30, "max_power": 1000, "actual_power": 100, "id": 11, "name": "Adjustable Device 2", "priority": 1, "switch_status": true}]
-2025-05-19 11:35:10,610 - INFO - Pobieranie danych kontraktu z http://localhost:5002/api/Scada/contract-info
-2025-05-19 11:35:11,028 - INFO - Przetworzone dane non_adjustable_devices: [{"id": 8, "name": "Non Adjustable Device 1", "priority": 1, "power": 31, "switch_status": true}, {"id": 9, "name": "Non Adjustable Device 2", "priority": 2, "power": 300, "switch_status": false}]
-2025-05-19 11:35:11,028 - INFO - Przetworzone dane adjustable_devices: [{"id": 10, "name": "Adjustable Device 1", "priority": 2, "power": 84, "switch_status": false, "min_power": 80, "max_power": 100}, {"id": 11, "name": "Adjustable Device 2", "priority": 1, "power": 100, "switch_status": true, "min_power": 30, "max_power": 1000}]
-2025-05-19 11:35:11,030 - INFO - Dane systemu zapisane do C:/eryk/AppFuga\apps\backend\live_data.json
-2025-05-19 11:35:11,031 - INFO - Dane kontraktu zapisane do C:/eryk/AppFuga\apps\backend\live_contract_data.json
-2025-05-19 11:35:11,031 - INFO - [DEBUG] Attempting to update wind_turbine: {'id': 3, 'name': 'Wind Turbine 1', 'priority': 2, 'max_output': 80, 'min_output': 0, 'actual_output': 80, 'switch_status': True, 'device_status': 'online'}
-2025-05-19 11:35:11,031 - INFO - Wind_turbine Wind Turbine 1 updated successfully.
-2025-05-19 11:35:11,032 - INFO - [DEBUG] Attempting to update wind_turbine: {'id': 4, 'name': 'Wind Turbine 2', 'priority': 2, 'max_output': 70, 'min_output': 0, 'actual_output': 0, 'switch_status': False, 'device_status': 'offline'}
-2025-05-19 11:35:11,032 - INFO - Wind_turbine Wind Turbine 2 updated successfully.
-2025-05-19 11:35:11,032 - INFO - [DEBUG] Attempting to update fuel_turbine: {'id': 5, 'name': 'Fuel Turbine 1', 'priority': 4, 'max_output': 100, 'min_output': 0, 'actual_output': 100, 'switch_status': True, 'device_status': 'online'}
-2025-05-19 11:35:11,032 - INFO - Fuel_turbine Fuel Turbine 1 updated successfully.
-2025-05-19 11:35:11,032 - INFO - [DEBUG] Attempting to update fuel_cell: {'id': 6, 'name': 'Fuel Cell 1', 'priority': 3, 'max_output': 75, 'min_output': 0, 'actual_output': 0, 'switch_status': False, 'device_status': 'offline'}
-2025-05-19 11:35:11,032 - INFO - Fuel_cell Fuel Cell 1 updated successfully.
-2025-05-19 11:35:11,032 - INFO - [DEBUG] Attempting to update bess: {'id': 7, 'name': 'BESS 1', 'capacity': 350, 'min_charge_level': 40, 'charge_level': 200, 'switch_status': True, 'device_status': 'online'}
-2025-05-19 11:35:11,032 - INFO - BESS BESS 1 updated successfully.
-2025-05-19 11:35:11,032 - INFO - Data loaded successfully.
-2025-05-19 11:35:11,038 - INFO - Loaded live data
-2025-05-19 11:35:11,039 - INFO - 
-==================================================
-Starting a new iteration in automatic mode
-==================================================
-2025-05-19 11:35:11,039 - INFO - 
--------------------- Starting device update based on meter readings --------------------
-2025-05-19 11:35:11,039 - INFO - Checking 4 devices for updates based on meter readings
-2025-05-19 11:35:11,039 - INFO - No meter found for device Wind Turbine 1 (ID: 3)
-2025-05-19 11:35:11,039 - INFO - No meter found for device Wind Turbine 2 (ID: 4)
-2025-05-19 11:35:11,039 - INFO - No meter found for device Fuel Turbine 1 (ID: 5)
-2025-05-19 11:35:11,039 - INFO - No meter found for device Fuel Cell 1 (ID: 6)
-2025-05-19 11:35:11,039 - INFO - 
--------------------- System Status Summary --------------------
-2025-05-19 11:35:11,039 - INFO - !!! Total generated power: 180.00 kW !!!
-2025-05-19 11:35:11,039 - INFO - !!! Total demand: 131.00 kW !!!
-2025-05-19 11:35:11,039 - INFO - Number of active generating devices: 2
-2025-05-19 11:35:11,039 - INFO - Number of inactive generating devices: 2
-2025-05-19 11:35:11,039 - INFO - 
--------------------- Active Generating Devices --------------------
-2025-05-19 11:35:11,039 - INFO -   - Wind Turbine 1: 80.00 kW / 80.00 kW
-2025-05-19 11:35:11,039 - INFO -   - Fuel Turbine 1: 100.00 kW / 100.00 kW
-2025-05-19 11:35:11,039 - INFO - 
--------------------- Inactive Generating Devices --------------------
-2025-05-19 11:35:11,039 - INFO -   - Wind Turbine 2: max output 70.00 kW
-2025-05-19 11:35:11,039 - INFO -   - Fuel Cell 1: max output 75.00 kW
-2025-05-19 11:35:11,040 - INFO - 
--------------------- BESS Status --------------------
-2025-05-19 11:35:11,040 - INFO - BESS charge level: 200.00 kWh / 350.00 kWh
-2025-05-19 11:35:11,040 - INFO - 
--------------------- Energy Trading Status --------------------
-2025-05-19 11:35:11,040 - INFO - Energy purchase: Available (Limit: 105.00 kWh, Current: 70.00 kWh)
-2025-05-19 11:35:11,040 - INFO - Energy sale: Not available (Limit: 0.00 kWh, Current: 0.00 kWh)
-2025-05-19 11:35:11,040 - INFO - 
--------------------- Energy Consumer Grid Summary --------------------
-2025-05-19 11:35:11,040 - INFO - !!! Total consumed power: 131.00 kW !!!
-2025-05-19 11:35:11,040 - INFO - Total number of devices: 4
-2025-05-19 11:35:11,040 - INFO - Number of active devices: 2
-2025-05-19 11:35:11,040 - INFO - Number of inactive devices: 2
-2025-05-19 11:35:11,040 - INFO - Number of active adjustable devices: 1
-2025-05-19 11:35:11,040 - INFO - Number of active non-adjustable devices: 1
-2025-05-19 11:35:11,040 - INFO - 
--------------------- Active Adjustable Devices --------------------
-2025-05-19 11:35:11,040 - INFO -   - Adjustable Device 2: Current: 100.00 kW / Max: 100.00 kW
-2025-05-19 11:35:11,040 - INFO - 
--------------------- Active Non-adjustable Devices --------------------
-2025-05-19 11:35:11,040 - INFO -   - Non Adjustable Device 1: 31.00 kW
-2025-05-19 11:35:11,040 - INFO - 
--------------------- Inactive Devices --------------------
-2025-05-19 11:35:11,040 - INFO -   - Non Adjustable Device 2 (Non-adjustable)
-2025-05-19 11:35:11,040 - INFO -   - Adjustable Device 1 (Adjustable)
-2025-05-19 11:35:11,040 - INFO - checkTotal generated power: 180 kW
-2025-05-19 11:35:11,040 - INFO - checkTotal demand power: 131 kW
-2025-05-19 11:35:11,041 - INFO - 
--------------------- Power surplus detected: 49 kW - starting surplus management --------------------
-2025-05-19 11:35:11,041 - INFO - Iteration 1, surplus remaining: 49.000000 kW
-2025-05-19 11:35:11,041 - INFO - Attempting to perform the action: SurplusAction.CHARGE_BATTERY
-2025-05-19 11:35:11,041 - INFO - Executing action: SurplusAction.CHARGE_BATTERY, type: <enum 'SurplusAction'>
-2025-05-19 11:35:11,041 - INFO - XXXXXXXXXXXXXXXXXXXXXXXXXExecuting actionxdxdxdd: SurplusAction.CHARGE_BATTERY
-2025-05-19 11:35:11,041 - INFO - Remaining surplus: 49.000000
-2025-05-19 11:35:11,041 - INFO - BESS charged by 49.00 kWh (14.00%). New level: 249.00 kWh
-2025-05-19 11:35:11,041 - INFO - Action result: {'success': True, 'amount': 49, 'percent': 14.0}
-2025-05-19 11:35:11,042 - INFO - Action SurplusAction.CHARGE_BATTERY managed 49.000000 kW. Surplus remaining: 0.000000 kW
-2025-05-19 11:35:11,042 - INFO - !!! Managed 49 kW of surplus. Remaining: 0 kW !!!
-2025-05-19 11:35:11,042 - INFO - Surplus management completed. The entire surplus has been dissolved.
-2025-05-19 11:35:11,042 - INFO - 
--------------------- System Status Summary --------------------
-2025-05-19 11:35:11,042 - INFO - !!! Total generated power: 180.00 kW !!!
-2025-05-19 11:35:11,042 - INFO - !!! Total demand: 131.00 kW !!!
-2025-05-19 11:35:11,042 - INFO - Number of active generating devices: 2
-2025-05-19 11:35:11,042 - INFO - Number of inactive generating devices: 2
-2025-05-19 11:35:11,042 - INFO - 
--------------------- Active Generating Devices --------------------
-2025-05-19 11:35:11,042 - INFO -   - Wind Turbine 1: 80.00 kW / 80.00 kW
-2025-05-19 11:35:11,043 - INFO -   - Fuel Turbine 1: 100.00 kW / 100.00 kW
-2025-05-19 11:35:11,043 - INFO - 
--------------------- Inactive Generating Devices --------------------
-2025-05-19 11:35:11,043 - INFO -   - Wind Turbine 2: max output 70.00 kW
-2025-05-19 11:35:11,043 - INFO -   - Fuel Cell 1: max output 75.00 kW
-2025-05-19 11:35:11,043 - INFO - 
--------------------- BESS Status --------------------
-2025-05-19 11:35:11,043 - INFO - BESS charge level: 249.00 kWh / 350.00 kWh
-2025-05-19 11:35:11,043 - INFO - 
--------------------- Energy Trading Status --------------------
-2025-05-19 11:35:11,043 - INFO - Energy purchase: Available (Limit: 105.00 kWh, Current: 70.00 kWh)
-2025-05-19 11:35:11,043 - INFO - Energy sale: Not available (Limit: 0.00 kWh, Current: 0.00 kWh)
-2025-05-19 11:35:11,043 - INFO - 
--------------------- Energy Consumer Grid Summary --------------------
-2025-05-19 11:35:11,043 - INFO - !!! Total consumed power: 131.00 kW !!!
-2025-05-19 11:35:11,043 - INFO - Total number of devices: 4
-2025-05-19 11:35:11,043 - INFO - Number of active devices: 2
-2025-05-19 11:35:11,043 - INFO - Number of inactive devices: 2
-2025-05-19 11:35:11,043 - INFO - Number of active adjustable devices: 1
-2025-05-19 11:35:11,043 - INFO - Number of active non-adjustable devices: 1
-2025-05-19 11:35:11,043 - INFO - 
--------------------- Active Adjustable Devices --------------------
-2025-05-19 11:35:11,043 - INFO -   - Adjustable Device 2: Current: 100.00 kW / Max: 100.00 kW
-2025-05-19 11:35:11,043 - INFO - 
--------------------- Active Non-adjustable Devices --------------------
-2025-05-19 11:35:11,044 - INFO -   - Non Adjustable Device 1: 31.00 kW
-2025-05-19 11:35:11,044 - INFO - 
--------------------- Inactive Devices --------------------
-2025-05-19 11:35:11,044 - INFO -   - Non Adjustable Device 2 (Non-adjustable)
-2025-05-19 11:35:11,044 - INFO -   - Adjustable Device 1 (Adjustable)
-2025-05-19 11:35:11,045 - INFO - 
--------------------- Ending of iteration --------------------
-2025-05-19 11:35:11,045 - INFO - Live data saved to C:/eryk/AppFuga\apps\backend\output_data.json
-2025-05-19 11:35:11,046 - INFO - Live contract data saved to C:/eryk/AppFuga\apps\backend\output_contract_data.json
-2025-05-19 11:35:11,350 - INFO - Updated power profile
-2025-05-19 11:35:11,350 - INFO - Iteration completed in 0.31 seconds
-2025-05-19 11:35:11,352 - INFO - 
--------------------- Ending of iteration --------------------
-2025-05-19 11:35:11,352 - INFO - Live data saved to C:/eryk/AppFuga\apps\backend\output_data.json
-2025-05-19 11:35:11,354 - INFO - Live contract data saved to C:/eryk/AppFuga\apps\backend\output_contract_data.json
-2025-05-19 11:35:11,355 - INFO - API system data saved to C:/eryk/AppFuga\apps\backend\output_data.json
-2025-05-19 11:35:11,356 - INFO - API contract data saved to C:/eryk/AppFuga\apps\backend\output_contract_data.json
-2025-05-19 11:35:11,859 - INFO - Aktualizacja stanu systemu wys³ana pomyœlnie
-2025-05-19 11:35:12,409 - INFO - Aktualizacja informacji o kontrakcie wys³ana pomyœlnie
-2025-05-19 11:35:12,504 - INFO - Updated power profile
-2025-05-19 11:35:12,504 - INFO - !!! Waiting 15 seconds for next iteration !!!
-2025-05-19 11:35:15,558 - INFO - !!! Energy management stopping !!!
-2025-05-19 11:35:15,558 - INFO - !!! Energy management stopped !!!
+2025-05-26 13:46:47,589 - INFO - Live data saved to C:/eryk/AppFuga\apps\backend\output_data.json
+2025-05-26 13:46:47,589 - INFO - Live contract data saved to C:/eryk/AppFuga\apps\backend\output_contract_data.json
+2025-05-26 13:46:47,589 - INFO - Wysy³anie danych systemu (próba 1/3) [RETRY]
+2025-05-26 13:46:53,661 - INFO - Exponential backoff: próba 1, opóŸnienie 30s (obliczone: 30s, max: 300s) [RETRY]
+2025-05-26 13:46:53,661 - INFO - Ponowna próba za 30 sekund... [RETRY]
+2025-05-26 13:47:23,530 - INFO - !!! Energy management stopping !!!
+2025-05-26 13:47:23,663 - INFO - Wysy³anie danych systemu (próba 2/3) [RETRY]
+2025-05-26 13:47:25,935 - INFO - Exponential backoff: próba 2, opóŸnienie 60s (obliczone: 60s, max: 300s) [RETRY]
+2025-05-26 13:47:25,935 - INFO - Ponowna próba za 60 sekund... [RETRY]
+2025-05-26 13:48:25,942 - INFO - Wysy³anie danych systemu (próba 3/3) [RETRY]
+2025-05-26 13:48:30,032 - INFO - Updated power profile
+2025-05-26 13:48:30,032 - INFO - !!! Waiting 15 seconds for next iteration !!!
+2025-05-26 13:48:30,032 - INFO - !!! Energy management stopped !!!
