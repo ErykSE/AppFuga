@@ -25,6 +25,7 @@ from apps.backend.devices.energy_point_class import EnergyPoint
 from apps.backend.devices.energy_source_class import EnergySource
 from apps.backend.others.data_consistency_checker import DataConsistencyChecker
 from apps.backend.managment.api_manager import ApiManager
+from apps.backend.managment.heartbeat_tag_sender import HeartbeatTagSender
 
 
 class EnergyManager:
@@ -110,8 +111,6 @@ class EnergyManager:
             lat=50.86,
             lon=16.32,
         )
-
-
         
         # Reszta inicjalizacji pozostaje bez zmian
         self.check_interval = check_interval
@@ -155,6 +154,17 @@ class EnergyManager:
                 verify_ssl=False
             )
 
+        # Heartbeat tag sender
+        self.heartbeat_sender = None  # ← Na początku nie ma heartbeat sendera
+        if self.use_api:  # ← Jeśli używamy API
+            self.heartbeat_sender = HeartbeatTagSender(  # ← Stwórz nowy obiekt
+                api_base_url=api_base_url,              # ← Adres API
+                info_logger=info_logger,                # ← Logger do info
+                error_logger=error_logger,              # ← Logger do błędów
+                verify_ssl=False                        # ← Bez weryfikacji SSL
+            )
+
+
         self.info_logger.info(f"Using API: {self.use_api}")
 
         self.changed_devices = []
@@ -189,6 +199,10 @@ class EnergyManager:
         """Uruchamia proces zarządzania energią w osobnym wątku."""
         self.running = True
         self.stop_event.clear()
+
+        if self.heartbeat_sender:  # ← Jeśli heartbeat sender istnieje
+            self.heartbeat_sender.start()  # ← URUCHOM go (osobny wątek!)
+
         Thread(target=self.run_energy_management).start()
         self.info_logger.important("Energy management started")
 
@@ -196,6 +210,10 @@ class EnergyManager:
         """Zatrzymuje proces zarządzania energią."""
         self.running = False
         self.stop_event.set()
+
+        if self.heartbeat_sender:  # ← Jeśli heartbeat sender istnieje
+            self.heartbeat_sender.stop()  # ← ZATRZYMAJ go
+
         self.info_logger.important("Energy management stopping")
 
     def run_energy_management(self):
