@@ -6,6 +6,7 @@ import time
 from urllib3.exceptions import InsecureRequestWarning
 from dataclasses import dataclass
 from typing import Optional, Dict, Any, List
+import datetime
 
 @dataclass
 class RetryConfig:
@@ -241,14 +242,29 @@ class ApiManager:
             system_url = f"{self.api_base_url}/api/Scada/system-state"
             self.info_logger.info(f"Pobieranie danych stanu systemu z {system_url}")
             
+            # DODAJ TO:
+            self.info_logger.info("=== DEBUG: Starting GET /system-state ===")
+            
             try:
                 system_response = requests.get(system_url, verify=self.verify_ssl, 
-                                             timeout=self.retry_config.connection_timeout)
+                                            timeout=self.retry_config.connection_timeout)
+                
+                # DODAJ TO:
+                self.info_logger.info(f"=== DEBUG: Response status code: {system_response.status_code} ===")
+                
                 system_response.raise_for_status()
                 system_data_raw = system_response.json()
                 
+                # DODAJ TO:
+                self.info_logger.info("=== DEBUG: GET /system-state SUCCESS - no retry needed ===")
+                
             except requests.exceptions.HTTPError as e:
+                # DODAJ TO:
+                self.info_logger.error(f"=== DEBUG: HTTPError caught - status: {e.response.status_code} ===")
+                
                 if e.response.status_code == 503:
+                    self.info_logger.info("=== DEBUG: Status 503 detected - entering retry logic ===")
+                    
                     self._log_with_flag("WARNING", "API zwróciło 503 - SCADA prawdopodobnie niedostępna", "SYSTEM")
                     
                     # Zapisz status awarii do pliku
@@ -257,46 +273,56 @@ class ApiManager:
                         "message": "SCADA system unavailable (503 error)",
                         "scada_connected": False,
                         "missing_devices": [],
-                        "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+                        "timestamp": datetime.datetime.now().isoformat() + "Z"  # ← DODAJ TO
                     }
                     self.save_status_data(status_path, error_status)
                     
                     # 5 prób ponownego połączenia z system-state
+                    self.info_logger.info("=== DEBUG: Starting 5-attempt retry logic for 503 ===")
+                    
                     if not self.retry_system_state_connection(system_url):
                         # Po nieudanych próbach - diagnostyka i zatrzymanie
                         self.log_final_scada_status()
                         
                         self.system_in_alarm_mode = True
                         self._log_with_flag("CRITICAL", 
-                                           "SCADA niedostępna po wszystkich próbach - ZATRZYMANIE ALGORYTMU!", 
-                                           "ALERT")
+                                        "SCADA niedostępna po wszystkich próbach - ZATRZYMANIE ALGORYTMU!", 
+                                        "ALERT")
                         return False
                     
                     # Sukces po retry - pobierz dane ponownie
                     system_response = requests.get(system_url, verify=self.verify_ssl, 
-                                                 timeout=self.retry_config.connection_timeout)
+                                                timeout=self.retry_config.connection_timeout)
                     system_response.raise_for_status()
                     system_data_raw = system_response.json()
                 else:
+                    # DODAJ TO:
+                    self.info_logger.error(f"=== DEBUG: HTTPError {e.response.status_code} - NOT 503, raising exception (NO RETRY) ===")
                     raise  # Inny błąd HTTP - propaguj dalej
             
             except requests.exceptions.RequestException as e:
+                # DODAJ TO:
+                self.info_logger.error(f"=== DEBUG: RequestException caught - type: {type(e).__name__}, message: {str(e)} ===")
+                self.info_logger.info("=== DEBUG: Connection/timeout error - entering retry logic ===")
+                
                 # Błędy połączenia (timeout, connection error itp.)
                 self._log_with_flag("ERROR", f"Błąd połączenia z system-state: {str(e)}", "NETWORK")
                 
                 # Próby ponownego połączenia
+                self.info_logger.info("=== DEBUG: Starting 5-attempt retry logic for RequestException ===")
+                
                 if not self.retry_system_state_connection(system_url):
                     self.log_final_scada_status()
                     
                     self.system_in_alarm_mode = True
                     self._log_with_flag("CRITICAL", 
-                                       "Błąd połączenia po wszystkich próbach - ZATRZYMANIE ALGORYTMU!", 
-                                       "ALERT")
+                                    "Błąd połączenia po wszystkich próbach - ZATRZYMANIE ALGORYTMU!", 
+                                    "ALERT")
                     return False
                 
                 # Sukces po retry
                 system_response = requests.get(system_url, verify=self.verify_ssl, 
-                                             timeout=self.retry_config.connection_timeout)
+                                            timeout=self.retry_config.connection_timeout)
                 system_response.raise_for_status()
                 system_data_raw = system_response.json()
             
@@ -307,8 +333,8 @@ class ApiManager:
             missing_devices = status_info.get("missing_devices", [])
             if missing_devices:
                 self._log_with_flag("WARNING", 
-                                   f"Wykryto {len(missing_devices)} brakujących urządzeń: {missing_devices}", 
-                                   "SYSTEM")
+                                f"Wykryto {len(missing_devices)} brakujących urządzeń: {missing_devices}", 
+                                "SYSTEM")
                 self._log_with_flag("INFO", "Algorytm będzie kontynuowany z dostępnymi urządzeniami", "SYSTEM")
             
             # 5. Zapisz status do osobnego pliku
@@ -318,7 +344,7 @@ class ApiManager:
             contract_url = f"{self.api_base_url}/api/Scada/contract-info"
             self.info_logger.info(f"Pobieranie danych kontraktu z {contract_url}")
             contract_response = requests.get(contract_url, verify=self.verify_ssl, 
-                                           timeout=self.retry_config.connection_timeout)
+                                        timeout=self.retry_config.connection_timeout)
             contract_response.raise_for_status()
             contract_data = contract_response.json()
             
@@ -344,14 +370,27 @@ class ApiManager:
             self.consecutive_failures = 0
             self.last_successful_connection = time.time()
             
+            # DODAJ TO:
+            self.info_logger.info("=== DEBUG: fetch_and_save_data SUCCESS ===")
+            
             return True
             
         except Exception as e:
+            # DODAJ TO:
+            self.error_logger.error(f"=== DEBUG: UNEXPECTED EXCEPTION caught in fetch_and_save_data ===")
+            self.error_logger.error(f"=== DEBUG: Exception type: {type(e).__name__} ===")
+            self.error_logger.error(f"=== DEBUG: Exception message: {str(e)} ===")
+            self.error_logger.exception("=== DEBUG: Full exception traceback ===")
+            
             self.consecutive_failures += 1
             self._log_with_flag("CRITICAL", 
-                               f"Błąd podczas pobierania/zapisywania danych z API (awaria #{self.consecutive_failures}): {str(e)}", 
-                               "ALERT")
+                            f"Błąd podczas pobierania/zapisywania danych z API (awaria #{self.consecutive_failures}): {str(e)}", 
+                            "ALERT")
             self.error_logger.exception("Szczegóły błędu:")
+            
+            # DODAJ TO:
+            self.info_logger.error("=== DEBUG: Returning False from unexpected exception ===")
+            
             return False
     
     def save_status_data(self, status_path: str, status_info: Dict[str, Any]):
