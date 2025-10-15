@@ -89,56 +89,24 @@ class EnergyDeficitManager:
         
         self.info_logger.info(f"Start managing power deficit: {power_deficit} kW")
         self.info_logger.info("")
-        self.info_logger.info("🔧 DEFICIT MANAGEMENT STRATEGY")
-        self.info_logger.info("-" * 40)
-        self.info_logger.info("1. Maximize power output from generators")
-        self.info_logger.info("2. If still deficit → BESS vs GRID decision")
-        self.info_logger.info("3. If still deficit → Limit consumption (last resort)")
-        self.info_logger.info("")
+        self.info_logger.info("🔧 MANAGING DEFICIT")
+        self.info_logger.info("-" * 25)
 
         managed = self.maximize_power_output(power_deficit)
 
-        self.info_logger.info("")
-        self.info_logger.info(f"✅ STEP 1 COMPLETED: Increased production by {managed:.2f} kW")
-        self.info_logger.info(f"   Strategy: Maximized active generators + activated inactive ones")
-        self.info_logger.info(f"   Result: {managed:.2f} kW additional power generated")
-        
-        # ✅ POPRAWKA: Sprawdź rzeczywisty bilans po maksymalizacji
-        if hasattr(self, 'energy_manager_ref') and self.energy_manager_ref:
-            current_balance = self.energy_manager_ref.calculate_energy_balance()
-            current_deficit = current_balance.deficit if current_balance.has_deficit else 0.0
-            self.info_logger.info(f"   Current balance after maximization: {current_balance.balance:+.2f} kW (deficit: {current_deficit:.2f} kW)")
+        self.info_logger.info(f"✅ Increased production: +{managed:.2f} kW")
         remaining_deficit = power_deficit - managed
 
         if remaining_deficit > 0:
-            self.info_logger.info("")
-            self.info_logger.info(f"⚠️  STEP 2 REQUIRED: {remaining_deficit:.2f} kW deficit remains")
-            self.info_logger.info("   Strategy: BESS discharge vs Grid import decision")
-            self.info_logger.info("   Factors: BESS charge level, Grid tariffs, Purchase limits")
+            self.info_logger.info(f"⚠️  Remaining deficit: {remaining_deficit:.2f} kW")
             
             result = self.manage_remaining_deficit(remaining_deficit)
             managed += result["amount_managed"]
             remaining_deficit = result["remaining_deficit"]
             
-            self.info_logger.info("")
-            self.info_logger.info(f"✅ STEP 2 COMPLETED: Managed additional {result['amount_managed']:.2f} kW")
-            self.info_logger.info(f"   Strategy: {'BESS discharge' if 'bess' in str(result).lower() else 'Grid import' if 'grid' in str(result).lower() else 'Consumption limitation'}")
-            self.info_logger.info(f"   Result: {result['amount_managed']:.2f} kW deficit resolved")
+            self.info_logger.info(f"✅ Managed additional: +{result['amount_managed']:.2f} kW")
 
-        # ✅ POPRAWKA: Sprawdź rzeczywisty bilans po zarządzaniu
-        if hasattr(self, 'energy_manager_ref') and self.energy_manager_ref:
-            final_balance = self.energy_manager_ref.calculate_energy_balance()
-            actual_remaining = final_balance.deficit if final_balance.has_deficit else 0.0
-            
-            self.info_logger.info(
-                f"Deficit management completed. A total of managed: {managed} kW. "
-                f"Calculated remaining: {remaining_deficit} kW. "
-                f"Actual remaining: {actual_remaining:.2f} kW"
-            )
-        else:
-            self.info_logger.info(
-                f"Deficit management completed. A total of managed: {managed} kW. Remaining deficit: {remaining_deficit} kW"
-            )
+        self.info_logger.info(f"📊 Total managed: {managed:.2f} kW, Remaining: {remaining_deficit:.2f} kW")
         return {
             "amount_managed": managed,
             "remaining_deficit": remaining_deficit,

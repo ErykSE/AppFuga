@@ -115,11 +115,8 @@ class EnergySurplusManager:
             return {"amount_managed": 0, "remaining_surplus": power_surplus}
         
         self.info_logger.info("")
-        self.info_logger.info("🔧 SURPLUS MANAGEMENT STRATEGY")
-        self.info_logger.info("-" * 40)
-        self.info_logger.info("1. BESS vs GRID decision (utility function)")
-        self.info_logger.info("2. If still surplus → Limit generation (last resort)")
-        self.info_logger.info("")
+        self.info_logger.info("🔧 MANAGING SURPLUS")
+        self.info_logger.info("-" * 25)
         
         total_managed = 0
         remaining_surplus = power_surplus
