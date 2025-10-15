@@ -74,7 +74,20 @@ class EnergyDeficitManager:
         Zwraca:
             dict: Słownik zawierający ilość zarządzonego deficytu i ewentualny pozostały deficyt.
         """
-        self.info_logger.info(f"Start managing power deficit:: {power_deficit} kW")
+        # ✅ WALIDACJA DANYCH WEJŚCIOWYCH
+        if not isinstance(power_deficit, (int, float)):
+            self.error_logger.error(f"Invalid power_deficit type: {type(power_deficit)}. Expected float.")
+            return {"amount_managed": 0, "remaining_deficit": power_deficit}
+        
+        if power_deficit <= 0:
+            self.info_logger.info(f"Power deficit is {power_deficit} kW - no action needed")
+            return {"amount_managed": 0, "remaining_deficit": 0}
+        
+        if power_deficit > 10000:  # Rozsądny limit
+            self.error_logger.error(f"Power deficit too large: {power_deficit} kW. Maximum allowed: 10000 kW")
+            return {"amount_managed": 0, "remaining_deficit": power_deficit}
+        
+        self.info_logger.info(f"Start managing power deficit: {power_deficit} kW")
 
         managed = self.maximize_power_output(power_deficit)
 
@@ -160,6 +173,15 @@ class EnergyDeficitManager:
         Zwraca:
             float: Ilość zwiększonej mocy wyjściowej w kW.
         """
+        # ✅ WALIDACJA DANYCH WEJŚCIOWYCH
+        if not isinstance(power_deficit, (int, float)) or power_deficit <= 0:
+            self.error_logger.error(f"Invalid power_deficit: {power_deficit}")
+            return 0.0
+        
+        if not self.microgrid or not hasattr(self.microgrid, 'get_all_devices'):
+            self.error_logger.error("Microgrid not available or invalid")
+            return 0.0
+        
         handleable_power = self.can_handle_more_power(power_deficit)
 
         current_output = self.microgrid.total_power_generated()
@@ -181,6 +203,7 @@ class EnergyDeficitManager:
 
         # Najpierw zwiększamy moc aktywnych urządzeń
         for device in all_devices:
+            # Sprawdź czy już osiągnęliśmy cel
             if current_output + increased_power >= target_output:
                 break
 
@@ -189,12 +212,10 @@ class EnergyDeficitManager:
                 max_output = device.get_max_output()
 
                 if device.is_adjustable:
-                    new_output = min(
-                        max_output,
-                        target_output
-                        - (current_output + increased_power)
-                        + initial_output,
-                    )
+                    # Oblicz ile jeszcze potrzebujemy
+                    remaining_needed = target_output - (current_output + increased_power)
+                    # Nowa moc = początkowa + to co potrzebujemy (ale nie więcej niż max)
+                    new_output = min(max_output, initial_output + remaining_needed)
                     if device.set_output(new_output):
                         actual_increase = new_output - initial_output
                         increased_power += actual_increase
@@ -243,10 +264,10 @@ class EnergyDeficitManager:
                     if device.activate():
                         max_output = device.get_max_output()
                         if device.is_adjustable:
-                            new_output = min(
-                                max_output,
-                                target_output - (current_output + increased_power),
-                            )
+                            # Oblicz ile jeszcze potrzebujemy
+                            remaining_needed = target_output - (current_output + increased_power)
+                            # Nowa moc = to co potrzebujemy (ale nie więcej niż max)
+                            new_output = min(max_output, remaining_needed)
                             if device.set_output(new_output):
                                 actual_increase = new_output
                                 increased_power += actual_increase
@@ -1542,18 +1563,6 @@ class EnergyDeficitManager:
             f"New level: {bess.charge_level:.2f} kWh"
         )
         
-        # Zaplanuj przyspieszoną iterację (jeśli plan dostępny i potrzeba)
-        if discharge_plan and discharge_plan.will_finish_before_next_iteration and self.energy_manager_ref:
-            self.energy_manager_ref.iteration_scheduler.schedule_early_iteration(
-                after_seconds=discharge_plan.time_to_completion_minutes * 60,
-                event_type="bess_discharge_complete",
-                description=f"BESS will be empty (discharged {discharge_plan.energy_amount:.2f} kWh)"
-            )
-            self.info_logger.info(
-                f"⏰ Early iteration scheduled in {discharge_plan.time_to_completion_minutes:.2f} min "
-                f"({discharge_plan.time_to_completion_minutes * 60:.0f}s)"
-            )
-        
         # Tracking zmian
         if self.energy_manager_ref:
             device_change = {
@@ -1566,7 +1575,6 @@ class EnergyDeficitManager:
             self.info_logger.info(f"DEVICE CHANGED: {bess.name} (BESS) - discharge:{discharged_amount:.2f}")
         
         # === EARLY ITERATION HANDLING ===
-
         if discharge_plan and discharge_plan.will_finish_before_next_iteration and self.energy_manager_ref:
             # BESS skończy wcześniej → zaplanuj early iteration
             self.energy_manager_ref.iteration_scheduler.schedule_early_iteration(
