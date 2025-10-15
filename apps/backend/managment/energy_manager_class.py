@@ -899,7 +899,9 @@ class EnergyManager:
             # ═══════════════════════════════════════════════════════
             
             # ✅ DODANE: Symuluj actual_output po wszystkich zmianach
+            self.info_logger.info("DEBUG: About to call _simulate_actual_outputs_after_changes")
             self._simulate_actual_outputs_after_changes()
+            self.info_logger.info("DEBUG: _simulate_actual_outputs_after_changes completed")
             
             final_balance = self.calculate_energy_balance()
             
@@ -3150,6 +3152,8 @@ class EnergyManager:
                     old_actual = device.actual_output
                     device.actual_output = device.setpoint_output  # Symulacja
                     self.info_logger.info(f"DEBUG: {device.name}: actual_output {old_actual:.1f} → {device.actual_output:.1f} kW (simulated)")
+                else:
+                    self.info_logger.info(f"DEBUG: {device.name}: actual_output = setpoint_output = {device.actual_output:.1f} kW (no change needed)")
         
         # Symuluj actual_output dla BESS
         if self.microgrid.bess and hasattr(self.microgrid.bess, 'setpoint_output'):
