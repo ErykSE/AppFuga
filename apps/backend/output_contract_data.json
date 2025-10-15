@@ -1,12 +1,12 @@
 {
-    "CONTRACTED_TYPE": "Type B",
+    "CONTRACTED_TYPE": "Type A",
     "CONTRACTED_DURATION": 12,
-    "CONTRACTED_MARGIN": 0.1,
+    "CONTRACTED_MARGIN": 0.05,
     "CONTRACTED_EXPORT_POSSIBILITY": true,
-    "CONTRACTED_SALE_LIMIT": 60,
-    "CONTRACTED_PURCHASE_LIMIT": 105,
-    "sold_power": 56,
-    "bought_power": 4,
-    "current_tariff_buy": 0.41,
-    "current_tariff_sell": 0.2
+    "CONTRACTED_SALE_LIMIT": 500.0,
+    "CONTRACTED_PURCHASE_LIMIT": 500.0,
+    "sold_power": 100.0,
+    "bought_power": 20.0,
+    "current_tariff_buy": 1.0,
+    "current_tariff_sell": 0.5
 }

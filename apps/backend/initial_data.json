@@ -3,145 +3,32 @@
         {
             "id": 1,
             "name": "PV Panel 1",
-            "priority": 1,
-            "max_output": 100,
-            "min_output": 10,
-            "actual_output": 80,
+            "max_output": 200.0,
+            "actual_output": 200.0,
+            "setpoint_output": 200.0,
+            "min_output": 0.0,
             "switch_status": true,
-            "device_status": "online"
-        },
-        {
-            "id": 2,
-            "name": "PV Panel 2",
-            "priority": 1,
-            "max_output": 120,
-            "min_output": 15,
-            "actual_output": 100,
-            "switch_status": true,
-            "device_status": "online"
+            "device_status": "operational",
+            "priority": 1
         }
     ],
-    "wind_turbines": [
-        {
-            "id": 3,
-            "name": "Wind Turbine 1",
-            "priority": 2,
-            "max_output": 80,
-            "min_output": 0,
-            "actual_output": 80,
-            "switch_status": true,
-            "device_status": "online"
-        },
-        {
-            "id": 4,
-            "name": "Wind Turbine 2",
-            "priority": 2,
-            "max_output": 70,
-            "min_output": 0,
-            "actual_output": 70,
-            "switch_status": true,
-            "device_status": "online"
-        }
-    ],
-    "fuel_turbines": [
-        {
-            "id": 5,
-            "name": "Fuel Turbine 1",
-            "priority": 4,
-            "max_output": 100,
-            "min_output": 0,
-            "actual_output": 100,
-            "switch_status": true,
-            "device_status": "online"
-        }
-    ],
-    "fuel_cells": [
-        {
-            "id": 6,
-            "name": "Fuel Cell 1",
-            "priority": 3,
-            "max_output": 75,
-            "min_output": 0,
-            "actual_output": 0,
-            "switch_status": false,
-            "device_status": "offline"
-        }
-    ],
-    "bess": [
-        {
-            "id": 7,
-            "name": "BESS 1",
-            "capacity": 350,
-            "min_charge_level": 40,
-            "charge_level": 200,
-            "switch_status": true,
-            "device_status": "online"
-        }
-    ],
+    "wind_turbines": [],
+    "fuel_turbines": [],
+    "fuel_cells": [],
+    "bess": [],
+    "power_meters": [],
+    "adjustable_devices": [],
     "non_adjustable_devices": [
         {
-            "id": 8,
-            "name": "Non Adjustable Device 1",
-            "priority": 1,
-            "power": 31,
-            "switch_status": true
-        },
-        {
-            "id": 9,
-            "name": "Non Adjustable Device 2",
-            "priority": 2,
-            "power": 300,
-            "switch_status": false
-        }
-    ],
-    "adjustable_devices": [
-        {
-            "id": 10,
-            "name": "Adjustable Device 1",
-            "priority": 2,
-            "power": 84,
-            "switch_status": false,
-            "min_power": 80,
-            "max_power": 100
-        },
-        {
-            "id": 11,
-            "name": "Adjustable Device 2",
-            "priority": 1,
-            "power": 100,
+            "id": 201,
+            "name": "Load 1",
+            "power": 150.0,
             "switch_status": true,
-            "min_power": 30,
-            "max_power": 1000
+            "priority": 10
         }
     ],
-    "power_meters": [
-        {
-            "id": 101,
-            "name": "Meter for PV Panel 1",
-            "status": "online",
-            "measured_power": 15,
-            "device_id": 1
-        },
-        {
-            "id": 102,
-            "name": "Meter for PV Panel 2",
-            "status": "online",
-            "measured_power": 98,
-            "device_id": 2
-        },
-        {
-            "id": 103,
-            "name": "Meter for Wind Turbine 1",
-            "status": "online",
-            "measured_power": 42,
-            "device_id": 3
-        },
-        {
-            "id": 104,
-            "name": "Meter for Fuel Turbine 1",
-            "status": "online",
-            "measured_power": 38,
-            "device_id": 5
-        }
-    ]
+    "status": {
+        "code": "ok",
+        "timestamp": "2025-10-14T10:00:00Z"
+    }
 }

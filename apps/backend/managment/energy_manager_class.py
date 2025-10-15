@@ -27,6 +27,10 @@ from apps.backend.others.data_consistency_checker import DataConsistencyChecker
 from apps.backend.managment.api_manager import ApiManager
 from apps.backend.managment.heartbeat_tag_sender import HeartbeatTagSender
 
+from apps.backend.managment.bess_capability_checker import BESSCapabilityChecker
+from apps.backend.managment.iteration_scheduler import IterationScheduler
+
+from apps.backend.managment.energy_balance import EnergyBalance
 
 class EnergyManager:
     """
@@ -118,7 +122,7 @@ class EnergyManager:
         self.stop_event = Event()
         self.restart_delay = 30  # czas oczekiwania przed ponownym startem (w sekundach)
         self.first_run = True
-        self.auto_interval = 15  # 30 sekund dla trybu automatycznego
+        self.auto_interval = 300  # 15 sekund dla trybu automatycznego
         self.semi_auto_interval = 15  # 5 minut dla trybu półautomatycznego
         self.operation_mode = OperationMode.AUTOMATIC
         self.action_timeout = 60  # 1 minuta na decyzję operatora
@@ -139,9 +143,9 @@ class EnergyManager:
         self.last_saved_data = None
 
         # Wyświetl informacje o ścieżkach (pomocne przy debugowaniu)
-        self.info_logger.info(f"Base path: {self.base_path}")
-        self.info_logger.info(f"Initial data path: {self.initial_data_path}")
-        self.info_logger.info(f"Initial contract path: {self.initial_contract_path}")
+        #self.info_logger.info(f"Base path: {self.base_path}")
+        #self.info_logger.info(f"Initial data path: {self.initial_data_path}")
+        #self.info_logger.info(f"Initial contract path: {self.initial_contract_path}")
 
         self.use_api = use_api
     
@@ -165,9 +169,43 @@ class EnergyManager:
             )
 
 
-        self.info_logger.info(f"Using API: {self.use_api}")
+        #self.info_logger.info(f"Using API: {self.use_api}")
 
         self.changed_devices = []
+
+        # === NARZĘDZIA POMOCNICZE ===
+    
+        # BESS Capability Checker (lazy initialization)
+        self.bess_checker = None  # Zostanie utworzony po załadowaniu danych
+        
+        # Iteration Scheduler
+        self.iteration_scheduler = IterationScheduler(
+            normal_interval_seconds=self.auto_interval,
+            info_logger=info_logger,
+            error_logger=error_logger
+        )
+
+        # ===================================================================
+        # ETAP 2: Tracking poprzednich stanów i ograniczeń
+        # ===================================================================
+        self.previous_device_states = {}  # Śledzenie poprzednich stanów urządzeń
+        self.artificial_limitations = []  # Lista sztucznie nałożonych ograniczeń
+        self.operation_history = []  # Historia operacji (dla analizy)
+
+        #self.info_logger.info(f"✅ IterationScheduler initialized")
+
+        # === SUMMARY ===
+        #self.info_logger.info("=" * 70)
+        #self.info_logger.info("ENERGY MANAGER INITIALIZATION COMPLETE")
+        #self.info_logger.info(f"  Operation mode: {self.operation_mode.value if hasattr(self.operation_mode, 'value') else self.operation_mode}")
+        #self.info_logger.info(f"  Auto interval: {self.auto_interval}s ({self.auto_interval/60:.1f} min)")
+        #self.info_logger.info(f"  BESS available: {self.microgrid.bess is not None}")
+        #self.info_logger.info(f"  BESSCapabilityChecker: {self.bess_checker is not None}")
+        #self.info_logger.info(f"  IterationScheduler: {self.iteration_scheduler is not None}")
+        #self.info_logger.info(f"  Decision mode: {getattr(self.osd, 'decision_mode', 'AUTO')}")
+        #self.info_logger.info(f"  Use API: {self.use_api}")
+        #self.info_logger.info("=" * 70)
+
 
 
 
@@ -220,6 +258,8 @@ class EnergyManager:
         """Uruchamia proces zarządzania energią w osobnym wątku."""
         while self.running and not self.stop_event.is_set():
             try:
+                # Oznacz początek iteracji
+                self.iteration_scheduler.mark_iteration_start()
                 iteration_start_time = time.time()
                 
                 # Resetuj listę zmian na początku iteracji
@@ -227,6 +267,11 @@ class EnergyManager:
                 
                 self.info_logger.highlight("Starting new iteration")
                 self.load_configuration()
+
+                # Sprawdź czy są eventy do wykonania
+                triggered_events = self.iteration_scheduler.check_for_triggered_events()
+                if triggered_events:
+                    self.handle_triggered_events(triggered_events)
 
                 # 1. Pobieramy dane z API (jeśli używamy API)
                 if self.use_api:
@@ -303,12 +348,10 @@ class EnergyManager:
                 self.info_logger.info(f"Complete iteration finished in {iteration_elapsed_time:.2f} seconds")
 
                 # 8. Oczekiwanie na następną iterację
-                wait_time = (
-                    self.auto_interval
-                    if self.operation_mode == OperationMode.AUTOMATIC
-                    else self.semi_auto_interval
-                )
-                self.info_logger.important(f"Waiting {wait_time} seconds for next iteration")
+                # Użyj schedulera aby dynamicznie dostosować czas
+                wait_time = self.iteration_scheduler.get_next_wait_time()
+                
+                self.info_logger.important(f"Waiting {wait_time:.1f} seconds for next iteration")
                 if self.stop_event.wait(wait_time):
                     break
                     
@@ -319,29 +362,41 @@ class EnergyManager:
         self.info_logger.important("Energy management stopped")
 
     def run_single_iteration(self):
-        self.info_logger.highlight(
-            f"Starting a new iteration in {self.operation_mode.value} mode"
-        )
+        """
+        Wykonuje jedną iterację zarządzania energią.
+        """
+        #self.info_logger.highlight("=" * 70)
+        self.info_logger.highlight("NEW ITERATION START")
+        #self.info_logger.highlight("=" * 70)
         start_time = time.time()
 
-        self.info_logger.section("Starting device update based on meter readings")
+        # NOWE: Resetuj setpointy grid na początku każdej iteracji
+        self.osd.reset_current_grid_values()
+
+        # Resetuj listę zmienionych urządzeń
+        self.reset_changed_devices()
+
+        # Oblicz początkowy bilans energetyczny
+        self.initial_energy_balance = self.microgrid.total_power_generated() - self.consumergrid.total_power_consumed()
+
+        # Aktualizuj urządzenia na podstawie odczytów mierników
         updated_devices = self.microgrid.update_device_with_meter_data()
         if updated_devices:
             self.info_logger.info(
-                f"Updated {len(updated_devices)} devices based on meter readings"
+                f"📊 Updated {len(updated_devices)} devices based on meter readings"
             )
             for device in updated_devices:
                 self.info_logger.info(
-                    f"Updated device: {device.name} (ID: {device.id}), New status: {device.device_status}, New output: {device.actual_output} kW"
+                    f"  • {device.name}: status={device.device_status}, output={device.actual_output} kW"
                 )
-        self.log_system_summary()
+        
+        # ✅ ZMIANA: Zaloguj status TYLKO RAZ na początku (bez sekcji)
+        self._log_initial_system_status()
 
-        # self.info_logger.info(
-        # f"BESS charge level before actions: {self.microgrid.bess.get_charge_level():.2f} kWh"
-        # )
-
+        # Sprawdź warunki energetyczne i podejmij odpowiednie działania
         result = self.check_energy_conditions()
 
+        # Wykonaj zatwierdzone akcje jeśli istnieją
         approved_actions = []
         if result is not None:
             if "approved_actions" in result:
@@ -351,16 +406,25 @@ class EnergyManager:
         if approved_actions:
             self.execute_approved_actions(approved_actions)
 
-        self.log_system_summary()
-        #self.save_live_data()
+        # ✅ ZMIANA: Zaloguj status TYLKO RAZ na końcu (jeśli były zmiany)
+        if self.has_device_changes():
+            self._log_final_system_status()
+        
+        # Zapisz dane kontraktu
         self.save_contract_data()
+        
+        # Aktualizuj profil mocy
         self.update_power_profile(datetime.now())
 
+        # Zaloguj operacje grid dla SCADA
+        self.log_grid_operations_for_scada()
+
+        # Oblicz czas wykonania iteracji
         elapsed_time = time.time() - start_time
-        self.info_logger.info(f"Iteration completed in {elapsed_time:.2f} seconds")
-        # self.info_logger.info(
-        # f"BESS charge level after actions: {self.microgrid.bess.get_charge_level():.2f} kWh"
-        # )
+        
+        #self.info_logger.highlight("=" * 70)
+        self.info_logger.highlight(f"ITERATION COMPLETE in {elapsed_time:.2f}s")
+        #self.info_logger.highlight("=" * 70)
 
         return result
 
@@ -563,7 +627,7 @@ class EnergyManager:
         self.save_operator_actions(actions)
 
     def perform_action(self, device, action):
-        device_name = self.get_device_name(device)
+        device_name = self.get_device_name(device)  # ← MUSI używać bezpiecznej funkcji!
         device_type = type(device).__name__
         self.info_logger.info(
             f"[DEBUG] Performing action: {device_name} ({device_type}) - {action}"
@@ -594,7 +658,7 @@ class EnergyManager:
                     "device_type": self.get_device_type(device)  # Używaj tej funkcji zamiast type().__name__
                 }
                 self.changed_devices.append(device_change)
-                self.info_logger.info(f"✅ DEVICE CHANGED: {device_name} ({self.get_device_type(device)}) - {action}")
+                self.info_logger.info(f"DEVICE CHANGED: {device_name} ({self.get_device_type(device)}) - {action}")
             
             return result
             
@@ -717,37 +781,104 @@ class EnergyManager:
             ],
         }
 
+    # apps/backend/managment/energy_manager_class.py
+
     def check_energy_conditions(self):
+        """
+        Sprawdza warunki energetyczne i podejmuje odpowiednie działania.
+        """
         try:
-            total_generated_power = self.microgrid.total_power_generated()
-            total_demand_power = self.consumergrid.total_power_consumed()
-
-            self.info_logger.info(
-                f"checkTotal generated power: {total_generated_power} kW"
-            )
-            self.info_logger.info(f"checkTotal demand power: {total_demand_power} kW")
-
+            # ═══════════════════════════════════════════════════════
+            # KROK 1: Oblicz początkowy bilans
+            # ═══════════════════════════════════════════════════════
+            initial_balance = self.calculate_energy_balance()
+            
+            # ═══════════════════════════════════════════════════════
+            # KROK 2: Sprawdź czy bilans OK
+            # ═══════════════════════════════════════════════════════
+            if initial_balance.is_balanced(threshold=1.0):
+                # ✅ ZMIANA: Wywołaj summary PRZED return!
+                self._log_operator_summary(
+                    initial_balance=initial_balance,
+                    final_balance=initial_balance,  # Bez zmian
+                    actions_taken=[],  # Pusta lista
+                    decision_rationale="System balanced - no action required"
+                )
+                return None
+            
+            # ═══════════════════════════════════════════════════════
+            # KROK 3: Neutralizuj konflikty
+            # ═══════════════════════════════════════════════════════
+            balance = self.neutralize_conflicting_operations(initial_balance)
+            
+            # ═══════════════════════════════════════════════════════
+            # KROK 4: Sprawdź czy po neutralizacji bilans OK
+            # ═══════════════════════════════════════════════════════
+            if balance.is_balanced(threshold=1.0):
+                # ✅ ZMIANA: Wywołaj summary PRZED return!
+                self._log_operator_summary(
+                    initial_balance=initial_balance,
+                    final_balance=balance,
+                    actions_taken=self.changed_devices,  # Neutralizacje
+                    decision_rationale="Balance achieved after neutralization"
+                )
+                return None
+            
+            # ═══════════════════════════════════════════════════════
+            # KROK 5: Przywróć ograniczenia (ETAP 2)
+            # ═══════════════════════════════════════════════════════
+            balance = self.restore_previous_limitations(balance)
+            
+            # ═══════════════════════════════════════════════════════
+            # KROK 6: Sprawdź czy po przywróceniu bilans OK
+            # ═══════════════════════════════════════════════════════
+            if balance.is_balanced(threshold=1.0):
+                # ✅ ZMIANA: Wywołaj summary PRZED return!
+                self._log_operator_summary(
+                    initial_balance=initial_balance,
+                    final_balance=balance,
+                    actions_taken=self.changed_devices,
+                    decision_rationale="Balance achieved after restoring limitations"
+                )
+                return None
+            
+            # ═══════════════════════════════════════════════════════
+            # KROK 7: Zarządzaj deficytem/nadwyżką
+            # ═══════════════════════════════════════════════════════
             result = None
-            if total_generated_power > total_demand_power:
-                power_surplus = total_generated_power - total_demand_power
+            decision_text = None
+            
+            if balance.has_surplus:
                 self.info_logger.section(
-                    f"Power surplus detected: {power_surplus} kW - starting surplus management"
+                    f"⚡ Surplus REMAINING: {balance.surplus:.2f} kW → managing"
                 )
-                result = self.manage_surplus(power_surplus)
-            elif total_generated_power < total_demand_power:
-                power_deficit = total_demand_power - total_generated_power
+                result = self.manage_surplus(balance.surplus)
+                decision_text = f"Managed {balance.surplus:.2f} kW surplus"
+                
+            elif balance.has_deficit:
                 self.info_logger.section(
-                    f"Power deficit detected: {power_deficit} kW - starting deficit management"
+                    f"📉 Deficit REMAINING: {balance.deficit:.2f} kW → managing"
                 )
-                result = self.manage_deficit(power_deficit)
-            else:
-                self.info_logger.section(
-                    "Power generation matches demand - no action needed"
-                )
-
+                result = self.manage_deficit(balance.deficit)
+                decision_text = f"Managed {balance.deficit:.2f} kW deficit"
+            
+            # ═══════════════════════════════════════════════════════
+            # KROK 8: Wywołaj summary NA KOŃCU (po wszystkich akcjach)
+            # ═══════════════════════════════════════════════════════
+            final_balance = self.calculate_energy_balance()
+            
+            self._log_operator_summary(
+                initial_balance=initial_balance,
+                final_balance=final_balance,
+                actions_taken=self.changed_devices,
+                decision_rationale=decision_text
+            )
+            
             return result
+            
         except Exception as e:
             self.error_logger.error(f"Error checking energy conditions: {str(e)}")
+            self.error_logger.exception("Full traceback:")
             return None
 
     def manage_surplus(self, power_surplus):
@@ -990,6 +1121,7 @@ class EnergyManager:
         self.error_logger.error("An error occurred. Stopping the algorithm.")
         self.stop()
 
+    '''
     def log_system_summary(self):
         total_generated_power = self.microgrid.total_power_generated()
         total_demand_power = self.consumergrid.total_power_consumed()
@@ -1045,8 +1177,10 @@ class EnergyManager:
         # Wywołujemy log_consumer_summary na końcu
         self.log_consumer_summary()
 
+    '''
+
     def load_initial_data(self):
-        self.info_logger.info("Starting to load initial data from files")
+        #self.info_logger.info("Starting to load initial data from files")
         self.microgrid.load_data_from_json(self.initial_data_path)
         self.consumergrid.load_data_from_json(self.initial_data_path)
         self.osd = OSD.load_data_from_json(
@@ -1056,20 +1190,27 @@ class EnergyManager:
             raise ValueError("Failed to load OSD data from initial contract file.")
         self.surplus_manager.osd = self.osd
         self.deficit_manager.osd = self.osd
-        self.info_logger.info("Finished loading initial data")
+        #self.info_logger.info("Finished loading initial data")
+        self._ensure_bess_checker()
+
+    # energy_manager.py - load_live_data
 
     def load_live_data(self):
         try:
             self.microgrid.load_data_from_json(self.live_data_path)
             self.consumergrid.load_data_from_json(self.live_data_path)
             new_osd = OSD.load_data_from_json(self.live_contract_path)
+            
             if new_osd is not None:
                 self.osd = new_osd
                 self.surplus_manager.osd = self.osd
                 self.deficit_manager.osd = self.osd
             else:
                 raise ValueError("Failed to load OSD data from live contract file.")
+            
             self.info_logger.info("Loaded live data")
+            self._ensure_bess_checker()  # ← DODAJ TĘ LINIĘ (jeśli jej nie ma)
+            
         except FileNotFoundError:
             self.error_logger.error("Live data files not found. Loading initial data.")
             self.load_initial_data()
@@ -1198,7 +1339,7 @@ class EnergyManager:
                     f"[DEBUG] Device not found for action: {action}"
                 )
 
-        self.log_system_summary()
+        #self.log_system_summary()
 
     def get_device_by_id_and_type(self, device_id, device_type):
         self.info_logger.info(
@@ -1310,15 +1451,31 @@ class EnergyManager:
         self.info_logger.info(f"##################Current tabu list: {self.tabu_list}")
 
     def perform_energy_source_action(self, device, action):
+        """
+        Wykonuje akcję na źródle energii (PV, WindTurbine, FuelTurbine, FuelCell).
+        
+        Args:
+            device: Obiekt źródła energii
+            action: Akcja do wykonania
+            
+        Returns:
+            dict: Wynik operacji
+        """
         self.info_logger.info(f"Performing action: {action} on device: {device.name}")
+        
         if action.startswith("set_output:"):
             _, new_output = action.split(":")
             new_output = float(new_output)
             current_output = device.get_actual_output()
+            
             if device.set_output(new_output):
+                # ✅ DODANE: Ustaw setpoint dla SCADA
+                device.setpoint_output = new_output
+                
                 actual_reduction = current_output - new_output
                 self.info_logger.info(
-                    f"Set output for {device.name} from {current_output} kW to {new_output} kW"
+                    f"Set output for {device.name} from {current_output} kW to {new_output} kW. "
+                    f"Setpoint: {device.setpoint_output} kW"
                 )
                 return {"success": True, "amount": actual_reduction}
             else:
@@ -1327,12 +1484,17 @@ class EnergyManager:
                     "amount": 0,
                     "reason": f"Failed to set output for {device.name}",
                 }
+                
         elif action == "deactivate":
-            current_output = device.get_actual_output()  # Dodajemy tę linię
+            current_output = device.get_actual_output()
+            
             if device.deactivate():
+                # ✅ DODANE: Ustaw setpoint na 0 (urządzenie wyłączone)
+                device.setpoint_output = 0
+                
                 saved_power = current_output
                 self.info_logger.info(
-                    f"Deactivated {device.name}, saved {saved_power} kW"
+                    f"Deactivated {device.name}, saved {saved_power} kW. Setpoint: 0 kW"
                 )
                 return {"success": True, "amount": saved_power}
             else:
@@ -1341,19 +1503,25 @@ class EnergyManager:
                     "amount": 0,
                     "reason": f"Failed to deactivate {device.name}",
                 }
+                
         elif action.startswith("activate_and_set:"):
             _, new_output = action.split(":")
             new_output = float(new_output)
-            initial_output = device.get_actual_output()  # Dodajemy tę linię
+            initial_output = device.get_actual_output()
+            
             if device.activate():
                 if device.set_output(new_output):
+                    # ✅ DODANE: Ustaw setpoint dla SCADA
+                    device.setpoint_output = new_output
+                    
                     actual_increase = new_output - initial_output
                     self.info_logger.info(
-                        f"Activated {device.name} and set output to {new_output} kW"
+                        f"Activated {device.name} and set output to {new_output} kW. "
+                        f"Setpoint: {device.setpoint_output} kW"
                     )
                     return {"success": True, "amount": actual_increase}
                 else:
-                    device.deactivate()  # Cofnij aktywację, jeśli nie udało się ustawić mocy
+                    device.deactivate()  # Cofnij aktywację
                     return {
                         "success": False,
                         "amount": 0,
@@ -1373,20 +1541,46 @@ class EnergyManager:
             }
 
     def perform_energy_point_action(self, device, action):
+        """
+        Wykonuje akcję na punkcie energetycznym (AdjustableDevice, NonAdjustableDevice).
+        
+        Args:
+            device: Obiekt punktu energetycznego
+            action: Akcja do wykonania
+            
+        Returns:
+            dict: Wynik operacji
+        """
         if action == "deactivate":
+            current_power = device.get_current_power()
+            
             if device.deactivate():
-                return {"success": True, "amount": device.get_current_power()}
+                # ✅ DODANE: Ustaw setpoint na 0
+                device.setpoint_output = 0
+                
+                self.info_logger.info(f"Deactivated {device.name}. Setpoint: 0 kW")
+                return {"success": True, "amount": current_power}
             else:
                 return {
                     "success": False,
                     "amount": 0,
                     "reason": f"Failed to deactivate {device.name}",
                 }
+                
         elif action.startswith("reduce:"):
             if isinstance(device, AdjustableDevice):
                 _, amount = action.split(":")
                 amount = float(amount)
+                
                 actual_reduction = device.decrease_power(amount)
+                
+                # ✅ DODANE: Ustaw setpoint (nowa moc po redukcji)
+                device.setpoint_output = device.get_current_power()
+                
+                self.info_logger.info(
+                    f"Reduced {device.name} by {actual_reduction} kW. "
+                    f"New power: {device.get_current_power()} kW, Setpoint: {device.setpoint_output} kW"
+                )
                 return {"success": True, "amount": actual_reduction}
             else:
                 return {
@@ -1394,9 +1588,24 @@ class EnergyManager:
                     "amount": 0,
                     "reason": f"Cannot reduce power for non-adjustable device {device.name}",
                 }
+                
         elif action == "activate":
-            device.activate()
-            return {"success": True, "amount": device.get_current_power()}
+            if device.activate():
+                current_power = device.get_current_power()
+                
+                # ✅ DODANE: Ustaw setpoint (moc po aktywacji)
+                device.setpoint_output = current_power
+                
+                self.info_logger.info(
+                    f"Activated {device.name}. Power: {current_power} kW, Setpoint: {device.setpoint_output} kW"
+                )
+                return {"success": True, "amount": current_power}
+            else:
+                return {
+                    "success": False,
+                    "amount": 0,
+                    "reason": f"Failed to activate {device.name}",
+                }
         else:
             return {
                 "success": False,
@@ -1448,33 +1657,56 @@ class EnergyManager:
             }
 
     def perform_osd_action(self, device, action):
+        """
+        Wykonuje akcję na OSD (zakup/sprzedaż energii).
+        
+        Args:
+            device: Obiekt OSD
+            action: Akcja do wykonania (buy:amount lub sell:amount)
+        
+        Returns:
+            dict: Wynik operacji z sukcesem i ilością
+        """
         if action.startswith("buy:"):
-            _, amount = action.split(":")
-            amount = float(amount)
-            if device.buy_power(amount):
-                return {"success": True, "amount": amount}
+            _, amount_str = action.split(":")
+            amount = float(amount_str)
+            
+            # buy_power już zwraca rzeczywistą ilość zakupioną
+            actual_bought = device.buy_power(amount)
+            
+            if actual_bought > 0:
+                self.info_logger.info(f"Successfully bought {actual_bought} kW from grid")
+                self.info_logger.info(f"Grid import setpoint: {device.get_current_grid_import()} kW")
+                return {"success": True, "amount": actual_bought}
             else:
                 return {
                     "success": False,
                     "amount": 0,
-                    "reason": f"Failed to buy power from OSD",
+                    "reason": f"Failed to buy power from grid - remaining capacity: {device.get_remaining_purchase_capacity()}"
                 }
+                
         elif action.startswith("sell:"):
-            _, amount = action.split(":")
-            amount = float(amount)
-            if device.sell_power(amount):
-                return {"success": True, "amount": amount}
+            _, amount_str = action.split(":")
+            amount = float(amount_str)
+            
+            # sell_power już zwraca rzeczywistą ilość sprzedaną
+            actual_sold = device.sell_power(amount)
+            
+            if actual_sold > 0:
+                self.info_logger.info(f"Successfully sold {actual_sold} kW to grid")
+                self.info_logger.info(f"Grid export setpoint: {device.get_current_grid_export()} kW")
+                return {"success": True, "amount": actual_sold}
             else:
                 return {
                     "success": False,
                     "amount": 0,
-                    "reason": f"Failed to sell power to OSD",
+                    "reason": f"Failed to sell power to grid - remaining capacity: {device.get_remaining_sale_capacity()}"
                 }
         else:
             return {
                 "success": False,
                 "amount": 0,
-                "reason": f"Unknown action for OSD: {action}",
+                "reason": f"Unknown OSD action: {action}"
             }
 
     def log_device_state_before_action(self, device):
@@ -1519,10 +1751,13 @@ class EnergyManager:
         )
 
     def get_device_name(self, device):
+        """Zwraca nazwę urządzenia (bezpieczna dla OSD)."""
         if isinstance(device, OSD):
             return "OSD"
         return device.name if hasattr(device, "name") else str(device)
 
+    
+    '''
     def log_consumer_summary(self):
         total_consumed_power = self.consumergrid.total_power_consumed()
         active_devices = self.consumergrid.get_active_devices()
@@ -1583,95 +1818,63 @@ class EnergyManager:
                     else "Non-adjustable"
                 )
                 self.info_logger.info(f"  - {device.name} ({device_type})")
-
-    # def prepare_system_data_for_api(self):
-    #     """
-    #     Przygotowuje dane systemu w formacie API do wysłania.
-        
-    #     Returns:
-    #         dict: Słownik zawierający dane systemu w formacie API.
-    #     """
-    #     api_data = {
-    #         "pv_panels": [],
-    #         "wind_turbines": [],
-    #         "fuel_turbines": [],
-    #         "fuel_cells": [],
-    #         "bess": [],
-    #         "non_adjustable_devices": [],
-    #         "adjustable_devices": []
-    #     }
-        
-    #     # Konwersja źródeł energii
-    #     for category, devices in [
-    #         ("pv_panels", self.microgrid.pv_panels),
-    #         ("wind_turbines", self.microgrid.wind_turbines),
-    #         ("fuel_turbines", self.microgrid.fuel_turbines),
-    #         ("fuel_cells", self.microgrid.fuel_cells)
-    #     ]:
-    #         for device in devices:
-    #             api_data[category].append({
-    #                 "name": device.name,
-    #                 "actual_output": device.get_actual_output(),
-    #                 "switch_status": device.switch_status
-    #             })
-        
-    #     # Konwersja BESS
-    #     if self.microgrid.bess:
-    #         api_data["bess"].append({
-    #             "name": self.microgrid.bess.name,
-    #             "actual_output": 0,  # BESS nie ma actual_output w API
-    #             "switch_status": self.microgrid.bess.switch_status
-    #         })
-        
-    #     # Konwersja urządzeń konsumpcyjnych
-    #     for device in self.consumergrid.non_adjustable_devices:
-    #         api_data["non_adjustable_devices"].append({
-    #             "name": device.name,
-    #             "actual_output": device.get_current_power(),
-    #             "switch_status": device.switch_status
-    #         })
-        
-    #     for device in self.consumergrid.adjustable_devices:
-    #         api_data["adjustable_devices"].append({
-    #             "name": device.name,
-    #             "actual_output": device.get_current_power(),
-    #             "switch_status": device.switch_status
-    #         })
-        
-    #     return api_data
+        '''
 
     def prepare_contract_data_for_api(self):
         """
-        Przygotowuje dane kontraktu w formacie API do wysłania.
+        Przygotowuje dane kontraktu w formacie API C# (snake_case).
+        
+        Mapowanie pól:
+        - sold_power, bought_power: skumulowana energia (kWh) od początku okresu
+        - grid_export, grid_import: setpointy mocy (kW) dla bieżącej iteracji
+        - setpoint_grid_export, setpoint_grid_import: duplikaty (wymagane przez API C#)
         
         Returns:
-            dict: Słownik zawierający dane kontraktu w formacie API.
+            dict: Dane kontraktu w formacie zgodnym z API C#
         """
         return {
+            # === DANE KONTRAKTOWE (stałe) ===
             "contracted_type": self.osd.CONTRACTED_TYPE,
             "contracted_duration": self.osd.CONTRACTED_DURATION,
             "contracted_margin": self.osd.CONTRACTED_MARGIN,
             "contracted_export_possibility": self.osd.CONTRACTED_EXPORT_POSSIBILITY,
             "contracted_sale_limit": self.osd.CONTRACTED_SALE_LIMIT,
             "contracted_purchase_limit": self.osd.CONTRACTED_PURCHASE_LIMIT,
-            "sold_power": self.osd.get_sold_power(),
-            "bought_power": self.osd.get_bought_power(),
+            
+            # === CYKL ROZLICZENIOWY ===
+            "contracted_billing_cycle": self.osd.contracted_billing_cycle,
+            "contracted_billing_period_start": self.osd.contracted_billing_period_start,
+            "contracted_billing_period_end": self.osd.contracted_billing_period_end,
+            
+            # === DANE SKUMULOWANE (kWh od początku okresu rozliczeniowego) ===
+            "sold_power": self.osd.get_sold_power(),      # Całkowita sprzedana energia
+            "bought_power": self.osd.get_bought_power(),  # Całkowita kupiona energia
+            
+            # === TARYFY (PLN/kWh) ===
             "current_tariff_buy": self.osd.get_current_buy_price(),
-            "current_tariff_sell": self.osd.get_current_sell_price()
+            "current_tariff_sell": self.osd.get_current_sell_price(),
+            
+            # === SETPOINTY MOCY dla SCADA (kW - BIEŻĄCA iteracja) ===
+            # Uwaga: API wymaga duplikacji - grid_* to alias dla setpoint_grid_*
+            "grid_export": self.osd.current_grid_export,         # kW do eksportu (setpoint)
+            "grid_import": self.osd.current_grid_import,         # kW do importu (setpoint)
+            "setpoint_grid_export": self.osd.current_grid_export,  # Duplikat dla kompatybilności
+            "setpoint_grid_import": self.osd.current_grid_import,  # Duplikat dla kompatybilności
         }
     
     def prepare_changed_devices_for_api(self):
-        """Przygotowuje dane API tylko dla urządzeń zmienionych przez algorytm."""
+        """
+        Przygotowuje dane API tylko dla urządzeń zmienionych przez algorytm.
+        Używa setpoint_output zamiast actual_output dla SCADA.
+        """
         api_data = {}
         
         for change in self.changed_devices:
             device = change["device"]
             device_type = change["device_type"]
 
-            # DODAJ TO - obsługa OSD:
             if device_type == "OSD":
                 # OSD nie jest wysyłane jako urządzenie, tylko jako dane kontraktu
-                # Więc pomijamy je tutaj - będzie obsłużone przez prepare_contract_data_for_api()
                 continue
             
             device_api_data = {
@@ -1680,13 +1883,18 @@ class EnergyManager:
             }
             
             if device_type == "BESS":
+                # ✅ POPRAWKA: Używamy setpoint_output (ujemny = ładowanie, dodatni = rozładowanie)
+                device_api_data["setpoint_output"] = device.setpoint_output
                 device_api_data["charge_level"] = device.get_charge_level()
+                
                 if "bess" not in api_data:
                     api_data["bess"] = []
                 api_data["bess"].append(device_api_data)
                 
             elif device_type in ["PV", "WindTurbine", "FuelTurbine", "FuelCell"]:
-                device_api_data["actual_output"] = device.get_actual_output()
+                # ✅ POPRAWKA: Używamy setpoint_output zamiast actual_output
+                device_api_data["setpoint_output"] = device.setpoint_output
+                
                 category_map = {
                     "PV": "pv_panels",
                     "WindTurbine": "wind_turbines", 
@@ -1699,11 +1907,17 @@ class EnergyManager:
                 api_data[category].append(device_api_data)
                 
             elif device_type in ["AdjustableDevice", "NonAdjustableDevice"]:
-                device_api_data["actual_output"] = device.get_current_power()
+                # ✅ POPRAWKA: Używamy setpoint_output zamiast actual_output
+                device_api_data["setpoint_output"] = device.setpoint_output
+                
                 category = "adjustable_devices" if device_type == "AdjustableDevice" else "non_adjustable_devices"
                 if category not in api_data:
                     api_data[category] = []
                 api_data[category].append(device_api_data)
+
+        # Dodaj podsumowanie decyzji algorytmu
+        decision_summary = self.generate_decision_summary()
+        api_data["algorithm_decision"] = decision_summary
         
         return api_data
 
@@ -1733,3 +1947,1299 @@ class EnergyManager:
                 self.info_logger.info(f"  - {device_type} '{device.name}': {action} → actual_output: {device.get_actual_output():.2f} kW")
             elif hasattr(device, 'get_current_power'):
                 self.info_logger.info(f"  - {device_type} '{device.name}': {action} → power: {device.get_current_power():.2f} kW")
+
+
+    def generate_decision_summary(self):
+        """Generuje bardzo zwięzłe podsumowanie decyzji algorytmu dla SCADA"""
+        current_generation = self.microgrid.total_power_generated()
+        current_consumption = self.consumergrid.total_power_consumed()
+        energy_balance = current_generation - current_consumption
+        
+        # Użyj początkowego bilansu energetycznego do określenia przyczyny akcji
+        initial_balance = getattr(self, 'initial_energy_balance', energy_balance)
+        
+        if not self.has_device_changes():
+            return {
+                "status": "OK",
+                "message": "No action needed",
+                "balance_kW": round(energy_balance, 1)
+            }
+        
+        # Przeanalizuj główne typy zmian
+        has_generation_changes = False
+        has_storage_changes = False
+        has_grid_trading = False
+        has_consumption_changes = False
+        
+        for change in self.changed_devices:
+            device_type = change["device_type"]
+            action = change["action"]
+            
+            if device_type in ["PV", "WindTurbine", "FuelTurbine", "FuelCell"]:
+                has_generation_changes = True
+            elif device_type == "BESS":
+                has_storage_changes = True
+            elif device_type == "OSD":
+                has_grid_trading = True
+            elif device_type in ["AdjustableDevice", "NonAdjustableDevice"]:
+                has_consumption_changes = True
+        
+        # Generuj bardzo krótki komunikat na podstawie POCZĄTKOWEGO bilansu
+        if abs(initial_balance) > 50:  # Duża nierównowaga
+            if initial_balance > 0:  # Była nadwyżka
+                message = "Reduced generation"
+                if has_storage_changes:
+                    message = "Stored surplus"
+                elif has_grid_trading:
+                    message = "Sold to grid"
+            else:  # Był deficyt
+                message = "Increased generation"
+                if has_storage_changes:
+                    message = "Used battery"
+                elif has_grid_trading:
+                    message = "Bought from grid"
+                elif has_consumption_changes:
+                    message = "Reduced consumption"
+        elif abs(initial_balance) > 10:  # Średnia nierównowaga
+            message = "Minor adjustments"
+        else:  # Mała nierównowaga
+            message = "Fine tuning"
+        
+        # Status na podstawie końcowego bilansu (skuteczność)
+        final_balance = abs(energy_balance)
+        if final_balance < 10:
+            status = "OK"
+        elif final_balance < 50:
+            status = "BALANCED"
+        else:
+            status = "ACTIVE"
+        
+        return {
+            "status": status,
+            "message": message,
+            "balance_kW": round(initial_balance, 1),
+            "devices_count": len(self.changed_devices)
+        }
+    
+    def handle_triggered_events(self, events):
+        """Obsługuje eventy triggered przez scheduler."""
+        for event in events:
+            self.info_logger.info(f"Handling event: {event.event_type} - {event.description}")
+            
+            if "bess" in event.event_type.lower():
+                self.stop_bess_operation()  # ← SPRAWDŹ CZY TA FUNKCJA ISTNIEJE
+            else:
+                self.error_logger.warning(f"Unknown event type: {event.event_type}")
+    
+    def stop_bess_operation(self):
+        """Zatrzymuje operację BESS (setpoint -> 0)."""
+        if not self.microgrid.bess:
+            return
+        
+        self.info_logger.info("🛑 Stopping BESS operation (setpoint -> 0 kW)")
+        
+        # Ustaw setpoint na 0
+        self.microgrid.bess.setpoint_output = 0
+        
+        # Dodaj do changed_devices
+        device_change = {
+            "device": self.microgrid.bess,
+            "action": "stop",
+            "new_value": 0,
+            "device_type": "BESS"
+        }
+        self.changed_devices.append(device_change)
+        
+        # Wyślij do API natychmiast
+        if self.use_api and self.has_device_changes():
+            api_changed_data = self.prepare_changed_devices_for_api()
+            api_contract_data = self.prepare_contract_data_for_api()
+            
+            success = self.api_manager.send_updated_data_with_retry(
+                api_changed_data,
+                api_contract_data
+            )
+            
+            if success:
+                self.info_logger.info("✅ BESS stop command sent to SCADA")
+            else:
+                self.error_logger.error("❌ Failed to send BESS stop command")
+    
+    def log_grid_operations_for_scada(self):
+        """
+        Loguje operacje związane z siecią dla systemu SCADA.
+        Wywołuj na końcu każdej iteracji.
+        """
+        export_setpoint = self.osd.get_current_grid_export()
+        import_setpoint = self.osd.get_current_grid_import()
+        
+        if export_setpoint > 0:
+            self.info_logger.important(
+                f"🔋➡️🏭 SCADA GRID EXPORT: {export_setpoint:.2f} kW "
+                f"(Total sold today: {self.osd.get_sold_power():.2f} kWh, "
+                f"Remaining capacity: {self.osd.get_remaining_sale_capacity():.2f} kWh, "
+                f"Sell price: {self.osd.get_current_sell_price():.3f} $/kWh)"
+            )
+        
+        if import_setpoint > 0:
+            self.info_logger.important(
+                f"🏭➡️🔋 SCADA GRID IMPORT: {import_setpoint:.2f} kW "
+                f"(Total bought today: {self.osd.get_bought_power():.2f} kWh, "
+                f"Remaining capacity: {self.osd.get_remaining_purchase_capacity():.2f} kWh, "
+                f"Buy price: {self.osd.get_current_buy_price():.3f} $/kWh)"
+            )
+        
+        if export_setpoint == 0 and import_setpoint == 0:
+            self.info_logger.info("SCADA GRID STATUS: No grid operations in this iteration")
+
+    def _ensure_bess_checker(self):
+        """
+        Tworzy BESSCapabilityChecker jeśli BESS istnieje i checker jeszcze nie został utworzony.
+        Lazy initialization - wywołuje się automatycznie po załadowaniu danych.
+        """
+        #self.info_logger.info("=" * 70)
+        #self.info_logger.info("_ensure_bess_checker() CALLED")
+        #self.info_logger.info(f"  self.microgrid.bess = {self.microgrid.bess}")
+        #self.info_logger.info(f"  self.bess_checker = {self.bess_checker}")
+        #self.info_logger.info(f"  Condition check: bess exists = {self.microgrid.bess is not None}, checker is None = {self.bess_checker is None}")
+        #self.info_logger.info("=" * 70)
+        
+        if self.microgrid.bess and self.bess_checker is None:
+            #self.info_logger.info("🔧 Creating BESSCapabilityChecker (lazy initialization)...")
+            #self.info_logger.info(f"  BESS details: name={self.microgrid.bess.name}, max_charge={self.microgrid.bess.max_charge_level}")
+            #self.info_logger.info(f"  auto_interval: {self.auto_interval}s")
+            #self.info_logger.info(f"  iteration_duration: {self.auto_interval / 60:.2f} min")
+            
+            try:
+                # ✅ DODAJ LOG PRZED IMPORTEM
+                #self.info_logger.info("  Importing BESSCapabilityChecker...")
+                from apps.backend.managment.bess_capability_checker import BESSCapabilityChecker
+                #self.info_logger.info("  Import successful!")
+                
+                # ✅ DODAJ LOG PRZED TWORZENIEM
+                #self.info_logger.info("  Creating BESSCapabilityChecker instance...")
+                self.bess_checker = BESSCapabilityChecker(
+                    bess=self.microgrid.bess,
+                    iteration_time_minutes=self.auto_interval / 60,  # ✅ POPRAWIONE!
+                    bess_low_threshold=0.20,  # ← DODAJ (20%)
+                    info_logger=self.info_logger,
+                    error_logger=self.error_logger
+                )
+
+                # ✅ DODAJ TE LOGI ZARAZ PO UTWORZENIU
+                #self.info_logger.info(f"  Instance created! Type: {type(self.bess_checker)}")
+                #self.info_logger.info(f"  Is None? {self.bess_checker is None}")
+                #self.info_logger.info(f"  Value: {self.bess_checker}")
+
+                if self.bess_checker is None:
+                    self.error_logger.error("  ❌ BESSCapabilityChecker constructor returned None!")
+                else:
+                    self.info_logger.info(
+                        f"✅ BESSCapabilityChecker initialized "
+                        f"(BESS: {self.microgrid.bess.name}, "
+                        f"iteration: {self.auto_interval/60:.2f} min, "
+                        f"capacity: {self.microgrid.bess.max_charge_level:.0f} kWh)"
+                    )
+                
+            except ImportError as e:
+                self.error_logger.error(f"❌ IMPORT ERROR: {e}")
+                self.error_logger.exception("Full traceback:")
+            except AttributeError as e:
+                self.error_logger.error(f"❌ ATTRIBUTE ERROR (prawdopodobnie brak atrybutu BESS): {e}")
+                self.error_logger.exception("Full traceback:")
+            except TypeError as e:
+                self.error_logger.error(f"❌ TYPE ERROR (prawdopodobnie złe parametry): {e}")
+                self.error_logger.exception("Full traceback:")
+            except Exception as e:
+                self.error_logger.error(f"❌ UNKNOWN ERROR: {type(e).__name__}: {e}")
+                self.error_logger.exception("Full traceback:")
+        
+        elif self.bess_checker is not None:
+            self.info_logger.info("ℹ️  BESSCapabilityChecker already exists, skipping creation")
+        else:
+            self.info_logger.warning("⚠️  No BESS available - BESSCapabilityChecker not created")
+        
+        # ✅ DODAJ LOG NA KOŃCU
+        #self.info_logger.info(f"_ensure_bess_checker() FINISHED. self.bess_checker = {self.bess_checker}")
+
+
+    def _load_bess_threshold(self):
+        """Ładuje bess_low_threshold z pliku konfiguracyjnego."""
+        # ← TUTAJ BRAKOWAŁO definicji config_path!
+        config_path = os.path.join(self.base_path, "apps", "backend", "bess_config.json")
+        
+        try:
+            with open(config_path, 'r') as f:
+                config = json.load(f)
+                threshold = config.get("bess_low_threshold", 0.20)
+                
+                self.info_logger.info(
+                    f"✅ Loaded bess_low_threshold: {threshold*100:.0f}% from config file"
+                )
+                return threshold
+                
+        except FileNotFoundError:
+            self.info_logger.warning(
+                f"⚠️  BESS config file not found at {config_path}. Using default: 20%"
+            )
+            return 0.20
+            
+        except Exception as e:
+            self.error_logger.error(f"❌ Error loading BESS config: {e}. Using default: 20%")
+            return 0.20
+        
+    def calculate_energy_balance(self) -> EnergyBalance:
+        """
+        Oblicza rzeczywisty bilans energetyczny mikrosieci.
+        
+        ✅ POPRAWIONA WERSJA - uwzględnia:
+        - Generację (PV, Wind, Fuel Turbine, Fuel Cell)
+        - BESS (rozładowanie/ładowanie) - używa actual_output
+        - Grid (import/export) - używa current_grid_import/export
+        - Zużycie (odbiorniki)
+        
+        Returns:
+            EnergyBalance: Szczegółowy bilans energetyczny
+        """
+        
+        # ====================================================================
+        # SUPPLY SIDE (źródła energii)
+        # ====================================================================
+        
+        # 1. Generacja ze źródeł (PV, Wind, Fuel Turbine, Fuel Cell)
+        generation = 0.0
+        for device in self.microgrid.get_all_devices():
+            if device.get_switch_status():
+                generation += device.get_actual_output()
+        
+        # 2. Grid import (kupno energii z sieci)
+        # ✅ POPRAWKA: Użyj actual_grid_import (rzeczywisty stan)
+        grid_import = self.osd.actual_grid_import
+        
+        # 3. BESS discharge (rozładowanie baterii)
+        # ⚠️ WAŻNE: actual_output > 0 → BESS dostarcza energię (rozładowanie)
+        bess_discharge = 0.0
+        if self.microgrid.bess and self.microgrid.bess.actual_output > 0:
+            bess_discharge = self.microgrid.bess.actual_output
+        
+        # Suma podaży
+        total_supply = generation + grid_import + bess_discharge
+        
+        # ====================================================================
+        # DEMAND SIDE (odbiorniki energii)
+        # ====================================================================
+        
+        # 1. Zużycie odbiorników (loads)
+        consumption = 0.0
+        for device in (
+            self.consumergrid.adjustable_devices +
+            self.consumergrid.non_adjustable_devices
+        ):
+            if device.switch_status:
+                # ✅ DODAJ DEBUG:
+                self.info_logger.debug(
+                    f"   🔍 DEBUG: {device.name} consumption: {device.power:.2f} kW"
+                )
+                consumption += device.get_current_power()
+        
+        # 2. Grid export (sprzedaż energii do sieci)
+        # ✅ POPRAWKA: Użyj actual_grid_export (rzeczywisty stan)
+        grid_export = self.osd.actual_grid_export
+        
+        # 3. BESS charge (ładowanie baterii)
+        # ⚠️ WAŻNE: actual_output < 0 → BESS pobiera energię (ładowanie)
+        bess_charge = 0.0
+        if self.microgrid.bess and self.microgrid.bess.actual_output < 0:
+            bess_charge = abs(self.microgrid.bess.actual_output)  # Zamień na wartość dodatnią
+        
+        # Suma popytu
+        total_demand = consumption + grid_export + bess_charge
+        
+        # ====================================================================
+        # BILANS
+        # ====================================================================
+        
+        balance = total_supply - total_demand
+        
+        # Stwórz obiekt EnergyBalance
+        energy_balance = EnergyBalance(
+            generation=generation,
+            grid_import=grid_import,
+            bess_discharge=bess_discharge,
+            consumption=consumption,
+            grid_export=grid_export,
+            bess_charge=bess_charge,
+            total_supply=total_supply,
+            total_demand=total_demand,
+            balance=balance
+        )
+        
+        # Loguj szczegółowy bilans
+        self._log_energy_balance(energy_balance)
+        
+        return energy_balance
+    
+    # apps/backend/managment/energy_manager_class.py
+
+    def _log_energy_balance(self, balance: EnergyBalance):
+        """
+        Loguje szczegółowy bilans energetyczny.
+        UPROSZCZONA WERSJA - czytelniejsze formatowanie.
+        """
+        self.info_logger.info("")
+        self.info_logger.info("⚖️  ENERGY BALANCE")
+        self.info_logger.info("-" * 70)
+        
+        # Supply side - w jednej linii
+        self.info_logger.info(
+            f"Supply:  Gen={balance.generation:.2f} + "
+            f"Grid_In={balance.grid_import:.2f} + "
+            f"BESS_Out={balance.bess_discharge:.2f} = "
+            f"{balance.total_supply:.2f} kW"
+        )
+        
+        # Demand side - w jednej linii
+        self.info_logger.info(
+            f"Demand:  Con={balance.consumption:.2f} + "
+            f"Grid_Out={balance.grid_export:.2f} + "
+            f"BESS_In={balance.bess_charge:.2f} = "
+            f"{balance.total_demand:.2f} kW"
+        )
+        
+        # Balance status
+        if balance.is_balanced():
+            status_emoji = "⚖️"
+            status_text = "BALANCED"
+        elif balance.has_surplus:
+            status_emoji = "⚡"
+            status_text = f"SURPLUS {balance.surplus:.2f} kW"
+        else:
+            status_emoji = "📉"
+            status_text = f"DEFICIT {balance.deficit:.2f} kW"
+        
+        self.info_logger.important(
+            f"Balance: {balance.balance:+.2f} kW → {status_emoji} {status_text}"
+        )
+        self.info_logger.info("-" * 70)
+
+
+    def _log_initial_system_status(self):
+        """
+        Loguje POCZĄTKOWY status systemu (przed działaniami algorytmu).
+        Wywołuj RAZ na początku iteracji.
+        """
+        self.info_logger.info("")
+        self.info_logger.info("📊 INITIAL SYSTEM STATUS")
+        self.info_logger.info("-" * 70)
+        
+        total_generated = self.microgrid.total_power_generated()
+        total_consumed = self.consumergrid.total_power_consumed()
+        
+        self.info_logger.info(f"Generation:  {total_generated:>8.2f} kW")
+        self.info_logger.info(f"Consumption: {total_consumed:>8.2f} kW")
+        
+        # BESS status
+        if self.microgrid.bess:
+            bess = self.microgrid.bess
+            self.info_logger.info(
+                f"BESS:        {bess.charge_level:>8.2f}/{bess.capacity:.2f} kWh "
+                f"(actual: {bess.actual_output:+.2f} kW)"
+            )
+        
+        # Grid status
+        self.info_logger.info(
+            f"Grid:        Import={self.osd.current_grid_import:.2f} kW, "
+            f"Export={self.osd.current_grid_export:.2f} kW"
+        )
+        
+        # Trading status
+        self.info_logger.info(
+            f"Trading:     Sold={self.osd.sold_power:.2f}/{self.osd.CONTRACTED_SALE_LIMIT:.2f} kWh, "
+            f"Bought={self.osd.bought_power:.2f}/{self.osd.CONTRACTED_PURCHASE_LIMIT:.2f} kWh"
+        )
+        
+        self.info_logger.info("-" * 70)
+
+
+    def _log_final_system_status(self):
+        """
+        Loguje KOŃCOWY status systemu (po działaniach algorytmu).
+        Wywołuj TYLKO jeśli były zmiany.
+        """
+        self.info_logger.info("")
+        self.info_logger.info("📊 FINAL SYSTEM STATUS (after algorithm actions)")
+        self.info_logger.info("-" * 70)
+        
+        total_generated = self.microgrid.total_power_generated()
+        total_consumed = self.consumergrid.total_power_consumed()
+        
+        self.info_logger.info(f"Generation:  {total_generated:>8.2f} kW")
+        self.info_logger.info(f"Consumption: {total_consumed:>8.2f} kW")
+        
+        # BESS status
+        if self.microgrid.bess:
+            bess = self.microgrid.bess
+            self.info_logger.info(
+                f"BESS:        {bess.charge_level:>8.2f}/{bess.capacity:.2f} kWh "
+                f"(setpoint: {bess.setpoint_output:+.2f} kW)"
+            )
+        
+        # Grid status
+        if self.osd.current_grid_export > 0 or self.osd.current_grid_import > 0:
+            self.info_logger.info(
+                f"Grid:        Import={self.osd.current_grid_import:.2f} kW, "
+                f"Export={self.osd.current_grid_export:.2f} kW"
+            )
+        
+        # Zmiany
+        if self.changed_devices:
+            self.info_logger.info(f"Changes:     {len(self.changed_devices)} device(s) modified")
+            for change in self.changed_devices[:5]:  # Pokaż max 5
+                device = change["device"]
+                action = change["action"]
+                self.info_logger.info(f"  • {device.name}: {action}")
+            if len(self.changed_devices) > 5:
+                self.info_logger.info(f"  ... and {len(self.changed_devices) - 5} more")
+        
+        self.info_logger.info("-" * 70)
+
+    # apps/backend/managment/energy_manager_class.py
+
+    # =========================================================================
+    # ETAP 1: NEUTRALIZACJA KONFLIKTOWYCH OPERACJI
+    # =========================================================================
+
+    def _log_operator_summary(self, 
+                             initial_balance: EnergyBalance,
+                             final_balance: EnergyBalance,
+                             actions_taken: list,
+                             decision_rationale: str = None):
+        """
+        Loguje profesjonalne podsumowanie dla operatorów.
+        
+        Args:
+            initial_balance: Bilans przed akcjami
+            final_balance: Bilans po akcjach
+            actions_taken: Lista podjętych akcji
+            decision_rationale: Uzasadnienie decyzji (opcjonalne)
+        """
+        from datetime import datetime
+        
+        self.info_logger.info("")
+        self.info_logger.info("=" * 70)
+        self.info_logger.info(f"ITERATION SUMMARY - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        self.info_logger.info("=" * 70)
+        
+        # ═══════════════════════════════════════════════════════════
+        # SEKCJA 1: STAN SYSTEMU
+        # ═══════════════════════════════════════════════════════════
+        self.info_logger.info("")
+        self.info_logger.info("┌" + "─" * 68 + "┐")
+        self.info_logger.info("│ 1. SYSTEM STATE (from SCADA)" + " " * 40 + "│")
+        self.info_logger.info("└" + "─" * 68 + "┘")
+        
+        total_gen = self.microgrid.total_power_generated()
+        total_cons = self.consumergrid.total_power_consumed()
+        
+        self.info_logger.info(f"  Generation:     {total_gen:>8.2f} kW")
+        self.info_logger.info(f"  Consumption:    {total_cons:>8.2f} kW")
+        
+        if self.microgrid.bess:
+            bess = self.microgrid.bess
+            soc_pct = (bess.charge_level / bess.capacity) * 100
+            self.info_logger.info(
+                f"  BESS:           {bess.charge_level:>8.2f}/{bess.capacity:.2f} kWh ({soc_pct:.0f}% SOC)"
+            )
+            if bess.actual_output != 0:
+                op_type = "CHARGING" if bess.actual_output < 0 else "DISCHARGING"
+                self.info_logger.info(
+                    f"    └─ Operation: {op_type} at {abs(bess.actual_output):.2f} kW"
+                )
+        
+        if self.osd.actual_grid_export > 0 or self.osd.actual_grid_import > 0:
+            self.info_logger.info("  Grid:")
+            if self.osd.actual_grid_export > 0:
+                self.info_logger.info(f"    └─ Operation: EXPORTING {self.osd.actual_grid_export:.2f} kW")
+            if self.osd.actual_grid_import > 0:
+                self.info_logger.info(f"    └─ Operation: IMPORTING {self.osd.actual_grid_import:.2f} kW")
+        
+        self.info_logger.info(
+            f"  Trading Status: Sold {self.osd.sold_power:.2f}/{self.osd.CONTRACTED_SALE_LIMIT:.2f} kWh, "
+            f"Bought {self.osd.bought_power:.2f}/{self.osd.CONTRACTED_PURCHASE_LIMIT:.2f} kWh"
+        )
+        
+        # ═══════════════════════════════════════════════════════════
+        # SEKCJA 2: ANALIZA BILANSU
+        # ═══════════════════════════════════════════════════════════
+        self.info_logger.info("")
+        self.info_logger.info("┌" + "─" * 68 + "┐")
+        self.info_logger.info("│ 2. ENERGY BALANCE ANALYSIS" + " " * 42 + "│")
+        self.info_logger.info("└" + "─" * 68 + "┘")
+        
+        self.info_logger.info(
+            f"  Supply Side:    {initial_balance.generation:.2f} kW (Gen) + "
+            f"{initial_balance.grid_import:.2f} kW (Grid) + "
+            f"{initial_balance.bess_discharge:.2f} kW (BESS) = {initial_balance.total_supply:.2f} kW"
+        )
+        self.info_logger.info(
+            f"  Demand Side:    {initial_balance.consumption:.2f} kW (Load) + "
+            f"{initial_balance.grid_export:.2f} kW (Export) + "
+            f"{initial_balance.bess_charge:.2f} kW (BESS) = {initial_balance.total_demand:.2f} kW"
+        )
+        self.info_logger.info("  " + "─" * 66)
+        
+        if initial_balance.has_deficit:
+            status_icon = "📉"
+            status_text = f"{initial_balance.deficit:.2f} kW DEFICIT"
+        elif initial_balance.has_surplus:
+            status_icon = "⚡"
+            status_text = f"{initial_balance.surplus:.2f} kW SURPLUS"
+        else:
+            status_icon = "⚖️"
+            status_text = "BALANCED"
+        
+        self.info_logger.info(f"  IMBALANCE:      {initial_balance.balance:+.2f} kW {status_icon} {status_text}")
+        
+        # ═══════════════════════════════════════════════════════════
+        # SEKCJA 3: PODJĘTE AKCJE (jeśli były)
+        # ═══════════════════════════════════════════════════════════
+        if actions_taken:
+            self.info_logger.info("")
+            self.info_logger.info("┌" + "─" * 68 + "┐")
+            self.info_logger.info("│ 3. CORRECTIVE ACTIONS" + " " * 47 + "│")
+            self.info_logger.info("└" + "─" * 68 + "┘")
+            
+            for idx, action in enumerate(actions_taken, 1):
+                device = action.get('device')
+                action_type = action.get('action', '')
+                prev_val = action.get('previous_value', 0)
+                new_val = action.get('new_value', 0)
+                
+                device_name = device.name if hasattr(device, 'name') else str(device)
+                
+                self.info_logger.info(f"  Action {idx}: {action_type.replace('_', ' ').upper()}")
+                self.info_logger.info(f"    Device:  {device_name}")
+                self.info_logger.info(f"    Command: {prev_val:.2f} kW → {new_val:.2f} kW")
+                
+                if action_type == "stop_charging":
+                    impact = abs(prev_val)
+                    self.info_logger.info(f"    Impact:  Frees up {impact:.2f} kW")
+                elif action_type == "stop_discharging":
+                    impact = abs(prev_val)
+                    self.info_logger.info(f"    Impact:  Stops supplying {impact:.2f} kW")
+                elif action_type == "stop_export":
+                    impact = abs(prev_val)
+                    self.info_logger.info(f"    Impact:  Retains {impact:.2f} kW")
+                elif action_type == "stop_import":
+                    impact = abs(prev_val)
+                    self.info_logger.info(f"    Impact:  Stops using {impact:.2f} kW")
+                
+                self.info_logger.info("")
+        
+        # ═══════════════════════════════════════════════════════════
+        # SEKCJA 4: WYNIK KOŃCOWY
+        # ═══════════════════════════════════════════════════════════
+        if actions_taken:
+            self.info_logger.info("┌" + "─" * 68 + "┐")
+            self.info_logger.info("│ 4. POST-ACTION BALANCE" + " " * 46 + "│")
+            self.info_logger.info("└" + "─" * 68 + "┘")
+            
+            self.info_logger.info(
+                f"  Supply Side:    {final_balance.generation:.2f} kW (Gen) + "
+                f"{final_balance.grid_import:.2f} kW (Grid) + "
+                f"{final_balance.bess_discharge:.2f} kW (BESS) = {final_balance.total_supply:.2f} kW"
+            )
+            self.info_logger.info(
+                f"  Demand Side:    {final_balance.consumption:.2f} kW (Load) + "
+                f"{final_balance.grid_export:.2f} kW (Export) + "
+                f"{final_balance.bess_charge:.2f} kW (BESS) = {final_balance.total_demand:.2f} kW"
+            )
+            self.info_logger.info("  " + "─" * 66)
+            
+            if final_balance.is_balanced():
+                self.info_logger.info(f"  RESULT:         {final_balance.balance:+.2f} kW ⚖️  BALANCED ✓")
+            else:
+                remaining = "SURPLUS" if final_balance.has_surplus else "DEFICIT"
+                amount = final_balance.surplus if final_balance.has_surplus else final_balance.deficit
+                self.info_logger.info(f"  RESULT:         {final_balance.balance:+.2f} kW ({amount:.2f} kW {remaining} remaining)")
+        
+        # ═══════════════════════════════════════════════════════════
+        # SEKCJA 5: PODSUMOWANIE
+        # ═══════════════════════════════════════════════════════════
+        self.info_logger.info("")
+        self.info_logger.info("┌" + "─" * 68 + "┐")
+        self.info_logger.info("│ 5. SUMMARY" + " " * 58 + "│")
+        self.info_logger.info("└" + "─" * 68 + "┘")
+        
+        if final_balance.is_balanced():
+            self.info_logger.info("  Status:         ✓ BALANCED - No further action required")
+        else:
+            if final_balance.has_surplus:
+                self.info_logger.info(f"  Status:         ⚡ {final_balance.surplus:.2f} kW surplus managed")
+            else:
+                self.info_logger.info(f"  Status:         📉 {final_balance.deficit:.2f} kW deficit managed")
+        
+        if actions_taken:
+            self.info_logger.info(f"  Changes Made:   {len(actions_taken)} device(s) modified")
+            for action in actions_taken[:3]:  # Pokaż max 3
+                device = action.get('device')
+                action_type = action.get('action', '')
+                device_name = device.name if hasattr(device, 'name') else str(device)
+                self.info_logger.info(f"    • {device_name}: {action_type.replace('_', ' ')}")
+            if len(actions_taken) > 3:
+                self.info_logger.info(f"    ... and {len(actions_taken) - 3} more")
+        
+        # Decyzja (jeśli była)
+        if decision_rationale:
+            self.info_logger.info(f"  Decision:       {decision_rationale}")
+        
+        next_time = datetime.now().replace(second=0, microsecond=0)
+        # Dodaj 5 minut
+        from datetime import timedelta
+        next_time = next_time + timedelta(minutes=5)
+        self.info_logger.info(f"  Next Iteration: {next_time.strftime('%Y-%m-%d %H:%M:%S')} (in 5 minutes)")
+        
+        self.info_logger.info("")
+        self.info_logger.info("=" * 70)
+    
+    def neutralize_conflicting_operations(self, balance: EnergyBalance) -> EnergyBalance:
+        """
+        Neutralizuje operacje, które POWODUJĄ deficyt/nadwyżkę.
+        
+        KLUCZOWA FUNKCJA - wywołuj PRZED manage_surplus/deficit!
+        
+        ✅ Z SYMULACJĄ: Zmienia zarówno setpoint (dla SCADA) jak i actual (dla obliczeń)
+        
+        Args:
+            balance: Obecny bilans energetyczny
+            
+        Returns:
+            EnergyBalance: Zaktualizowany bilans po neutralizacji
+        """
+        self.info_logger.info("")
+        self.info_logger.info("🔍 ANALYZING CONFLICTING OPERATIONS")
+        self.info_logger.info("-" * 70)
+        
+        neutralized = False
+        neutralized_amount = 0.0
+        
+        # === DEFICYT - szukaj operacji, które ZWIĘKSZAJĄ zapotrzebowanie ===
+        if balance.has_deficit:
+            self.info_logger.info(f"Deficit detected: {balance.deficit:.2f} kW")
+            
+            # 1. BESS ładuje się? (pobiera energię)
+            if self.microgrid.bess and self.microgrid.bess.actual_output < 0:
+                bess_charging = abs(self.microgrid.bess.actual_output)
+                self.info_logger.warning(
+                    f"⚠️  BESS is CHARGING {bess_charging:.2f} kW → CAUSING deficit!"
+                )
+                self.info_logger.info(f"   → NEUTRALIZING: Stop BESS charging")
+                
+                # Zapisz poprzedni stan (dla logowania)
+                previous_actual = self.microgrid.bess.actual_output
+                previous_setpoint = self.microgrid.bess.setpoint_output
+                
+                # ═══════════════════════════════════════════════════════════
+                # KROK A: Ustaw setpoint (POLECENIE dla SCADA)
+                # ═══════════════════════════════════════════════════════════
+                self.microgrid.bess.setpoint_output = 0
+                self.info_logger.info(f"   ✓ Set setpoint_output = 0 kW (command for SCADA)")
+                
+                # ═══════════════════════════════════════════════════════════
+                # KROK B: Symuluj actual_output (TYLKO dla obliczeń w Pythonie)
+                # ═══════════════════════════════════════════════════════════
+                self.simulate_device_state_for_calculations(
+                    self.microgrid.bess, 
+                    "stop_charging", 
+                    0
+                )
+                self.info_logger.info(f"   ✓ Simulated actual_output = 0 kW (for calculations only)")
+                
+                # Dodaj do changed_devices
+                device_change = {
+                    "device": self.microgrid.bess,
+                    "action": "stop_charging",
+                    "previous_value": previous_setpoint,
+                    "new_value": 0,
+                    "device_type": "BESS"
+                }
+                self.changed_devices.append(device_change)
+                
+                neutralized = True
+                neutralized_amount += bess_charging
+            
+            # 2. Grid eksportuje? (traci energię)
+            if self.osd.actual_grid_export > 0:  # ✅ Zmiana: actual zamiast current
+                grid_exporting = self.osd.actual_grid_export
+                self.info_logger.warning(
+                    f"⚠️  GRID is EXPORTING {grid_exporting:.2f} kW → CAUSING deficit!"
+                )
+                self.info_logger.info(f"   → NEUTRALIZING: Stop grid export")
+                
+                # Zapisz poprzedni stan
+                previous_actual = self.osd.actual_grid_export
+                previous_setpoint = self.osd.setpoint_grid_export
+                
+                # ═══════════════════════════════════════════════════════════
+                # KROK A: Ustaw setpoint (POLECENIE dla SCADA)
+                # ═══════════════════════════════════════════════════════════
+                self.osd.setpoint_grid_export = 0
+                self.info_logger.info(f"   ✓ Set setpoint_grid_export = 0 kW (command for SCADA)")
+                
+                # ═══════════════════════════════════════════════════════════
+                # KROK B: Symuluj actual (TYLKO dla obliczeń w Pythonie)
+                # ═══════════════════════════════════════════════════════════
+                self.simulate_device_state_for_calculations(
+                    self.osd, 
+                    "stop_export", 
+                    0
+                )
+                self.info_logger.info(f"   ✓ Simulated actual_grid_export = 0 kW (for calculations only)")
+                
+                # Backward compatibility (tymczasowo)
+                self.osd.current_grid_export = 0
+                
+                # Dodaj do changed_devices
+                device_change = {
+                    "device": self.osd,
+                    "action": "stop_export",
+                    "previous_value": previous_setpoint,
+                    "new_value": 0,
+                    "device_type": "OSD"
+                }
+                self.changed_devices.append(device_change)
+                
+                neutralized = True
+                neutralized_amount += grid_exporting
+        
+        # === NADWYŻKA - szukaj operacji, które ZWIĘKSZAJĄ produkcję ===
+        elif balance.has_surplus:
+            self.info_logger.info(f"Surplus detected: {balance.surplus:.2f} kW")
+            
+            # 1. BESS rozładowuje się? (dostarcza energię)
+            if self.microgrid.bess and self.microgrid.bess.actual_output > 0:
+                bess_discharging = self.microgrid.bess.actual_output
+                self.info_logger.warning(
+                    f"⚠️  BESS is DISCHARGING {bess_discharging:.2f} kW → CAUSING surplus!"
+                )
+                self.info_logger.info(f"   → NEUTRALIZING: Stop BESS discharging")
+                
+                # Zapisz poprzedni stan
+                previous_actual = self.microgrid.bess.actual_output
+                previous_setpoint = self.microgrid.bess.setpoint_output
+                
+                # ═══════════════════════════════════════════════════════════
+                # KROK A: Ustaw setpoint (POLECENIE dla SCADA)
+                # ═══════════════════════════════════════════════════════════
+                self.microgrid.bess.setpoint_output = 0
+                self.info_logger.info(f"   ✓ Set setpoint_output = 0 kW (command for SCADA)")
+                
+                # ═══════════════════════════════════════════════════════════
+                # KROK B: Symuluj actual_output (TYLKO dla obliczeń w Pythonie)
+                # ═══════════════════════════════════════════════════════════
+                self.simulate_device_state_for_calculations(
+                    self.microgrid.bess, 
+                    "stop_discharging", 
+                    0
+                )
+                self.info_logger.info(f"   ✓ Simulated actual_output = 0 kW (for calculations only)")
+                
+                # Dodaj do changed_devices
+                device_change = {
+                    "device": self.microgrid.bess,
+                    "action": "stop_discharging",
+                    "previous_value": previous_setpoint,
+                    "new_value": 0,
+                    "device_type": "BESS"
+                }
+                self.changed_devices.append(device_change)
+                
+                neutralized = True
+                neutralized_amount += bess_discharging
+            
+            # 2. Grid importuje? (dodaje energię)
+            if self.osd.actual_grid_import > 0:  # ✅ Zmiana: actual zamiast current
+                grid_importing = self.osd.actual_grid_import
+                self.info_logger.warning(
+                    f"⚠️  GRID is IMPORTING {grid_importing:.2f} kW → CAUSING surplus!"
+                )
+                self.info_logger.info(f"   → NEUTRALIZING: Stop grid import")
+                
+                # Zapisz poprzedni stan
+                previous_actual = self.osd.actual_grid_import
+                previous_setpoint = self.osd.setpoint_grid_import
+                
+                # ═══════════════════════════════════════════════════════════
+                # KROK A: Ustaw setpoint (POLECENIE dla SCADA)
+                # ═══════════════════════════════════════════════════════════
+                self.osd.setpoint_grid_import = 0
+                self.info_logger.info(f"   ✓ Set setpoint_grid_import = 0 kW (command for SCADA)")
+                
+                # ═══════════════════════════════════════════════════════════
+                # KROK B: Symuluj actual (TYLKO dla obliczeń w Pythonie)
+                # ═══════════════════════════════════════════════════════════
+                self.simulate_device_state_for_calculations(
+                    self.osd, 
+                    "stop_import", 
+                    0
+                )
+                self.info_logger.info(f"   ✓ Simulated actual_grid_import = 0 kW (for calculations only)")
+                
+                # Backward compatibility (tymczasowo)
+                self.osd.current_grid_import = 0
+                
+                # Dodaj do changed_devices
+                device_change = {
+                    "device": self.osd,
+                    "action": "stop_import",
+                    "previous_value": previous_setpoint,
+                    "new_value": 0,
+                    "device_type": "OSD"
+                }
+                self.changed_devices.append(device_change)
+                
+                neutralized = True
+                neutralized_amount += grid_importing
+        
+        if neutralized:
+            self.info_logger.info("")
+            self.info_logger.info(f"✓ Neutralized {neutralized_amount:.2f} kW of conflicting operations")
+            self.info_logger.info("   Recalculating balance with simulated state...")
+            
+            # ═══════════════════════════════════════════════════════════════
+            # PRZELICZ BILANS PONOWNIE (używa ZSYMULOWANEGO actual_output!)
+            # ═══════════════════════════════════════════════════════════════
+            new_balance = self.calculate_energy_balance()
+            
+            self.info_logger.info(
+                f"   New balance: {new_balance.balance:+.2f} kW "
+                f"(was: {balance.balance:+.2f} kW, delta: {new_balance.balance - balance.balance:+.2f} kW)"
+            )
+            
+            return new_balance
+        else:
+            self.info_logger.info("✓ No conflicting operations detected")
+            return balance
+    
+    def check_device_already_operating(self, device_type: str, operation: str) -> tuple:
+        """
+        Sprawdza czy urządzenie już wykonuje daną operację.
+        
+        Args:
+            device_type: "BESS" lub "GRID"
+            operation: "charging", "discharging", "importing", "exporting"
+            
+        Returns:
+            tuple: (is_operating: bool, current_amount: float)
+        """
+        if device_type == "BESS":
+            if not self.microgrid.bess:
+                return False, 0.0
+            
+            if operation == "charging":
+                if self.microgrid.bess.actual_output < 0:
+                    return True, abs(self.microgrid.bess.actual_output)
+                return False, 0.0
+            
+            elif operation == "discharging":
+                if self.microgrid.bess.actual_output > 0:
+                    return True, self.microgrid.bess.actual_output
+                return False, 0.0
+        
+        elif device_type == "GRID":
+            if operation == "importing":
+                # ✅ POPRAWKA: Użyj actual_grid_import
+                if self.osd.actual_grid_import > 0:
+                    return True, self.osd.actual_grid_import
+                return False, 0.0
+            
+            elif operation == "exporting":
+                # ✅ POPRAWKA: Użyj actual_grid_export
+                if self.osd.actual_grid_export > 0:
+                    return True, self.osd.actual_grid_export
+                return False, 0.0
+        
+        return False, 0.0
+    
+
+    def simulate_device_state_for_calculations(self, device, operation: str, value: float):
+        """
+        Symuluje zmianę stanu urządzenia TYLKO dla obliczeń w bieżącej iteracji.
+        
+        ⚠️  WAŻNE: To NIE jest wysyłane do API/SCADA!
+        
+        Args:
+            device: Urządzenie (BESS lub OSD)
+            operation: Rodzaj operacji
+            value: Nowa wartość
+        """
+        device_type = type(device).__name__
+        
+        self.info_logger.debug(
+            f"🧪 SIMULATING state for {device_type}: {operation} → {value}"
+        )
+        
+        # Symulacja dla BESS
+        if device_type == "BESS":
+            if operation in ["stop_charging", "stop_discharging"]:
+                device.actual_output = value  # ← SYMULACJA
+                self.info_logger.debug(
+                    f"   → BESS.actual_output = {value} kW (simulated)"
+                )
+        
+        # ✅ NOWE: Symulacja dla OSD
+        elif device_type == "OSD":
+            if operation == "stop_export":
+                device.actual_grid_export = value  # ← SYMULACJA
+                self.info_logger.debug(
+                    f"   → OSD.actual_grid_export = {value} kW (simulated)"
+                )
+            elif operation == "stop_import":
+                device.actual_grid_import = value  # ← SYMULACJA
+                self.info_logger.debug(
+                    f"   → OSD.actual_grid_import = {value} kW (simulated)"
+                )
+        
+        self.info_logger.debug(
+            f"   ℹ️  This is IN-MEMORY ONLY, will be overwritten in next iteration"
+        )
+    
+
+    # =========================================================================
+    # ETAP 2: PRZYWRACANIE POPRZEDNICH OGRANICZEŃ
+    # =========================================================================
+    
+    def restore_previous_limitations(self, balance: EnergyBalance) -> EnergyBalance:
+        """
+        Cofa wcześniej nałożone sztucznie ograniczenia ORAZ
+        sprawdza czy obecne urządzenia są ograniczone.
+        
+        ETAP 2: Przed zarządzaniem deficytem/nadwyżką:
+        1. Cofamy poprzednie ograniczenia (z self.artificial_limitations)
+        2. Sprawdzamy czy obecne urządzenia mogą pomóc
+        
+        Args:
+            balance: Obecny bilans energetyczny
+            
+        Returns:
+            EnergyBalance: Zaktualizowany bilans po przywróceniu
+        """
+        self.info_logger.info("")
+        self.info_logger.info("🔄 RESTORING/CHECKING LIMITATIONS")
+        self.info_logger.info("-" * 70)
+        
+        restored = False
+        restored_count = 0
+        
+        # ═══════════════════════════════════════════════════════════════
+        # CZĘŚĆ 1: Przywróć poprzednie ograniczenia (z artificial_limitations)
+        # ═══════════════════════════════════════════════════════════════
+        
+        if self.artificial_limitations:
+            self.info_logger.info(f"Found {len(self.artificial_limitations)} previous limitations to restore")
+            
+            # Dla DEFICYTU: Przywróć ograniczone generatory
+            if balance.has_deficit:
+                for limitation in self.artificial_limitations[:]:
+                    if limitation["type"] == "generation_limit":
+                        device = limitation["device"]
+                        original_output = limitation["original_output"]
+                        current_output = device.actual_output
+                        
+                        if current_output < original_output:
+                            self.info_logger.info(
+                                f"⚙️  Restoring {device.name}: "
+                                f"{current_output:.2f} kW → {original_output:.2f} kW"
+                            )
+                            
+                            device.setpoint_output = original_output
+                            
+                            device_change = {
+                                "device": device,
+                                "action": f"restore_output",
+                                "previous_value": current_output,
+                                "new_value": original_output,
+                                "device_type": type(device).__name__
+                            }
+                            self.changed_devices.append(device_change)
+                            self.artificial_limitations.remove(limitation)
+                            
+                            restored = True
+                            restored_count += 1
+            
+            # Dla NADWYŻKI: Przywróć ograniczone odbiorniki
+            elif balance.has_surplus:
+                for limitation in self.artificial_limitations[:]:
+                    if limitation["type"] == "consumption_limit":
+                        device = limitation["device"]
+                        original_power = limitation["original_power"]
+                        was_active = limitation.get("was_active", True)
+                        current_power = device.power
+                        
+                        if not device.switch_status and was_active:
+                            self.info_logger.info(
+                                f"⚙️  Restoring {device.name}: OFF → ON ({original_power:.2f} kW)"
+                            )
+                            
+                            device.switch_status = True
+                            if hasattr(device, "set_power"):
+                                device.set_power(original_power)
+                            else:
+                                device.power = original_power
+                            
+                            device_change = {
+                                "device": device,
+                                "action": f"restore_consumer",
+                                "previous_value": 0,
+                                "new_value": original_power,
+                                "device_type": type(device).__name__
+                            }
+                            self.changed_devices.append(device_change)
+                            self.artificial_limitations.remove(limitation)
+                            
+                            restored = True
+                            restored_count += 1
+                        
+                        elif current_power < original_power:
+                            self.info_logger.info(
+                                f"⚙️  Restoring {device.name}: "
+                                f"{current_power:.2f} kW → {original_power:.2f} kW"
+                            )
+                            
+                            if hasattr(device, "set_power"):
+                                device.set_power(original_power)
+                            else:
+                                device.power = original_power
+                            
+                            device_change = {
+                                "device": device,
+                                "action": f"restore_power",
+                                "previous_value": current_power,
+                                "new_value": original_power,
+                                "device_type": type(device).__name__
+                            }
+                            self.changed_devices.append(device_change)
+                            self.artificial_limitations.remove(limitation)
+                            
+                            restored = True
+                            restored_count += 1
+        
+        # ═══════════════════════════════════════════════════════════════
+        # CZĘŚĆ 2: Sprawdź OBECNE urządzenia (nie w artificial_limitations)
+        # ═══════════════════════════════════════════════════════════════
+        
+        # Dla DEFICYTU: Zwiększ generację
+        if balance.has_deficit and not restored:
+            self.info_logger.info("Checking for limited generators (not in artificial_limitations)...")
+            
+            # Sprawdź wszystkie generatory
+            all_generators = (
+                self.microgrid.pv_panels +
+                self.microgrid.wind_turbines +
+                self.microgrid.fuel_turbines +
+                self.microgrid.fuel_cells
+            )
+            
+            for generator in all_generators:
+                if not generator.switch_status or generator.device_status != "operational":
+                    continue
+                
+                # Czy generator ma rezerwę?
+                available_increase = generator.max_output - generator.actual_output
+                
+                if available_increase > 0.1:  # Minimalny threshold
+                    increase = min(balance.deficit, available_increase)
+                    
+                    self.info_logger.info(
+                        f"⚙️  Increasing {generator.name}: "
+                        f"{generator.actual_output:.2f} → {generator.actual_output + increase:.2f} kW "
+                        f"(+{increase:.2f} kW)"
+                    )
+                    
+                    new_output = generator.actual_output + increase
+                    generator.setpoint_output = new_output
+                    
+                    device_change = {
+                        "device": generator,
+                        "action": f"increase_generation",
+                        "previous_value": generator.actual_output,
+                        "new_value": new_output,
+                        "device_type": type(generator).__name__
+                    }
+                    self.changed_devices.append(device_change)
+                    
+                    restored = True
+                    restored_count += 1
+                    break  # Zwiększ tylko jeden generator na raz
+        
+        # Dla NADWYŻKI: Zwiększ obciążenie
+        # Dla NADWYŻKI: Zwiększ obciążenie
+        elif balance.has_surplus and not restored:
+            self.info_logger.info("Checking for limited consumers (not in artificial_limitations)...")
+            self.info_logger.info(
+                f"   Found {len(self.consumergrid.adjustable_devices)} adjustable device(s)"
+            )
+            
+            # Sprawdź adjustable devices
+            for device in self.consumergrid.adjustable_devices:
+                self.info_logger.info(
+                    f"   🔍 Checking: {device.name} - "
+                    f"switch_status={device.switch_status}, "
+                    f"power={device.power:.2f}/{device.max_power:.2f} kW"
+                )
+                
+                # Czy device OFF? Włącz go
+                if not device.switch_status:
+                    power_to_set = min(balance.surplus, device.max_power)
+                    
+                    self.info_logger.info(
+                        f"⚙️  Activating {device.name}: OFF → ON ({power_to_set:.2f} kW)"
+                    )
+                    
+                    device.switch_status = True
+                    
+                    if hasattr(device, "set_power"):
+                        device.set_power(power_to_set)
+                    else:
+                        device.power = power_to_set
+                    
+                    device_change = {
+                        "device": device,
+                        "action": f"activate_consumer",
+                        "previous_value": 0,
+                        "new_value": power_to_set,
+                        "device_type": type(device).__name__
+                    }
+                    self.changed_devices.append(device_change)
+                    
+                    restored = True
+                    restored_count += 1
+                    break
+                
+                # Czy device ma rezerwę? Zwiększ moc
+                elif device.power < device.max_power:
+                    available_increase = device.max_power - device.power
+                    
+                    self.info_logger.info(
+                        f"   🔍 Available increase: {available_increase:.2f} kW"
+                    )
+                    
+                    if available_increase > 0.1:  # Minimalny threshold
+                        increase = min(balance.surplus, available_increase)
+                        
+                        # Zapisz wartości
+                        previous_power = device.power
+                        new_power = device.power + increase
+                        
+                        self.info_logger.info(
+                            f"⚙️  Increasing {device.name}: "
+                            f"{previous_power:.2f} → {new_power:.2f} kW "
+                            f"(+{increase:.2f} kW)"
+                        )
+                        
+                        # Ustaw nową moc
+                        if hasattr(device, "set_power"):
+                            device.set_power(new_power)
+                        else:
+                            device.power = new_power
+                        
+                        device_change = {
+                            "device": device,
+                            "action": f"increase_consumption",
+                            "previous_value": previous_power,
+                            "new_value": new_power,
+                            "device_type": type(device).__name__
+                        }
+                        self.changed_devices.append(device_change)
+                        
+                        restored = True
+                        restored_count += 1
+                        break  # Zwiększ tylko jeden device na raz
+                    else:
+                        self.info_logger.info(
+                            f"   ⚠️  {device.name}: available increase too small ({available_increase:.2f} kW)"
+                        )
+                else:
+                    self.info_logger.info(
+                        f"   ⚠️  {device.name}: already at max power"
+                    )
+        
+        # ═══════════════════════════════════════════════════════════════
+        # FINALIZACJA
+        # ═══════════════════════════════════════════════════════════════
+        
+        if restored:
+            self.info_logger.info(
+                f"✓ Restored/increased {restored_count} device(s), recalculating balance..."
+            )
+            new_balance = self.calculate_energy_balance()
+            self.info_logger.info(
+                f"   New balance: {new_balance.balance:+.2f} kW "
+                f"(was: {balance.balance:+.2f} kW, delta: {new_balance.balance - balance.balance:+.2f} kW)"
+            )
+            self.info_logger.info("-" * 70)
+            return new_balance
+        else:
+            self.info_logger.info("✓ No restorable/increasable devices found")
+            self.info_logger.info("-" * 70)
+            return balance
+    
+    def save_device_state(self, device, reason: str):
+        """
+        Zapisuje obecny stan urządzenia przed zmianą.
+        
+        ETAP 2: Tracking poprzednich stanów umożliwia późniejsze przywrócenie.
+        
+        Args:
+            device: Urządzenie do zapisania
+            reason: Powód zapisu (np. "before_limitation", "before_optimization")
+        """
+        device_id = device.id if hasattr(device, 'id') else id(device)
+        
+        state = {
+            "timestamp": time.time(),
+            "reason": reason,
+            "device_type": type(device).__name__,
+        }
+        
+        # Zapisz specyficzne pola w zależności od typu urządzenia
+        if hasattr(device, 'actual_output'):
+            state["actual_output"] = device.actual_output
+        if hasattr(device, 'setpoint_output'):
+            state["setpoint_output"] = device.setpoint_output
+        if hasattr(device, 'switch_status'):
+            state["switch_status"] = device.switch_status
+        if hasattr(device, 'get_current_power'):
+            state["current_power"] = device.get_current_power()
+        
+        self.previous_device_states[device_id] = state
+        
+        self.info_logger.debug(
+            f"Saved state for {device.name if hasattr(device, 'name') else device_id}: "
+            f"{reason}"
+        )
+    
+    def add_artificial_limitation(self, device, limitation_type: str, **kwargs):
+        """
+        Dodaje ograniczenie do listy śledzonych ograniczeń.
+        
+        ETAP 2: Śledzenie ograniczeń pozwala je później cofnąć.
+        
+        Args:
+            device: Urządzenie, które jest ograniczane
+            limitation_type: Typ ograniczenia ("generation_limit", "consumption_limit")
+            **kwargs: Dodatkowe parametry (np. original_output, original_power)
+        """
+        limitation = {
+            "device": device,
+            "type": limitation_type,
+            "timestamp": time.time(),
+            **kwargs
+        }
+        
+        self.artificial_limitations.append(limitation)
+        
+        self.info_logger.debug(
+            f"Added limitation: {limitation_type} for "
+            f"{device.name if hasattr(device, 'name') else 'unknown'}"
+        )

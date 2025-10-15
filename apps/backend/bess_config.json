@@ -1,0 +1,27 @@
+{
+    "bess_low_threshold": 0.20,
+    "_info": {
+        "description": "Safety buffer for BESS discharge - prevents deep discharge",
+        "unit": "percent of usable capacity (max_charge_level - min_charge_level)",
+        "formula": "safety_level = min_charge_level + (usable_capacity × bess_low_threshold)",
+        "example": "If min=20 kWh, max=180 kWh, threshold=0.20: safety_level = 20 + (160 × 0.20) = 52 kWh",
+        "recommended_values": {
+            "new_battery_0_1_years": 0.25,
+            "mature_battery_1_5_years": 0.20,
+            "old_battery_5_plus_years": 0.30,
+            "testing_aggressive": 0.15
+        },
+        "effects": {
+            "higher_threshold": "More protection, less utilization, longer battery life",
+            "lower_threshold": "Less protection, more utilization, shorter battery life"
+        },
+        "warning": "Values below 0.15 (15%) are NOT recommended for production use!",
+        "how_to_change": [
+            "1. Edit 'bess_low_threshold' value above",
+            "2. Choose from 'recommended_values' or use custom value",
+            "3. Save file",
+            "4. Restart algorithm",
+            "5. Check logs for: 'Loaded bess_low_threshold: XX%'"
+        ]
+    }
+}

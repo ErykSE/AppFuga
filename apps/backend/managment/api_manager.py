@@ -242,29 +242,17 @@ class ApiManager:
             system_url = f"{self.api_base_url}/api/Scada/system-state"
             self.info_logger.info(f"Pobieranie danych stanu systemu z {system_url}")
             
-            # DODAJ TO:
-            self.info_logger.info("=== DEBUG: Starting GET /system-state ===")
-            
             try:
-                system_response = requests.get(system_url, verify=self.verify_ssl, 
-                                            timeout=self.retry_config.connection_timeout)
-                
-                # DODAJ TO:
-                self.info_logger.info(f"=== DEBUG: Response status code: {system_response.status_code} ===")
-                
+                system_response = requests.get(
+                    system_url, 
+                    verify=self.verify_ssl, 
+                    timeout=self.retry_config.connection_timeout
+                )
                 system_response.raise_for_status()
                 system_data_raw = system_response.json()
                 
-                # DODAJ TO:
-                self.info_logger.info("=== DEBUG: GET /system-state SUCCESS - no retry needed ===")
-                
             except requests.exceptions.HTTPError as e:
-                # DODAJ TO:
-                self.info_logger.error(f"=== DEBUG: HTTPError caught - status: {e.response.status_code} ===")
-                
                 if e.response.status_code == 503:
-                    self.info_logger.info("=== DEBUG: Status 503 detected - entering retry logic ===")
-                    
                     self._log_with_flag("WARNING", "API zwróciło 503 - SCADA prawdopodobnie niedostępna", "SYSTEM")
                     
                     # Zapisz status awarii do pliku
@@ -273,13 +261,11 @@ class ApiManager:
                         "message": "SCADA system unavailable (503 error)",
                         "scada_connected": False,
                         "missing_devices": [],
-                        "timestamp": datetime.datetime.now().isoformat() + "Z"  # ← DODAJ TO
+                        "timestamp": datetime.datetime.now().isoformat() + "Z"
                     }
                     self.save_status_data(status_path, error_status)
                     
                     # 5 prób ponownego połączenia z system-state
-                    self.info_logger.info("=== DEBUG: Starting 5-attempt retry logic for 503 ===")
-                    
                     if not self.retry_system_state_connection(system_url):
                         # Po nieudanych próbach - diagnostyka i zatrzymanie
                         self.log_final_scada_status()
@@ -291,26 +277,21 @@ class ApiManager:
                         return False
                     
                     # Sukces po retry - pobierz dane ponownie
-                    system_response = requests.get(system_url, verify=self.verify_ssl, 
-                                                timeout=self.retry_config.connection_timeout)
+                    system_response = requests.get(
+                        system_url, 
+                        verify=self.verify_ssl, 
+                        timeout=self.retry_config.connection_timeout
+                    )
                     system_response.raise_for_status()
                     system_data_raw = system_response.json()
                 else:
-                    # DODAJ TO:
-                    self.info_logger.error(f"=== DEBUG: HTTPError {e.response.status_code} - NOT 503, raising exception (NO RETRY) ===")
                     raise  # Inny błąd HTTP - propaguj dalej
             
             except requests.exceptions.RequestException as e:
-                # DODAJ TO:
-                self.info_logger.error(f"=== DEBUG: RequestException caught - type: {type(e).__name__}, message: {str(e)} ===")
-                self.info_logger.info("=== DEBUG: Connection/timeout error - entering retry logic ===")
-                
                 # Błędy połączenia (timeout, connection error itp.)
                 self._log_with_flag("ERROR", f"Błąd połączenia z system-state: {str(e)}", "NETWORK")
                 
                 # Próby ponownego połączenia
-                self.info_logger.info("=== DEBUG: Starting 5-attempt retry logic for RequestException ===")
-                
                 if not self.retry_system_state_connection(system_url):
                     self.log_final_scada_status()
                     
@@ -321,15 +302,18 @@ class ApiManager:
                     return False
                 
                 # Sukces po retry
-                system_response = requests.get(system_url, verify=self.verify_ssl, 
-                                            timeout=self.retry_config.connection_timeout)
+                system_response = requests.get(
+                    system_url, 
+                    verify=self.verify_ssl, 
+                    timeout=self.retry_config.connection_timeout
+                )
                 system_response.raise_for_status()
                 system_data_raw = system_response.json()
             
             # 2. Wydziel status z odpowiedzi
             status_info = system_data_raw.get("status", {})
             
-            # 3. Sprawdź czy są brakujące urządzenia (pozostała logika bez zmian)
+            # 3. Sprawdź czy są brakujące urządzenia
             missing_devices = status_info.get("missing_devices", [])
             if missing_devices:
                 self._log_with_flag("WARNING", 
@@ -337,22 +321,25 @@ class ApiManager:
                                 "SYSTEM")
                 self._log_with_flag("INFO", "Algorytm będzie kontynuowany z dostępnymi urządzeniami", "SYSTEM")
             
-            # 5. Zapisz status do osobnego pliku
+            # 4. Zapisz status do osobnego pliku
             self.save_status_data(status_path, status_info)
             
-            # 6. Pobierz dane kontraktu
+            # 5. Pobierz dane kontraktu
             contract_url = f"{self.api_base_url}/api/Scada/contract-info"
             self.info_logger.info(f"Pobieranie danych kontraktu z {contract_url}")
-            contract_response = requests.get(contract_url, verify=self.verify_ssl, 
-                                        timeout=self.retry_config.connection_timeout)
+            contract_response = requests.get(
+                contract_url, 
+                verify=self.verify_ssl, 
+                timeout=self.retry_config.connection_timeout
+            )
             contract_response.raise_for_status()
             contract_data = contract_response.json()
             
-            # 7. Przygotuj i zapisz dane urządzeń (bez statusu)
+            # 6. Przygotuj i zapisz dane urządzeń (bez statusu)
             devices_data = self.prepare_devices_data(system_data_raw)
             contract_data_converted = self.convert_contract_data(contract_data)
             
-            # 8. Zapisz pliki
+            # 7. Zapisz pliki
             os.makedirs(os.path.dirname(data_path), exist_ok=True)
             os.makedirs(os.path.dirname(contract_path), exist_ok=True)
             
@@ -370,27 +357,14 @@ class ApiManager:
             self.consecutive_failures = 0
             self.last_successful_connection = time.time()
             
-            # DODAJ TO:
-            self.info_logger.info("=== DEBUG: fetch_and_save_data SUCCESS ===")
-            
             return True
             
         except Exception as e:
-            # DODAJ TO:
-            self.error_logger.error(f"=== DEBUG: UNEXPECTED EXCEPTION caught in fetch_and_save_data ===")
-            self.error_logger.error(f"=== DEBUG: Exception type: {type(e).__name__} ===")
-            self.error_logger.error(f"=== DEBUG: Exception message: {str(e)} ===")
-            self.error_logger.exception("=== DEBUG: Full exception traceback ===")
-            
             self.consecutive_failures += 1
             self._log_with_flag("CRITICAL", 
                             f"Błąd podczas pobierania/zapisywania danych z API (awaria #{self.consecutive_failures}): {str(e)}", 
                             "ALERT")
             self.error_logger.exception("Szczegóły błędu:")
-            
-            # DODAJ TO:
-            self.info_logger.error("=== DEBUG: Returning False from unexpected exception ===")
-            
             return False
     
     def save_status_data(self, status_path: str, status_info: Dict[str, Any]):
@@ -411,7 +385,10 @@ class ApiManager:
             self._log_with_flag("ERROR", f"Błąd podczas zapisywania statusu: {str(e)}", "SYSTEM")
     
     def prepare_devices_data(self, system_data_raw: Dict[str, Any]) -> Dict[str, Any]:
-        """Przygotowuje dane urządzeń bez informacji o statusie."""
+        """
+        Przygotowuje dane urządzeń bez informacji o statusie.
+        ZAKTUALIZOWANA: Przepisuje WSZYSTKIE pola z API (w tym setpoint_output).
+        """
         devices_data = {
             "pv_panels": [],
             "wind_turbines": [],
@@ -423,81 +400,74 @@ class ApiManager:
             "power_meters": []
         }
         
-        # Funkcja pomocnicza do konwersji urządzeń energetycznych
-        def convert_energy_source(device, source_type):
-            return {
-                "id": device.get("id", 0),
-                "name": device.get("name", "Unknown Device"),
-                "priority": device.get("priority", 1),
-                "max_output": device.get("max_output", 100),
-                "min_output": device.get("min_output", 0),
-                "actual_output": device.get("actual_output", 0),
-                "switch_status": device.get("switch_status", False),
-                "device_status": "online" if device.get("switch_status", False) else "offline"
-            }
+        # === ŹRÓDŁA ENERGII (PV, Wind, Fuel Turbines, Fuel Cells) ===
+        # Mapowanie kategorii do kluczy w API
+        energy_sources = {
+            "pv_panels": "pv_panels",
+            "wind_turbines": "wind_turbines",
+            "fuel_turbines": "fuel_turbines",
+            "fuel_cells": "fuel_cells"
+        }
         
-        # Konwersja urządzeń źródłowych
-        for pv_panel in system_data_raw.get("pv_panels", []):
-            devices_data["pv_panels"].append(convert_energy_source(pv_panel, "pv_panels"))
-            
-        for wind_turbine in system_data_raw.get("wind_turbines", []):
-            devices_data["wind_turbines"].append(convert_energy_source(wind_turbine, "wind_turbines"))
-            
-        for fuel_turbine in system_data_raw.get("fuel_turbines", []):
-            devices_data["fuel_turbines"].append(convert_energy_source(fuel_turbine, "fuel_turbines"))
-            
-        for fuel_cell in system_data_raw.get("fuel_cells", []):
-            devices_data["fuel_cells"].append(convert_energy_source(fuel_cell, "fuel_cells"))
+        for category, api_key in energy_sources.items():
+            for device in system_data_raw.get(api_key, []):
+                devices_data[category].append({
+                    "id": device.get("id", 0),
+                    "name": device.get("name", "Unknown Device"),
+                    "priority": device.get("priority", 1),
+                    "max_output": device.get("max_output", 100),
+                    "min_output": device.get("min_output", 0),
+                    "actual_output": device.get("actual_output", 0),
+                    "setpoint_output": device.get("setpoint_output", 0),  # ✅ NOWE
+                    "switch_status": device.get("switch_status", False),
+                    "device_status": "online" if device.get("switch_status", False) else "offline"
+                })
         
-        # Konwersja BESS
+        # === BESS ===
         for bess in system_data_raw.get("bess", []):
             devices_data["bess"].append({
                 "id": bess.get("id", 7),
                 "name": bess.get("name", "BESS 1"),
-                "capacity": bess.get("capacity", 350),
-                "min_charge_level": bess.get("min_charge_level", 40),
-                "charge_level": bess.get("charge_level", 350.0),
+                "capacity": bess.get("capacity", 200),
+                "min_charge_level": bess.get("min_charge_level", 10),
+                "max_charge_level": bess.get("max_charge_level", 200),  # ✅ NOWE
+                "charge_level": bess.get("charge_level", 0),
+                "actual_output": bess.get("actual_output", 0),  # ✅ NOWE
+                "setpoint_output": bess.get("setpoint_output", 0),  # ✅ NOWE
+                "max_discharge_power": bess.get("max_discharge_power", 100),  # ✅ NOWE
+                "max_charge_power": bess.get("max_charge_power", 100),  # ✅ NOWE
+                "min_output": bess.get("min_output", 0),  # ✅ NOWE
                 "switch_status": bess.get("switch_status", True),
                 "device_status": "online" if bess.get("switch_status", True) else "offline"
             })
         
-        # Konwersja non-adjustable devices
+        # === NON-ADJUSTABLE DEVICES ===
         for device in system_data_raw.get("non_adjustable_devices", []):
-            # Pobierz wartość mocy - może być w actual_power lub power
-            power_value = 0
-            if "actual_power" in device:
-                power_value = device["actual_power"]
-            elif "power" in device:
-                power_value = device["power"]
-                
             devices_data["non_adjustable_devices"].append({
                 "id": device.get("id", 0),
                 "name": device.get("name", "Unknown Device"),
                 "priority": device.get("priority", 1),
-                "power": power_value,
+                "power": device.get("actual_output", 0),  # ✅ API używa actual_output
+                "actual_output": device.get("actual_output", 0),  # ✅ NOWE - dla kompatybilności
+                "setpoint_output": device.get("setpoint_output", 0),  # ✅ NOWE
                 "switch_status": device.get("switch_status", False)
             })
         
-        # Konwersja adjustable devices
+        # === ADJUSTABLE DEVICES ===
         for device in system_data_raw.get("adjustable_devices", []):
-            # Pobierz wartość mocy - może być w actual_power lub power
-            power_value = 0
-            if "actual_power" in device:
-                power_value = device["actual_power"]
-            elif "power" in device:
-                power_value = device["power"]
-                
             devices_data["adjustable_devices"].append({
                 "id": device.get("id", 0),
                 "name": device.get("name", "Unknown Device"),
                 "priority": device.get("priority", 1),
-                "power": power_value,
+                "power": device.get("actual_output", 0),  # ✅ API używa actual_output
+                "actual_output": device.get("actual_output", 0),  # ✅ NOWE - dla kompatybilności
+                "setpoint_output": device.get("setpoint_output", 0),  # ✅ NOWE
                 "switch_status": device.get("switch_status", False),
-                "min_power": device.get("min_power", 30),
+                "min_power": device.get("min_power", 0),
                 "max_power": device.get("max_power", 100)
             })
         
-        # Konwersja liczników energii (power meters)
+        # === POWER METERS ===
         for meter in system_data_raw.get("power_meters", []):
             devices_data["power_meters"].append({
                 "id": meter.get("id", 0),
@@ -510,18 +480,33 @@ class ApiManager:
         return devices_data
     
     def convert_contract_data(self, contract_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Konwertuje dane kontraktu z camelCase na wymagany format."""
+        """
+        Konwertuje dane kontraktu z camelCase API na snake_case Python.
+        ZAKTUALIZOWANA: Dodano nowe pola billing cycle.
+        """
         return {
+            # Dane kontraktowe (stałe)
             "CONTRACTED_TYPE": contract_data.get("contractedType", ""),
             "CONTRACTED_DURATION": contract_data.get("contractedDuration", 0),
             "CONTRACTED_MARGIN": contract_data.get("contractedMargin", 0),
             "CONTRACTED_EXPORT_POSSIBILITY": contract_data.get("contractedExportPossibility", False),
             "CONTRACTED_SALE_LIMIT": contract_data.get("contractedSaleLimit", 0),
             "CONTRACTED_PURCHASE_LIMIT": contract_data.get("contractedPurchaseLimit", 0),
+            
+            # ✅ NOWE: Billing cycle
+            "CONTRACTED_BILLING_CYCLE": contract_data.get("contractedBillingCycle", "monthly"),
+            "contracted_billing_period_start": contract_data.get("contractedBillingPeriodStart", ""),
+            "contracted_billing_period_end": contract_data.get("contractedBillingPeriodEnd", ""),
+            
+            # Dane bieżące
             "sold_power": contract_data.get("soldPower", 0),
             "bought_power": contract_data.get("boughtPower", 0),
             "current_tariff_buy": contract_data.get("currentTariffBuy", 0),
-            "current_tariff_sell": contract_data.get("currentTariffSell", 0)
+            "current_tariff_sell": contract_data.get("currentTariffSell", 0),
+            
+            # ✅ NOWE: Grid operations (opcjonalne - mogą nie być w API)
+            "current_grid_export": contract_data.get("gridExport", 0),
+            "current_grid_import": contract_data.get("gridImport", 0),
         }
     
     def send_updated_data_with_retry(self, system_data: Dict[str, Any], contract_data: Dict[str, Any]) -> bool:
@@ -536,14 +521,15 @@ class ApiManager:
             bool: True jeśli udało się wysłać, False w przeciwnym razie
         """
         # Próba wysłania danych systemu
-        if not self._send_system_data_with_retry(system_data):
-            return False
+        system_success = self._send_system_data_with_retry(system_data)
         
         # Próba wysłania danych kontraktu
-        if not self._send_contract_data_with_retry(contract_data):
-            return False
+        contract_success = self._send_contract_data_with_retry(contract_data)
         
-        return True
+        # NOWE: Próba wysłania komunikatu algorytmu
+        decision_success = self.send_algorithm_decision(system_data)
+        
+        return system_success and contract_success and decision_success
     
     def _send_system_data_with_retry(self, system_data: Dict[str, Any]) -> bool:
         """Wysyła dane systemu z mechanizmem retry i exponential backoff."""
@@ -604,8 +590,14 @@ class ApiManager:
         for attempt in range(1, self.retry_config.max_retries + 1):
             try:
                 self._log_with_flag("INFO", 
-                                   f"Wysyłanie danych kontraktu (próba {attempt}/{self.retry_config.max_retries})", 
-                                   "RETRY")
+                                f"Wysyłanie danych kontraktu (próba {attempt}/{self.retry_config.max_retries})", 
+                                "RETRY")
+                
+                # ✅ DIAGNOSTYKA: Log danych przed wysłaniem
+                self.info_logger.info("=" * 70)
+                self.info_logger.info("CONTRACT DATA BEING SENT TO API:")
+                self.info_logger.info(json.dumps(contract_data, indent=2))
+                self.info_logger.info("=" * 70)
                 
                 response = requests.post(
                     url,
@@ -614,11 +606,17 @@ class ApiManager:
                     verify=self.verify_ssl,
                     timeout=self.retry_config.connection_timeout
                 )
+                
+                # ✅ DIAGNOSTYKA: Log odpowiedzi API
+                self.info_logger.info(f"API Response Status Code: {response.status_code}")
+                
+                if response.status_code != 200:
+                    self.error_logger.error(f"API Error Response Body: {response.text}")
+                
                 response.raise_for_status()
                 
                 # Sprawdź odpowiedź z API
                 response_data = response.json()
-                # Sprawdź różne warianty message/Message i czy zawiera "successfully" 
                 message = response_data.get("message", "") or response_data.get("Message", "")
                 if message and "successfully" in message.lower():
                     self._log_with_flag("SUCCESS", "Dane kontraktu wysłane pomyślnie", "NETWORK")
@@ -634,8 +632,8 @@ class ApiManager:
                     
             except requests.exceptions.RequestException as e:
                 self._log_with_flag("ERROR", 
-                                   f"Błąd podczas wysyłania danych kontraktu (próba {attempt}): {str(e)}", 
-                                   "RETRY")
+                                f"Błąd podczas wysyłania danych kontraktu (próba {attempt}): {str(e)}", 
+                                "RETRY")
                 
                 if attempt < self.retry_config.max_retries:
                     delay = self._calculate_retry_delay(attempt)
@@ -643,8 +641,8 @@ class ApiManager:
                     time.sleep(delay)
                 else:
                     self._log_with_flag("CRITICAL", 
-                                       "Przekroczono maksymalną liczbę prób wysłania danych kontraktu", 
-                                       "ALERT")
+                                    "Przekroczono maksymalną liczbę prób wysłania danych kontraktu", 
+                                    "ALERT")
         
         return False
     
@@ -814,4 +812,41 @@ class ApiManager:
         except Exception as e:
             self._log_with_flag("CRITICAL", f"Błąd podczas wysyłania aktualizacji do API: {str(e)}", "ALERT")
             self.error_logger.exception("Szczegóły błędu:")
+            return False
+        
+
+    def send_algorithm_decision(self, data):
+        """Wysyła komunikat decyzji algorytmu do SCADA"""
+
+        print("DEBUG: send_algorithm_decision called!")
+        print(f"DEBUG: data keys: {list(data.keys())}")
+
+        if "algorithm_decision" not in data:
+            self.info_logger.info("No algorithm decision in data - skipping")
+            return True
+            
+        endpoint = f"{self.api_base_url}/api/Scada/algorithm-decision"
+        
+        payload = {
+            "algorithm_decision": data["algorithm_decision"]
+        }
+        
+        try:
+            response = requests.post(
+                endpoint, 
+                json=payload, 
+                timeout=self.retry_config.connection_timeout, 
+                verify=self.verify_ssl,
+                headers={'Content-Type': 'application/json'}
+            )
+            
+            if response.status_code == 200:
+                self.info_logger.info("Algorithm decision sent successfully")
+                return True
+            else:
+                self.error_logger.error(f"Failed to send algorithm decision: {response.status_code}")
+                return False
+                
+        except Exception as e:
+            self.error_logger.error(f"Error sending algorithm decision: {str(e)}")
             return False

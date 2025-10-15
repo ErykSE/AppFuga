@@ -35,7 +35,8 @@ if __name__ == "__main__":
             info_logger=info_logger, 
             error_logger=error_logger,
             api_base_url="http://localhost:5002",  # Zmień na adres swojego API
-            use_api=True  # Włącz używanie API
+            #use_api=True  # Włącz używanie API
+            use_api=False  # Włącz używanie API
         )
 
         # Uruchomienie zarządzania energią

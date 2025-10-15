@@ -1,5 +1,10 @@
 import uuid
 from apps.backend.managment.surplus_action import SurplusAction
+from apps.backend.managment.bess_decision_logic import (
+    should_prioritize_charging_or_selling,
+    DecisionConfig,
+    DecisionMode
+)
 
 
 class EnergySurplusManager:
@@ -30,6 +35,7 @@ class EnergySurplusManager:
         is_in_tabu_func,
         clean_tabu_func,
         energy_manager_ref=None  # ← DODAJ TO
+        
     ):
         self.microgrid = microgrid
         self.osd = osd
@@ -44,6 +50,7 @@ class EnergySurplusManager:
             clean_tabu_func  # Zmienione z self.clean_tabu na self.clean_tabu_list
         )
         self.energy_manager_ref = energy_manager_ref  # ← DODAJ TO
+        self.decision_config = self._load_decision_config()
 
     def manage_surplus_energy(self, power_surplus):
         total_managed = 0
@@ -149,73 +156,6 @@ class EnergySurplusManager:
         else:
             return {"success": False, "amount": 0, "reason": "Unknown action"}
 
-    def should_prioritize_charging_or_selling(
-        self, surplus_power, battery_free_percentage, current_selling_price
-    ):
-        """
-        Określa, czy priorytetem powinno być ładowanie BESS czy sprzedaż energii.
-
-        Ta metoda wykorzystuje różne czynniki, takie jak poziom naładowania BESS,
-        aktualna cena sprzedaży i nadwyżka mocy, aby zdecydować o priorytecie między
-        ładowaniem, a sprzedażą energii do sieci.
-
-        Argumenty:
-            surplus_power (float): Aktualna nadwyżka mocy w kW.
-            battery_free_percentage (float): Procent wolnej pojemności w BESS.
-            current_selling_price (float): Aktualna cena sprzedaży energii do sieci.
-
-        Zwraca:
-            bool: True jeśli priorytetem powinno być ładowanie, False jeśli sprzedaż.
-        """
-        # Parametry do konfiguracji
-        MIN_SELLING_PRICE = 0.01
-        MAX_SELLING_PRICE = 2.25
-        BATTERY_THRESHOLD = 20
-        PRICE_THRESHOLD = 0.7
-        HYSTERESIS = 0.05
-
-        if battery_free_percentage <= BATTERY_THRESHOLD:
-            return True
-
-        if battery_free_percentage == 0:
-            return False
-
-        # price_factor = (current_selling_price - MIN_SELLING_PRICE) / (
-        # MAX_SELLING_PRICE - MIN_SELLING_PRICE
-        # )
-        # price_factor = max(0, min(price_factor, 1))
-
-        # battery_factor = 1 - (battery_free_percentage / 100)
-        price_factor = 0.2
-        battery_factor = 0.1
-
-        self.info_logger.info(
-            f"Batteryxxx ({battery_factor}) price ({price_factor} kW)"
-        )
-
-        # battery_factor = 0.77
-
-        if price_factor > PRICE_THRESHOLD and surplus_power > 50:
-            self.info_logger.info(
-                f"Sales priority: high price ({current_selling_price}) and significant surplus ({surplus_power} kW)"
-            )
-            return False
-        elif battery_factor > price_factor + HYSTERESIS:
-            self.info_logger.info(
-                f"Charging priority: battery factor ({battery_factor:.2f}) > price factor ({price_factor:.2f})"
-            )
-            return True
-        elif price_factor > battery_factor + HYSTERESIS:
-            self.info_logger.info(
-                f"Sales priority: price factor ({price_factor:.2f}) > battery factor ({battery_factor:.2f})"
-            )
-            return False
-        else:
-            self.info_logger.info(
-                f"xxxx: price factor ({price_factor:.2f}) > battery factor ({battery_factor:.2f})"
-            )
-            return self.previous_decision
-
     def get_bess_free_capacity(self):
         try:
             if self.microgrid.bess:
@@ -244,17 +184,60 @@ class EnergySurplusManager:
 
     def decide_to_charge_bess(self, power_surplus):
         """
-        Decyduje, czy ładować system BESS i o ile.
-
-        Ta metoda sprawdza dostępność i pojemność BESS, a następnie próbuje
-        naładować go nadwyżką energii, jeśli to możliwe.
-
-        Argumenty:
-            power_surplus (float): Ilość nadwyżki energii dostępnej do ładowania w kW.
-
-        Zwraca:
-            dict: Słownik wskazujący na sukces próby ładowania, naładowaną ilość i procent.
+        Decyduje czy ładować BESS.
+        ZAKTUALIZOWANA: Używa BESSCapabilityChecker + planuje przyspieszoną iterację.
+        
+        Args:
+            power_surplus: Nadwyżka mocy do załadowania (kW)
+            
+        Returns:
+            dict: Wynik operacji ładowania
         """
+        # Użyj capability checker jeśli dostępny
+        if self.energy_manager_ref and self.energy_manager_ref.bess_checker:
+            plan = self.energy_manager_ref.bess_checker.check_charge_capability(power_surplus)
+            
+            # Log planu
+            self.energy_manager_ref.bess_checker.log_plan(plan, "charge")
+            
+            if not plan.is_feasible:
+                return {
+                    "success": False,
+                    "amount": 0,
+                    "percent": 0,
+                    "reason": plan.reason
+                }
+            
+            # Wykonaj ładowanie
+            bess = self.microgrid.bess
+            charged_amount, charged_percent = bess.charge(abs(plan.power_setpoint))
+            
+            # Jeśli skończy się wcześniej - zaplanuj przyspieszoną iterację
+            if plan.will_finish_before_next_iteration:
+                self.energy_manager_ref.iteration_scheduler.schedule_early_iteration(
+                    after_seconds=plan.time_to_completion_minutes * 60,
+                    event_type="bess_charge_complete",
+                    description=f"BESS will be full (charged {plan.energy_amount:.2f} kWh)"
+                )
+            
+            # Dodaj tracking zmian
+            if self.energy_manager_ref:
+                device_change = {
+                    "device": bess,
+                    "action": f"charge:{charged_amount}",
+                    "new_value": charged_amount,
+                    "device_type": "BESS"
+                }
+                self.energy_manager_ref.changed_devices.append(device_change)
+                self.info_logger.info(f"DEVICE CHANGED: {bess.name} (BESS) - charge:{charged_amount}")
+            
+            return {
+                "success": True,
+                "amount": charged_amount,
+                "percent": charged_percent
+            }
+        
+        # Fallback - stary kod (jeśli brak checkera)
         try:
             if not self.check_bess_availability():
                 return {
@@ -280,10 +263,10 @@ class EnergySurplusManager:
 
             if charged_amount > 0:
                 self.info_logger.info(
-                    f"BESS charged by {charged_amount:.2f} kWh ({charged_percent:.2f}%). "
+                    f"BESS {bess.name} charged by {charged_amount:.2f} kWh ({charged_percent:.2f}%). "
                     f"New level: {bess.get_charge_level():.2f} kWh"
                 )
-                # DODAJ TO - Śledzenie zmian BESS
+                
                 if self.energy_manager_ref:
                     device_change = {
                         "device": bess,
@@ -292,7 +275,7 @@ class EnergySurplusManager:
                         "device_type": "BESS"
                     }
                     self.energy_manager_ref.changed_devices.append(device_change)
-                    self.info_logger.info(f"✅ DEVICE CHANGED: {bess.name} (BESS) - charge:{charged_amount}")
+                    self.info_logger.info(f"DEVICE CHANGED: {bess.name} (BESS) - charge:{charged_amount}")
                 
                 return {
                     "success": True,
@@ -359,41 +342,6 @@ class EnergySurplusManager:
             self.error_logger.error(f"Error in decide_to_sell_energy: {str(e)}")
             return {"success": False, "amount": 0, "reason": str(e)}
 
-    def handle_both_action(self, remaining_surplus):
-        battery_free_percentage = self.get_bess_free_percentage()
-        current_selling_price = self.osd.current_tariff_sell
-
-        should_charge = self.should_prioritize_charging_or_selling(
-            remaining_surplus,
-            battery_free_percentage,
-            current_selling_price,
-        )
-
-        if should_charge:
-            result = self.decide_to_charge_bess(remaining_surplus)
-            if (
-                not result["success"]
-                or result["amount"] < remaining_surplus - self.EPSILON
-            ):
-                sell_result = self.decide_to_sell_energy(
-                    remaining_surplus - result["amount"]
-                )
-                result["amount"] += sell_result["amount"]
-                result["success"] = result["success"] or sell_result["success"]
-        else:
-            result = self.decide_to_sell_energy(remaining_surplus)
-            if (
-                not result["success"]
-                or result["amount"] < remaining_surplus - self.EPSILON
-            ):
-                charge_result = self.decide_to_charge_bess(
-                    remaining_surplus - result["amount"]
-                )
-                result["amount"] += charge_result["amount"]
-                result["success"] = result["success"] or charge_result["success"]
-
-        return result
-
     def sell_energy(self, power_surplus):
         try:
             self.osd.sell_power(power_surplus)
@@ -409,7 +357,7 @@ class EnergySurplusManager:
                     "device_type": "OSD"
                 }
                 self.energy_manager_ref.changed_devices.append(device_change)
-                self.info_logger.info(f"✅ DEVICE CHANGED: OSD (OSD) - sell:{power_surplus}")
+                self.info_logger.info(f" DEVICE CHANGED: OSD (OSD) - sell:{power_surplus}")
             
             return power_surplus
         except Exception as e:
@@ -451,12 +399,17 @@ class EnergySurplusManager:
             reducible_power = current_output - min_output
 
             self.info_logger.info(
-                f"Processing device: {device.name}, Current output: {current_output:.6f}, Min output: {min_output:.6f}, Reducible power: {reducible_power:.6f}"
+                f"Processing device: {device.name}, Current output: {current_output:.6f}, "
+                f"Min output: {min_output:.6f}, Reducible power: {reducible_power:.6f}"
             )
 
             if reducible_power <= self.EPSILON:
                 reasons.append(f"Device {device.name} cannot be reduced further")
                 continue
+
+            # ✅ ETAP 2: Zapisz stan PRZED ograniczeniem
+            if self.energy_manager_ref:
+                self.energy_manager_ref.save_device_state(device, "before_generation_limit")
 
             if device.is_adjustable:
                 reduction = min(reducible_power, power_surplus - total_reduced)
@@ -477,11 +430,40 @@ class EnergySurplusManager:
                 self.info_logger.info(f"Action pending for {device.name}: {action}")
                 break
             elif result["success"]:
+                # ✅ Ustaw setpoint dla SCADA
+                if action == "deactivate":
+                    device.setpoint_output = 0
+                else:
+                    device.setpoint_output = new_output
+                
                 actual_reduction = current_output - device.get_actual_output()
+                
+                # ✅ ETAP 2: Dodaj do listy ograniczeń
+                if self.energy_manager_ref:
+                    self.energy_manager_ref.add_artificial_limitation(
+                        device=device,
+                        limitation_type="generation_limit",
+                        original_output=current_output,
+                        new_output=device.get_actual_output(),
+                        reduction=actual_reduction
+                    )
+                
+                # Tracking zmian
+                if self.energy_manager_ref:
+                    device_change = {
+                        "device": device,
+                        "action": f"limit_output:{device.get_actual_output():.2f}",
+                        "previous_value": current_output,
+                        "new_value": device.get_actual_output(),
+                        "device_type": type(device).__name__
+                    }
+                    self.energy_manager_ref.changed_devices.append(device_change)
+                
                 total_reduced += actual_reduction
                 self.info_logger.info(
                     f"Reduced {device.name} (priority: {device.priority}) power by {actual_reduction:.6f} kW "
-                    f"from {current_output:.6f} kW to {device.get_actual_output():.6f} kW"
+                    f"from {current_output:.6f} kW to {device.get_actual_output():.6f} kW. "
+                    f"Setpoint: {device.setpoint_output:.6f} kW"
                 )
             else:
                 reasons.append(
@@ -742,3 +724,269 @@ class EnergySurplusManager:
             return False
         free_capacity = self.get_bess_free_capacity()
         return free_capacity > self.EPSILON and amount > 0
+    
+    def _load_decision_config(self) -> DecisionConfig:
+        try:
+            # Pobierz tryb z OSD (przychodzi z API jako 'energy_mode')
+            mode_str = getattr(self.osd, 'energy_mode', 'AUTO').upper()
+            
+            if mode_str in DecisionMode.__members__:
+                mode = DecisionMode[mode_str]
+            else:
+                self.error_logger.warning(f"Unknown energy_mode '{mode_str}', using AUTO")
+                mode = DecisionMode.AUTO
+            
+            config = DecisionConfig(mode=mode)
+            
+            #self.info_logger.info(f"Decision config loaded: mode={config.mode.value}")
+            
+            return config
+            
+        except Exception as e:
+            self.error_logger.error(f"Error loading decision config: {e}")
+            return DecisionConfig()
+        
+    def handle_both_action(self, remaining_surplus):
+        """
+        Obsługuje akcję BOTH - ładowanie BESS i/lub sprzedaż.
+        
+        POPRAWIONY FLOW:
+        1. Sprawdź fizyczne możliwości (BESSCapabilityChecker)
+        2. Jeśli obie opcje dostępne → Decyzja (utility function)
+        3. Wykonaj wybraną akcję
+        """
+        bess = self.microgrid.bess
+
+        # ✅ DODAJ TE LOGI DIAGNOSTYCZNE
+        self.info_logger.info("=" * 70)
+        self.info_logger.info("HANDLE_BOTH_ACTION - DEBUG")
+        self.info_logger.info(f"  Remaining surplus: {remaining_surplus:.2f} kW")
+        self.info_logger.info(f"  energy_manager_ref: {self.energy_manager_ref}")
+        self.info_logger.info(f"  bess_checker: {self.energy_manager_ref.bess_checker if self.energy_manager_ref else None}")
+        self.info_logger.info("=" * 70)
+            
+        # === KROK 1: SPRAWDŹ FIZYCZNE MOŻLIWOŚCI ===
+    
+        # Czy BESS może ładować?
+        # 1A. Czy BESS może ładować?
+        can_charge = False
+        charge_plan = None
+        
+        if self.energy_manager_ref and self.energy_manager_ref.bess_checker:
+            bess = self.energy_manager_ref.microgrid.bess
+            
+            # ✅ ETAP 1: Sprawdź czy BESS już nie ładuje się!
+            is_already_charging, charge_amount = self.energy_manager_ref.check_device_already_operating(
+                "BESS", "charging"
+            )
+            
+            if is_already_charging:
+                self.info_logger.warning(
+                    f"⚠️  BESS is ALREADY CHARGING {charge_amount:.2f} kW - cannot charge more"
+                )
+                can_charge = False
+            else:
+                # Sprawdź fizyczne możliwości ładowania
+                charge_plan = self.energy_manager_ref.bess_checker.check_charge_capability(remaining_surplus)
+                can_charge = charge_plan.is_feasible
+                
+                if can_charge:
+                    self.info_logger.info(
+                        f"✓ BESS can CHARGE: {charge_plan.energy_amount:.2f} kWh will be charged "
+                        f"at {abs(charge_plan.power_setpoint):.2f} kW"
+                    )
+                    
+                    # Opcjonalnie: log duration jeśli dostępny
+                    if charge_plan.time_to_completion_minutes is not None:
+                        self.info_logger.info(
+                            f"  → Duration: {charge_plan.time_to_completion_minutes:.2f} min"
+                        )
+        
+        # 1B. Czy Grid może eksportować?
+        can_sell = self.osd.can_sell_energy()
+        
+        if can_sell:
+            # ✅ ETAP 1: Sprawdź czy Grid już nie eksportuje!
+            is_already_exporting, export_amount = self.energy_manager_ref.check_device_already_operating(
+                "GRID", "exporting"
+            )
+            
+            if is_already_exporting:
+                self.info_logger.warning(
+                    f"⚠️  GRID is ALREADY EXPORTING {export_amount:.2f} kW - cannot export more"
+                )
+                can_sell = False
+            else:
+                remaining_capacity = self.osd.get_remaining_sale_capacity()
+                self.info_logger.info(
+                    f"✓ GRID can SELL: {remaining_capacity:.2f} kWh remaining capacity"
+                )
+        
+        # === KROK 2: PODEJMIJ DECYZJĘ (tylko jeśli obie opcje dostępne) ===
+        
+        # Przypadek A: Tylko CHARGE możliwe
+        if can_charge and not can_sell:
+            self.info_logger.info("🔋 Only CHARGE available → charging")
+            return self._execute_charge(charge_plan, remaining_surplus)
+        
+        # Przypadek B: Tylko SELL możliwe
+        if can_sell and not can_charge:
+            self.info_logger.info("💰 Only SELL available → selling")
+            return self._execute_sell(remaining_surplus)
+        
+        # Przypadek C: Obie opcje dostępne → DECYZJA
+        if can_charge and can_sell:
+            self.info_logger.info("⚖️  Both CHARGE and SELL available → making decision")
+            
+            # WYWOŁAJ FUNKCJĘ DECYZYJNĄ
+            result = should_prioritize_charging_or_selling(
+                # BESS
+                charge_level=bess.charge_level,
+                min_charge_level=bess.min_charge_level,
+                max_charge_level=bess.max_charge_level,
+                
+                # Sieć
+                tariff_sell=self.osd.current_tariff_sell,
+                tariff_buy=self.osd.current_tariff_buy,
+                sold_power=self.osd.sold_power,
+                sale_limit=self.osd.CONTRACTED_SALE_LIMIT,
+                
+                # Konfiguracja
+                config=self.decision_config,
+                
+                # Logger
+                info_logger=self.info_logger,
+                error_logger=self.error_logger
+            )
+            
+            # Loguj wynik
+            self.info_logger.info(f"Decision: {result.reason}")
+            self.info_logger.info(f"Confidence: {result.confidence*100:.1f}%")
+            
+            # Wykonaj decyzję
+            if result.decision:  # CHARGE
+                return self._execute_charge(charge_plan, remaining_surplus)
+            else:  # SELL
+                return self._execute_sell(remaining_surplus)
+        
+        # Przypadek D: Żadna opcja niedostępna
+        self.info_logger.warning("⚠️  Neither CHARGE nor SELL available")
+        return {"success": False, "amount": 0, "reason": "No action possible"}
+
+
+    def _execute_charge(self, charge_plan, remaining_surplus):
+        """
+        Wykonuje ładowanie BESS zgodnie z planem.
+        
+        Args:
+            charge_plan: BESSOperationPlan z BESSCapabilityChecker
+            remaining_surplus: Pozostała nadwyżka do zarządzenia (kW)
+            
+        Returns:
+            dict: Wynik operacji ładowania
+        """
+        bess = self.microgrid.bess
+        
+        self.info_logger.info(f"Executing CHARGE: {abs(charge_plan.power_setpoint):.2f} kW")
+        
+        # Wykonaj ładowanie
+        charged_amount, charged_percent = bess.charge(abs(charge_plan.power_setpoint))
+        
+        self.info_logger.info(
+            f"BESS charged: {charged_amount:.2f} kWh ({charged_percent:.2f}%). "
+            f"New level: {bess.charge_level:.2f} kWh"
+        )
+        
+        # Zaplanuj przyspieszoną iterację (jeśli potrzeba)
+        if charge_plan.will_finish_before_next_iteration and self.energy_manager_ref:
+            self.energy_manager_ref.iteration_scheduler.schedule_early_iteration(
+                after_seconds=charge_plan.time_to_completion_minutes * 60,
+                event_type="bess_charge_complete",
+                description=f"BESS will be full (charged {charge_plan.energy_amount:.2f} kWh)"
+            )
+            self.info_logger.info(
+                f"⏰ Early iteration scheduled in {charge_plan.time_to_completion_minutes:.2f} min "
+                f"({charge_plan.time_to_completion_minutes * 60:.0f}s)"
+            )
+        
+        # Tracking zmian
+        if self.energy_manager_ref:
+            device_change = {
+                "device": bess,
+                "action": f"charge:{charged_amount}",
+                "new_value": charged_amount,
+                "device_type": "BESS"
+            }
+            self.energy_manager_ref.changed_devices.append(device_change)
+            self.info_logger.info(f"DEVICE CHANGED: {bess.name} (BESS) - charge:{charged_amount:.2f}")
+        
+        # Jeśli nie udało się załadować całości → sprzedaj resztę
+        # === EARLY ITERATION HANDLING ===
+
+        if charge_plan.will_finish_before_next_iteration and self.energy_manager_ref:
+            # BESS skończy wcześniej → zaplanuj early iteration
+            self.energy_manager_ref.iteration_scheduler.schedule_early_iteration(
+                after_seconds=charge_plan.time_to_completion_minutes * 60,
+                event_type="bess_charge_complete",
+                description=f"BESS will be full (charged {charge_plan.energy_amount:.2f} kWh)"
+            )
+            
+            self.info_logger.info(
+                f"⏰ Early iteration scheduled in {charge_plan.time_to_completion_minutes:.2f} min. "
+                f"BESS setpoint will be set to 0 kW at that time. "
+                f"Remaining surplus will be handled then."
+            )
+            
+            # ✅ NIE sprzedawaj reszty teraz - poczekaj na early iteration
+
+        else:
+            # BESS NIE skończy wcześniej → próbuj sprzedać resztę teraz
+            if charged_amount < remaining_surplus - self.EPSILON:
+                remaining = remaining_surplus - charged_amount
+                self.info_logger.info(
+                    f"Charged {charged_amount:.2f} kW, {remaining:.2f} kW remains. "
+                    f"BESS won't finish early - attempting to sell remaining now."
+                )
+                
+                # Sprawdź czy sell możliwe
+                if self.is_export_possible():
+                    remaining_limit = self.osd.CONTRACTED_SALE_LIMIT - self.osd.sold_power
+                    if remaining_limit > self.EPSILON:
+                        sell_result = self._execute_sell(remaining)
+                        return {
+                            "success": True,
+                            "amount": charged_amount + sell_result.get("amount", 0),
+                            "percent": charged_percent
+                        }
+                    else:
+                        self.info_logger.warning("Cannot sell remaining - limit reached")
+                else:
+                    self.info_logger.warning("Cannot sell remaining - export not permitted")
+        
+        return {
+            "success": True,
+            "amount": charged_amount,
+            "percent": charged_percent
+        }
+
+
+    def _execute_sell(self, amount):
+        """
+        Wykonuje sprzedaż energii.
+        
+        Args:
+            amount: Ilość energii do sprzedaży (kW)
+            
+        Returns:
+            dict: Wynik operacji sprzedaży
+        """
+        self.info_logger.info(f"Executing SELL: {amount:.2f} kW")
+        
+        sell_result = self.decide_to_sell_energy(amount)
+        
+        if sell_result["success"]:
+            self.info_logger.info(f"Sold {sell_result['amount']:.2f} kW successfully")
+        else:
+            self.info_logger.warning(f"Failed to sell energy: {sell_result.get('reason', 'unknown')}")
+        
+        return sell_result

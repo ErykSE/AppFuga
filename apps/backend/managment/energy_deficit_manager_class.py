@@ -1,9 +1,15 @@
 import uuid
+import logging
 from collections import defaultdict
 
 from apps.backend.managment.deficit_action import DeficitAction
 from apps.backend.devices.adjustable_devices import AdjustableDevice
 from apps.backend.devices.non_adjustable import NonAdjustableDevice
+from apps.backend.managment.bess_decision_logic import (
+    should_prioritize_discharging_or_buying,
+    DecisionConfig,
+    DecisionMode
+)
 
 
 class EnergyDeficitManager:
@@ -50,6 +56,8 @@ class EnergyDeficitManager:
         self.previous_discharge_decision = False
         self.MAX_EXCESS_PERCENTAGE = 0.85  # Dodaj tę linię
         self.energy_manager_ref = energy_manager_ref  # ← DODAJ TO
+        self.EPSILON = 1e-6
+        self.decision_config = self._load_decision_config()
 
     def handle_deficit_automatic(self, power_deficit):
         """
@@ -199,7 +207,7 @@ class EnergyDeficitManager:
                                 "device_type": self.energy_manager_ref.get_device_type(device)
                             }
                             self.energy_manager_ref.changed_devices.append(device_change)
-                            self.info_logger.info(f"✅ DEVICE CHANGED: {device.name} ({self.energy_manager_ref.get_device_type(device)}) - set_output:{new_output}")
+                            self.info_logger.info(f"DEVICE CHANGED: {device.name} ({self.energy_manager_ref.get_device_type(device)}) - set_output:{new_output}")
                         
                         self.info_logger.info(
                             f"Increased power of adjustable device {device.name} "
@@ -218,7 +226,7 @@ class EnergyDeficitManager:
                                 "device_type": self.energy_manager_ref.get_device_type(device)
                             }
                             self.energy_manager_ref.changed_devices.append(device_change)
-                            self.info_logger.info(f"✅ DEVICE CHANGED: {device.name} ({self.energy_manager_ref.get_device_type(device)}) - set_output:{max_output}")
+                            self.info_logger.info(f"DEVICE CHANGED: {device.name} ({self.energy_manager_ref.get_device_type(device)}) - set_output:{max_output}")
                         
                         self.info_logger.info(
                             f"Set non-adjustable device {device.name} "
@@ -251,7 +259,7 @@ class EnergyDeficitManager:
                                         "device_type": self.energy_manager_ref.get_device_type(device)
                                     }
                                     self.energy_manager_ref.changed_devices.append(device_change)
-                                    self.info_logger.info(f"✅ DEVICE CHANGED: {device.name} ({self.energy_manager_ref.get_device_type(device)}) - activate_and_set:{new_output}")
+                                    self.info_logger.info(f"DEVICE CHANGED: {device.name} ({self.energy_manager_ref.get_device_type(device)}) - activate_and_set:{new_output}")
                                 
                                 self.info_logger.info(
                                     f"Activated adjustable device {device.name} "
@@ -270,7 +278,7 @@ class EnergyDeficitManager:
                                         "device_type": self.energy_manager_ref.get_device_type(device)
                                     }
                                     self.energy_manager_ref.changed_devices.append(device_change)
-                                    self.info_logger.info(f"✅ DEVICE CHANGED: {device.name} ({self.energy_manager_ref.get_device_type(device)}) - activate_and_set:{max_output}")
+                                    self.info_logger.info(f"DEVICE CHANGED: {device.name} ({self.energy_manager_ref.get_device_type(device)}) - activate_and_set:{max_output}")
                                 
                                 self.info_logger.info(
                                     f"Activated non-adjustable device {device.name} "
@@ -281,94 +289,110 @@ class EnergyDeficitManager:
         self.info_logger.info(f"Final output: {current_output + increased_power} kW")
         return increased_power
 
+    """
+    POPRAWIONA GŁÓWNA PĘTLA DEFICYTU
+    Spójna struktura z surplus_manager.py
+    """
+
     def manage_remaining_deficit(self, remaining_deficit):
         """
         Zarządza pozostałym deficytem energii po maksymalizacji produkcji.
-
-        Ta metoda wykonuje serię działań w celu pokrycia pozostałego deficytu,
-        w tym rozładowywanie BESS, zakup energii i ograniczanie zużycia.
-
-        Argumenty:
-            remaining_deficit (float): Pozostały deficyt energii do zarządzania w kW.
-
-        Zwraca:
+        
+        ✅ POPRAWIONA STRUKTURA - zawsze przez _execute_* metody!
+        
+        Args:
+            remaining_deficit: Pozostały deficyt energii do zarządzania w kW.
+            
+        Returns:
             dict: Słownik zawierający ilość zarządzonego deficytu i ewentualny pozostały deficyt.
         """
         total_managed = 0
         iteration = 0
         MAX_ITERATIONS = 100
 
-        while remaining_deficit > 0 and iteration < MAX_ITERATIONS:
+        while remaining_deficit > self.EPSILON and iteration < MAX_ITERATIONS:
             iteration += 1
             self.info_logger.info(
                 f"Iteration {iteration}, remaining deficit: {remaining_deficit} kW"
             )
 
+            # Sprawdź możliwości
             bess_available = self.is_bess_available()
             can_buy_energy = self.can_buy_energy()
 
+            # === NOWA LOGIKA - SPÓJNA Z SURPLUS ===
+            
             if bess_available and can_buy_energy:
-                bess_energy = self.microgrid.bess.get_charge_level()
-                current_buy_price = self.osd.get_current_buy_price()
-
-                primary_action = self.decide_deficit_action(remaining_deficit)
-                secondary_action = (
-                    DeficitAction.DISCHARGE_BESS
-                    if primary_action == DeficitAction.BUY_ENERGY
-                    else DeficitAction.BUY_ENERGY
-                )
-
-                # Wykonaj pierwszą akcję
-                result = self.execute_action(primary_action, remaining_deficit)
+                # ✅ Obie opcje → handle_deficit_both_action()
+                self.info_logger.info("Both DISCHARGE and BUY available → using smart decision")
+                result = self.handle_deficit_both_action(remaining_deficit)
+                
                 if result["success"]:
                     total_managed += result["amount"]
                     remaining_deficit -= result["amount"]
                     self.info_logger.info(
-                        f"Primary action {primary_action} managed {result['amount']} kW. Remaining deficit: {remaining_deficit} kW"
+                        f"Smart decision handled {result['amount']:.2f} kW. "
+                        f"Remaining deficit: {remaining_deficit:.2f} kW"
                     )
-
-                # Jeśli nadal jest deficyt, wykonaj drugą akcję
-                if remaining_deficit > 0:
-                    result = self.execute_action(secondary_action, remaining_deficit)
-                    if result["success"]:
-                        total_managed += result["amount"]
-                        remaining_deficit -= result["amount"]
-                        self.info_logger.info(
-                            f"Secondary action {secondary_action} managed {result['amount']} kW. Remaining deficit: {remaining_deficit} kW"
-                        )
+                else:
+                    self.info_logger.warning(
+                        f"Failed to handle deficit: {result.get('reason', 'unknown')}"
+                    )
+                    # Jeśli nie udało się - spróbuj ograniczyć zużycie
+                    break
 
             elif bess_available:
-                result = self.execute_action(
-                    DeficitAction.DISCHARGE_BESS, remaining_deficit
-                )
+                # ✅ Tylko DISCHARGE → _execute_discharge()
+                self.info_logger.info("Only BESS available → discharging")
+                
+                # Sprawdź capability
+                discharge_plan = None
+                if self.energy_manager_ref and self.energy_manager_ref.bess_checker:
+                    discharge_plan = self.energy_manager_ref.bess_checker.check_discharge_capability(remaining_deficit)
+                    if not discharge_plan.is_feasible:
+                        self.info_logger.warning(f"BESS discharge not feasible: {discharge_plan.reason}")
+                        break
+                
+                result = self._execute_discharge(discharge_plan, remaining_deficit)
+                
                 if result["success"]:
                     total_managed += result["amount"]
                     remaining_deficit -= result["amount"]
                     self.info_logger.info(
-                        f"BESS discharge managed {result['amount']} kW. Remaining deficit: {remaining_deficit} kW"
+                        f"BESS discharge handled {result['amount']:.2f} kW. "
+                        f"Remaining deficit: {remaining_deficit:.2f} kW"
                     )
+                else:
+                    self.info_logger.warning(f"BESS discharge failed: {result.get('reason', 'unknown')}")
+                    break
 
             elif can_buy_energy:
-                result = self.execute_action(
-                    DeficitAction.BUY_ENERGY, remaining_deficit
-                )
+                # ✅ Tylko BUY → _execute_buy()
+                self.info_logger.info("Only BUY available → buying from grid")
+                result = self._execute_buy(remaining_deficit)
+                
                 if result["success"]:
                     total_managed += result["amount"]
                     remaining_deficit -= result["amount"]
                     self.info_logger.info(
-                        f"Energy purchase managed {result['amount']} kW. Remaining deficit: {remaining_deficit} kW"
+                        f"Energy purchase handled {result['amount']:.2f} kW. "
+                        f"Remaining deficit: {remaining_deficit:.2f} kW"
                     )
+                else:
+                    self.info_logger.warning(f"Energy purchase failed: {result.get('reason', 'unknown')}")
+                    break
 
             else:
-                # Tylko jeśli nie można ani rozładować BESS, ani kupić energii, próbujemy ograniczyć zużycie
-                result = self.execute_action(
-                    DeficitAction.LIMIT_CONSUMPTION, remaining_deficit
-                )
+                # ❌ Żadna opcja niedostępna → ograniczenie zużycia (ostateczność)
+                self.info_logger.warning("Neither DISCHARGE nor BUY available → limiting consumption")
+                result = self.execute_action(DeficitAction.LIMIT_CONSUMPTION, remaining_deficit)
+                
                 if result["success"]:
                     total_managed += result["amount"]
                     remaining_deficit -= result["amount"]
                     self.info_logger.info(
-                        f"Consumption limitation managed {result['amount']} kW. Remaining deficit: {remaining_deficit} kW"
+                        f"Consumption limitation handled {result['amount']:.2f} kW. "
+                        f"Remaining deficit: {remaining_deficit:.2f} kW"
                     )
                     if "devices_affected" in result:
                         for device in result["devices_affected"]:
@@ -377,21 +401,19 @@ class EnergyDeficitManager:
                     self.info_logger.warning(
                         f"Failed to limit consumption. Reason: {result.get('error', 'Unknown')}"
                     )
-                    if remaining_deficit == result.get(
-                        "remaining_deficit", remaining_deficit
-                    ):
-                        self.info_logger.error(
-                            "No further reduction possible. Exiting loop."
-                        )
+                    if remaining_deficit == result.get("remaining_deficit", remaining_deficit):
+                        self.error_logger.error("No further reduction possible. Exiting loop.")
                         break
 
             self.info_logger.info(
-                f"After iteration {iteration}: A total managed {total_managed} kW, remaining deficit {remaining_deficit} kW"
+                f"After iteration {iteration}: "
+                f"Total managed {total_managed:.2f} kW, "
+                f"remaining deficit {remaining_deficit:.2f} kW"
             )
 
         if iteration == MAX_ITERATIONS:
             self.error_logger.error(
-                f"The maximum number of iterations ({MAX_ITERATIONS}) has been reached without fully solving the deficit."
+                f"Maximum iterations ({MAX_ITERATIONS}) reached without fully solving deficit."
             )
 
         return {
@@ -455,14 +477,60 @@ class EnergyDeficitManager:
 
     def discharge_bess(self, power_deficit):
         """
-        Próbuje rozładować System Magazynowania Energii w Akumulatorach (BESS) w celu pokrycia deficytu.
-
-        Argumenty:
-            power_deficit (float): Ilość deficytu energii do pokrycia w kW.
-
-        Zwraca:
-            dict: Słownik zawierający informacje o sukcesie operacji i ilości rozładowanej energii.
+        Próbuje rozładować BESS w celu pokrycia deficytu.
+        ZAKTUALIZOWANA: Używa BESSCapabilityChecker + planuje przyspieszoną iterację.
+        
+        Args:
+            power_deficit: Deficyt mocy do pokrycia (kW)
+            
+        Returns:
+            dict: Wynik operacji rozładowania
         """
+        # Użyj capability checker jeśli dostępny
+        if self.energy_manager_ref and self.energy_manager_ref.bess_checker:
+            plan = self.energy_manager_ref.bess_checker.check_discharge_capability(power_deficit)
+            
+            # Log planu
+            self.energy_manager_ref.bess_checker.log_plan(plan, "discharge")
+            
+            if not plan.is_feasible:
+                return {
+                    "success": False,
+                    "amount": 0,
+                    "percent": 0,
+                    "reason": plan.reason
+                }
+            
+            # Wykonaj rozładowanie
+            bess = self.microgrid.bess
+            discharged_amount, discharged_percent = bess.discharge(plan.power_setpoint)
+            
+            # Jeśli skończy się wcześniej - zaplanuj przyspieszoną iterację
+            if plan.will_finish_before_next_iteration:
+                self.energy_manager_ref.iteration_scheduler.schedule_early_iteration(
+                    after_seconds=plan.time_to_completion_minutes * 60,
+                    event_type="bess_discharge_complete",
+                    description=f"BESS will be empty (discharged {plan.energy_amount:.2f} kWh)"
+                )
+            
+            # Dodaj tracking zmian
+            if self.energy_manager_ref:
+                device_change = {
+                    "device": bess,
+                    "action": f"discharge:{discharged_amount}",
+                    "new_value": discharged_amount,
+                    "device_type": "BESS"
+                }
+                self.energy_manager_ref.changed_devices.append(device_change)
+                self.info_logger.info(f"DEVICE CHANGED: {bess.name} (BESS) - discharge:{discharged_amount}")
+            
+            return {
+                "success": True,
+                "amount": discharged_amount,
+                "percent": discharged_percent
+            }
+        
+        # Fallback - stary kod (jeśli brak checkera)
         if not self.microgrid.bess:
             self.info_logger.warning("BESS is not available")
             return {"success": False, "amount": 0, "percent": 0}
@@ -486,7 +554,8 @@ class EnergyDeficitManager:
             self.info_logger.info(
                 f"BESS charge level: before {initial_charge} kWh, after {new_charge} kWh"
             )
-            # DODAJ TO - Śledzenie zmian BESS
+            
+            # Dodaj tracking zmian
             if self.energy_manager_ref:
                 device_change = {
                     "device": self.microgrid.bess,
@@ -495,7 +564,7 @@ class EnergyDeficitManager:
                     "device_type": "BESS"
                 }
                 self.energy_manager_ref.changed_devices.append(device_change)
-                self.info_logger.info(f"✅ DEVICE CHANGED: {self.microgrid.bess.name} (BESS) - discharge:{discharged_amount}")
+                self.info_logger.info(f"DEVICE CHANGED: {self.microgrid.bess.name} (BESS) - discharge:{discharged_amount}")
             
             return {
                 "success": True,
@@ -522,12 +591,17 @@ class EnergyDeficitManager:
                     "device_type": "OSD"
                 }
                 self.energy_manager_ref.changed_devices.append(device_change)
-                self.info_logger.info(f"✅ DEVICE CHANGED: OSD (OSD) - buy:{amount_to_buy}")
+                self.info_logger.info(f"DEVICE CHANGED: OSD (OSD) - buy:{amount_to_buy}")
             
             return {"success": True, "amount": amount_to_buy}
         return {"success": False, "amount": 0}
 
     def limit_consumption(self, power_deficit):
+        """
+        Ogranicza zużycie energii przez odbiorniki.
+        
+        ✅ ETAP 2: Z tracking poprzednich stanów.
+        """
         self.info_logger.info(f"Attempting to limit consumption by {power_deficit} kW")
         total_reduced = 0
         devices_affected = []
@@ -1010,62 +1084,93 @@ class EnergyDeficitManager:
         return None
 
     def reduce_power_for_priority_group(self, devices, target_reduction):
+        """
+        Redukuje moc dla grupy urządzeń o tym samym priorytecie.
+        
+        ✅ ETAP 2: Z tracking poprzednich stanów.
+        """
         total_reduced = 0
-        affected_devices = []
-
-        self.info_logger.info(
-            f"Attempting to reduce {target_reduction} kW from priority group"
-        )
-
-        # Najpierw rozważ urządzenia regulowane
-        adjustable_devices = [
-            d for d in devices if isinstance(d, AdjustableDevice) and d.switch_status
-        ]
-        for device in adjustable_devices:
-            self.info_logger.info(
-                f"Considering adjustable device: {device.name} (current power: {device.get_current_power()} kW)"
-            )
+        devices_affected = []
+        
+        for device in devices:
+            if not device.switch_status:
+                continue
+            
             if total_reduced >= target_reduction:
                 break
-            reduction = self.reduce_device_power(
-                device, target_reduction - total_reduced
-            )
-            if reduction > 0:
-                total_reduced += reduction
-                affected_devices.append(f"{device.name} reduced by {reduction} kW")
-                self.info_logger.info(f"Reduced {reduction} kW from {device.name}")
-
-        # Następnie rozważ urządzenia nieregulowane
-        if total_reduced < target_reduction:
-            non_adjustable_devices = [
-                d
-                for d in devices
-                if not isinstance(d, AdjustableDevice) and d.switch_status
-            ]
-
-            sorted_non_adjustable = sorted(
-                non_adjustable_devices,
-                key=lambda d: self.sorting_key(d, target_reduction - total_reduced),
-            )
-
-            for device in sorted_non_adjustable:
-                self.info_logger.info(
-                    f"Considering non-adjustable device: {device.name} (current power: {device.get_current_power()} kW)"
-                )
-                if total_reduced >= target_reduction:
-                    break
-                reduction = self.reduce_device_power(
-                    device, target_reduction - total_reduced
-                )
+            
+            current_power = device.get_current_power()
+            
+            # ✅ ETAP 2: Zapisz stan PRZED ograniczeniem
+            if self.energy_manager_ref:
+                self.energy_manager_ref.save_device_state(device, "before_consumption_limit")
+            
+            # Dla urządzeń regulowanych
+            if hasattr(device, 'min_power'):
+                reducible = current_power - device.min_power
+                reduction = min(reducible, target_reduction - total_reduced)
+                
                 if reduction > 0:
+                    new_power = current_power - reduction
+                    device.set_power(new_power)
+                    
+                    # ✅ ETAP 2: Dodaj do listy ograniczeń
+                    if self.energy_manager_ref:
+                        self.energy_manager_ref.add_artificial_limitation(
+                            device=device,
+                            limitation_type="consumption_limit",
+                            original_power=current_power,
+                            new_power=new_power,
+                            was_active=True
+                        )
+                    
+                    # Tracking zmian
+                    if self.energy_manager_ref:
+                        device_change = {
+                            "device": device,
+                            "action": f"reduce_power:{new_power:.2f}",
+                            "previous_value": current_power,
+                            "new_value": new_power,
+                            "device_type": type(device).__name__
+                        }
+                        self.energy_manager_ref.changed_devices.append(device_change)
+                    
                     total_reduced += reduction
-                    affected_devices.append(f"{device.name} reduced by {reduction} kW")
-                    self.info_logger.info(
-                        f"Deactivated {device.name}, saved {reduction} kW"
-                    )
-
-        self.info_logger.info(f"Total reduced from priority group: {total_reduced} kW")
-        return {"amount": total_reduced, "devices": affected_devices}
+                    devices_affected.append(f"{device.name} reduced by {reduction:.2f} kW")
+            
+            # Dla urządzeń nieregulowanych - tylko wyłączenie
+            else:
+                if current_power > 0:
+                    # ✅ ETAP 2: Dodaj do listy ograniczeń PRZED wyłączeniem
+                    if self.energy_manager_ref:
+                        self.energy_manager_ref.add_artificial_limitation(
+                            device=device,
+                            limitation_type="consumption_limit",
+                            original_power=current_power,
+                            new_power=0,
+                            was_active=True
+                        )
+                    
+                    device.deactivate()
+                    
+                    # Tracking zmian
+                    if self.energy_manager_ref:
+                        device_change = {
+                            "device": device,
+                            "action": "turn_off",
+                            "previous_value": current_power,
+                            "new_value": 0,
+                            "device_type": type(device).__name__
+                        }
+                        self.energy_manager_ref.changed_devices.append(device_change)
+                    
+                    total_reduced += current_power
+                    devices_affected.append(f"{device.name} turned OFF (saved {current_power:.2f} kW)")
+        
+        return {
+            "amount": total_reduced,
+            "devices": devices_affected
+        }
 
     def sorting_key(self, device, remaining_deficit):
         power_difference = abs(remaining_deficit - device.get_current_power())
@@ -1075,51 +1180,78 @@ class EnergyDeficitManager:
         return (power_difference, 0)
 
     def reduce_device_power(self, device, target_reduction):
-        initial_power = device.get_current_power()
-        self.info_logger.info(
-            f"Attempting to reduce {target_reduction} kW from {device.name} (current power: {initial_power} kW)"
-        )
-
-        if isinstance(device, AdjustableDevice):
-            max_reduction = initial_power - device.min_power
-            actual_reduction = min(max_reduction, target_reduction)
-            device.decrease_power(actual_reduction)
-            final_power = device.get_current_power()
-            # DODAJ TO:
-            if self.energy_manager_ref and actual_reduction > 0:
-                device_change = {
-                    "device": device,
-                    "action": f"reduce:{actual_reduction}",
-                    "new_value": actual_reduction,
-                    "device_type": "AdjustableDevice"
-                }
-                self.energy_manager_ref.changed_devices.append(device_change)
-                self.info_logger.info(f"✅ DEVICE CHANGED: {device.name} (AdjustableDevice) - reduce:{actual_reduction}")
+        """
+        Redukuje moc pojedynczego urządzenia.
+        
+        ✅ ETAP 2: Z tracking poprzednich stanów.
+        """
+        current_power = device.get_current_power()
+        
+        # ✅ ETAP 2: Zapisz stan PRZED ograniczeniem
+        if self.energy_manager_ref:
+            self.energy_manager_ref.save_device_state(device, "before_consumption_limit")
+        
+        # Dla urządzeń regulowanych
+        if hasattr(device, 'min_power'):
+            reducible = current_power - device.min_power
+            reduction = min(reducible, target_reduction)
             
-            self.info_logger.info(
-                f"Reduced {device.name} from {initial_power} kW to {final_power} kW"
-            )
-            return initial_power - final_power
-        else:
-            if device.deactivate():
-                # DODAJ TO:
+            if reduction > 0:
+                new_power = current_power - reduction
+                device.set_power(new_power)
+                
+                # ✅ ETAP 2: Dodaj do listy ograniczeń
+                if self.energy_manager_ref:
+                    self.energy_manager_ref.add_artificial_limitation(
+                        device=device,
+                        limitation_type="consumption_limit",
+                        original_power=current_power,
+                        new_power=new_power,
+                        was_active=True
+                    )
+                
+                # Tracking zmian
                 if self.energy_manager_ref:
                     device_change = {
                         "device": device,
-                        "action": "deactivate",
-                        "new_value": initial_power,
-                        "device_type": "NonAdjustableDevice"
+                        "action": f"reduce_power:{new_power:.2f}",
+                        "previous_value": current_power,
+                        "new_value": new_power,
+                        "device_type": type(device).__name__
                     }
                     self.energy_manager_ref.changed_devices.append(device_change)
-                    self.info_logger.info(f"✅ DEVICE CHANGED: {device.name} (NonAdjustableDevice) - deactivate")
                 
-                self.info_logger.info(
-                    f"Deactivated {device.name}, saved {initial_power} kW"
-                )
-                return initial_power
-            else:
-                self.info_logger.warning(f"Failed to deactivate {device.name}")
-                return 0
+                return reduction
+        
+        # Dla urządzeń nieregulowanych - wyłącz
+        else:
+            if current_power > 0:
+                # ✅ ETAP 2: Dodaj do listy ograniczeń PRZED wyłączeniem
+                if self.energy_manager_ref:
+                    self.energy_manager_ref.add_artificial_limitation(
+                        device=device,
+                        limitation_type="consumption_limit",
+                        original_power=current_power,
+                        new_power=0,
+                        was_active=True
+                    )
+                
+                device.deactivate()
+                
+                # Tracking zmian
+                if self.energy_manager_ref:
+                    device_change = {
+                        "device": device,
+                        "action": "turn_off",
+                        "previous_value": current_power,
+                        "new_value": 0,
+                        "device_type": type(device).__name__
+                    }
+                    self.energy_manager_ref.changed_devices.append(device_change)
+                
+                return current_power
+        
+        return 0
 
     def get_reducible_power(self, device):
         if not device.switch_status:
@@ -1214,3 +1346,328 @@ class EnergyDeficitManager:
                     "reduction": device.get_current_power(),
                 }
         return None
+    
+    def _load_decision_config(self) -> DecisionConfig:
+        try:
+            # Pobierz tryb z OSD (przychodzi z API jako 'energy_mode')
+            mode_str = getattr(self.osd, 'energy_mode', 'AUTO').upper()
+            
+            if mode_str in DecisionMode.__members__:
+                mode = DecisionMode[mode_str]
+            else:
+                self.error_logger.warning(f"Unknown energy_mode '{mode_str}', using AUTO")
+                mode = DecisionMode.AUTO
+            
+            config = DecisionConfig(mode=mode)
+            
+            #self.info_logger.info(f"Decision config loaded: mode={config.mode.value}")
+            
+            return config
+            
+        except Exception as e:
+            self.error_logger.error(f"Error loading decision config: {e}")
+            return DecisionConfig()
+
+
+    """
+    POPRAWIONA FUNKCJA DEFICYTU - deficit_manager.py
+    Spójna struktura z surplus_manager.py
+    """
+
+    def handle_deficit_both_action(self, power_deficit):
+        """
+        Obsługuje deficyt - rozładowanie BESS i/lub zakup z grid.
+        
+        STRUKTURA IDENTYCZNA JAK W SURPLUS:
+        1. Sprawdź fizyczne możliwości (BESSCapabilityChecker)
+        2. Jeśli obie opcje dostępne → Decyzja (utility function)
+        3. Wykonaj wybraną akcję
+        
+        ✅ WSZYSTKIE REGUŁY BEZPIECZEŃSTWA SĄ W KROKU 1!
+        
+        Args:
+            power_deficit: Deficyt mocy do pokrycia (kW)
+            
+        Returns:
+            dict: Wynik operacji
+        """
+        bess = self.microgrid.bess
+        
+        self.info_logger.info(f"Deficit decision: {power_deficit:.2f} kW")
+        
+        # === KROK 1: SPRAWDŹ FIZYCZNE MOŻLIWOŚCI ===
+        
+        # 1A. Czy BESS może rozładować?
+        can_discharge = False
+        discharge_plan = None
+        
+        if self.energy_manager_ref and self.energy_manager_ref.bess_checker:
+            bess = self.energy_manager_ref.microgrid.bess
+            
+            # ✅ ETAP 1: Sprawdź czy BESS już nie rozładowuje się!
+            is_already_discharging, discharge_amount = self.energy_manager_ref.check_device_already_operating(
+                "BESS", "discharging"
+            )
+            
+            if is_already_discharging:
+                self.info_logger.warning(
+                    f"⚠️  BESS is ALREADY DISCHARGING {discharge_amount:.2f} kW - cannot discharge more"
+                )
+                can_discharge = False
+            else:
+                # Sprawdź fizyczne możliwości rozładowania
+                discharge_plan = self.energy_manager_ref.bess_checker.check_discharge_capability(power_deficit)
+                can_discharge = discharge_plan.is_feasible
+                
+                if can_discharge:
+                    # ✅ BEZPIECZNY LOG - wszystkie pola mogą być None
+                    self.info_logger.info(
+                        f"✓ BESS can DISCHARGE: {discharge_plan.energy_amount:.2f} kWh "
+                        f"at {abs(discharge_plan.power_setpoint):.2f} kW"
+                    )
+                    
+                    # Opcjonalnie: log duration jeśli dostępny
+                    if discharge_plan.time_to_completion_minutes is not None:
+                        self.info_logger.info(
+                            f"  → Duration: {discharge_plan.time_to_completion_minutes:.2f} min"
+                        )
+                else:
+                    self.info_logger.info(
+                        f"✗ BESS cannot discharge: {discharge_plan.reason}"
+                    )
+        else:
+            self.info_logger.warning("BESS checker not available")
+        
+        # 1B. Czy Grid może importować?
+        can_buy = self.osd.can_buy_energy()
+        
+        if can_buy:
+            # ✅ ETAP 1: Sprawdź czy Grid już nie importuje!
+            is_already_importing, import_amount = self.energy_manager_ref.check_device_already_operating(
+                "GRID", "importing"
+            )
+            
+            if is_already_importing:
+                self.info_logger.warning(
+                    f"⚠️  GRID is ALREADY IMPORTING {import_amount:.2f} kW - cannot import more"
+                )
+                can_buy = False
+            else:
+                remaining_capacity = self.osd.get_remaining_purchase_capacity()
+                self.info_logger.info(
+                    f"✓ GRID can BUY: {remaining_capacity:.2f} kWh remaining capacity"
+                )
+        
+        # === KROK 2: PODEJMIJ DECYZJĘ ===
+        
+        # Przypadek A: Tylko DISCHARGE możliwe
+        if can_discharge and not can_buy:
+            self.info_logger.info("⚡ Only DISCHARGE available → discharging")
+            return self._execute_discharge(discharge_plan, power_deficit)
+        
+        # Przypadek B: Tylko BUY możliwe
+        if can_buy and not can_discharge:
+            self.info_logger.info("💰 Only BUY available → buying")
+            return self._execute_buy(power_deficit)
+        
+        # Przypadek C: Obie opcje dostępne → DECYZJA
+        if can_discharge and can_buy:
+            self.info_logger.info("⚖️  Both DISCHARGE and BUY available → making decision")
+            
+            # WYWOŁAJ FUNKCJĘ DECYZYJNĄ
+            result = should_prioritize_discharging_or_buying(
+                # BESS
+                charge_level=bess.charge_level,
+                min_charge_level=bess.min_charge_level,
+                max_charge_level=bess.max_charge_level,
+                
+                # Sieć
+                tariff_buy=self.osd.current_tariff_buy,
+                tariff_sell=self.osd.current_tariff_sell,
+                bought_power=self.osd.bought_power,
+                purchase_limit=self.osd.CONTRACTED_PURCHASE_LIMIT,
+                
+                # Konfiguracja (ta sama co dla nadwyżki!)
+                config=self.decision_config,
+                
+                # Logger
+                info_logger=self.info_logger,
+                error_logger=self.error_logger
+            )
+            
+            # Loguj wynik
+            self.info_logger.info(f"Decision: {result.reason}")
+            self.info_logger.info(f"Confidence: {result.confidence*100:.1f}%")
+            
+            # Wykonaj decyzję
+            if result.decision:  # DISCHARGE
+                return self._execute_discharge(discharge_plan, power_deficit)
+            else:  # BUY
+                return self._execute_buy(power_deficit)
+        
+        # Przypadek D: Żadna opcja niedostępna
+        self.info_logger.warning("⚠️  Neither DISCHARGE nor BUY available")
+        return {"success": False, "amount": 0, "reason": "No action possible"}
+
+
+    def _execute_discharge(self, discharge_plan, power_deficit):
+        """
+        Wykonuje rozładowanie BESS zgodnie z planem.
+        
+        STRUKTURA IDENTYCZNA JAK _execute_charge() W SURPLUS!
+        
+        Args:
+            discharge_plan: BESSOperationPlan z BESSCapabilityChecker (lub None dla fallback)
+            power_deficit: Deficyt do pokrycia (kW)
+            
+        Returns:
+            dict: Wynik operacji rozładowania
+        """
+        bess = self.microgrid.bess
+        
+        # Użyj planu jeśli dostępny, inaczej fallback
+        if discharge_plan:
+            discharge_power = discharge_plan.power_setpoint
+            self.info_logger.info(f"Executing DISCHARGE (with plan): {discharge_power:.2f} kW")
+        else:
+            # Fallback - użyj pełnego deficytu (discharge() i tak ogranicy)
+            discharge_power = power_deficit
+            self.info_logger.info(f"Executing DISCHARGE (fallback): {discharge_power:.2f} kW")
+        
+        # Wykonaj rozładowanie
+        discharged_amount, discharged_percent = bess.discharge(discharge_power)
+        
+        self.info_logger.info(
+            f"BESS discharged: {discharged_amount:.2f} kWh ({discharged_percent:.2f}%). "
+            f"New level: {bess.charge_level:.2f} kWh"
+        )
+        
+        # Zaplanuj przyspieszoną iterację (jeśli plan dostępny i potrzeba)
+        if discharge_plan and discharge_plan.will_finish_before_next_iteration and self.energy_manager_ref:
+            self.energy_manager_ref.iteration_scheduler.schedule_early_iteration(
+                after_seconds=discharge_plan.time_to_completion_minutes * 60,
+                event_type="bess_discharge_complete",
+                description=f"BESS will be empty (discharged {discharge_plan.energy_amount:.2f} kWh)"
+            )
+            self.info_logger.info(
+                f"⏰ Early iteration scheduled in {discharge_plan.time_to_completion_minutes:.2f} min "
+                f"({discharge_plan.time_to_completion_minutes * 60:.0f}s)"
+            )
+        
+        # Tracking zmian
+        if self.energy_manager_ref:
+            device_change = {
+                "device": bess,
+                "action": f"discharge:{discharged_amount}",
+                "new_value": discharged_amount,
+                "device_type": "BESS"
+            }
+            self.energy_manager_ref.changed_devices.append(device_change)
+            self.info_logger.info(f"DEVICE CHANGED: {bess.name} (BESS) - discharge:{discharged_amount:.2f}")
+        
+        # === EARLY ITERATION HANDLING ===
+
+        if discharge_plan and discharge_plan.will_finish_before_next_iteration and self.energy_manager_ref:
+            # BESS skończy wcześniej → zaplanuj early iteration
+            self.energy_manager_ref.iteration_scheduler.schedule_early_iteration(
+                after_seconds=discharge_plan.time_to_completion_minutes * 60,
+                event_type="bess_discharge_complete",
+                description=f"BESS will be empty (discharged {discharge_plan.energy_amount:.2f} kWh)"
+            )
+            
+            self.info_logger.info(
+                f"⏰ Early iteration scheduled in {discharge_plan.time_to_completion_minutes:.2f} min. "
+                f"BESS setpoint will be set to 0 kW at that time. "
+                f"Remaining deficit will be handled then."
+            )
+            
+            # ✅ NIE kupuj reszty teraz - poczekaj na early iteration
+
+        else:
+            # BESS NIE skończy wcześniej → próbuj kupić resztę teraz
+            if discharged_amount < power_deficit - self.EPSILON:
+                remaining = power_deficit - discharged_amount
+                self.info_logger.info(
+                    f"Discharged {discharged_amount:.2f} kW, {remaining:.2f} kW remains. "
+                    f"BESS won't finish early - attempting to buy remaining now."
+                )
+                
+                # Sprawdź czy buy możliwe
+                if self.can_buy_energy():
+                    remaining_limit = self.osd.CONTRACTED_PURCHASE_LIMIT - self.osd.bought_power
+                    if remaining_limit > self.EPSILON:
+                        buy_result = self._execute_buy(remaining)
+                        return {
+                            "success": True,
+                            "amount": discharged_amount + buy_result.get("amount", 0),
+                            "percent": discharged_percent
+                        }
+                    else:
+                        self.info_logger.warning("Cannot buy remaining - limit reached")
+                else:
+                    self.info_logger.warning("Cannot buy remaining - purchase not permitted")
+        
+        return {
+            "success": True,
+            "amount": discharged_amount,
+            "percent": discharged_percent
+        }
+
+
+    def _execute_buy(self, amount):
+        """
+        Wykonuje zakup energii z grid.
+        
+        STRUKTURA IDENTYCZNA JAK _execute_sell() W SURPLUS!
+        
+        Args:
+            amount: Ilość energii do zakupu (kW)
+            
+        Returns:
+            dict: Wynik operacji zakupu
+        """
+        self.info_logger.info(f"Executing BUY: {amount:.2f} kW")
+        
+        # Ogranicz do dostępnego limitu
+        remaining_limit = self.osd.CONTRACTED_PURCHASE_LIMIT - self.osd.bought_power
+        amount_to_buy = min(amount, remaining_limit)
+        
+        if amount_to_buy <= self.EPSILON:
+            self.info_logger.warning("Cannot buy - purchase limit reached")
+            return {
+                "success": False,
+                "amount": 0,
+                "reason": "Purchase limit reached"
+            }
+        
+        # Kup energię z grid
+        bought_amount = self.osd.buy_power(amount_to_buy)
+        
+        if bought_amount > 0:
+            self.info_logger.info(f"Bought {bought_amount:.2f} kW from grid successfully")
+            
+            # Tracking zmian
+            if self.energy_manager_ref:
+                device_change = {
+                    "device": self.osd,
+                    "action": f"buy:{bought_amount}",
+                    "new_value": bought_amount,
+                    "device_type": "OSD"
+                }
+                self.energy_manager_ref.changed_devices.append(device_change)
+                self.info_logger.info(f"DEVICE CHANGED: OSD - buy:{bought_amount:.2f}")
+            
+            return {
+                "success": True,
+                "amount": bought_amount
+            }
+        else:
+            self.info_logger.warning("Failed to buy energy from grid")
+            return {
+                "success": False,
+                "amount": 0,
+                "reason": "Failed to buy from grid"
+            }
+
+
+    
