@@ -406,9 +406,7 @@ class EnergyManager:
         if approved_actions:
             self.execute_approved_actions(approved_actions)
 
-        # ✅ ZMIANA: Zaloguj status TYLKO RAZ na końcu (jeśli były zmiany)
-        if self.has_device_changes():
-            self._log_final_system_status()
+        # ✅ USUNIĘTE: Duplikujące się logi
         
         # Zapisz dane kontraktu
         self.save_contract_data()

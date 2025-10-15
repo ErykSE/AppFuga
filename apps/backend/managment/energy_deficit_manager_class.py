@@ -208,6 +208,7 @@ class EnergyDeficitManager:
         for device in all_devices:
             # Sprawdź czy już wystarczy
             if increased_power >= power_deficit:
+                self.info_logger.info(f"🔍 DEBUG: STOPPING - increased_power ({increased_power:.1f}) >= power_deficit ({power_deficit:.1f})")
                 break
 
             if device.get_switch_status():  # Jeśli urządzenie jest aktywne
@@ -217,7 +218,7 @@ class EnergyDeficitManager:
                 if device.is_adjustable:
                     # Oblicz ile jeszcze potrzebujemy
                     remaining_needed = power_deficit - increased_power
-                    # ✅ POPRAWKA: Zwiększ tylko tyle ile potrzeba
+                    # ✅ POPRAWKA: Zwiększ tylko tyle ile potrzeba (nie do max!)
                     increase_amount = min(remaining_needed, max_output - initial_output)
                     new_output = initial_output + increase_amount
                     
@@ -230,7 +231,7 @@ class EnergyDeficitManager:
                             device_change = {
                                 "device": device,
                                 "action": f"set_output:{new_output}",
-                                "new_value": actual_increase,
+                                "new_value": increase_amount,
                                 "device_type": self.energy_manager_ref.get_device_type(device)
                             }
                             self.energy_manager_ref.changed_devices.append(device_change)
