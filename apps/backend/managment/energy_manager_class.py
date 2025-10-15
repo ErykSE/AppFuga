@@ -882,8 +882,9 @@ class EnergyManager:
             # ═══════════════════════════════════════════════════════
             final_balance = self.calculate_energy_balance()
             
-            # ✅ NOWE: Stan systemu po zarządzaniu
-            self._log_system_state("FINAL STATE", final_balance)
+            # ✅ NOWE: Stan systemu po zarządzaniu (tylko jeśli były zmiany)
+            if self.changed_devices:
+                self._log_system_state("FINAL STATE", final_balance)
             
             self._log_operator_summary(
                 initial_balance=initial_balance,
@@ -3104,49 +3105,41 @@ class EnergyManager:
         self.info_logger.info(f"   Grid Export:   {balance.grid_export:.2f} kW")
         self.info_logger.info(f"   BESS Charge:    {balance.bess_charge:.2f} kW")
         
-        # Stan BESS
-        if self.microgrid.bess:
+        # Stan BESS (tylko jeśli istotny)
+        if self.microgrid.bess and (self.microgrid.bess.actual_output != 0 or phase == "INITIAL STATE"):
             bess = self.microgrid.bess
             charge_percent = ((bess.charge_level - bess.min_charge_level) / 
                            (bess.max_charge_level - bess.min_charge_level)) * 100
-            self.info_logger.info(f"🔋 BESS STATE:")
-            self.info_logger.info(f"   Level: {bess.charge_level:.2f}/{bess.max_charge_level:.2f} kWh ({charge_percent:.1f}%)")
-            self.info_logger.info(f"   Output: {bess.actual_output:+.2f} kW (setpoint: {bess.setpoint_output:+.2f} kW)")
-            self.info_logger.info(f"   Status: {'ON' if bess.switch_status else 'OFF'}")
+            self.info_logger.info(f"🔋 BESS: {bess.charge_level:.1f}/{bess.max_charge_level:.1f} kWh ({charge_percent:.0f}%) | {bess.actual_output:+.1f} kW")
         
-        # Stan Grid
-        self.info_logger.info(f"🌐 GRID STATE:")
-        self.info_logger.info(f"   Import: {self.osd.actual_grid_import:.2f} kW (setpoint: {self.osd.setpoint_grid_import:.2f} kW)")
-        self.info_logger.info(f"   Export: {self.osd.actual_grid_export:.2f} kW (setpoint: {self.osd.setpoint_grid_export:.2f} kW)")
-        self.info_logger.info(f"   Tariffs: Buy={self.osd.current_tariff_buy:.3f} $/kWh, Sell={self.osd.current_tariff_sell:.3f} $/kWh")
+        # Stan Grid (tylko jeśli istotny)
+        if (self.osd.actual_grid_import > 0 or self.osd.actual_grid_export > 0 or phase == "INITIAL STATE"):
+            self.info_logger.info(f"🌐 GRID: Import={self.osd.actual_grid_import:.1f} kW, Export={self.osd.actual_grid_export:.1f} kW")
         
-        # Generatory
-        total_gen = 0
-        active_gen = 0
-        for gen_type in ['pv_panels', 'wind_turbines', 'fuel_turbines', 'fuel_cells']:
-            devices = getattr(self.microgrid, gen_type, [])
-            for device in devices:
-                if device.get_switch_status():
-                    active_gen += 1
-                    total_gen += device.get_actual_output()
-        
-        self.info_logger.info(f"⚡ GENERATORS:")
-        self.info_logger.info(f"   Active: {active_gen} devices")
-        self.info_logger.info(f"   Total Output: {total_gen:.2f} kW")
-        
-        # Odbiorniki
-        total_cons = 0
-        active_cons = 0
-        for cons_type in ['adjustable_devices', 'non_adjustable_devices']:
-            devices = getattr(self.consumergrid, cons_type, [])
-            for device in devices:
-                if device.get_switch_status():
-                    active_cons += 1
-                    total_cons += device.get_current_power()
-        
-        self.info_logger.info(f"🏠 CONSUMERS:")
-        self.info_logger.info(f"   Active: {active_cons} devices")
-        self.info_logger.info(f"   Total Consumption: {total_cons:.2f} kW")
+        # Generatory (tylko jeśli istotne)
+        if phase == "INITIAL STATE":
+            total_gen = 0
+            active_gen = 0
+            for gen_type in ['pv_panels', 'wind_turbines', 'fuel_turbines', 'fuel_cells']:
+                devices = getattr(self.microgrid, gen_type, [])
+                for device in devices:
+                    if device.get_switch_status():
+                        active_gen += 1
+                        total_gen += device.get_actual_output()
+            
+            self.info_logger.info(f"⚡ GENERATORS: {active_gen} active, {total_gen:.1f} kW total")
+            
+            # Odbiorniki (tylko jeśli istotne)
+            total_cons = 0
+            active_cons = 0
+            for cons_type in ['adjustable_devices', 'non_adjustable_devices']:
+                devices = getattr(self.consumergrid, cons_type, [])
+                for device in devices:
+                    if device.get_switch_status():
+                        active_cons += 1
+                        total_cons += device.get_current_power()
+            
+            self.info_logger.info(f"🏠 CONSUMERS: {active_cons} active, {total_cons:.1f} kW total")
 
     def simulate_device_state_for_calculations(self, device, operation: str, value: float):
         """
