@@ -2711,6 +2711,14 @@ class EnergyManager:
                 
                 neutralized = True
                 neutralized_amount += grid_exporting
+            
+            # 3. Generatory niepotrzebnie ograniczone? (krok 5 scenariusza)
+            self.info_logger.info("🔍 Checking for unnecessarily limited generators...")
+            generators_freed = self._check_and_free_limited_generators(balance.deficit)
+            if generators_freed > 0:
+                neutralized = True
+                neutralized_amount += generators_freed
+                self.info_logger.info(f"   ✓ Freed {generators_freed:.2f} kW from limited generators")
         
         # === NADWYŻKA - szukaj operacji, które ZWIĘKSZAJĄ produkcję ===
         elif balance.has_surplus:
@@ -2861,6 +2869,66 @@ class EnergyManager:
         
         return False, 0.0
     
+    def _check_and_free_limited_generators(self, deficit: float) -> float:
+        """
+        Sprawdza i zwalnia niepotrzebnie ograniczone generatory.
+        
+        Args:
+            deficit: Aktualny deficyt energii (kW)
+            
+        Returns:
+            float: Ilość uwolnionej energii (kW)
+        """
+        freed_power = 0.0
+        
+        # Pobierz wszystkie generatory
+        all_generators = (
+            self.microgrid.pv_panels +
+            self.microgrid.wind_turbines +
+            self.microgrid.fuel_turbines +
+            self.microgrid.fuel_cells
+        )
+        
+        for generator in all_generators:
+            if not generator.get_switch_status():
+                continue  # Pomiń nieaktywne generatory
+                
+            current_output = generator.get_actual_output()
+            max_output = generator.get_max_output()
+            
+            # Sprawdź czy generator może produkować więcej
+            if current_output < max_output - self.EPSILON:
+                potential_increase = max_output - current_output
+                increase_needed = min(potential_increase, deficit - freed_power)
+                
+                if increase_needed > self.EPSILON:
+                    self.info_logger.info(
+                        f"   🔧 Generator {generator.name}: {current_output:.2f} → {current_output + increase_needed:.2f} kW "
+                        f"(+{increase_needed:.2f} kW)"
+                    )
+                    
+                    # Zwiększ moc generatora
+                    if generator.is_adjustable:
+                        new_output = current_output + increase_needed
+                        if generator.set_output(new_output):
+                            freed_power += increase_needed
+                            
+                            # Dodaj do changed_devices
+                            device_change = {
+                                "device": generator,
+                                "action": f"increase_output:{new_output}",
+                                "previous_value": current_output,
+                                "new_value": increase_needed,
+                                "device_type": self.get_device_type(generator)
+                            }
+                            self.changed_devices.append(device_change)
+                            
+                            self.info_logger.info(f"   ✓ Increased {generator.name} by {increase_needed:.2f} kW")
+                    
+                    if freed_power >= deficit - self.EPSILON:
+                        break  # Wystarczająco uwolniono
+        
+        return freed_power
 
     def simulate_device_state_for_calculations(self, device, operation: str, value: float):
         """

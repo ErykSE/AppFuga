@@ -1551,9 +1551,19 @@ class EnergyDeficitManager:
             discharge_power = discharge_plan.power_setpoint
             self.info_logger.info(f"Executing DISCHARGE (with plan): {discharge_power:.2f} kW")
         else:
-            # Fallback - użyj pełnego deficytu (discharge() i tak ogranicy)
-            discharge_power = power_deficit
-            self.info_logger.info(f"Executing DISCHARGE (fallback): {discharge_power:.2f} kW")
+            # ✅ POPRAWIONY FALLBACK - użyj bezpieczniejszych limitów
+            # Sprawdź dostępną energię w BESS
+            available_energy = bess.charge_level - bess.min_charge_level
+            max_discharge_power = bess.get_max_discharge_power() if hasattr(bess, 'get_max_discharge_power') else bess.max_output
+            
+            # Użyj minimum z: deficyt, dostępna energia, max moc rozładowania
+            discharge_power = min(power_deficit, available_energy, max_discharge_power)
+            
+            if discharge_power <= 0:
+                self.info_logger.warning(f"BESS fallback: No discharge possible (available: {available_energy:.2f} kWh, max_power: {max_discharge_power:.2f} kW)")
+                return {"success": False, "amount": 0, "reason": "BESS cannot discharge"}
+            
+            self.info_logger.info(f"Executing DISCHARGE (fallback): {discharge_power:.2f} kW (limited by BESS capacity)")
         
         # Wykonaj rozładowanie
         discharged_amount, discharged_percent = bess.discharge(discharge_power)
