@@ -839,7 +839,9 @@ class EnergyManager:
             
             # ✅ UPROSZCZONE: Stan po neutralizacji (tylko jeśli były zmiany)
             if self.changed_devices:
+                self.info_logger.info("DEBUG: Calling _log_after_neutralization")
                 self._log_after_neutralization(balance)
+                self.info_logger.info("DEBUG: _log_after_neutralization completed")
             
             # ═══════════════════════════════════════════════════════
             # KROK 4: Sprawdź czy po neutralizacji bilans OK
@@ -899,7 +901,9 @@ class EnergyManager:
             
             # ✅ UPROSZCZONE: Stan końcowy (tylko jeśli były zmiany)
             if self.changed_devices:
+                self.info_logger.info("DEBUG: Calling _log_final_state")
                 self._log_final_state(final_balance)
+                self.info_logger.info("DEBUG: _log_final_state completed")
             
             self._log_operator_summary(
                 initial_balance=initial_balance,
@@ -3084,19 +3088,19 @@ class EnergyManager:
         self.info_logger.info("")
         self.info_logger.info("INITIAL STATE")
         self.info_logger.info("-" * 30)
-        self.info_logger.info(f"⚖️  Balance: {balance.balance:+.2f} kW {'(SURPLUS)' if balance.has_surplus else '(DEFICIT)' if balance.has_deficit else '(BALANCED)'}")
-        self.info_logger.info(f"📈 Supply:  {balance.total_supply:.2f} kW (Gen: {balance.generation:.1f}, Grid: {balance.grid_import:.1f}, BESS: {balance.bess_discharge:.1f})")
-        self.info_logger.info(f"📉 Demand:  {balance.total_demand:.2f} kW (Load: {balance.consumption:.1f}, Export: {balance.grid_export:.1f}, BESS: {balance.bess_charge:.1f})")
+        self.info_logger.info(f"Balance: {balance.balance:+.2f} kW {'(SURPLUS)' if balance.has_surplus else '(DEFICIT)' if balance.has_deficit else '(BALANCED)'}")
+        self.info_logger.info(f"Supply:  {balance.total_supply:.2f} kW (Gen: {balance.generation:.1f}, Grid: {balance.grid_import:.1f}, BESS: {balance.bess_discharge:.1f})")
+        self.info_logger.info(f"Demand:  {balance.total_demand:.2f} kW (Load: {balance.consumption:.1f}, Export: {balance.grid_export:.1f}, BESS: {balance.bess_charge:.1f})")
         
         # BESS tylko jeśli aktywny
         if self.microgrid.bess and self.microgrid.bess.actual_output != 0:
             bess = self.microgrid.bess
             charge_percent = ((bess.charge_level - bess.min_charge_level) / (bess.max_charge_level - bess.min_charge_level)) * 100
-            self.info_logger.info(f"🔋 BESS: {bess.charge_level:.1f}/{bess.max_charge_level:.1f} kWh ({charge_percent:.0f}%) | {bess.actual_output:+.1f} kW")
+            self.info_logger.info(f"BESS: {bess.charge_level:.1f}/{bess.max_charge_level:.1f} kWh ({charge_percent:.0f}%) | {bess.actual_output:+.1f} kW")
         
         # Grid tylko jeśli aktywny
         if self.osd.actual_grid_import > 0 or self.osd.actual_grid_export > 0:
-            self.info_logger.info(f"🌐 GRID: Import={self.osd.actual_grid_import:.1f} kW, Export={self.osd.actual_grid_export:.1f} kW")
+            self.info_logger.info(f"GRID: Import={self.osd.actual_grid_import:.1f} kW, Export={self.osd.actual_grid_export:.1f} kW")
     
     def _log_after_neutralization(self, balance: EnergyBalance):
         """Loguje stan po neutralizacji konfliktów"""
@@ -3120,11 +3124,11 @@ class EnergyManager:
         if self.microgrid.bess and self.microgrid.bess.actual_output != 0:
             bess = self.microgrid.bess
             charge_percent = ((bess.charge_level - bess.min_charge_level) / (bess.max_charge_level - bess.min_charge_level)) * 100
-            self.info_logger.info(f"🔋 BESS: {bess.charge_level:.1f}/{bess.max_charge_level:.1f} kWh ({charge_percent:.0f}%) | {bess.actual_output:+.1f} kW")
+            self.info_logger.info(f"BESS: {bess.charge_level:.1f}/{bess.max_charge_level:.1f} kWh ({charge_percent:.0f}%) | {bess.actual_output:+.1f} kW")
         
         # Grid tylko jeśli aktywny
         if self.osd.actual_grid_import > 0 or self.osd.actual_grid_export > 0:
-            self.info_logger.info(f"🌐 GRID: Import={self.osd.actual_grid_import:.1f} kW, Export={self.osd.actual_grid_export:.1f} kW")
+            self.info_logger.info(f"GRID: Import={self.osd.actual_grid_import:.1f} kW, Export={self.osd.actual_grid_export:.1f} kW")
 
     def simulate_device_state_for_calculations(self, device, operation: str, value: float):
         """
