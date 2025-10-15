@@ -4,10 +4,10 @@
             "id": 1,
             "name": "PV Panel 1",
             "priority": 1,
-            "max_output": 15.0,
+            "max_output": 25.0,
             "min_output": 0,
-            "actual_output": 12.0,
-            "setpoint_output": 12.0,
+            "actual_output": 25.0,
+            "setpoint_output": 25.0,
             "switch_status": true,
             "device_status": "online"
         },
@@ -15,10 +15,10 @@
             "id": 2,
             "name": "PV Panel 2",
             "priority": 1,
-            "max_output": 20.0,
+            "max_output": 30.0,
             "min_output": 0,
-            "actual_output": 8.0,
-            "setpoint_output": 8.0,
+            "actual_output": 30.0,
+            "setpoint_output": 30.0,
             "switch_status": true,
             "device_status": "online"
         }
@@ -28,10 +28,10 @@
             "id": 3,
             "name": "Wind Turbine 1",
             "priority": 2,
-            "max_output": 10.0,
+            "max_output": 15.0,
             "min_output": 0,
-            "actual_output": 5.0,
-            "setpoint_output": 5.0,
+            "actual_output": 15.0,
+            "setpoint_output": 15.0,
             "switch_status": true,
             "device_status": "online"
         }
@@ -45,9 +45,9 @@
             "capacity": 100,
             "min_charge_level": 10,
             "max_charge_level": 90,
-            "charge_level": 45,
-            "actual_output": -8.0,
-            "setpoint_output": -8.0,
+            "charge_level": 75,
+            "actual_output": 5.0,
+            "setpoint_output": 5.0,
             "max_discharge_power": 50,
             "max_charge_power": 30,
             "min_output": 0,
@@ -60,18 +60,18 @@
             "id": 8,
             "name": "Critical Load 1",
             "priority": 1,
-            "power": 15.0,
-            "actual_output": 15.0,
-            "setpoint_output": 15.0,
+            "power": 20.0,
+            "actual_output": 20.0,
+            "setpoint_output": 20.0,
             "switch_status": true
         },
         {
             "id": 9,
             "name": "Critical Load 2",
             "priority": 1,
-            "power": 12.0,
-            "actual_output": 12.0,
-            "setpoint_output": 12.0,
+            "power": 15.0,
+            "actual_output": 15.0,
+            "setpoint_output": 15.0,
             "switch_status": true
         }
     ],
@@ -80,23 +80,23 @@
             "id": 10,
             "name": "AC Unit 1",
             "priority": 2,
-            "power": 8.0,
-            "actual_output": 8.0,
-            "setpoint_output": 8.0,
+            "power": 10.0,
+            "actual_output": 10.0,
+            "setpoint_output": 10.0,
             "switch_status": true,
             "min_power": 0,
-            "max_power": 10
+            "max_power": 15
         },
         {
             "id": 11,
             "name": "Lighting",
             "priority": 3,
-            "power": 5.0,
-            "actual_output": 5.0,
-            "setpoint_output": 5.0,
+            "power": 8.0,
+            "actual_output": 8.0,
+            "setpoint_output": 8.0,
             "switch_status": true,
             "min_power": 0,
-            "max_power": 8
+            "max_power": 12
         }
     ],
     "power_meters": [
@@ -104,21 +104,21 @@
             "id": 101,
             "name": "Meter for PV Panel 1",
             "status": "online",
-            "measured_power": 12.0,
+            "measured_power": 25.0,
             "device_id": 1
         },
         {
             "id": 102,
             "name": "Meter for PV Panel 2",
             "status": "online",
-            "measured_power": 8.0,
+            "measured_power": 30.0,
             "device_id": 2
         },
         {
             "id": 103,
             "name": "Meter for Wind Turbine 1",
             "status": "online",
-            "measured_power": 5.0,
+            "measured_power": 15.0,
             "device_id": 3
         }
     ]
