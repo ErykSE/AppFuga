@@ -394,10 +394,7 @@ class EnergyManager:
         self._log_initial_system_status()
 
         # Sprawdź warunki energetyczne i podejmij odpowiednie działania
-        self.info_logger.info("DEBUG: About to call check_energy_conditions")
-        self.info_logger.info("DEBUG: This is a test message to verify code execution")
         result = self.check_energy_conditions()
-        self.info_logger.info("DEBUG: check_energy_conditions completed")
 
         # Wykonaj zatwierdzone akcje jeśli istnieją
         approved_actions = []
