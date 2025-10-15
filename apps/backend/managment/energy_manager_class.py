@@ -787,137 +787,61 @@ class EnergyManager:
         """
         Sprawdza warunki energetyczne i podejmuje odpowiednie działania.
         """
-        self.info_logger.info("DEBUG: check_energy_conditions START")
         try:
-            # ✅ WYCZYŚĆ LISTĘ ZMIAN NA POCZĄTKU
+            # WYCZYŚĆ LISTĘ ZMIAN NA POCZĄTKU
             self.changed_devices = []
-            self.info_logger.info("DEBUG: changed_devices cleared")
             
-            # ═══════════════════════════════════════════════════════
             # KROK 1: Oblicz początkowy bilans
-            # ═══════════════════════════════════════════════════════
-            self.info_logger.info("")
-            self.info_logger.info("🔍" + "="*80)
-            self.info_logger.info("🔍 ENERGY MANAGEMENT ITERATION START")
-            self.info_logger.info("🔍" + "="*80)
-            
             initial_balance = self.calculate_energy_balance()
             
-            # ✅ UPROSZCZONE: Stan początkowy
-            self.info_logger.info("DEBUG: Calling _log_initial_state")
-            self.info_logger.info("DEBUG: About to call _log_initial_state method")
-            try:
-                self._log_initial_state(initial_balance)
-                self.info_logger.info("DEBUG: _log_initial_state completed successfully")
-            except Exception as e:
-                self.info_logger.error(f"DEBUG: Error in _log_initial_state: {e}")
+            # STAN PRZED
+            self._log_state_before(initial_balance)
             
-            # ═══════════════════════════════════════════════════════
             # KROK 2: Sprawdź czy bilans OK
-            # ═══════════════════════════════════════════════════════
             if initial_balance.is_balanced(threshold=1.0):
-                # ✅ ZMIANA: Wywołaj summary PRZED return!
-                self._log_operator_summary(
-                    initial_balance=initial_balance,
-                    final_balance=initial_balance,  # Bez zmian
-                    actions_taken=[],  # Pusta lista
-                    decision_rationale="System balanced - no action required"
-                )
-                return None
+                self._log_simple_summary(initial_balance, initial_balance, [], "System balanced - no action required")
+                return {"status": "balanced", "balance": initial_balance.balance}
             
-            # ═══════════════════════════════════════════════════════
             # KROK 3: Neutralizuj konflikty
-            # ═══════════════════════════════════════════════════════
-            self.info_logger.info("")
-            self.info_logger.info("🔧 NEUTRALIZING CONFLICTING OPERATIONS")
-            self.info_logger.info("-" * 50)
-            
             balance = self.neutralize_conflicting_operations(initial_balance)
             
-            # ✅ UPROSZCZONE: Stan po neutralizacji (tylko jeśli były zmiany)
-            if self.changed_devices:
-                self.info_logger.info("DEBUG: Calling _log_after_neutralization")
-                self._log_after_neutralization(balance)
-                self.info_logger.info("DEBUG: _log_after_neutralization completed")
-            
-            # ═══════════════════════════════════════════════════════
             # KROK 4: Sprawdź czy po neutralizacji bilans OK
-            # ═══════════════════════════════════════════════════════
             if balance.is_balanced(threshold=1.0):
-                # ✅ ZMIANA: Wywołaj summary PRZED return!
-                self._log_operator_summary(
-                    initial_balance=initial_balance,
-                    final_balance=balance,
-                    actions_taken=self.changed_devices,  # Neutralizacje
-                    decision_rationale="Balance achieved after neutralization"
-                )
-                return None
+                self._log_simple_summary(initial_balance, balance, self.changed_devices, "Balance achieved after neutralization")
+                return {"status": "balanced_after_neutralization", "balance": balance.balance}
             
-            # ═══════════════════════════════════════════════════════
-            # KROK 5: Przywróć ograniczenia (ETAP 2)
-            # ═══════════════════════════════════════════════════════
+            # KROK 5: Przywróć ograniczenia
             balance = self.restore_previous_limitations(balance)
             
-            # ═══════════════════════════════════════════════════════
             # KROK 6: Sprawdź czy po przywróceniu bilans OK
-            # ═══════════════════════════════════════════════════════
             if balance.is_balanced(threshold=1.0):
-                # ✅ ZMIANA: Wywołaj summary PRZED return!
-                self._log_operator_summary(
-                    initial_balance=initial_balance,
-                    final_balance=balance,
-                    actions_taken=self.changed_devices,
-                    decision_rationale="Balance achieved after restoring limitations"
-                )
-                return None
+                self._log_simple_summary(initial_balance, balance, self.changed_devices, "Balance achieved after restoring limitations")
+                return {"status": "balanced_after_restoration", "balance": balance.balance}
             
-            # ═══════════════════════════════════════════════════════
             # KROK 7: Zarządzaj deficytem/nadwyżką
-            # ═══════════════════════════════════════════════════════
-            result = None
             decision_text = None
-            
             if balance.has_surplus:
-                self.info_logger.section(
-                    f"⚡ Surplus REMAINING: {balance.surplus:.2f} kW → managing"
-                )
                 result = self.manage_surplus(balance.surplus)
                 decision_text = f"Managed {balance.surplus:.2f} kW surplus"
-                
             elif balance.has_deficit:
-                self.info_logger.section(
-                    f"📉 Deficit REMAINING: {balance.deficit:.2f} kW → managing"
-                )
                 result = self.manage_deficit(balance.deficit)
                 decision_text = f"Managed {balance.deficit:.2f} kW deficit"
             
-            # ═══════════════════════════════════════════════════════
-            # KROK 8: Wywołaj summary NA KOŃCU (po wszystkich akcjach)
-            # ═══════════════════════════════════════════════════════
-            
-            # ✅ USUNIĘTE: Symulacja actual_output jest niepotrzebna
-            
+            # KROK 8: Oblicz końcowy bilans
             final_balance = self.calculate_energy_balance()
             
-            # ✅ UPROSZCZONE: Stan końcowy (tylko jeśli były zmiany)
-            if self.changed_devices:
-                self.info_logger.info("DEBUG: Calling _log_final_state")
-                self._log_final_state(final_balance)
-                self.info_logger.info("DEBUG: _log_final_state completed")
+            # STAN PO
+            self._log_state_after(final_balance)
             
-            self._log_operator_summary(
-                initial_balance=initial_balance,
-                final_balance=final_balance,
-                actions_taken=self.changed_devices,
-                decision_rationale=decision_text
-            )
+            # PODSUMOWANIE
+            self._log_simple_summary(initial_balance, final_balance, self.changed_devices, decision_text)
             
-            return result
+            return {"status": "managed", "balance": final_balance.balance}
             
         except Exception as e:
-            self.error_logger.error(f"Error checking energy conditions: {str(e)}")
+            self.error_logger.error(f"Error in check_energy_conditions: {str(e)}")
             self.error_logger.exception("Full traceback:")
-            return None
+            return {"status": "error", "error": str(e)}
 
     def manage_surplus(self, power_surplus):
         if self.operation_mode == OperationMode.AUTOMATIC:
@@ -3135,7 +3059,37 @@ class EnergyManager:
         if self.osd.actual_grid_import > 0 or self.osd.actual_grid_export > 0:
             self.info_logger.info(f"GRID: Import={self.osd.actual_grid_import:.1f} kW, Export={self.osd.actual_grid_export:.1f} kW")
 
-    # ✅ USUNIĘTE: _simulate_actual_outputs_after_changes() - niepotrzebne
+    def _log_state_before(self, balance):
+        """Loguje stan przed zmianami"""
+        self.info_logger.info("STAN PRZED:")
+        self.info_logger.info(f"  Generation: {balance.generation:.1f} kW")
+        self.info_logger.info(f"  Consumption: {balance.consumption:.1f} kW")
+        self.info_logger.info(f"  BESS: {balance.bess_charge:.1f} kW")
+        self.info_logger.info(f"  Grid: Import={balance.grid_import:.1f} kW, Export={balance.grid_export:.1f} kW")
+        self.info_logger.info(f"  Balance: {balance.balance:.1f} kW ({'SURPLUS' if balance.has_surplus else 'DEFICIT' if balance.has_deficit else 'BALANCED'})")
+        self.info_logger.info("")
+
+    def _log_state_after(self, balance):
+        """Loguje stan po zmianach"""
+        self.info_logger.info("STAN PO:")
+        self.info_logger.info(f"  Generation: {balance.generation:.1f} kW")
+        self.info_logger.info(f"  Consumption: {balance.consumption:.1f} kW")
+        self.info_logger.info(f"  BESS: {balance.bess_charge:.1f} kW")
+        self.info_logger.info(f"  Grid: Import={balance.grid_import:.1f} kW, Export={balance.grid_export:.1f} kW")
+        self.info_logger.info(f"  Balance: {balance.balance:.1f} kW ({'SURPLUS' if balance.has_surplus else 'DEFICIT' if balance.has_deficit else 'BALANCED'})")
+        self.info_logger.info("")
+
+    def _log_simple_summary(self, initial_balance, final_balance, changes, decision):
+        """Proste podsumowanie"""
+        self.info_logger.info("PODSUMOWANIE:")
+        self.info_logger.info(f"  Initial Balance: {initial_balance.balance:.1f} kW")
+        self.info_logger.info(f"  Final Balance: {final_balance.balance:.1f} kW")
+        self.info_logger.info(f"  Changes: {len(changes)} device(s) modified")
+        if changes:
+            for change in changes:
+                self.info_logger.info(f"    - {change.get('device', {}).get('name', 'Unknown')}: {change.get('action', 'Unknown')}")
+        self.info_logger.info(f"  Decision: {decision}")
+        self.info_logger.info("")
 
     def simulate_device_state_for_calculations(self, device, operation: str, value: float):
         """
