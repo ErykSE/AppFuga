@@ -2808,6 +2808,14 @@ class EnergyManager:
                 
                 neutralized = True
                 neutralized_amount += grid_importing
+            
+            # 3. Odbiorniki niepotrzebnie wyłączone? (krok 5 scenariusza)
+            self.info_logger.info("🔍 Checking for unnecessarily disabled consumers...")
+            consumers_restored = self._check_and_restore_disabled_consumers(balance.surplus)
+            if consumers_restored > 0:
+                neutralized = True
+                neutralized_amount += consumers_restored
+                self.info_logger.info(f"   ✓ Restored {consumers_restored:.2f} kW from disabled consumers")
         
         if neutralized:
             self.info_logger.info("")
@@ -2929,6 +2937,68 @@ class EnergyManager:
                         break  # Wystarczająco uwolniono
         
         return freed_power
+    
+    def _check_and_restore_disabled_consumers(self, surplus: float) -> float:
+        """
+        Sprawdza i przywraca niepotrzebnie wyłączone odbiorniki.
+        
+        Args:
+            surplus: Aktualna nadwyżka energii (kW)
+            
+        Returns:
+            float: Ilość przywróconej energii (kW)
+        """
+        restored_power = 0.0
+        
+        # Pobierz wszystkie odbiorniki
+        all_consumers = (
+            self.consumergrid.adjustable_devices +
+            self.consumergrid.non_adjustable_devices
+        )
+        
+        # Sortuj według priorytetu (malejąco - najpierw najważniejsze)
+        all_consumers.sort(key=lambda x: x.priority, reverse=True)
+        
+        for consumer in all_consumers:
+            if consumer.get_switch_status():
+                continue  # Pomiń aktywne odbiorniki
+                
+            max_power = consumer.get_max_output() if hasattr(consumer, 'get_max_output') else consumer.max_power
+            
+            # Sprawdź czy odbiornik może być włączony
+            if max_power > self.EPSILON:
+                power_to_restore = min(max_power, surplus - restored_power)
+                
+                if power_to_restore > self.EPSILON:
+                    self.info_logger.info(
+                        f"   🔧 Consumer {consumer.name}: OFF → ON ({power_to_restore:.2f} kW)"
+                    )
+                    
+                    # Włącz odbiornik
+                    if consumer.activate():
+                        if consumer.is_adjustable and hasattr(consumer, 'set_output'):
+                            consumer.set_output(power_to_restore)
+                        else:
+                            consumer.power = power_to_restore
+                        
+                        restored_power += power_to_restore
+                        
+                        # Dodaj do changed_devices
+                        device_change = {
+                            "device": consumer,
+                            "action": f"restore_consumer:{power_to_restore}",
+                            "previous_value": 0,
+                            "new_value": power_to_restore,
+                            "device_type": self.get_device_type(consumer)
+                        }
+                        self.changed_devices.append(device_change)
+                        
+                        self.info_logger.info(f"   ✓ Restored {consumer.name} with {power_to_restore:.2f} kW")
+                    
+                    if restored_power >= surplus - self.EPSILON:
+                        break  # Wystarczająco przywrócono
+        
+        return restored_power
 
     def simulate_device_state_for_calculations(self, device, operation: str, value: float):
         """

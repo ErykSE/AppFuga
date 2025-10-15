@@ -1,5 +1,6 @@
 import uuid
 from apps.backend.managment.surplus_action import SurplusAction
+from apps.backend.managment.bess_decision_logic import should_prioritize_charging_or_selling
 from apps.backend.managment.bess_decision_logic import (
     should_prioritize_charging_or_selling,
     DecisionConfig,
@@ -51,8 +52,68 @@ class EnergySurplusManager:
         )
         self.energy_manager_ref = energy_manager_ref  # ← DODAJ TO
         self.decision_config = self._load_decision_config()
+    
+    def _decide_bess_vs_grid(self, surplus: float):
+        """
+        Podejmuje decyzję BESS vs GRID dla nadwyżki energii.
+        
+        Args:
+            surplus: Nadwyżka energii (kW)
+            
+        Returns:
+            SurplusAction: Wybrana akcja
+        """
+        if not self.energy_manager_ref or not self.energy_manager_ref.microgrid.bess:
+            self.info_logger.warning("BESS not available for decision")
+            return SurplusAction.SELL_ENERGY
+        
+        bess = self.energy_manager_ref.microgrid.bess
+        
+        # Wywołaj funkcję decyzyjną
+        result = should_prioritize_charging_or_selling(
+            # BESS
+            charge_level=bess.charge_level,
+            min_charge_level=bess.min_charge_level,
+            max_charge_level=bess.max_charge_level,
+            
+            # Sieć
+            tariff_sell=self.osd.current_tariff_sell,
+            tariff_buy=self.osd.current_tariff_buy,
+            sold_power=self.osd.sold_power,
+            sale_limit=self.osd.CONTRACTED_SALE_LIMIT,
+            
+            # Konfiguracja
+            config=self.decision_config,
+            
+            # Logger
+            info_logger=self.info_logger,
+            error_logger=self.error_logger
+        )
+        
+        # Loguj wynik
+        self.info_logger.info(f"Decision: {result.reason}")
+        self.info_logger.info(f"Confidence: {result.confidence*100:.1f}%")
+        
+        # Zwróć odpowiednią akcję
+        if result.decision:  # CHARGE
+            return SurplusAction.CHARGE_BATTERY
+        else:  # SELL
+            return SurplusAction.SELL_ENERGY
 
     def manage_surplus_energy(self, power_surplus):
+        # ✅ WALIDACJA DANYCH WEJŚCIOWYCH
+        if not isinstance(power_surplus, (int, float)):
+            self.error_logger.error(f"Invalid power_surplus type: {type(power_surplus)}. Expected float.")
+            return {"amount_managed": 0, "remaining_surplus": power_surplus}
+        
+        if power_surplus <= 0:
+            self.info_logger.info(f"Power surplus is {power_surplus} kW - no action needed")
+            return {"amount_managed": 0, "remaining_surplus": 0}
+        
+        if power_surplus > 10000:  # Rozsądny limit
+            self.error_logger.error(f"Power surplus too large: {power_surplus} kW. Maximum allowed: 10000 kW")
+            return {"amount_managed": 0, "remaining_surplus": power_surplus}
+        
         total_managed = 0
         remaining_surplus = power_surplus
         iteration = 0
@@ -66,37 +127,34 @@ class EnergySurplusManager:
                     f"Iteration {iteration}, surplus remaining: {remaining_surplus:.6f} kW"
                 )
 
+                # ✅ POPRAWIONA LOGIKA ZGODNIE ZE SCENARIUSZEM
+                # Krok 6: BESS vs GRID (decyzja)
+                # Krok 7: Ograniczanie generacji (ostateczność)
+                
                 bess_available = self.check_bess_availability()
                 export_possible = self.is_export_possible()
-
-                # Określamy dostępne akcje
-                available_actions = []
-                if (
-                    bess_available
-                    and export_possible
-                    and SurplusAction.BOTH not in attempted_actions
-                ):
-                    available_actions.append(SurplusAction.BOTH)
-                if (
-                    bess_available
-                    and SurplusAction.CHARGE_BATTERY not in attempted_actions
-                ):
-                    available_actions.append(SurplusAction.CHARGE_BATTERY)
-                if (
-                    export_possible
-                    and SurplusAction.SELL_ENERGY not in attempted_actions
-                ):
-                    available_actions.append(SurplusAction.SELL_ENERGY)
-                if SurplusAction.LIMIT_GENERATION not in attempted_actions:
-                    available_actions.append(SurplusAction.LIMIT_GENERATION)
-
-                if not available_actions:
-                    self.info_logger.warning(
-                        "No more available actions to handle surplus."
-                    )
-                    break
-
-                action = available_actions[0]  # Wybieramy pierwszą dostępną akcję
+                
+                # === KROK 6: BESS vs GRID (decyzja) ===
+                if bess_available and export_possible:
+                    # Obie opcje dostępne → DECYZJA (nie używamy BOTH)
+                    self.info_logger.info("⚖️  Both BESS and GRID available → making decision")
+                    action = self._decide_bess_vs_grid(remaining_surplus)
+                elif bess_available:
+                    # Tylko BESS dostępne
+                    self.info_logger.info("⚡ Only BESS available → charging")
+                    action = SurplusAction.CHARGE_BATTERY
+                elif export_possible:
+                    # Tylko GRID dostępne
+                    self.info_logger.info("💰 Only GRID available → selling")
+                    action = SurplusAction.SELL_ENERGY
+                else:
+                    # === KROK 7: OSTATECZNOŚĆ - Ograniczanie generacji ===
+                    if SurplusAction.LIMIT_GENERATION not in attempted_actions:
+                        self.info_logger.warning("⚠️  Neither BESS nor GRID available → limiting generation")
+                        action = SurplusAction.LIMIT_GENERATION
+                    else:
+                        self.info_logger.warning("No more available actions to handle surplus.")
+                        break
                 attempted_actions.add(action)
 
                 self.info_logger.info(f"Attempting to perform the action: {action}")
