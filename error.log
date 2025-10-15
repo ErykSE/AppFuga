@@ -1,1 +1,1 @@
-2025-10-15 14:10:20,988 - ERROR - Error checking bess possibility: 'NoneType' object has no attribute 'get_switch_status'
+2025-10-15 17:52:01,716 - ERROR - Error checking bess possibility: 'NoneType' object has no attribute 'get_switch_status'
