@@ -88,7 +88,7 @@ class EnergyDeficitManager:
             return {"amount_managed": 0, "remaining_deficit": power_deficit}
         
         self.info_logger.info(f"Start managing power deficit: {power_deficit} kW")
-        self.info_logger.info("🔍 DEBUG: EnergyDeficitManager.handle_deficit_automatic START")
+        self.info_logger.info("DEBUG: EnergyDeficitManager.handle_deficit_automatic START")
         self.info_logger.info("")
         self.info_logger.info("🔧 MANAGING DEFICIT")
         self.info_logger.info("-" * 25)
@@ -175,7 +175,7 @@ class EnergyDeficitManager:
         Zwraca:
             float: Ilość zwiększonej mocy wyjściowej w kW.
         """
-        self.info_logger.info("🔍 DEBUG: maximize_power_output START")
+        self.info_logger.info("DEBUG: maximize_power_output START")
         # ✅ WALIDACJA DANYCH WEJŚCIOWYCH
         if not isinstance(power_deficit, (int, float)) or power_deficit <= 0:
             self.error_logger.error(f"Invalid power_deficit: {power_deficit}")
@@ -208,10 +208,10 @@ class EnergyDeficitManager:
         for device in all_devices:
             # Sprawdź czy już wystarczy
             if increased_power >= power_deficit:
-                self.info_logger.info(f"🔍 DEBUG: STOPPING - increased_power ({increased_power:.1f}) >= power_deficit ({power_deficit:.1f})")
+                self.info_logger.info(f"DEBUG: STOPPING - increased_power ({increased_power:.1f}) >= power_deficit ({power_deficit:.1f})")
                 break
             
-            self.info_logger.info(f"🔍 DEBUG: Processing device {device.name}, increased_power={increased_power:.1f}, power_deficit={power_deficit:.1f}")
+            self.info_logger.info(f"DEBUG: Processing device {device.name}, increased_power={increased_power:.1f}, power_deficit={power_deficit:.1f}")
 
             if device.get_switch_status():  # Jeśli urządzenie jest aktywne
                 initial_output = device.get_actual_output()
@@ -224,11 +224,11 @@ class EnergyDeficitManager:
                     increase_amount = min(remaining_needed, max_output - initial_output)
                     new_output = initial_output + increase_amount
                     
-                    self.info_logger.info(f"🔍 DEBUG: Device {device.name}: {initial_output:.1f} → {new_output:.1f} kW (increase: {increase_amount:.1f})")
+                    self.info_logger.info(f"DEBUG: Device {device.name}: {initial_output:.1f} -> {new_output:.1f} kW (increase: {increase_amount:.1f})")
                     
                     if increase_amount > 0 and device.set_output(new_output):
                         increased_power += increase_amount
-                        self.info_logger.info(f"🔍 DEBUG: AFTER CHANGE - increased_power={increased_power:.1f}, power_deficit={power_deficit:.1f}")
+                        self.info_logger.info(f"DEBUG: AFTER CHANGE - increased_power={increased_power:.1f}, power_deficit={power_deficit:.1f}")
                         # DODAJ TO:
                         if self.energy_manager_ref:
                             device_change = {

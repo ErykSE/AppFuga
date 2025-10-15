@@ -2252,7 +2252,7 @@ class EnergyManager:
         UPROSZCZONA WERSJA - czytelniejsze formatowanie.
         """
         self.info_logger.info("")
-        self.info_logger.info("⚖️  ENERGY BALANCE")
+        self.info_logger.info("ENERGY BALANCE")
         self.info_logger.info("-" * 70)
         
         # Supply side - w jednej linii
@@ -2623,7 +2623,7 @@ class EnergyManager:
             EnergyBalance: Zaktualizowany bilans po neutralizacji
         """
         self.info_logger.info("")
-        self.info_logger.info("🔍 ANALYZING CONFLICTING OPERATIONS")
+        self.info_logger.info("ANALYZING CONFLICTING OPERATIONS")
         self.info_logger.info("-" * 70)
         
         neutralized = False
@@ -2915,7 +2915,7 @@ class EnergyManager:
                 potential_increase = max_output - current_output
                 increase_needed = min(potential_increase, deficit - freed_power)
                 
-                self.info_logger.info(f"🔍 DEBUG: Generator {generator.name}: current={current_output:.1f}, max={max_output:.1f}, potential={potential_increase:.1f}, needed={increase_needed:.1f}, deficit={deficit:.1f}, freed={freed_power:.1f}")
+                self.info_logger.info(f"DEBUG: Generator {generator.name}: current={current_output:.1f}, max={max_output:.1f}, potential={potential_increase:.1f}, needed={increase_needed:.1f}, deficit={deficit:.1f}, freed={freed_power:.1f}")
                 
                 if increase_needed > self.EPSILON:
                     # ✅ POPRAWKA: Zwiększ tylko tyle ile potrzeba
@@ -3037,7 +3037,7 @@ class EnergyManager:
         self.info_logger.info("")
         self.info_logger.info("🔧 AFTER NEUTRALIZATION")
         self.info_logger.info("-" * 30)
-        self.info_logger.info(f"⚖️  Balance: {balance.balance:+.2f} kW {'(SURPLUS)' if balance.has_surplus else '(DEFICIT)' if balance.has_deficit else '(BALANCED)'}")
+        self.info_logger.info(f"Balance: {balance.balance:+.2f} kW {'(SURPLUS)' if balance.has_surplus else '(DEFICIT)' if balance.has_deficit else '(BALANCED)'}")
         self.info_logger.info(f"📈 Supply:  {balance.total_supply:.2f} kW")
         self.info_logger.info(f"📉 Demand:  {balance.total_demand:.2f} kW")
     
@@ -3046,7 +3046,7 @@ class EnergyManager:
         self.info_logger.info("")
         self.info_logger.info("📊 FINAL STATE")
         self.info_logger.info("-" * 30)
-        self.info_logger.info(f"⚖️  Balance: {balance.balance:+.2f} kW {'(SURPLUS)' if balance.has_surplus else '(DEFICIT)' if balance.has_deficit else '(BALANCED)'}")
+        self.info_logger.info(f"Balance: {balance.balance:+.2f} kW {'(SURPLUS)' if balance.has_surplus else '(DEFICIT)' if balance.has_deficit else '(BALANCED)'}")
         self.info_logger.info(f"📈 Supply:  {balance.total_supply:.2f} kW")
         self.info_logger.info(f"📉 Demand:  {balance.total_demand:.2f} kW")
         

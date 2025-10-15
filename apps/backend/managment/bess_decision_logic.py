@@ -523,7 +523,7 @@ def should_prioritize_charging_or_selling(
     
     if info_logger:
         info_logger.info("-" * 70)
-        info_logger.info(f"  Decision: {'✅ CHARGE' if decision_charge else '💰 SELL'}")
+        info_logger.info(f"  Decision: {'CHARGE' if decision_charge else 'SELL'}")
         info_logger.info(f"  Confidence: {confidence*100:.1f}%")
         info_logger.info(f"  Reason: {reason}")
         info_logger.info("=" * 70)
