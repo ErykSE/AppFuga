@@ -2916,14 +2916,15 @@ class EnergyManager:
                 increase_needed = min(potential_increase, deficit - freed_power)
                 
                 if increase_needed > self.EPSILON:
+                    # ✅ POPRAWKA: Zwiększ tylko tyle ile potrzeba
+                    new_output = current_output + increase_needed
                     self.info_logger.info(
-                        f"   🔧 Generator {generator.name}: {current_output:.2f} → {current_output + increase_needed:.2f} kW "
+                        f"   🔧 Generator {generator.name}: {current_output:.2f} → {new_output:.2f} kW "
                         f"(+{increase_needed:.2f} kW)"
                     )
                     
                     # Zwiększ moc generatora
                     if generator.is_adjustable:
-                        new_output = current_output + increase_needed
                         if generator.set_output(new_output):
                             freed_power += increase_needed
                             
@@ -3085,7 +3086,13 @@ class EnergyManager:
         self.info_logger.info(f"  Changes: {len(changes)} device(s) modified")
         if changes:
             for change in changes:
-                self.info_logger.info(f"    - {change.get('device', {}).get('name', 'Unknown')}: {change.get('action', 'Unknown')}")
+                # ✅ POPRAWKA: change['device'] to obiekt, nie słownik!
+                device = change.get('device')
+                action = change.get('action', 'Unknown')
+                if hasattr(device, 'name'):
+                    self.info_logger.info(f"    - {device.name}: {action}")
+                else:
+                    self.info_logger.info(f"    - Unknown device: {action}")
         self.info_logger.info(f"  Decision: {decision}")
         self.info_logger.info("")
 

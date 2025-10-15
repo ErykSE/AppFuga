@@ -210,6 +210,8 @@ class EnergyDeficitManager:
             if increased_power >= power_deficit:
                 self.info_logger.info(f"🔍 DEBUG: STOPPING - increased_power ({increased_power:.1f}) >= power_deficit ({power_deficit:.1f})")
                 break
+            
+            self.info_logger.info(f"🔍 DEBUG: Processing device {device.name}, increased_power={increased_power:.1f}, power_deficit={power_deficit:.1f}")
 
             if device.get_switch_status():  # Jeśli urządzenie jest aktywne
                 initial_output = device.get_actual_output()
@@ -226,6 +228,7 @@ class EnergyDeficitManager:
                     
                     if increase_amount > 0 and device.set_output(new_output):
                         increased_power += increase_amount
+                        self.info_logger.info(f"🔍 DEBUG: AFTER CHANGE - increased_power={increased_power:.1f}, power_deficit={power_deficit:.1f}")
                         # DODAJ TO:
                         if self.energy_manager_ref:
                             device_change = {

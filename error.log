@@ -1,9 +1,0 @@
-2025-10-15 18:42:42,882 - ERROR - Error in check_energy_conditions: 'BESS' object has no attribute 'get'
-2025-10-15 18:42:42,882 - ERROR - Full traceback:
-Traceback (most recent call last):
-  File "c:\eryk\AppFuga\apps\backend\managment\energy_manager_class.py", line 835, in check_energy_conditions
-    self._log_simple_summary(initial_balance, final_balance, self.changed_devices, decision_text)
-  File "c:\eryk\AppFuga\apps\backend\managment\energy_manager_class.py", line 3088, in _log_simple_summary
-    self.info_logger.info(f"    - {change.get('device', {}).get('name', 'Unknown')}: {change.get('action', 'Unknown')}")
-                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AttributeError: 'BESS' object has no attribute 'get'
