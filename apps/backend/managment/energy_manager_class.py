@@ -2915,6 +2915,8 @@ class EnergyManager:
                 potential_increase = max_output - current_output
                 increase_needed = min(potential_increase, deficit - freed_power)
                 
+                self.info_logger.info(f"🔍 DEBUG: Generator {generator.name}: current={current_output:.1f}, max={max_output:.1f}, potential={potential_increase:.1f}, needed={increase_needed:.1f}, deficit={deficit:.1f}, freed={freed_power:.1f}")
+                
                 if increase_needed > self.EPSILON:
                     # ✅ POPRAWKA: Zwiększ tylko tyle ile potrzeba
                     new_output = current_output + increase_needed
