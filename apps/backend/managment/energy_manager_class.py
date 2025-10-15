@@ -898,10 +898,7 @@ class EnergyManager:
             # KROK 8: Wywołaj summary NA KOŃCU (po wszystkich akcjach)
             # ═══════════════════════════════════════════════════════
             
-            # ✅ DODANE: Symuluj actual_output po wszystkich zmianach
-            self.info_logger.info("DEBUG: About to call _simulate_actual_outputs_after_changes")
-            self._simulate_actual_outputs_after_changes()
-            self.info_logger.info("DEBUG: _simulate_actual_outputs_after_changes completed")
+            # ✅ USUNIĘTE: Symulacja actual_output jest niepotrzebna
             
             final_balance = self.calculate_energy_balance()
             
@@ -2251,10 +2248,15 @@ class EnergyManager:
         # ====================================================================
         
         # 1. Generacja ze źródeł (PV, Wind, Fuel Turbine, Fuel Cell)
+        # ✅ POPRAWKA: Użyj setpoint_output zamiast actual_output dla obliczeń
         generation = 0.0
         for device in self.microgrid.get_all_devices():
             if device.get_switch_status():
-                generation += device.get_actual_output()
+                # Użyj setpoint_output jeśli dostępny, w przeciwnym razie actual_output
+                if hasattr(device, 'setpoint_output'):
+                    generation += device.setpoint_output
+                else:
+                    generation += device.get_actual_output()
         
         # 2. Grid import (kupno energii z sieci)
         # ✅ POPRAWKA: Użyj actual_grid_import (rzeczywisty stan)
@@ -3136,50 +3138,7 @@ class EnergyManager:
         if self.osd.actual_grid_import > 0 or self.osd.actual_grid_export > 0:
             self.info_logger.info(f"GRID: Import={self.osd.actual_grid_import:.1f} kW, Export={self.osd.actual_grid_export:.1f} kW")
 
-    def _simulate_actual_outputs_after_changes(self):
-        """
-        Symuluje actual_output po wszystkich zmianach dla obliczeń bilansu.
-        
-        ⚠️  WAŻNE: To NIE jest wysyłane do API/SCADA!
-        Tylko dla obliczeń w bieżącej iteracji.
-        """
-        self.info_logger.info("DEBUG: Simulating actual_outputs after changes")
-        
-        # Symuluj actual_output dla wszystkich urządzeń, które mają setpoint_output
-        all_devices = self.microgrid.get_all_devices()
-        self.info_logger.info(f"DEBUG: Found {len(all_devices)} devices to check")
-        
-        for device in all_devices:
-            if hasattr(device, 'setpoint_output') and hasattr(device, 'actual_output'):
-                self.info_logger.info(f"DEBUG: {device.name}: actual_output={device.actual_output:.1f}, setpoint_output={device.setpoint_output:.1f}")
-                if device.setpoint_output != device.actual_output:
-                    old_actual = device.actual_output
-                    device.actual_output = device.setpoint_output  # Symulacja
-                    self.info_logger.info(f"DEBUG: {device.name}: actual_output {old_actual:.1f} → {device.actual_output:.1f} kW (simulated)")
-                else:
-                    self.info_logger.info(f"DEBUG: {device.name}: actual_output = setpoint_output = {device.actual_output:.1f} kW (no change needed)")
-            else:
-                self.info_logger.info(f"DEBUG: {device.name}: missing setpoint_output or actual_output attributes")
-        
-        # Symuluj actual_output dla BESS
-        if self.microgrid.bess and hasattr(self.microgrid.bess, 'setpoint_output'):
-            if self.microgrid.bess.setpoint_output != self.microgrid.bess.actual_output:
-                old_actual = self.microgrid.bess.actual_output
-                self.microgrid.bess.actual_output = self.microgrid.bess.setpoint_output
-                self.info_logger.info(f"DEBUG: BESS: actual_output {old_actual:.1f} → {self.microgrid.bess.actual_output:.1f} kW (simulated)")
-        
-        # Symuluj actual_output dla Grid
-        if hasattr(self.osd, 'setpoint_grid_import') and hasattr(self.osd, 'actual_grid_import'):
-            if self.osd.setpoint_grid_import != self.osd.actual_grid_import:
-                old_actual = self.osd.actual_grid_import
-                self.osd.actual_grid_import = self.osd.setpoint_grid_import
-                self.info_logger.info(f"DEBUG: Grid Import: actual {old_actual:.1f} → {self.osd.actual_grid_import:.1f} kW (simulated)")
-        
-        if hasattr(self.osd, 'setpoint_grid_export') and hasattr(self.osd, 'actual_grid_export'):
-            if self.osd.setpoint_grid_export != self.osd.actual_grid_export:
-                old_actual = self.osd.actual_grid_export
-                self.osd.actual_grid_export = self.osd.setpoint_grid_export
-                self.info_logger.info(f"DEBUG: Grid Export: actual {old_actual:.1f} → {self.osd.actual_grid_export:.1f} kW (simulated)")
+    # ✅ USUNIĘTE: _simulate_actual_outputs_after_changes() - niepotrzebne
 
     def simulate_device_state_for_calculations(self, device, operation: str, value: float):
         """
