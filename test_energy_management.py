@@ -192,7 +192,8 @@ class TestEnergyManagement:
             "scenario_4_surplus_bess_full.json",
             "scenario_5_balanced.json",
             "scenario_6_extreme_deficit.json",
-            "scenario_7_extreme_surplus.json"
+            "scenario_7_extreme_surplus.json",
+            "scenario_8_real_data.json"
         ]
         
         passed = 0
