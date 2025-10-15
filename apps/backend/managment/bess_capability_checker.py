@@ -252,7 +252,7 @@ class BESSCapabilityChecker:
             self.info_logger.warning(f"BESS {operation_type} NOT FEASIBLE: {plan.reason}")
             return
         
-        self.info_logger.info("=" * 60)
+        #self.info_logger.info("=" * 60)
         self.info_logger.info(f"BESS {operation_type.upper()} PLAN:")
         self.info_logger.info(f"  Setpoint: {plan.power_setpoint:.2f} kW")
         self.info_logger.info(f"  Energy: {plan.energy_amount:.2f} kWh")
@@ -264,4 +264,4 @@ class BESSCapabilityChecker:
         else:
             self.info_logger.info(f"  Will continue through entire iteration ({self.iteration_time_minutes} min)")
         
-        self.info_logger.info("=" * 60)
+        #self.info_logger.info("=" * 60)
