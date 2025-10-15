@@ -2719,12 +2719,8 @@ class EnergyManager:
                 neutralized_amount += grid_exporting
             
             # 3. Generatory niepotrzebnie ograniczone? (krok 5 scenariusza)
-            self.info_logger.info("🔍 Checking for unnecessarily limited generators...")
-            generators_freed = self._check_and_free_limited_generators(balance.deficit)
-            if generators_freed > 0:
-                neutralized = True
-                neutralized_amount += generators_freed
-                self.info_logger.info(f"   ✓ Freed {generators_freed:.2f} kW from limited generators")
+            # ✅ USUNIĘTE: Zwiększanie generatorów w neutralizacji jest błędne!
+            # To powinno być w maximize_power_output(), nie w neutralizacji!
         
         # === NADWYŻKA - szukaj operacji, które ZWIĘKSZAJĄ produkcję ===
         elif balance.has_surplus:
