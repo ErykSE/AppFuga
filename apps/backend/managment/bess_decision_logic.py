@@ -410,6 +410,12 @@ def should_prioritize_charging_or_selling(
         info_logger.info("=" * 70)
         info_logger.info("DECISION ANALYSIS - should_prioritize_charging_or_selling()")
         info_logger.info(f"  Mode: {config.mode.value}")
+        info_logger.info("")
+        info_logger.info("INPUT DATA:")
+        info_logger.info(f"  BESS: {charge_level:.1f}/{max_charge_level:.1f} kWh ({charge_level/max_charge_level*100:.1f}% SOC)")
+        info_logger.info(f"  Tariffs: Buy={tariff_buy:.3f} $/kWh, Sell={tariff_sell:.3f} $/kWh")
+        info_logger.info(f"  Trading: Sold={sold_power:.1f}/{sale_limit:.1f} kWh")
+        info_logger.info("")
     
     # Waliduj konfigurację
     try:

@@ -2208,8 +2208,8 @@ class EnergyManager:
                 consumption += device.get_current_power()
         
         # 2. Grid export (sprzedaż energii do sieci)
-        # ✅ POPRAWKA: Użyj actual_grid_export (rzeczywisty stan)
-        grid_export = self.osd.actual_grid_export
+        # ✅ POPRAWKA: Użyj setpoint_grid_export (polecenie dla SCADA)
+        grid_export = self.osd.setpoint_grid_export
         
         # 3. BESS charge (ładowanie baterii)
         # ⚠️ WAŻNE: actual_output < 0 → BESS pobiera energię (ładowanie)
@@ -2693,14 +2693,9 @@ class EnergyManager:
                 self.info_logger.info(f"   ✓ Set setpoint_grid_export = 0 kW (command for SCADA)")
                 
                 # ═══════════════════════════════════════════════════════════
-                # KROK B: Symuluj actual (TYLKO dla obliczeń w Pythonie)
+                # KROK B: Symulacja nie jest potrzebna - używamy setpoint
                 # ═══════════════════════════════════════════════════════════
-                self.simulate_device_state_for_calculations(
-                    self.osd, 
-                    "stop_export", 
-                    0
-                )
-                self.info_logger.info(f"   ✓ Simulated actual_grid_export = 0 kW (for calculations only)")
+                self.info_logger.info(f"   ✓ Grid export setpoint set to 0 kW (command for SCADA)")
                 
                 # Backward compatibility (tymczasowo)
                 self.osd.current_grid_export = 0
@@ -3065,6 +3060,23 @@ class EnergyManager:
         self.info_logger.info(f"  Grid: Import={balance.grid_import:.1f} kW, Export={balance.grid_export:.1f} kW")
         self.info_logger.info(f"  Balance: {balance.balance:.1f} kW ({'SURPLUS' if balance.has_surplus else 'DEFICIT' if balance.has_deficit else 'BALANCED'})")
         self.info_logger.info("")
+        
+        # Szczegółowe logi urządzeń
+        self.info_logger.info("DEVICE DETAILS:")
+        for device in self.microgrid.get_all_devices():
+            if hasattr(device, 'actual_output'):
+                self.info_logger.info(f"  {device.name}: {device.actual_output:.1f} kW (setpoint: {device.setpoint_output:.1f} kW)")
+        
+        # BESS szczegóły
+        if self.microgrid.bess:
+            bess = self.microgrid.bess
+            soc = (bess.charge_level / bess.max_charge_level) * 100
+            self.info_logger.info(f"  BESS: {bess.charge_level:.1f}/{bess.max_charge_level:.1f} kWh ({soc:.1f}% SOC)")
+        
+        # Grid szczegóły
+        self.info_logger.info(f"  Grid: Import={self.osd.current_grid_import:.1f} kW, Export={self.osd.current_grid_export:.1f} kW")
+        self.info_logger.info(f"  Tariffs: Buy={self.osd.current_tariff_buy:.3f} $/kWh, Sell={self.osd.current_tariff_sell:.3f} $/kWh")
+        self.info_logger.info("")
 
     def _log_state_after(self, balance):
         """Loguje stan po zmianach"""
@@ -3120,17 +3132,17 @@ class EnergyManager:
                 )
         
         # ✅ NOWE: Symulacja dla OSD
-        elif device_type == "OSD":
-            if operation == "stop_export":
-                device.actual_grid_export = value  # ← SYMULACJA
-                self.info_logger.debug(
-                    f"   → OSD.actual_grid_export = {value} kW (simulated)"
-                )
-            elif operation == "stop_import":
-                device.actual_grid_import = value  # ← SYMULACJA
-                self.info_logger.debug(
-                    f"   → OSD.actual_grid_import = {value} kW (simulated)"
-                )
+            elif device_type == "OSD":
+                if operation == "stop_export":
+                    # Symulacja nie jest potrzebna - używamy setpoint
+                    self.info_logger.debug(
+                        f"   → OSD.setpoint_grid_export = {value} kW (setpoint only)"
+                    )
+                elif operation == "stop_import":
+                    # Symulacja nie jest potrzebna - używamy setpoint
+                    self.info_logger.debug(
+                        f"   → OSD.setpoint_grid_import = {value} kW (setpoint only)"
+                    )
         
         self.info_logger.debug(
             f"   ℹ️  This is IN-MEMORY ONLY, will be overwritten in next iteration"

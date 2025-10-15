@@ -364,9 +364,7 @@ class OSD:
             # ✅ Reset eksportu
             self.setpoint_grid_export = 0.0
             
-            # ✅ POPRAWKA: Aktualizuj ACTUAL (dla obliczeń bilansu)
-            self.actual_grid_import = amount_to_buy
-            self.actual_grid_export = 0.0
+            # ✅ POPRAWKA: Symulacja nie jest potrzebna - używamy setpoint
             
             # Backward compatibility
             self.current_grid_import = amount_to_buy
@@ -398,9 +396,7 @@ class OSD:
             # ✅ Reset importu
             self.setpoint_grid_import = 0.0
             
-            # ✅ POPRAWKA: Aktualizuj ACTUAL (dla obliczeń bilansu)
-            self.actual_grid_export = amount_to_sell
-            self.actual_grid_import = 0.0
+            # ✅ POPRAWKA: Symulacja nie jest potrzebna - używamy setpoint
             
             # Backward compatibility
             self.current_grid_export = amount_to_sell
