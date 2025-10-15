@@ -897,6 +897,10 @@ class EnergyManager:
             # ═══════════════════════════════════════════════════════
             # KROK 8: Wywołaj summary NA KOŃCU (po wszystkich akcjach)
             # ═══════════════════════════════════════════════════════
+            
+            # ✅ DODANE: Symuluj actual_output po wszystkich zmianach
+            self._simulate_actual_outputs_after_changes()
+            
             final_balance = self.calculate_energy_balance()
             
             # ✅ UPROSZCZONE: Stan końcowy (tylko jeśli były zmiany)
@@ -3129,6 +3133,43 @@ class EnergyManager:
         # Grid tylko jeśli aktywny
         if self.osd.actual_grid_import > 0 or self.osd.actual_grid_export > 0:
             self.info_logger.info(f"GRID: Import={self.osd.actual_grid_import:.1f} kW, Export={self.osd.actual_grid_export:.1f} kW")
+
+    def _simulate_actual_outputs_after_changes(self):
+        """
+        Symuluje actual_output po wszystkich zmianach dla obliczeń bilansu.
+        
+        ⚠️  WAŻNE: To NIE jest wysyłane do API/SCADA!
+        Tylko dla obliczeń w bieżącej iteracji.
+        """
+        self.info_logger.info("DEBUG: Simulating actual_outputs after changes")
+        
+        # Symuluj actual_output dla wszystkich urządzeń, które mają setpoint_output
+        for device in self.microgrid.get_all_devices():
+            if hasattr(device, 'setpoint_output') and hasattr(device, 'actual_output'):
+                if device.setpoint_output != device.actual_output:
+                    old_actual = device.actual_output
+                    device.actual_output = device.setpoint_output  # Symulacja
+                    self.info_logger.info(f"DEBUG: {device.name}: actual_output {old_actual:.1f} → {device.actual_output:.1f} kW (simulated)")
+        
+        # Symuluj actual_output dla BESS
+        if self.microgrid.bess and hasattr(self.microgrid.bess, 'setpoint_output'):
+            if self.microgrid.bess.setpoint_output != self.microgrid.bess.actual_output:
+                old_actual = self.microgrid.bess.actual_output
+                self.microgrid.bess.actual_output = self.microgrid.bess.setpoint_output
+                self.info_logger.info(f"DEBUG: BESS: actual_output {old_actual:.1f} → {self.microgrid.bess.actual_output:.1f} kW (simulated)")
+        
+        # Symuluj actual_output dla Grid
+        if hasattr(self.osd, 'setpoint_grid_import') and hasattr(self.osd, 'actual_grid_import'):
+            if self.osd.setpoint_grid_import != self.osd.actual_grid_import:
+                old_actual = self.osd.actual_grid_import
+                self.osd.actual_grid_import = self.osd.setpoint_grid_import
+                self.info_logger.info(f"DEBUG: Grid Import: actual {old_actual:.1f} → {self.osd.actual_grid_import:.1f} kW (simulated)")
+        
+        if hasattr(self.osd, 'setpoint_grid_export') and hasattr(self.osd, 'actual_grid_export'):
+            if self.osd.setpoint_grid_export != self.osd.actual_grid_export:
+                old_actual = self.osd.actual_grid_export
+                self.osd.actual_grid_export = self.osd.setpoint_grid_export
+                self.info_logger.info(f"DEBUG: Grid Export: actual {old_actual:.1f} → {self.osd.actual_grid_export:.1f} kW (simulated)")
 
     def simulate_device_state_for_calculations(self, device, operation: str, value: float):
         """
