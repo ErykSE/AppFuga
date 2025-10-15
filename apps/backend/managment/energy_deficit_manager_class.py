@@ -88,21 +88,36 @@ class EnergyDeficitManager:
             return {"amount_managed": 0, "remaining_deficit": power_deficit}
         
         self.info_logger.info(f"Start managing power deficit: {power_deficit} kW")
+        self.info_logger.info("")
+        self.info_logger.info("🔧 DEFICIT MANAGEMENT STRATEGY")
+        self.info_logger.info("-" * 40)
+        self.info_logger.info("1. Maximize power output from generators")
+        self.info_logger.info("2. If still deficit → BESS vs GRID decision")
+        self.info_logger.info("3. If still deficit → Limit consumption (last resort)")
+        self.info_logger.info("")
 
         managed = self.maximize_power_output(power_deficit)
 
-        self.info_logger.info(
-            f"Power was ordered by increasing production: {managed} kW"
-        )
+        self.info_logger.info("")
+        self.info_logger.info(f"✅ STEP 1 COMPLETED: Increased production by {managed:.2f} kW")
+        self.info_logger.info(f"   Strategy: Maximized active generators + activated inactive ones")
+        self.info_logger.info(f"   Result: {managed:.2f} kW additional power generated")
         remaining_deficit = power_deficit - managed
 
         if remaining_deficit > 0:
-            self.info_logger.info(
-                f"Remaining deficit after maximisation of equipment operation: {remaining_deficit} kW"
-            )
+            self.info_logger.info("")
+            self.info_logger.info(f"⚠️  STEP 2 REQUIRED: {remaining_deficit:.2f} kW deficit remains")
+            self.info_logger.info("   Strategy: BESS discharge vs Grid import decision")
+            self.info_logger.info("   Factors: BESS charge level, Grid tariffs, Purchase limits")
+            
             result = self.manage_remaining_deficit(remaining_deficit)
             managed += result["amount_managed"]
             remaining_deficit = result["remaining_deficit"]
+            
+            self.info_logger.info("")
+            self.info_logger.info(f"✅ STEP 2 COMPLETED: Managed additional {result['amount_managed']:.2f} kW")
+            self.info_logger.info(f"   Strategy: {'BESS discharge' if 'bess' in str(result).lower() else 'Grid import' if 'grid' in str(result).lower() else 'Consumption limitation'}")
+            self.info_logger.info(f"   Result: {result['amount_managed']:.2f} kW deficit resolved")
 
         self.info_logger.info(
             f"Deficit management completed. A total of managed: {managed} kW. Remaining deficit: {remaining_deficit} kW"
@@ -1481,19 +1496,31 @@ class EnergyDeficitManager:
         
         # === KROK 2: PODEJMIJ DECYZJĘ ===
         
+        self.info_logger.info("")
+        self.info_logger.info("🤔 DECISION ANALYSIS")
+        self.info_logger.info("-" * 30)
+        self.info_logger.info(f"   BESS can discharge: {'✅ YES' if can_discharge else '❌ NO'}")
+        self.info_logger.info(f"   GRID can import:    {'✅ YES' if can_buy else '❌ NO'}")
+        
         # Przypadek A: Tylko DISCHARGE możliwe
         if can_discharge and not can_buy:
-            self.info_logger.info("⚡ Only DISCHARGE available → discharging")
+            self.info_logger.info("")
+            self.info_logger.info("⚡ DECISION: Only BESS available → DISCHARGE")
+            self.info_logger.info("   Reason: Grid cannot import (limit reached or unavailable)")
             return self._execute_discharge(discharge_plan, power_deficit)
         
         # Przypadek B: Tylko BUY możliwe
         if can_buy and not can_discharge:
-            self.info_logger.info("💰 Only BUY available → buying")
+            self.info_logger.info("")
+            self.info_logger.info("💰 DECISION: Only GRID available → BUY")
+            self.info_logger.info("   Reason: BESS cannot discharge (low charge or unavailable)")
             return self._execute_buy(power_deficit)
         
         # Przypadek C: Obie opcje dostępne → DECYZJA
         if can_discharge and can_buy:
-            self.info_logger.info("⚖️  Both DISCHARGE and BUY available → making decision")
+            self.info_logger.info("")
+            self.info_logger.info("⚖️  DECISION: Both options available → UTILITY FUNCTION")
+            self.info_logger.info("   Factors: Economics, BESS state, Risk assessment")
             
             # WYWOŁAJ FUNKCJĘ DECYZYJNĄ
             result = should_prioritize_discharging_or_buying(
@@ -1516,9 +1543,21 @@ class EnergyDeficitManager:
                 error_logger=self.error_logger
             )
             
-            # Loguj wynik
-            self.info_logger.info(f"Decision: {result.reason}")
-            self.info_logger.info(f"Confidence: {result.confidence*100:.1f}%")
+            # Loguj szczegółowy wynik
+            self.info_logger.info("")
+            self.info_logger.info("🧠 UTILITY FUNCTION RESULT")
+            self.info_logger.info("-" * 35)
+            self.info_logger.info(f"   Decision: {result.reason}")
+            self.info_logger.info(f"   Confidence: {result.confidence*100:.1f}%")
+            self.info_logger.info(f"   Action: {'DISCHARGE BESS' if result.decision else 'BUY FROM GRID'}")
+            
+            # Dodatkowe szczegóły
+            if hasattr(result, 'economic_factor'):
+                self.info_logger.info(f"   Economic factor: {result.economic_factor:.3f}")
+            if hasattr(result, 'storage_factor'):
+                self.info_logger.info(f"   Storage factor: {result.storage_factor:.3f}")
+            if hasattr(result, 'risk_factor'):
+                self.info_logger.info(f"   Risk factor: {result.risk_factor:.3f}")
             
             # Wykonaj decyzję
             if result.decision:  # DISCHARGE

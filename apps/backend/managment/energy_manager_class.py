@@ -791,7 +791,15 @@ class EnergyManager:
             # ═══════════════════════════════════════════════════════
             # KROK 1: Oblicz początkowy bilans
             # ═══════════════════════════════════════════════════════
+            self.info_logger.info("")
+            self.info_logger.info("🔍" + "="*80)
+            self.info_logger.info("🔍 ENERGY MANAGEMENT ITERATION START")
+            self.info_logger.info("🔍" + "="*80)
+            
             initial_balance = self.calculate_energy_balance()
+            
+            # ✅ NOWE: Szczegółowy stan systemu na początku
+            self._log_system_state("INITIAL STATE", initial_balance)
             
             # ═══════════════════════════════════════════════════════
             # KROK 2: Sprawdź czy bilans OK
@@ -809,7 +817,14 @@ class EnergyManager:
             # ═══════════════════════════════════════════════════════
             # KROK 3: Neutralizuj konflikty
             # ═══════════════════════════════════════════════════════
+            self.info_logger.info("")
+            self.info_logger.info("🔧 NEUTRALIZING CONFLICTING OPERATIONS")
+            self.info_logger.info("-" * 50)
+            
             balance = self.neutralize_conflicting_operations(initial_balance)
+            
+            # ✅ NOWE: Stan systemu po neutralizacji
+            self._log_system_state("AFTER NEUTRALIZATION", balance)
             
             # ═══════════════════════════════════════════════════════
             # KROK 4: Sprawdź czy po neutralizacji bilans OK
@@ -866,6 +881,9 @@ class EnergyManager:
             # KROK 8: Wywołaj summary NA KOŃCU (po wszystkich akcjach)
             # ═══════════════════════════════════════════════════════
             final_balance = self.calculate_energy_balance()
+            
+            # ✅ NOWE: Stan systemu po zarządzaniu
+            self._log_system_state("FINAL STATE", final_balance)
             
             self._log_operator_summary(
                 initial_balance=initial_balance,
@@ -2476,6 +2494,20 @@ class EnergyManager:
         self.info_logger.info("│ 2. ENERGY BALANCE ANALYSIS" + " " * 42 + "│")
         self.info_logger.info("└" + "─" * 68 + "┘")
         
+        # Porównanie bilansów
+        balance_change = final_balance.balance - initial_balance.balance
+        self.info_logger.info(f"  Initial Balance:  {initial_balance.balance:+.2f} kW")
+        self.info_logger.info(f"  Final Balance:    {final_balance.balance:+.2f} kW")
+        self.info_logger.info(f"  Balance Change:   {balance_change:+.2f} kW")
+        
+        if abs(balance_change) > 0.1:
+            if balance_change > 0:
+                self.info_logger.info(f"  Status: ✅ IMPROVED (reduced deficit or increased surplus)")
+            else:
+                self.info_logger.info(f"  Status: ⚠️  WORSENED (increased deficit or reduced surplus)")
+        else:
+            self.info_logger.info(f"  Status: ➡️  STABLE (minimal change)")
+        
         self.info_logger.info(
             f"  Supply Side:    {initial_balance.generation:.2f} kW (Gen) + "
             f"{initial_balance.grid_import:.2f} kW (Grid) + "
@@ -2564,11 +2596,53 @@ class EnergyManager:
                 self.info_logger.info(f"  RESULT:         {final_balance.balance:+.2f} kW ({amount:.2f} kW {remaining} remaining)")
         
         # ═══════════════════════════════════════════════════════════
-        # SEKCJA 5: PODSUMOWANIE
+        # SEKCJA 5: UZASADNIENIE DECYZJI
         # ═══════════════════════════════════════════════════════════
         self.info_logger.info("")
         self.info_logger.info("┌" + "─" * 68 + "┐")
-        self.info_logger.info("│ 5. SUMMARY" + " " * 58 + "│")
+        self.info_logger.info("│ 5. DECISION RATIONALE" + " " * 45 + "│")
+        self.info_logger.info("└" + "─" * 68 + "┘")
+        
+        if decision_rationale:
+            self.info_logger.info(f"  {decision_rationale}")
+        else:
+            self.info_logger.info("  No specific rationale provided.")
+        
+        # Dodatkowe szczegóły o decyzjach
+        if actions_taken:
+            self.info_logger.info("")
+            self.info_logger.info("  DECISION BREAKDOWN:")
+            
+            # Grupuj akcje według typu
+            action_groups = {}
+            for action in actions_taken:
+                action_type = action.get("action", "unknown")
+                if action_type not in action_groups:
+                    action_groups[action_type] = []
+                action_groups[action_type].append(action)
+            
+            for action_type, actions in action_groups.items():
+                if action_type == "stop_charging":
+                    self.info_logger.info(f"    • Neutralized BESS charging ({len(actions)} action(s))")
+                elif action_type == "stop_discharging":
+                    self.info_logger.info(f"    • Neutralized BESS discharging ({len(actions)} action(s))")
+                elif action_type == "stop_export":
+                    self.info_logger.info(f"    • Neutralized Grid export ({len(actions)} action(s))")
+                elif action_type == "stop_import":
+                    self.info_logger.info(f"    • Neutralized Grid import ({len(actions)} action(s))")
+                elif "increase_output" in action_type:
+                    self.info_logger.info(f"    • Increased generator output ({len(actions)} action(s))")
+                elif "restore_consumer" in action_type:
+                    self.info_logger.info(f"    • Restored disabled consumers ({len(actions)} action(s))")
+                else:
+                    self.info_logger.info(f"    • {action_type.replace('_', ' ').title()} ({len(actions)} action(s))")
+        
+        # ═══════════════════════════════════════════════════════════
+        # SEKCJA 6: PODSUMOWANIE
+        # ═══════════════════════════════════════════════════════════
+        self.info_logger.info("")
+        self.info_logger.info("┌" + "─" * 68 + "┐")
+        self.info_logger.info("│ 6. SUMMARY" + " " * 58 + "│")
         self.info_logger.info("└" + "─" * 68 + "┘")
         
         if final_balance.is_balanced():
@@ -2999,6 +3073,80 @@ class EnergyManager:
                         break  # Wystarczająco przywrócono
         
         return restored_power
+    
+    def _log_system_state(self, phase: str, balance: EnergyBalance):
+        """
+        Loguje szczegółowy stan systemu w danej fazie.
+        
+        Args:
+            phase: Nazwa fazy (np. "INITIAL STATE", "AFTER NEUTRALIZATION")
+            balance: Bilans energetyczny
+        """
+        self.info_logger.info("")
+        self.info_logger.info(f"📊 {phase} - SYSTEM STATE")
+        self.info_logger.info("-" * 60)
+        
+        # Bilans energetyczny
+        self.info_logger.info(f"⚖️  ENERGY BALANCE:")
+        self.info_logger.info(f"   Supply:  {balance.total_supply:.2f} kW")
+        self.info_logger.info(f"   Demand:  {balance.total_demand:.2f} kW")
+        self.info_logger.info(f"   Balance: {balance.balance:+.2f} kW {'(SURPLUS)' if balance.has_surplus else '(DEFICIT)' if balance.has_deficit else '(BALANCED)'}")
+        
+        # Szczegóły podaży
+        self.info_logger.info(f"📈 SUPPLY BREAKDOWN:")
+        self.info_logger.info(f"   Generation:    {balance.generation:.2f} kW")
+        self.info_logger.info(f"   Grid Import:   {balance.grid_import:.2f} kW")
+        self.info_logger.info(f"   BESS Discharge: {balance.bess_discharge:.2f} kW")
+        
+        # Szczegóły popytu
+        self.info_logger.info(f"📉 DEMAND BREAKDOWN:")
+        self.info_logger.info(f"   Consumption:   {balance.consumption:.2f} kW")
+        self.info_logger.info(f"   Grid Export:   {balance.grid_export:.2f} kW")
+        self.info_logger.info(f"   BESS Charge:    {balance.bess_charge:.2f} kW")
+        
+        # Stan BESS
+        if self.microgrid.bess:
+            bess = self.microgrid.bess
+            charge_percent = ((bess.charge_level - bess.min_charge_level) / 
+                           (bess.max_charge_level - bess.min_charge_level)) * 100
+            self.info_logger.info(f"🔋 BESS STATE:")
+            self.info_logger.info(f"   Level: {bess.charge_level:.2f}/{bess.max_charge_level:.2f} kWh ({charge_percent:.1f}%)")
+            self.info_logger.info(f"   Output: {bess.actual_output:+.2f} kW (setpoint: {bess.setpoint_output:+.2f} kW)")
+            self.info_logger.info(f"   Status: {'ON' if bess.switch_status else 'OFF'}")
+        
+        # Stan Grid
+        self.info_logger.info(f"🌐 GRID STATE:")
+        self.info_logger.info(f"   Import: {self.osd.actual_grid_import:.2f} kW (setpoint: {self.osd.setpoint_grid_import:.2f} kW)")
+        self.info_logger.info(f"   Export: {self.osd.actual_grid_export:.2f} kW (setpoint: {self.osd.setpoint_grid_export:.2f} kW)")
+        self.info_logger.info(f"   Tariffs: Buy={self.osd.current_tariff_buy:.3f} $/kWh, Sell={self.osd.current_tariff_sell:.3f} $/kWh")
+        
+        # Generatory
+        total_gen = 0
+        active_gen = 0
+        for gen_type in ['pv_panels', 'wind_turbines', 'fuel_turbines', 'fuel_cells']:
+            devices = getattr(self.microgrid, gen_type, [])
+            for device in devices:
+                if device.get_switch_status():
+                    active_gen += 1
+                    total_gen += device.get_actual_output()
+        
+        self.info_logger.info(f"⚡ GENERATORS:")
+        self.info_logger.info(f"   Active: {active_gen} devices")
+        self.info_logger.info(f"   Total Output: {total_gen:.2f} kW")
+        
+        # Odbiorniki
+        total_cons = 0
+        active_cons = 0
+        for cons_type in ['adjustable_devices', 'non_adjustable_devices']:
+            devices = getattr(self.consumergrid, cons_type, [])
+            for device in devices:
+                if device.get_switch_status():
+                    active_cons += 1
+                    total_cons += device.get_current_power()
+        
+        self.info_logger.info(f"🏠 CONSUMERS:")
+        self.info_logger.info(f"   Active: {active_cons} devices")
+        self.info_logger.info(f"   Total Consumption: {total_cons:.2f} kW")
 
     def simulate_device_state_for_calculations(self, device, operation: str, value: float):
         """
