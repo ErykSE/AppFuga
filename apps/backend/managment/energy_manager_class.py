@@ -3146,14 +3146,20 @@ class EnergyManager:
         self.info_logger.info("DEBUG: Simulating actual_outputs after changes")
         
         # Symuluj actual_output dla wszystkich urządzeń, które mają setpoint_output
-        for device in self.microgrid.get_all_devices():
+        all_devices = self.microgrid.get_all_devices()
+        self.info_logger.info(f"DEBUG: Found {len(all_devices)} devices to check")
+        
+        for device in all_devices:
             if hasattr(device, 'setpoint_output') and hasattr(device, 'actual_output'):
+                self.info_logger.info(f"DEBUG: {device.name}: actual_output={device.actual_output:.1f}, setpoint_output={device.setpoint_output:.1f}")
                 if device.setpoint_output != device.actual_output:
                     old_actual = device.actual_output
                     device.actual_output = device.setpoint_output  # Symulacja
                     self.info_logger.info(f"DEBUG: {device.name}: actual_output {old_actual:.1f} → {device.actual_output:.1f} kW (simulated)")
                 else:
                     self.info_logger.info(f"DEBUG: {device.name}: actual_output = setpoint_output = {device.actual_output:.1f} kW (no change needed)")
+            else:
+                self.info_logger.info(f"DEBUG: {device.name}: missing setpoint_output or actual_output attributes")
         
         # Symuluj actual_output dla BESS
         if self.microgrid.bess and hasattr(self.microgrid.bess, 'setpoint_output'):
