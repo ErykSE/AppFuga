@@ -214,8 +214,9 @@ class EnergyDeficitManager:
                 if device.is_adjustable:
                     # Oblicz ile jeszcze potrzebujemy
                     remaining_needed = target_output - (current_output + increased_power)
-                    # Nowa moc = początkowa + to co potrzebujemy (ale nie więcej niż max)
+                    # ✅ POPRAWKA: Nowa moc = początkowa + to co potrzebujemy (ale nie więcej niż max)
                     new_output = min(max_output, initial_output + remaining_needed)
+                    self.info_logger.info(f"🔍 DEBUG: Device {device.name}: {initial_output:.1f} → {new_output:.1f} kW (needed: {remaining_needed:.1f})")
                     if device.set_output(new_output):
                         actual_increase = new_output - initial_output
                         increased_power += actual_increase

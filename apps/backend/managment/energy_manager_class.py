@@ -788,6 +788,9 @@ class EnergyManager:
         Sprawdza warunki energetyczne i podejmuje odpowiednie działania.
         """
         try:
+            # ✅ WYCZYŚĆ LISTĘ ZMIAN NA POCZĄTKU
+            self.changed_devices = []
+            
             # ═══════════════════════════════════════════════════════
             # KROK 1: Oblicz początkowy bilans
             # ═══════════════════════════════════════════════════════
@@ -799,6 +802,7 @@ class EnergyManager:
             initial_balance = self.calculate_energy_balance()
             
             # ✅ UPROSZCZONE: Stan początkowy
+            self.info_logger.info("🔍 DEBUG: Calling _log_initial_state")
             self._log_initial_state(initial_balance)
             
             # ═══════════════════════════════════════════════════════
@@ -3063,6 +3067,7 @@ class EnergyManager:
     
     def _log_initial_state(self, balance: EnergyBalance):
         """Loguje stan początkowy systemu"""
+        self.info_logger.info("🔍 DEBUG: _log_initial_state called")
         self.info_logger.info("")
         self.info_logger.info("📊 INITIAL STATE")
         self.info_logger.info("-" * 30)
