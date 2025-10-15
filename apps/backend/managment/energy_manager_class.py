@@ -394,7 +394,9 @@ class EnergyManager:
         self._log_initial_system_status()
 
         # Sprawdź warunki energetyczne i podejmij odpowiednie działania
+        self.info_logger.info("🚨 DEBUG: About to call check_energy_conditions")
         result = self.check_energy_conditions()
+        self.info_logger.info("🚨 DEBUG: check_energy_conditions completed")
 
         # Wykonaj zatwierdzone akcje jeśli istnieją
         approved_actions = []
@@ -787,9 +789,11 @@ class EnergyManager:
         """
         Sprawdza warunki energetyczne i podejmuje odpowiednie działania.
         """
+        self.info_logger.info("🔍 DEBUG: check_energy_conditions START")
         try:
             # ✅ WYCZYŚĆ LISTĘ ZMIAN NA POCZĄTKU
             self.changed_devices = []
+            self.info_logger.info("🔍 DEBUG: changed_devices cleared")
             
             # ═══════════════════════════════════════════════════════
             # KROK 1: Oblicz początkowy bilans
@@ -803,7 +807,12 @@ class EnergyManager:
             
             # ✅ UPROSZCZONE: Stan początkowy
             self.info_logger.info("🔍 DEBUG: Calling _log_initial_state")
-            self._log_initial_state(initial_balance)
+            self.info_logger.info("🔍 DEBUG: About to call _log_initial_state method")
+            try:
+                self._log_initial_state(initial_balance)
+                self.info_logger.info("🔍 DEBUG: _log_initial_state completed successfully")
+            except Exception as e:
+                self.info_logger.error(f"🔍 DEBUG: Error in _log_initial_state: {e}")
             
             # ═══════════════════════════════════════════════════════
             # KROK 2: Sprawdź czy bilans OK
@@ -3068,6 +3077,9 @@ class EnergyManager:
     def _log_initial_state(self, balance: EnergyBalance):
         """Loguje stan początkowy systemu"""
         self.info_logger.info("🔍 DEBUG: _log_initial_state called")
+        self.info_logger.info("🔍 DEBUG: balance.balance = " + str(balance.balance))
+        self.info_logger.info("🔍 DEBUG: balance.total_supply = " + str(balance.total_supply))
+        self.info_logger.info("🔍 DEBUG: balance.total_demand = " + str(balance.total_demand))
         self.info_logger.info("")
         self.info_logger.info("📊 INITIAL STATE")
         self.info_logger.info("-" * 30)

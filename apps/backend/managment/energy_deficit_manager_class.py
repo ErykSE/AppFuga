@@ -88,6 +88,7 @@ class EnergyDeficitManager:
             return {"amount_managed": 0, "remaining_deficit": power_deficit}
         
         self.info_logger.info(f"Start managing power deficit: {power_deficit} kW")
+        self.info_logger.info("🔍 DEBUG: EnergyDeficitManager.handle_deficit_automatic START")
         self.info_logger.info("")
         self.info_logger.info("🔧 MANAGING DEFICIT")
         self.info_logger.info("-" * 25)
@@ -146,6 +147,7 @@ class EnergyDeficitManager:
         # Oblicz, ile dodatkowej mocy możemy obsłużyć
         handleable_power = min(total_available_capacity, potential_surplus)
 
+        self.info_logger.info("🔍 DEBUG: maximize_power_output calculations")
         self.info_logger.info(f"Current output: {current_output} kW")
         self.info_logger.info(f"Max potential output: {max_potential_output} kW")
         self.info_logger.info(f"Power deficit: {power_deficit} kW")
@@ -173,6 +175,7 @@ class EnergyDeficitManager:
         Zwraca:
             float: Ilość zwiększonej mocy wyjściowej w kW.
         """
+        self.info_logger.info("🔍 DEBUG: maximize_power_output START")
         # ✅ WALIDACJA DANYCH WEJŚCIOWYCH
         if not isinstance(power_deficit, (int, float)) or power_deficit <= 0:
             self.error_logger.error(f"Invalid power_deficit: {power_deficit}")
