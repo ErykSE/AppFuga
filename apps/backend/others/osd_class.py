@@ -64,16 +64,16 @@ class OSD:
         self.current_tariff_sell = current_tariff_sell
 
         # === GRID OPERATIONS - SETPOINTY (polecenia dla SCADA) ===
-        self.setpoint_grid_export = 0.0  # ✅ NOWE: Polecenie eksportu
-        self.setpoint_grid_import = 0.0  # ✅ NOWE: Polecenie importu
+        self.setpoint_grid_export = 0.0  # NOWE: Polecenie eksportu
+        self.setpoint_grid_import = 0.0  # NOWE: Polecenie importu
         
         # === GRID OPERATIONS - ACTUAL (stan rzeczywisty z SCADA) ===
-        self.actual_grid_export = 0.0    # ✅ NOWE: Rzeczywisty eksport
-        self.actual_grid_import = 0.0    # ✅ NOWE: Rzeczywisty import
+        self.actual_grid_export = 0.0    # NOWE: Rzeczywisty eksport
+        self.actual_grid_import = 0.0    # NOWE: Rzeczywisty import
         
         # === BACKWARD COMPATIBILITY ===
-        self.current_grid_export = 0.0   # ⚠️  DEPRECATED
-        self.current_grid_import = 0.0   # ⚠️  DEPRECATED
+        self.current_grid_export = 0.0   # DEPRECATED
+        self.current_grid_import = 0.0   # DEPRECATED
 
         self.decision_mode = decision_mode
     
@@ -244,7 +244,7 @@ class OSD:
                 error_logger=error_logger
             )
             
-            # ✅ NOWE: Jeśli JSON zawiera grid operations (setpointy i actual)
+            # NOWE: Jeśli JSON zawiera grid operations (setpointy i actual)
             if "setpoint_grid_export" in data:
                 instance.setpoint_grid_export = data.get("setpoint_grid_export", 0.0)
             if "setpoint_grid_import" in data:
@@ -359,12 +359,12 @@ class OSD:
         if amount_to_buy > 0:
             self.bought_power += amount_to_buy
             
-            # ✅ POPRAWKA: Ustaw SETPOINT (polecenie dla SCADA)
+            # POPRAWKA: Ustaw SETPOINT (polecenie dla SCADA)
             self.setpoint_grid_import = amount_to_buy
-            # ✅ Reset eksportu
+            # Reset eksportu
             self.setpoint_grid_export = 0.0
             
-            # ✅ POPRAWKA: Symulacja nie jest potrzebna - używamy setpoint
+            # POPRAWKA: Symulacja nie jest potrzebna - używamy setpoint
             
             # Backward compatibility
             self.current_grid_import = amount_to_buy
@@ -391,12 +391,12 @@ class OSD:
         if amount_to_sell > 0:
             self.sold_power += amount_to_sell
             
-            # ✅ POPRAWKA: Ustaw SETPOINT (polecenie dla SCADA)
+            # POPRAWKA: Ustaw SETPOINT (polecenie dla SCADA)
             self.setpoint_grid_export = amount_to_sell
-            # ✅ Reset importu
+            # Reset importu
             self.setpoint_grid_import = 0.0
             
-            # ✅ POPRAWKA: Symulacja nie jest potrzebna - używamy setpoint
+            # POPRAWKA: Symulacja nie jest potrzebna - używamy setpoint
             
             # Backward compatibility
             self.current_grid_export = amount_to_sell
@@ -414,8 +414,8 @@ class OSD:
 
     def reset_current_grid_values(self):
         """Resetuje setpointy grid na początku iteracji."""
-        self.setpoint_grid_export = 0.0  # ✅ NOWE
-        self.setpoint_grid_import = 0.0  # ✅ NOWE
+        self.setpoint_grid_export = 0.0  # NOWE
+        self.setpoint_grid_import = 0.0  # NOWE
         
         # Backward compatibility
         self.current_grid_export = 0.0
@@ -501,7 +501,7 @@ class OSD:
         """
         Konwertuje obiekt OSD do słownika dla API.
         
-        ⚠️  Ta metoda zwraca TYLKO dane DO WYSŁANIA do API/SCADA.
+        Ta metoda zwraca TYLKO dane DO WYSŁANIA do API/SCADA.
         
         WYSYŁANE:
         - Billing (akumulatory): sold_power, bought_power
@@ -517,15 +517,15 @@ class OSD:
             dict: Słownik zawierający TYLKO pola do wysłania
         """
         return {
-            # ✅ BILLING - Stan sprzedaży/zakupu (zapisujemy postęp)
+            # BILLING - Stan sprzedaży/zakupu (zapisujemy postęp)
             "sold_power": self.sold_power,
             "bought_power": self.bought_power,
             
-            # ✅ SETPOINTY - Polecenia dla SCADA
+            # SETPOINTY - Polecenia dla SCADA
             "setpoint_grid_export": self.setpoint_grid_export,
             "setpoint_grid_import": self.setpoint_grid_import,
             
-            # ⚠️  BACKWARD COMPATIBILITY (do usunięcia po migracji)
+            # BACKWARD COMPATIBILITY (do usunięcia po migracji)
             "current_grid_export": self.current_grid_export,
             "current_grid_import": self.current_grid_import,
         }

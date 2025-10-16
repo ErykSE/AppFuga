@@ -563,12 +563,12 @@ def should_prioritize_discharging_or_buying(
     """
     Decyduje czy lepiej rozładować BESS czy kupić energię z grid przy deficycie.
     
-    ⚠️ ZAŁOŻENIE: Obie opcje są FIZYCZNIE MOŻLIWE (sprawdzone wcześniej)
+    ZAŁOŻENIE: Obie opcje są FIZYCZNIE MOŻLIWE (sprawdzone wcześniej)
     - BESS może rozładować (BESSCapabilityChecker.check_discharge_capability)
     - Można kupić z grid (OSD.can_buy_energy + limit check)
     
-    ❌ USUNIĘTE: Reguły bezpieczeństwa (bess_low_threshold)
-    ✅ TYLKO: Porównanie utility DISCHARGE vs BUY
+    USUNIĘTE: Reguły bezpieczeństwa (bess_low_threshold)
+    TYLKO: Porównanie utility DISCHARGE vs BUY
     
     Args:
         charge_level: Aktualny poziom naładowania BESS (kWh)
@@ -592,7 +592,7 @@ def should_prioritize_discharging_or_buying(
         info_logger.info("=" * 70)
         info_logger.info("DEFICIT DECISION ANALYSIS - should_prioritize_discharging_or_buying()")
         info_logger.info(f"  Mode: {config.mode.value}")
-        info_logger.info("  ⚠️  ASSUMPTION: Both DISCHARGE and BUY are physically possible")
+        info_logger.info("  ASSUMPTION: Both DISCHARGE and BUY are physically possible")
     
     try:
         config.validate()
@@ -610,7 +610,7 @@ def should_prioritize_discharging_or_buying(
         info_logger.info(f"  BESS: {charge_level:.2f}/{max_charge_level:.2f} kWh")
         info_logger.info(f"  Charge: {charge_percent*100:.1f}% | Available: {available_energy:.2f} kWh")
     
-    # ❌ USUNIĘTE: Reguła bezpieczeństwa bess_low_threshold
+    # USUNIĘTE: Reguła bezpieczeństwa bess_low_threshold
     # To powinno być sprawdzone WCZEŚNIEJ w check_discharge_capability()
     
     # === KROK 2: Ekonomia ===
@@ -764,7 +764,7 @@ def should_prioritize_discharging_or_buying(
     # === KROK 10: Logowanie ===
     if info_logger:
         info_logger.info("-" * 70)
-        info_logger.info(f"  Decision: {'⚡ DISCHARGE' if decision_discharge else '💰 BUY'}")
+        info_logger.info(f"  Decision: {'DISCHARGE' if decision_discharge else 'BUY'}")
         info_logger.info(f"  Confidence: {confidence*100:.1f}%")
         info_logger.info(f"  Reason: {reason}")
         info_logger.info("=" * 70)

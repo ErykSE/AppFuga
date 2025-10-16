@@ -74,7 +74,7 @@ class EnergyDeficitManager:
         Zwraca:
             dict: Słownik zawierający ilość zarządzonego deficytu i ewentualny pozostały deficyt.
         """
-        # ✅ WALIDACJA DANYCH WEJŚCIOWYCH
+        #  WALIDACJA DANYCH WEJŚCIOWYCH
         if not isinstance(power_deficit, (int, float)):
             self.error_logger.error(f"Invalid power_deficit type: {type(power_deficit)}. Expected float.")
             return {"amount_managed": 0, "remaining_deficit": power_deficit}
@@ -90,22 +90,22 @@ class EnergyDeficitManager:
         self.info_logger.info(f"Start managing power deficit: {power_deficit} kW")
         self.info_logger.info("DEBUG: EnergyDeficitManager.handle_deficit_automatic START")
         self.info_logger.info("")
-        self.info_logger.info("🔧 MANAGING DEFICIT")
+        self.info_logger.info(" MANAGING DEFICIT")
         self.info_logger.info("-" * 25)
 
         managed = self.maximize_power_output(power_deficit)
 
-        self.info_logger.info(f"✅ Increased production: +{managed:.2f} kW")
+        self.info_logger.info(f" Increased production: +{managed:.2f} kW")
         remaining_deficit = power_deficit - managed
 
         if remaining_deficit > 0:
-            self.info_logger.info(f"⚠️  Remaining deficit: {remaining_deficit:.2f} kW")
+            self.info_logger.info(f"  Remaining deficit: {remaining_deficit:.2f} kW")
             
             result = self.manage_remaining_deficit(remaining_deficit)
             managed += result["amount_managed"]
             remaining_deficit = result["remaining_deficit"]
             
-            self.info_logger.info(f"✅ Managed additional: +{result['amount_managed']:.2f} kW")
+            self.info_logger.info(f" Managed additional: +{result['amount_managed']:.2f} kW")
 
         self.info_logger.info(f"📊 Total managed: {managed:.2f} kW, Remaining: {remaining_deficit:.2f} kW")
         return {
@@ -176,7 +176,7 @@ class EnergyDeficitManager:
             float: Ilość zwiększonej mocy wyjściowej w kW.
         """
         self.info_logger.info("DEBUG: maximize_power_output START")
-        # ✅ WALIDACJA DANYCH WEJŚCIOWYCH
+        #  WALIDACJA DANYCH WEJŚCIOWYCH
         if not isinstance(power_deficit, (int, float)) or power_deficit <= 0:
             self.error_logger.error(f"Invalid power_deficit: {power_deficit}")
             return 0.0
@@ -220,7 +220,7 @@ class EnergyDeficitManager:
                 if device.is_adjustable:
                     # Oblicz ile jeszcze potrzebujemy
                     remaining_needed = power_deficit - increased_power
-                    # ✅ POPRAWKA: Zwiększ tylko tyle ile potrzeba (nie do max!)
+                    #  POPRAWKA: Zwiększ tylko tyle ile potrzeba (nie do max!)
                     increase_amount = min(remaining_needed, max_output - initial_output)
                     new_output = initial_output + increase_amount
                     
@@ -329,7 +329,7 @@ class EnergyDeficitManager:
         """
         Zarządza pozostałym deficytem energii po maksymalizacji produkcji.
         
-        ✅ POPRAWIONA STRUKTURA - zawsze przez _execute_* metody!
+ POPRAWIONA STRUKTURA - zawsze przez _execute_* metody!
         
         Args:
             remaining_deficit: Pozostały deficyt energii do zarządzania w kW.
@@ -354,7 +354,7 @@ class EnergyDeficitManager:
             # === NOWA LOGIKA - SPÓJNA Z SURPLUS ===
             
             if bess_available and can_buy_energy:
-                # ✅ Obie opcje → handle_deficit_both_action()
+                #  Obie opcje → handle_deficit_both_action()
                 self.info_logger.info("Both DISCHARGE and BUY available → using smart decision")
                 result = self.handle_deficit_both_action(remaining_deficit)
                 
@@ -373,7 +373,7 @@ class EnergyDeficitManager:
                     break
 
             elif bess_available:
-                # ✅ Tylko DISCHARGE → _execute_discharge()
+                #  Tylko DISCHARGE → _execute_discharge()
                 self.info_logger.info("Only BESS available → discharging")
                 
                 # Sprawdź capability
@@ -398,7 +398,7 @@ class EnergyDeficitManager:
                     break
 
             elif can_buy_energy:
-                # ✅ Tylko BUY → _execute_buy()
+                #  Tylko BUY → _execute_buy()
                 self.info_logger.info("Only BUY available → buying from grid")
                 result = self._execute_buy(remaining_deficit)
                 
@@ -631,7 +631,7 @@ class EnergyDeficitManager:
         """
         Ogranicza zużycie energii przez odbiorniki.
         
-        ✅ ETAP 2: Z tracking poprzednich stanów.
+ ETAP 2: Z tracking poprzednich stanów.
         """
         self.info_logger.info(f"Attempting to limit consumption by {power_deficit} kW")
         total_reduced = 0
@@ -1118,7 +1118,7 @@ class EnergyDeficitManager:
         """
         Redukuje moc dla grupy urządzeń o tym samym priorytecie.
         
-        ✅ ETAP 2: Z tracking poprzednich stanów.
+ ETAP 2: Z tracking poprzednich stanów.
         """
         total_reduced = 0
         devices_affected = []
@@ -1132,7 +1132,7 @@ class EnergyDeficitManager:
             
             current_power = device.get_current_power()
             
-            # ✅ ETAP 2: Zapisz stan PRZED ograniczeniem
+            #  ETAP 2: Zapisz stan PRZED ograniczeniem
             if self.energy_manager_ref:
                 self.energy_manager_ref.save_device_state(device, "before_consumption_limit")
             
@@ -1145,7 +1145,7 @@ class EnergyDeficitManager:
                     new_power = current_power - reduction
                     device.set_power(new_power)
                     
-                    # ✅ ETAP 2: Dodaj do listy ograniczeń
+                    #  ETAP 2: Dodaj do listy ograniczeń
                     if self.energy_manager_ref:
                         self.energy_manager_ref.add_artificial_limitation(
                             device=device,
@@ -1172,7 +1172,7 @@ class EnergyDeficitManager:
             # Dla urządzeń nieregulowanych - tylko wyłączenie
             else:
                 if current_power > 0:
-                    # ✅ ETAP 2: Dodaj do listy ograniczeń PRZED wyłączeniem
+                    #  ETAP 2: Dodaj do listy ograniczeń PRZED wyłączeniem
                     if self.energy_manager_ref:
                         self.energy_manager_ref.add_artificial_limitation(
                             device=device,
@@ -1214,11 +1214,11 @@ class EnergyDeficitManager:
         """
         Redukuje moc pojedynczego urządzenia.
         
-        ✅ ETAP 2: Z tracking poprzednich stanów.
+ ETAP 2: Z tracking poprzednich stanów.
         """
         current_power = device.get_current_power()
         
-        # ✅ ETAP 2: Zapisz stan PRZED ograniczeniem
+        #  ETAP 2: Zapisz stan PRZED ograniczeniem
         if self.energy_manager_ref:
             self.energy_manager_ref.save_device_state(device, "before_consumption_limit")
         
@@ -1231,7 +1231,7 @@ class EnergyDeficitManager:
                 new_power = current_power - reduction
                 device.set_power(new_power)
                 
-                # ✅ ETAP 2: Dodaj do listy ograniczeń
+                #  ETAP 2: Dodaj do listy ograniczeń
                 if self.energy_manager_ref:
                     self.energy_manager_ref.add_artificial_limitation(
                         device=device,
@@ -1257,7 +1257,7 @@ class EnergyDeficitManager:
         # Dla urządzeń nieregulowanych - wyłącz
         else:
             if current_power > 0:
-                # ✅ ETAP 2: Dodaj do listy ograniczeń PRZED wyłączeniem
+                #  ETAP 2: Dodaj do listy ograniczeń PRZED wyłączeniem
                 if self.energy_manager_ref:
                     self.energy_manager_ref.add_artificial_limitation(
                         device=device,
@@ -1421,7 +1421,7 @@ class EnergyDeficitManager:
         2. Jeśli obie opcje dostępne → Decyzja (utility function)
         3. Wykonaj wybraną akcję
         
-        ✅ WSZYSTKIE REGUŁY BEZPIECZEŃSTWA SĄ W KROKU 1!
+ WSZYSTKIE REGUŁY BEZPIECZEŃSTWA SĄ W KROKU 1!
         
         Args:
             power_deficit: Deficyt mocy do pokrycia (kW)
@@ -1442,14 +1442,14 @@ class EnergyDeficitManager:
         if self.energy_manager_ref and self.energy_manager_ref.bess_checker:
             bess = self.energy_manager_ref.microgrid.bess
             
-            # ✅ ETAP 1: Sprawdź czy BESS już nie rozładowuje się!
+            #  ETAP 1: Sprawdź czy BESS już nie rozładowuje się!
             is_already_discharging, discharge_amount = self.energy_manager_ref.check_device_already_operating(
                 "BESS", "discharging"
             )
             
             if is_already_discharging:
                 self.info_logger.warning(
-                    f"⚠️  BESS is ALREADY DISCHARGING {discharge_amount:.2f} kW - cannot discharge more"
+                    f"  BESS is ALREADY DISCHARGING {discharge_amount:.2f} kW - cannot discharge more"
                 )
                 can_discharge = False
             else:
@@ -1458,7 +1458,7 @@ class EnergyDeficitManager:
                 can_discharge = discharge_plan.is_feasible
                 
                 if can_discharge:
-                    # ✅ BEZPIECZNY LOG - wszystkie pola mogą być None
+                    #  BEZPIECZNY LOG - wszystkie pola mogą być None
                     self.info_logger.info(
                         f"✓ BESS can DISCHARGE: {discharge_plan.energy_amount:.2f} kWh "
                         f"at {abs(discharge_plan.power_setpoint):.2f} kW"
@@ -1480,14 +1480,14 @@ class EnergyDeficitManager:
         can_buy = self.osd.can_buy_energy()
         
         if can_buy:
-            # ✅ ETAP 1: Sprawdź czy Grid już nie importuje!
+            #  ETAP 1: Sprawdź czy Grid już nie importuje!
             is_already_importing, import_amount = self.energy_manager_ref.check_device_already_operating(
                 "GRID", "importing"
             )
             
             if is_already_importing:
                 self.info_logger.warning(
-                    f"⚠️  GRID is ALREADY IMPORTING {import_amount:.2f} kW - cannot import more"
+                    f"  GRID is ALREADY IMPORTING {import_amount:.2f} kW - cannot import more"
                 )
                 can_buy = False
             else:
@@ -1501,8 +1501,8 @@ class EnergyDeficitManager:
         self.info_logger.info("")
         self.info_logger.info("🤔 DECISION ANALYSIS")
         self.info_logger.info("-" * 30)
-        self.info_logger.info(f"   BESS can discharge: {'✅ YES' if can_discharge else '❌ NO'}")
-        self.info_logger.info(f"   GRID can import:    {'✅ YES' if can_buy else '❌ NO'}")
+        self.info_logger.info(f"   BESS can discharge: {' YES' if can_discharge else '❌ NO'}")
+        self.info_logger.info(f"   GRID can import:    {' YES' if can_buy else '❌ NO'}")
         
         # Przypadek A: Tylko DISCHARGE możliwe
         if can_discharge and not can_buy:
@@ -1568,7 +1568,7 @@ class EnergyDeficitManager:
                 return self._execute_buy(power_deficit)
         
         # Przypadek D: Żadna opcja niedostępna
-        self.info_logger.warning("⚠️  Neither DISCHARGE nor BUY available")
+        self.info_logger.warning("  Neither DISCHARGE nor BUY available")
         return {"success": False, "amount": 0, "reason": "No action possible"}
 
 
@@ -1592,7 +1592,7 @@ class EnergyDeficitManager:
             discharge_power = discharge_plan.power_setpoint
             self.info_logger.info(f"Executing DISCHARGE (with plan): {discharge_power:.2f} kW")
         else:
-            # ✅ POPRAWIONY FALLBACK - użyj bezpieczniejszych limitów
+            #  POPRAWIONY FALLBACK - użyj bezpieczniejszych limitów
             # Sprawdź dostępną energię w BESS
             available_energy = bess.charge_level - bess.min_charge_level
             max_discharge_power = bess.get_max_discharge_power() if hasattr(bess, 'get_max_discharge_power') else bess.max_output
@@ -1640,7 +1640,7 @@ class EnergyDeficitManager:
                 f"Remaining deficit will be handled then."
             )
             
-            # ✅ NIE kupuj reszty teraz - poczekaj na early iteration
+            #  NIE kupuj reszty teraz - poczekaj na early iteration
 
         else:
             # BESS NIE skończy wcześniej → próbuj kupić resztę teraz
