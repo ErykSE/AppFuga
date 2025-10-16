@@ -191,9 +191,6 @@ class EnergyManager:
         self.previous_device_states = {}  # Śledzenie poprzednich stanów urządzeń
         self.artificial_limitations = []  # Lista sztucznie nałożonych ograniczeń
         self.operation_history = []  # Historia operacji (dla analizy)
-        
-        # Flaga chroniąca przed race condition przy zatrzymywaniu BESS
-        self.bess_pending_stop = False
 
         #self.info_logger.info(f" IterationScheduler initialized")
 
@@ -268,16 +265,23 @@ class EnergyManager:
                 # Resetuj listę zmian na początku iteracji
                 self.reset_changed_devices()
                 
-                # Resetuj flagę BESS pending stop na początku iteracji
-                self.bess_pending_stop = False
-                
                 self.info_logger.highlight("Starting new iteration")
                 self.load_configuration()
 
-                # Sprawdź czy są eventy do wykonania
+                # Sprawdź czy są eventy do wykonania (PRZED załadowaniem danych)
                 triggered_events = self.iteration_scheduler.check_for_triggered_events()
+                bess_stop_pending = False
+                
                 if triggered_events:
-                    self.handle_triggered_events(triggered_events)
+                    for event in triggered_events:
+                        if "bess" in event.event_type.lower():
+                            bess_stop_pending = True
+                            self.info_logger.info(
+                                f"⏰ BESS event: {event.event_type} - "
+                                f"will stop after loading data"
+                            )
+                        else:
+                            self.handle_triggered_events([event])
 
                 # 1. Pobieramy dane z API (jeśli używamy API)
                 if self.use_api:
@@ -308,6 +312,11 @@ class EnergyManager:
                 else:
                     # Tryb bez API - użyj danych początkowych (tylko do testów)
                     self.load_initial_data()
+                
+                # Wykonaj zatrzymanie BESS PO załadowaniu danych
+                if bess_stop_pending:
+                    self.info_logger.info("🛑 Executing BESS stop")
+                    self.stop_bess_operation()
 
                 # 3. Wykonujemy algorytm
                 result = self.run_single_iteration()
@@ -1155,14 +1164,6 @@ class EnergyManager:
 
     def load_live_data(self):
         try:
-            # Zapisz obecny setpoint BESS jeśli flaga jest ustawiona
-            saved_bess_setpoint = None
-            if self.bess_pending_stop and self.microgrid.bess:
-                saved_bess_setpoint = self.microgrid.bess.setpoint_output
-                self.info_logger.info(
-                    f"⚠️ BESS pending stop detected - preserving setpoint {saved_bess_setpoint:.2f} kW"
-                )
-            
             self.microgrid.load_data_from_json(self.live_data_path)
             self.consumergrid.load_data_from_json(self.live_data_path)
             new_osd = OSD.load_data_from_json(self.live_contract_path)
@@ -1173,13 +1174,6 @@ class EnergyManager:
                 self.deficit_manager.osd = self.osd
             else:
                 raise ValueError("Failed to load OSD data from live contract file.")
-            
-            # Przywróć setpoint BESS jeśli flaga była ustawiona
-            if self.bess_pending_stop and self.microgrid.bess and saved_bess_setpoint is not None:
-                self.microgrid.bess.setpoint_output = saved_bess_setpoint
-                self.info_logger.info(
-                    f"✓ Restored BESS setpoint to {saved_bess_setpoint:.2f} kW (protected from race condition)"
-                )
             
             self.info_logger.info("Loaded live data")
             self._ensure_bess_checker()  # ← DODAJ TĘ LINIĘ (jeśli jej nie ma)
@@ -2010,9 +2004,6 @@ class EnergyManager:
             return
         
         self.info_logger.info("🛑 Stopping BESS operation (setpoint -> 0 kW)")
-        
-        # Ustaw flagę chroniącą przed nadpisaniem setpoint przez load_live_data()
-        self.bess_pending_stop = True
         
         # Ustaw setpoint na 0
         self.microgrid.bess.setpoint_output = 0
