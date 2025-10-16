@@ -2796,6 +2796,12 @@ class EnergyManager:
             self.info_logger.info("")
             self.info_logger.info(f"Neutralized {neutralized_amount:.1f} kW of conflicting operations")
             
+            # Dodaj szczegóły o przyczynie neutralizacji
+            if balance.has_surplus:
+                self.info_logger.info("   Reason: BESS was discharging during surplus (causing more surplus)")
+            elif balance.has_deficit:
+                self.info_logger.info("   Reason: BESS was charging during deficit (causing more deficit)")
+            
             # ═══════════════════════════════════════════════════════════════
             # PRZELICZ BILANS PONOWNIE (używa ZSYMULOWANEGO actual_output!)
             # ═══════════════════════════════════════════════════════════════
@@ -3323,10 +3329,9 @@ class EnergyManager:
         # Dla NADWYŻKI: NIE zwiększaj zużycia - to jest nielogiczne!
         # Nadwyżka powinna być zagospodarowana przez BESS lub Grid, nie przez zwiększanie zużycia
         elif balance.has_surplus and not restored:
-            self.info_logger.info("Surplus detected - will be managed by BESS/Grid (not by increasing consumption)")
-            
             # TODO: W przyszłości można dodać logikę przywracania wcześniej zmniejszonych urządzeń
             # TODO: Lub zwiększania zużycia tylko w krytycznych sytuacjach (gdy BESS/Grid nie mogą zagospodarować nadwyżki)
+            pass
         
         # ═══════════════════════════════════════════════════════════════
         # FINALIZACJA
