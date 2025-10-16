@@ -3062,24 +3062,25 @@ class EnergyManager:
         self.info_logger.info("")
 
     def _log_state_after(self, balance):
-        """Loguje stan po zmianach"""
-        self.info_logger.info("STAN PO:")
-        self.info_logger.info(f"  Generation: {balance.generation:.1f} kW")
-        self.info_logger.info(f"  Consumption: {balance.consumption:.1f} kW")
-        self.info_logger.info(f"  BESS: {balance.bess_charge:.1f} kW")
-        self.info_logger.info(f"  Grid: Import={balance.grid_import:.1f} kW, Export={balance.grid_export:.1f} kW")
-        self.info_logger.info(f"  Balance: {balance.balance:.1f} kW ({'SURPLUS' if balance.has_surplus else 'DEFICIT' if balance.has_deficit else 'BALANCED'})")
-        self.info_logger.info("")
+        """Loguje stan po zmianach - NIEPOTRZEBNE, użyj _log_simple_summary"""
+        pass
 
     def _log_simple_summary(self, initial_balance, final_balance, changes, decision):
-        """Proste podsumowanie"""
+        """Połączone podsumowanie - stan po + zmiany"""
         self.info_logger.info("PODSUMOWANIE:")
         self.info_logger.info(f"  Initial Balance: {initial_balance.balance:.1f} kW")
         self.info_logger.info(f"  Final Balance: {final_balance.balance:.1f} kW")
-        self.info_logger.info(f"  Changes: {len(changes)} device(s) modified")
+        self.info_logger.info(f"  Balance Change: {final_balance.balance - initial_balance.balance:+.1f} kW")
+        self.info_logger.info("")
+        self.info_logger.info("  FINAL STATE:")
+        self.info_logger.info(f"    Generation: {final_balance.generation:.1f} kW")
+        self.info_logger.info(f"    Consumption: {final_balance.consumption:.1f} kW")
+        self.info_logger.info(f"    BESS: {final_balance.bess_charge:.1f} kW")
+        self.info_logger.info(f"    Grid: Import={final_balance.grid_import:.1f} kW, Export={final_balance.grid_export:.1f} kW")
+        self.info_logger.info("")
+        self.info_logger.info(f"  CHANGES: {len(changes)} device(s) modified")
         if changes:
             for change in changes:
-                #  POPRAWKA: change['device'] to obiekt, nie słownik!
                 device = change.get('device')
                 action = change.get('action', 'Unknown')
                 if hasattr(device, 'name'):
