@@ -927,9 +927,7 @@ class EnergySurplusManager:
                 error_logger=self.error_logger
             )
             
-            # Loguj wynik
-            self.info_logger.info(f"Decision: {result.reason}")
-            self.info_logger.info(f"Confidence: {result.confidence*100:.1f}%")
+            # Wynik już zalogowany w should_prioritize_charging_or_selling()
             
             # Wykonaj decyzję
             if result.decision:  # CHARGE
