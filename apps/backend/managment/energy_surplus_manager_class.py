@@ -802,13 +802,20 @@ class EnergySurplusManager:
     
     def _load_decision_config(self) -> DecisionConfig:
         try:
-            # Pobierz tryb z OSD (przychodzi z API jako 'energy_mode')
-            mode_str = getattr(self.osd, 'energy_mode', 'AUTO').upper()
+            # Pobierz tryb z OSD (przychodzi z API jako 'decision_mode')
+            mode_str = getattr(self.osd, 'decision_mode', 'AUTO').upper()
             
-            if mode_str in DecisionMode.__members__:
-                mode = DecisionMode[mode_str]
+            # Mapowanie z API na DecisionMode
+            mode_mapping = {
+                "AUTO": DecisionMode.AUTO,
+                "BESS_PRIORITY": DecisionMode.BESS_PRIORITY,
+                "GRID_PRIORITY": DecisionMode.GRID_PRIORITY
+            }
+            
+            if mode_str in mode_mapping:
+                mode = mode_mapping[mode_str]
             else:
-                self.error_logger.warning(f"Unknown energy_mode '{mode_str}', using AUTO")
+                self.error_logger.warning(f"Unknown decision_mode '{mode_str}', using AUTO")
                 mode = DecisionMode.AUTO
             
             config = DecisionConfig(mode=mode)

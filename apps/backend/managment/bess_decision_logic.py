@@ -62,7 +62,7 @@ class DecisionMode(Enum):
     === API CONTRACT_DATA ===
     
     {
-        "energy_mode": "AUTO",  // lub "BESS_PRIORITY" lub "GRID_PRIORITY"
+        "decision_mode": "AUTO",  // lub "BESS_PRIORITY" lub "GRID_PRIORITY"
         // ... reszta pól
     }
     """
