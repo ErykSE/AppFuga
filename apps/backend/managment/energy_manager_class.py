@@ -3324,6 +3324,9 @@ class EnergyManager:
         # Nadwyżka powinna być zagospodarowana przez BESS lub Grid, nie przez zwiększanie zużycia
         elif balance.has_surplus and not restored:
             self.info_logger.info("Surplus detected - will be managed by BESS/Grid (not by increasing consumption)")
+            
+            # TODO: W przyszłości można dodać logikę przywracania wcześniej zmniejszonych urządzeń
+            # TODO: Lub zwiększania zużycia tylko w krytycznych sytuacjach (gdy BESS/Grid nie mogą zagospodarować nadwyżki)
         
         # ═══════════════════════════════════════════════════════════════
         # FINALIZACJA
