@@ -160,19 +160,18 @@ class EnergySurplusManager:
                         break
                 attempted_actions.add(action)
 
-                self.info_logger.info(f"Attempting to perform the action: {action}")
+                self.info_logger.info(f"Attempting: {action}")
                 result = self.execute_action(action, remaining_surplus)
-                self.info_logger.info(f"Action result: {result}")
 
                 if result["success"]:
                     total_managed += result["amount"]
                     remaining_surplus -= result["amount"]
                     self.info_logger.info(
-                        f"Action {action} managed {result['amount']:.6f} kW. Surplus remaining: {remaining_surplus:.6f} kW"
+                        f"Success: Managed {result['amount']:.1f} kW, remaining: {remaining_surplus:.1f} kW"
                     )
                 else:
                     self.info_logger.info(
-                        f"Action {action} has failed. Reason: {result.get('reason', 'Unknown')}"
+                        f"Failed: {result.get('reason', 'Unknown')}"
                     )
 
             if iteration == MAX_ITERATIONS:
@@ -200,11 +199,7 @@ class EnergySurplusManager:
         Zwraca:
             dict: Słownik wskazujący na sukces działania i ilość zarządzonej energii.
         """
-        self.info_logger.info(f"Executing action: {action}, type: {type(action)}")
-        self.info_logger.info(
-            f"XXXXXXXXXXXXXXXXXXXXXXXXXExecuting actionxdxdxdd: {action}"
-        )
-        self.info_logger.info(f"Remaining surplus: {remaining_surplus:.6f}")
+        # Action już zalogowane w manage_surplus_energy()
 
         if action == SurplusAction.BOTH:
             return self.handle_both_action(remaining_surplus)
@@ -387,9 +382,6 @@ class EnergySurplusManager:
             if amount_to_sell > self.EPSILON:
                 sold_amount = self.sell_energy(amount_to_sell)
                 if sold_amount > 0:
-                    self.info_logger.info(
-                        f"Successfully sold {sold_amount:.6f} kW of energy."
-                    )
                     return {"success": True, "amount": round(sold_amount, 6)}
                 else:
                     return {
@@ -406,10 +398,7 @@ class EnergySurplusManager:
     def sell_energy(self, power_surplus):
         try:
             self.osd.sell_power(power_surplus)
-            self.info_logger.info(
-                f"Selling {power_surplus} kW of surplus energy. Total energy sold: {self.osd.get_sold_power()} kW."
-            )
-            # DODAJ TO - Śledzenie zmian OSD
+            # Śledzenie zmian OSD
             if self.energy_manager_ref:
                 device_change = {
                     "device": self.osd,
@@ -418,7 +407,6 @@ class EnergySurplusManager:
                     "device_type": "OSD"
                 }
                 self.energy_manager_ref.changed_devices.append(device_change)
-                self.info_logger.info(f" DEVICE CHANGED: OSD (OSD) - sell:{power_surplus}")
             
             return power_surplus
         except Exception as e:
