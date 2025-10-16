@@ -2005,8 +2005,12 @@ class EnergyManager:
         
         self.info_logger.info("🛑 Stopping BESS operation (setpoint -> 0 kW)")
         
-        # Ustaw setpoint na 0
+        # Ustaw setpoint na 0 (polecenie dla SCADA)
         self.microgrid.bess.setpoint_output = 0
+        
+        # Ustaw actual_output na 0 (symulacja dla obliczeń)
+        # To zapewnia że algorytm widzi BESS jako zatrzymany
+        self.microgrid.bess.actual_output = 0
         
         # Dodaj do changed_devices
         device_change = {
