@@ -2285,15 +2285,23 @@ class EnergyManager:
         self.info_logger.info(" INITIAL SYSTEM STATUS")
         self.info_logger.info("-" * 70)
         
-        # Użyj calculate_energy_balance() dla spójności
-        energy_balance = self.calculate_energy_balance()
+        # Użyj actual values z API (przed działaniem algorytmu)
+        actual_generation = self.microgrid.total_power_generated()
+        actual_consumption = self.consumergrid.total_power_consumed()
+        
+        # BESS actual output
+        bess_actual = self.microgrid.bess.actual_output if self.microgrid.bess else 0.0
+        
+        # Grid actual values
+        grid_import_actual = self.osd.current_grid_import
+        grid_export_actual = self.osd.current_grid_export
         
         # Oblicz całkowitą generację (urządzenia + BESS + grid)
-        total_generation = energy_balance.generation + energy_balance.bess_discharge + energy_balance.grid_import
-        total_consumption = energy_balance.consumption + energy_balance.bess_charge + energy_balance.grid_export
+        total_generation = actual_generation + max(0, bess_actual) + grid_import_actual
+        total_consumption = actual_consumption + max(0, -bess_actual) + grid_export_actual
         
-        self.info_logger.info(f"Generation:  {total_generation:>8.2f} kW (devices: {energy_balance.generation:.1f} + BESS: {energy_balance.bess_discharge:.1f} + Grid: {energy_balance.grid_import:.1f})")
-        self.info_logger.info(f"Consumption: {total_consumption:>8.2f} kW (loads: {energy_balance.consumption:.1f} + BESS: {energy_balance.bess_charge:.1f} + Grid: {energy_balance.grid_export:.1f})")
+        self.info_logger.info(f"Generation:  {total_generation:>8.2f} kW (devices: {actual_generation:.1f} + BESS: {max(0, bess_actual):.1f} + Grid: {grid_import_actual:.1f})")
+        self.info_logger.info(f"Consumption: {total_consumption:>8.2f} kW (loads: {actual_consumption:.1f} + BESS: {max(0, -bess_actual):.1f} + Grid: {grid_export_actual:.1f})")
         
         # BESS status
         if self.microgrid.bess:
@@ -2315,8 +2323,8 @@ class EnergyManager:
             f"Bought={self.osd.bought_power:.2f}/{self.osd.CONTRACTED_PURCHASE_LIMIT:.2f} kWh"
         )
         
-        # Balance calculation
-        balance = energy_balance.balance
+        # Balance calculation (użyj actual values)
+        balance = total_generation - total_consumption
         if abs(balance) < 1.0:
             balance_text = "BALANCED"
         elif balance > 0:
@@ -3061,11 +3069,34 @@ class EnergyManager:
         self.info_logger.info(f"  Final Balance: {final_balance.balance:.1f} kW")
         self.info_logger.info(f"  Balance Change: {final_balance.balance - initial_balance.balance:+.1f} kW")
         self.info_logger.info("")
-        self.info_logger.info("  FINAL STATE:")
-        self.info_logger.info(f"    Generation: {final_balance.generation:.1f} kW")
-        self.info_logger.info(f"    Consumption: {final_balance.consumption:.1f} kW")
-        self.info_logger.info(f"    BESS: {final_balance.bess_charge:.1f} kW")
-        self.info_logger.info(f"    Grid: Import={final_balance.grid_import:.1f} kW, Export={final_balance.grid_export:.1f} kW")
+        self.info_logger.info("  FINAL STATE (SETPOINTS FOR SCADA):")
+        
+        # Oblicz setpoint values (polecenia dla SCADA)
+        setpoint_generation = 0.0
+        for device in self.microgrid.get_all_devices():
+            if device.get_switch_status():
+                if hasattr(device, 'setpoint_output'):
+                    setpoint_generation += device.setpoint_output
+                else:
+                    setpoint_generation += device.get_actual_output()
+        
+        setpoint_consumption = self.consumergrid.total_power_consumed()
+        
+        # BESS setpoint
+        bess_setpoint = self.microgrid.bess.setpoint_output if self.microgrid.bess else 0.0
+        
+        # Grid setpoints
+        grid_import_setpoint = self.osd.setpoint_grid_import
+        grid_export_setpoint = self.osd.setpoint_grid_export
+        
+        # Oblicz całkowitą generację (urządzenia + BESS + grid)
+        total_setpoint_generation = setpoint_generation + max(0, bess_setpoint) + grid_import_setpoint
+        total_setpoint_consumption = setpoint_consumption + max(0, -bess_setpoint) + grid_export_setpoint
+        
+        self.info_logger.info(f"    Generation: {total_setpoint_generation:.1f} kW (devices: {setpoint_generation:.1f} + BESS: {max(0, bess_setpoint):.1f} + Grid: {grid_import_setpoint:.1f})")
+        self.info_logger.info(f"    Consumption: {total_setpoint_consumption:.1f} kW (loads: {setpoint_consumption:.1f} + BESS: {max(0, -bess_setpoint):.1f} + Grid: {grid_export_setpoint:.1f})")
+        self.info_logger.info(f"    BESS: {bess_setpoint:.1f} kW (setpoint)")
+        self.info_logger.info(f"    Grid: Import={grid_import_setpoint:.1f} kW, Export={grid_export_setpoint:.1f} kW (setpoints)")
         self.info_logger.info("")
         self.info_logger.info(f"  CHANGES: {len(changes)} device(s) modified")
         if changes:
