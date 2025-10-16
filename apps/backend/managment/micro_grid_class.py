@@ -292,23 +292,23 @@ class Microgrid:
             with open(file_path, "r") as file:
                 data = json.load(file)
 
-            # ✅ WALIDACJA STATUSU SCADA
+            #  WALIDACJA STATUSU SCADA
             if "status" in data:
                 status = data.get("status", {})
                 status_code = status.get("code", "unknown")
                 
                 if status_code == "scada_unavailable":
                     self.error_logger.critical(
-                        "❌ SCADA SYSTEM NOT AVAILABLE! Cannot load data."
+                        " SCADA SYSTEM NOT AVAILABLE! Cannot load data."
                     )
                     return False
                 elif status_code == "partial_data":
                     missing = status.get("missing_devices", [])
                     self.error_logger.warning(
-                        f"⚠️  Partial data received. Missing devices: {missing}"
+                        f"  Partial data received. Missing devices: {missing}"
                     )
                 elif status_code == "ok":
-                    self.info_logger.info("✅ SCADA status: OK")
+                    self.info_logger.info(" SCADA status: OK")
 
             # Wyczyść istniejące urządzenia
             self.pv_panels = []

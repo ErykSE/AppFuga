@@ -107,7 +107,7 @@ class EnergyDeficitManager:
             
             self.info_logger.info(f" Managed additional: +{result['amount_managed']:.2f} kW")
 
-        self.info_logger.info(f"📊 Total managed: {managed:.2f} kW, Remaining: {remaining_deficit:.2f} kW")
+        self.info_logger.info(f" Total managed: {managed:.2f} kW, Remaining: {remaining_deficit:.2f} kW")
         return {
             "amount_managed": managed,
             "remaining_deficit": remaining_deficit,
@@ -147,7 +147,7 @@ class EnergyDeficitManager:
         # Oblicz, ile dodatkowej mocy możemy obsłużyć
         handleable_power = min(total_available_capacity, potential_surplus)
 
-        self.info_logger.info("🔍 DEBUG: maximize_power_output calculations")
+        self.info_logger.info(" DEBUG: maximize_power_output calculations")
         self.info_logger.info(f"Current output: {current_output} kW")
         self.info_logger.info(f"Max potential output: {max_potential_output} kW")
         self.info_logger.info(f"Power deficit: {power_deficit} kW")
@@ -414,7 +414,7 @@ class EnergyDeficitManager:
                     break
 
             else:
-                # ❌ Żadna opcja niedostępna → ograniczenie zużycia (ostateczność)
+                #  Żadna opcja niedostępna → ograniczenie zużycia (ostateczność)
                 self.info_logger.warning("Neither DISCHARGE nor BUY available → limiting consumption")
                 result = self.execute_action(DeficitAction.LIMIT_CONSUMPTION, remaining_deficit)
                 
@@ -1460,7 +1460,7 @@ class EnergyDeficitManager:
                 if can_discharge:
                     #  BEZPIECZNY LOG - wszystkie pola mogą być None
                     self.info_logger.info(
-                        f"✓ BESS can DISCHARGE: {discharge_plan.energy_amount:.2f} kWh "
+                        f" BESS can DISCHARGE: {discharge_plan.energy_amount:.2f} kWh "
                         f"at {abs(discharge_plan.power_setpoint):.2f} kW"
                     )
                     
@@ -1493,7 +1493,7 @@ class EnergyDeficitManager:
             else:
                 remaining_capacity = self.osd.get_remaining_purchase_capacity()
                 self.info_logger.info(
-                    f"✓ GRID can BUY: {remaining_capacity:.2f} kWh remaining capacity"
+                    f" GRID can BUY: {remaining_capacity:.2f} kWh remaining capacity"
                 )
         
         # === KROK 2: PODEJMIJ DECYZJĘ ===
@@ -1501,8 +1501,8 @@ class EnergyDeficitManager:
         self.info_logger.info("")
         self.info_logger.info("🤔 DECISION ANALYSIS")
         self.info_logger.info("-" * 30)
-        self.info_logger.info(f"   BESS can discharge: {' YES' if can_discharge else '❌ NO'}")
-        self.info_logger.info(f"   GRID can import:    {' YES' if can_buy else '❌ NO'}")
+        self.info_logger.info(f"   BESS can discharge: {' YES' if can_discharge else ' NO'}")
+        self.info_logger.info(f"   GRID can import:    {' YES' if can_buy else ' NO'}")
         
         # Przypadek A: Tylko DISCHARGE możliwe
         if can_discharge and not can_buy:

@@ -227,7 +227,7 @@ class BESS:
         """
         Ustawia BESS na ładowanie.
         
-        ⚠️  WAŻNE: Ta metoda NIE zmienia charge_level!
+  WAŻNE: Ta metoda NIE zmienia charge_level!
         charge_level jest READ-ONLY z SCADA i zostanie zaktualizowany
         w następnej iteracji przez load_data_from_json().
         
@@ -257,10 +257,10 @@ class BESS:
         # Ogranicz moc do dostępnej przestrzeni (nie możemy żądać więcej niż się zmieści)
         charged_amount = min(actual_power, available_space)
         
-        # ✅ TYLKO ustaw setpoint (polecenie dla SCADA)
+        #  TYLKO ustaw setpoint (polecenie dla SCADA)
         self.setpoint_output = -abs(charged_amount)  # Ujemny = ładowanie
         
-        # ❌ NIE ZMIENIAJ charge_level!
+        #  NIE ZMIENIAJ charge_level!
         # self.charge_level += charged_amount  # ← USUNIĘTE!
         
         # Oblicz procent (informacyjnie, bazując na OBECNYM charge_level)
@@ -279,7 +279,7 @@ class BESS:
         """
         Ustawia BESS na rozładowanie.
         
-        ⚠️  WAŻNE: Ta metoda NIE zmienia charge_level!
+  WAŻNE: Ta metoda NIE zmienia charge_level!
         charge_level jest READ-ONLY z SCADA i zostanie zaktualizowany
         w następnej iteracji przez load_data_from_json().
         
@@ -309,10 +309,10 @@ class BESS:
         # Ogranicz moc do dostępnej energii
         discharged_amount = min(actual_power, available_energy)
         
-        # ✅ TYLKO ustaw setpoint (polecenie dla SCADA)
+        #  TYLKO ustaw setpoint (polecenie dla SCADA)
         self.setpoint_output = abs(discharged_amount)  # Dodatni = rozładowanie
         
-        # ❌ NIE ZMIENIAJ charge_level!
+        #  NIE ZMIENIAJ charge_level!
         # self.charge_level -= discharged_amount  # ← USUNIĘTE!
         
         # Oblicz procent (informacyjnie)
@@ -363,7 +363,7 @@ class BESS:
         """
         Konwertuje obiekt BESS do słownika dla API.
         
-        ⚠️  WAŻNE: Wysyłamy TYLKO setpointy (polecenia dla SCADA)!
+  WAŻNE: Wysyłamy TYLKO setpointy (polecenia dla SCADA)!
         charge_level i actual_output są READ-ONLY i NIE są wysyłane.
         
         Returns:
@@ -373,11 +373,11 @@ class BESS:
             "id": self.id,
             "name": self.name,
             
-            # ✅ SETPOINTY (polecenia dla SCADA) - WYSYŁAMY:
+            #  SETPOINTY (polecenia dla SCADA) - WYSYŁAMY:
             "setpoint_output": self.setpoint_output,
             "switch_status": self.switch_status,
             
-            # ❌ READ-ONLY (stan z SCADA) - NIE WYSYŁAMY:
+            #  READ-ONLY (stan z SCADA) - NIE WYSYŁAMY:
             # "charge_level": self.charge_level,  # ← READ-ONLY
             # "actual_output": self.actual_output,  # ← READ-ONLY
             

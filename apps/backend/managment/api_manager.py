@@ -418,7 +418,7 @@ class ApiManager:
                     "max_output": device.get("max_output", 100),
                     "min_output": device.get("min_output", 0),
                     "actual_output": device.get("actual_output", 0),
-                    "setpoint_output": device.get("setpoint_output", 0),  # ✅ NOWE
+                    "setpoint_output": device.get("setpoint_output", 0),  #  NOWE
                     "switch_status": device.get("switch_status", False),
                     "device_status": "online" if device.get("switch_status", False) else "offline"
                 })
@@ -430,13 +430,13 @@ class ApiManager:
                 "name": bess.get("name", "BESS 1"),
                 "capacity": bess.get("capacity", 200),
                 "min_charge_level": bess.get("min_charge_level", 10),
-                "max_charge_level": bess.get("max_charge_level", 200),  # ✅ NOWE
+                "max_charge_level": bess.get("max_charge_level", 200),  #  NOWE
                 "charge_level": bess.get("charge_level", 0),
-                "actual_output": bess.get("actual_output", 0),  # ✅ NOWE
-                "setpoint_output": bess.get("setpoint_output", 0),  # ✅ NOWE
-                "max_discharge_power": bess.get("max_discharge_power", 100),  # ✅ NOWE
-                "max_charge_power": bess.get("max_charge_power", 100),  # ✅ NOWE
-                "min_output": bess.get("min_output", 0),  # ✅ NOWE
+                "actual_output": bess.get("actual_output", 0),  #  NOWE
+                "setpoint_output": bess.get("setpoint_output", 0),  #  NOWE
+                "max_discharge_power": bess.get("max_discharge_power", 100),  #  NOWE
+                "max_charge_power": bess.get("max_charge_power", 100),  #  NOWE
+                "min_output": bess.get("min_output", 0),  #  NOWE
                 "switch_status": bess.get("switch_status", True),
                 "device_status": "online" if bess.get("switch_status", True) else "offline"
             })
@@ -447,9 +447,9 @@ class ApiManager:
                 "id": device.get("id", 0),
                 "name": device.get("name", "Unknown Device"),
                 "priority": device.get("priority", 1),
-                "power": device.get("actual_output", 0),  # ✅ API używa actual_output
-                "actual_output": device.get("actual_output", 0),  # ✅ NOWE - dla kompatybilności
-                "setpoint_output": device.get("setpoint_output", 0),  # ✅ NOWE
+                "power": device.get("actual_output", 0),  #  API używa actual_output
+                "actual_output": device.get("actual_output", 0),  #  NOWE - dla kompatybilności
+                "setpoint_output": device.get("setpoint_output", 0),  #  NOWE
                 "switch_status": device.get("switch_status", False)
             })
         
@@ -459,9 +459,9 @@ class ApiManager:
                 "id": device.get("id", 0),
                 "name": device.get("name", "Unknown Device"),
                 "priority": device.get("priority", 1),
-                "power": device.get("actual_output", 0),  # ✅ API używa actual_output
-                "actual_output": device.get("actual_output", 0),  # ✅ NOWE - dla kompatybilności
-                "setpoint_output": device.get("setpoint_output", 0),  # ✅ NOWE
+                "power": device.get("actual_output", 0),  #  API używa actual_output
+                "actual_output": device.get("actual_output", 0),  #  NOWE - dla kompatybilności
+                "setpoint_output": device.get("setpoint_output", 0),  #  NOWE
                 "switch_status": device.get("switch_status", False),
                 "min_power": device.get("min_power", 0),
                 "max_power": device.get("max_power", 100)
@@ -493,7 +493,7 @@ class ApiManager:
             "CONTRACTED_SALE_LIMIT": contract_data.get("contractedSaleLimit", 0),
             "CONTRACTED_PURCHASE_LIMIT": contract_data.get("contractedPurchaseLimit", 0),
             
-            # ✅ NOWE: Billing cycle
+            #  NOWE: Billing cycle
             "CONTRACTED_BILLING_CYCLE": contract_data.get("contractedBillingCycle", "monthly"),
             "contracted_billing_period_start": contract_data.get("contractedBillingPeriodStart", ""),
             "contracted_billing_period_end": contract_data.get("contractedBillingPeriodEnd", ""),
@@ -504,7 +504,7 @@ class ApiManager:
             "current_tariff_buy": contract_data.get("currentTariffBuy", 0),
             "current_tariff_sell": contract_data.get("currentTariffSell", 0),
             
-            # ✅ NOWE: Grid operations (opcjonalne - mogą nie być w API)
+            #  NOWE: Grid operations (opcjonalne - mogą nie być w API)
             "current_grid_export": contract_data.get("gridExport", 0),
             "current_grid_import": contract_data.get("gridImport", 0),
         }
@@ -593,7 +593,7 @@ class ApiManager:
                                 f"Wysyłanie danych kontraktu (próba {attempt}/{self.retry_config.max_retries})", 
                                 "RETRY")
                 
-                # ✅ DIAGNOSTYKA: Log danych przed wysłaniem
+                #  DIAGNOSTYKA: Log danych przed wysłaniem
                 self.info_logger.info("=" * 70)
                 self.info_logger.info("CONTRACT DATA BEING SENT TO API:")
                 self.info_logger.info(json.dumps(contract_data, indent=2))
@@ -607,7 +607,7 @@ class ApiManager:
                     timeout=self.retry_config.connection_timeout
                 )
                 
-                # ✅ DIAGNOSTYKA: Log odpowiedzi API
+                #  DIAGNOSTYKA: Log odpowiedzi API
                 self.info_logger.info(f"API Response Status Code: {response.status_code}")
                 
                 if response.status_code != 200:

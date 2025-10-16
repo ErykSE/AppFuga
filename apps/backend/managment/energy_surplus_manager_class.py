@@ -101,7 +101,7 @@ class EnergySurplusManager:
             return SurplusAction.SELL_ENERGY
 
     def manage_surplus_energy(self, power_surplus):
-        # ✅ WALIDACJA DANYCH WEJŚCIOWYCH
+        #  WALIDACJA DANYCH WEJŚCIOWYCH
         if not isinstance(power_surplus, (int, float)):
             self.error_logger.error(f"Invalid power_surplus type: {type(power_surplus)}. Expected float.")
             return {"amount_managed": 0, "remaining_surplus": power_surplus}
@@ -115,7 +115,7 @@ class EnergySurplusManager:
             return {"amount_managed": 0, "remaining_surplus": power_surplus}
         
         self.info_logger.info("")
-        self.info_logger.info("🔧 MANAGING SURPLUS")
+        self.info_logger.info(" MANAGING SURPLUS")
         self.info_logger.info("-" * 25)
         
         total_managed = 0
@@ -131,7 +131,7 @@ class EnergySurplusManager:
                     f"Iteration {iteration}, surplus remaining: {remaining_surplus:.6f} kW"
                 )
 
-                # ✅ POPRAWIONA LOGIKA ZGODNIE ZE SCENARIUSZEM
+                #  POPRAWIONA LOGIKA ZGODNIE ZE SCENARIUSZEM
                 # Krok 6: BESS vs GRID (decyzja)
                 # Krok 7: Ograniczanie generacji (ostateczność)
                 
@@ -144,16 +144,16 @@ class EnergySurplusManager:
                     self.info_logger.info("")
                     self.info_logger.info("🤔 DECISION ANALYSIS")
                     self.info_logger.info("-" * 30)
-                    self.info_logger.info(f"   BESS can charge:   {'✅ YES' if bess_available else '❌ NO'}")
-                    self.info_logger.info(f"   GRID can export:   {'✅ YES' if export_possible else '❌ NO'}")
+                    self.info_logger.info(f"   BESS can charge:   {' YES' if bess_available else ' NO'}")
+                    self.info_logger.info(f"   GRID can export:   {' YES' if export_possible else ' NO'}")
                     self.info_logger.info("")
-                    self.info_logger.info("⚖️  DECISION: Both options available → UTILITY FUNCTION")
+                    self.info_logger.info("  DECISION: Both options available → UTILITY FUNCTION")
                     self.info_logger.info("   Factors: Economics, BESS state, Risk assessment")
                     action = self._decide_bess_vs_grid(remaining_surplus)
                 elif bess_available:
                     # Tylko BESS dostępne
                     self.info_logger.info("")
-                    self.info_logger.info("⚡ DECISION: Only BESS available → CHARGE")
+                    self.info_logger.info(" DECISION: Only BESS available → CHARGE")
                     self.info_logger.info("   Reason: Grid cannot export (limit reached or unavailable)")
                     action = SurplusAction.CHARGE_BATTERY
                 elif export_possible:
@@ -166,7 +166,7 @@ class EnergySurplusManager:
                     # === KROK 7: OSTATECZNOŚĆ - Ograniczanie generacji ===
                     if SurplusAction.LIMIT_GENERATION not in attempted_actions:
                         self.info_logger.info("")
-                        self.info_logger.info("⚠️  DECISION: Neither BESS nor GRID available → LIMIT GENERATION")
+                        self.info_logger.info("  DECISION: Neither BESS nor GRID available → LIMIT GENERATION")
                         self.info_logger.info("   Reason: Last resort - reduce generator output")
                         action = SurplusAction.LIMIT_GENERATION
                     else:
@@ -482,7 +482,7 @@ class EnergySurplusManager:
                 reasons.append(f"Device {device.name} cannot be reduced further")
                 continue
 
-            # ✅ ETAP 2: Zapisz stan PRZED ograniczeniem
+            #  ETAP 2: Zapisz stan PRZED ograniczeniem
             if self.energy_manager_ref:
                 self.energy_manager_ref.save_device_state(device, "before_generation_limit")
 
@@ -505,7 +505,7 @@ class EnergySurplusManager:
                 self.info_logger.info(f"Action pending for {device.name}: {action}")
                 break
             elif result["success"]:
-                # ✅ Ustaw setpoint dla SCADA
+                #  Ustaw setpoint dla SCADA
                 if action == "deactivate":
                     device.setpoint_output = 0
                 else:
@@ -513,7 +513,7 @@ class EnergySurplusManager:
                 
                 actual_reduction = current_output - device.get_actual_output()
                 
-                # ✅ ETAP 2: Dodaj do listy ograniczeń
+                #  ETAP 2: Dodaj do listy ograniczeń
                 if self.energy_manager_ref:
                     self.energy_manager_ref.add_artificial_limitation(
                         device=device,
@@ -839,7 +839,7 @@ class EnergySurplusManager:
         """
         bess = self.microgrid.bess
 
-        # ✅ DODAJ TE LOGI DIAGNOSTYCZNE
+        #  DODAJ TE LOGI DIAGNOSTYCZNE
         self.info_logger.info("=" * 70)
         self.info_logger.info("HANDLE_BOTH_ACTION - DEBUG")
         self.info_logger.info(f"  Remaining surplus: {remaining_surplus:.2f} kW")
@@ -857,14 +857,14 @@ class EnergySurplusManager:
         if self.energy_manager_ref and self.energy_manager_ref.bess_checker:
             bess = self.energy_manager_ref.microgrid.bess
             
-            # ✅ ETAP 1: Sprawdź czy BESS już nie ładuje się!
+            #  ETAP 1: Sprawdź czy BESS już nie ładuje się!
             is_already_charging, charge_amount = self.energy_manager_ref.check_device_already_operating(
                 "BESS", "charging"
             )
             
             if is_already_charging:
                 self.info_logger.warning(
-                    f"⚠️  BESS is ALREADY CHARGING {charge_amount:.2f} kW - cannot charge more"
+                    f"  BESS is ALREADY CHARGING {charge_amount:.2f} kW - cannot charge more"
                 )
                 can_charge = False
             else:
@@ -888,14 +888,14 @@ class EnergySurplusManager:
         can_sell = self.osd.can_sell_energy()
         
         if can_sell:
-            # ✅ ETAP 1: Sprawdź czy Grid już nie eksportuje!
+            #  ETAP 1: Sprawdź czy Grid już nie eksportuje!
             is_already_exporting, export_amount = self.energy_manager_ref.check_device_already_operating(
                 "GRID", "exporting"
             )
             
             if is_already_exporting:
                 self.info_logger.warning(
-                    f"⚠️  GRID is ALREADY EXPORTING {export_amount:.2f} kW - cannot export more"
+                    f"  GRID is ALREADY EXPORTING {export_amount:.2f} kW - cannot export more"
                 )
                 can_sell = False
             else:
@@ -908,7 +908,7 @@ class EnergySurplusManager:
         
         # Przypadek A: Tylko CHARGE możliwe
         if can_charge and not can_sell:
-            self.info_logger.info("🔋 Only CHARGE available → charging")
+            self.info_logger.info(" Only CHARGE available → charging")
             return self._execute_charge(charge_plan, remaining_surplus)
         
         # Przypadek B: Tylko SELL możliwe
@@ -918,7 +918,7 @@ class EnergySurplusManager:
         
         # Przypadek C: Obie opcje dostępne → DECYZJA
         if can_charge and can_sell:
-            self.info_logger.info("⚖️  Both CHARGE and SELL available → making decision")
+            self.info_logger.info("  Both CHARGE and SELL available → making decision")
             
             # WYWOŁAJ FUNKCJĘ DECYZYJNĄ
             result = should_prioritize_charging_or_selling(
@@ -952,7 +952,7 @@ class EnergySurplusManager:
                 return self._execute_sell(remaining_surplus)
         
         # Przypadek D: Żadna opcja niedostępna
-        self.info_logger.warning("⚠️  Neither CHARGE nor SELL available")
+        self.info_logger.warning("  Neither CHARGE nor SELL available")
         return {"success": False, "amount": 0, "reason": "No action possible"}
 
 
@@ -1019,7 +1019,7 @@ class EnergySurplusManager:
                 f"Remaining surplus will be handled then."
             )
             
-            # ✅ NIE sprzedawaj reszty teraz - poczekaj na early iteration
+            #  NIE sprzedawaj reszty teraz - poczekaj na early iteration
 
         else:
             # BESS NIE skończy wcześniej → próbuj sprzedać resztę teraz

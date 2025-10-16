@@ -112,6 +112,6 @@ class EnergyBalance:
                 "value": round(self.balance, 2),
                 "surplus": round(self.surplus, 2),
                 "deficit": round(self.deficit, 2),
-                "is_balanced": self.is_balanced()  # ✅ Wywołaj jako metodę!
+                "is_balanced": self.is_balanced()  #  Wywołaj jako metodę!
             }
         }
