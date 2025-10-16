@@ -408,11 +408,11 @@ class EnergyManager:
 
         #  USUNIĘTE: Duplikujące się logi
         
-        # Zapisz dane kontraktu
-        self.save_contract_data()
+        # Zapisz dane kontraktu (już zapisane w run_single_iteration)
+        # self.save_contract_data()
         
-        # Aktualizuj profil mocy
-        self.update_power_profile(datetime.now())
+        # Aktualizuj profil mocy (już zaktualizowany w run_single_iteration)
+        # self.update_power_profile(datetime.now())
 
         # Zaloguj operacje grid dla SCADA
         self.log_grid_operations_for_scada()
@@ -2094,12 +2094,8 @@ class EnergyManager:
                 if self.bess_checker is None:
                     self.error_logger.error("  ❌ BESSCapabilityChecker constructor returned None!")
                 else:
-                    self.info_logger.info(
-                        f" BESSCapabilityChecker initialized "
-                        f"(BESS: {self.microgrid.bess.name}, "
-                        f"iteration: {self.auto_interval/60:.2f} min, "
-                        f"capacity: {self.microgrid.bess.max_charge_level:.0f} kWh)"
-                    )
+                    # BESSCapabilityChecker initialized silently
+                    pass
                 
             except ImportError as e:
                 self.error_logger.error(f"❌ IMPORT ERROR: {e}")
@@ -2239,8 +2235,8 @@ class EnergyManager:
             balance=balance
         )
         
-        # Loguj szczegółowy bilans
-        self._log_energy_balance(energy_balance)
+        # Loguj szczegółowy bilans (tylko w trybie debug)
+        # self._log_energy_balance(energy_balance)
         
         return energy_balance
     
@@ -2322,6 +2318,17 @@ class EnergyManager:
             f"Trading:     Sold={self.osd.sold_power:.2f}/{self.osd.CONTRACTED_SALE_LIMIT:.2f} kWh, "
             f"Bought={self.osd.bought_power:.2f}/{self.osd.CONTRACTED_PURCHASE_LIMIT:.2f} kWh"
         )
+        
+        # Balance calculation
+        balance = total_generated - total_consumed
+        if abs(balance) < 1.0:
+            balance_text = "BALANCED"
+        elif balance > 0:
+            balance_text = f"SURPLUS (+{balance:.1f} kW)"
+        else:
+            balance_text = f"DEFICIT ({balance:.1f} kW)"
+        
+        self.info_logger.info(f"Balance:     {balance:>8.1f} kW ({balance_text})")
         
         self.info_logger.info("-" * 70)
 
@@ -2624,7 +2631,6 @@ class EnergyManager:
         """
         self.info_logger.info("")
         self.info_logger.info("ANALYZING CONFLICTING OPERATIONS")
-        self.info_logger.info("-" * 70)
         
         neutralized = False
         neutralized_amount = 0.0
@@ -2636,30 +2642,21 @@ class EnergyManager:
             # 1. BESS ładuje się? (pobiera energię)
             if self.microgrid.bess and self.microgrid.bess.actual_output < 0:
                 bess_charging = abs(self.microgrid.bess.actual_output)
-                self.info_logger.warning(
-                    f"⚠️  BESS is CHARGING {bess_charging:.2f} kW → CAUSING deficit!"
-                )
-                self.info_logger.info(f"   → NEUTRALIZING: Stop BESS charging")
+                self.info_logger.info(f"BESS charging {bess_charging:.1f} kW → stopping")
                 
                 # Zapisz poprzedni stan (dla logowania)
                 previous_actual = self.microgrid.bess.actual_output
                 previous_setpoint = self.microgrid.bess.setpoint_output
                 
-                # ═══════════════════════════════════════════════════════════
-                # KROK A: Ustaw setpoint (POLECENIE dla SCADA)
-                # ═══════════════════════════════════════════════════════════
+                # Ustaw setpoint (POLECENIE dla SCADA)
                 self.microgrid.bess.setpoint_output = 0
-                self.info_logger.info(f"   ✓ Set setpoint_output = 0 kW (command for SCADA)")
                 
-                # ═══════════════════════════════════════════════════════════
-                # KROK B: Symuluj actual_output (TYLKO dla obliczeń w Pythonie)
-                # ═══════════════════════════════════════════════════════════
+                # Symuluj actual_output (TYLKO dla obliczeń w Pythonie)
                 self.simulate_device_state_for_calculations(
                     self.microgrid.bess, 
                     "stop_charging", 
                     0
                 )
-                self.info_logger.info(f"   ✓ Simulated actual_output = 0 kW (for calculations only)")
                 
                 # Dodaj do changed_devices
                 device_change = {
@@ -2677,25 +2674,14 @@ class EnergyManager:
             # 2. Grid eksportuje? (traci energię)
             if self.osd.actual_grid_export > 0:  #  Zmiana: actual zamiast current
                 grid_exporting = self.osd.actual_grid_export
-                self.info_logger.warning(
-                    f"⚠️  GRID is EXPORTING {grid_exporting:.2f} kW → CAUSING deficit!"
-                )
-                self.info_logger.info(f"   → NEUTRALIZING: Stop grid export")
+                self.info_logger.info(f"Grid exporting {grid_exporting:.1f} kW → stopping")
                 
                 # Zapisz poprzedni stan
                 previous_actual = self.osd.actual_grid_export
                 previous_setpoint = self.osd.setpoint_grid_export
                 
-                # ═══════════════════════════════════════════════════════════
-                # KROK A: Ustaw setpoint (POLECENIE dla SCADA)
-                # ═══════════════════════════════════════════════════════════
+                # Ustaw setpoint (POLECENIE dla SCADA)
                 self.osd.setpoint_grid_export = 0
-                self.info_logger.info(f"   ✓ Set setpoint_grid_export = 0 kW (command for SCADA)")
-                
-                # ═══════════════════════════════════════════════════════════
-                # KROK B: Symulacja nie jest potrzebna - używamy setpoint
-                # ═══════════════════════════════════════════════════════════
-                self.info_logger.info(f"   ✓ Grid export setpoint set to 0 kW (command for SCADA)")
                 
                 # Backward compatibility (tymczasowo)
                 self.osd.current_grid_export = 0
@@ -2737,7 +2723,6 @@ class EnergyManager:
                 # KROK A: Ustaw setpoint (POLECENIE dla SCADA)
                 # ═══════════════════════════════════════════════════════════
                 self.microgrid.bess.setpoint_output = 0
-                self.info_logger.info(f"   ✓ Set setpoint_output = 0 kW (command for SCADA)")
                 
                 # ═══════════════════════════════════════════════════════════
                 # KROK B: Symuluj actual_output (TYLKO dla obliczeń w Pythonie)
@@ -2747,7 +2732,6 @@ class EnergyManager:
                     "stop_discharging", 
                     0
                 )
-                self.info_logger.info(f"   ✓ Simulated actual_output = 0 kW (for calculations only)")
                 
                 # Dodaj do changed_devices
                 device_change = {
@@ -2778,7 +2762,6 @@ class EnergyManager:
                 # KROK A: Ustaw setpoint (POLECENIE dla SCADA)
                 # ═══════════════════════════════════════════════════════════
                 self.osd.setpoint_grid_import = 0
-                self.info_logger.info(f"   ✓ Set setpoint_grid_import = 0 kW (command for SCADA)")
                 
                 # ═══════════════════════════════════════════════════════════
                 # KROK B: Symuluj actual (TYLKO dla obliczeń w Pythonie)
@@ -2788,7 +2771,6 @@ class EnergyManager:
                     "stop_import", 
                     0
                 )
-                self.info_logger.info(f"   ✓ Simulated actual_grid_import = 0 kW (for calculations only)")
                 
                 # Backward compatibility (tymczasowo)
                 self.osd.current_grid_import = 0
@@ -2812,11 +2794,10 @@ class EnergyManager:
             if consumers_restored > 0:
                 neutralized = True
                 neutralized_amount += consumers_restored
-                self.info_logger.info(f"   ✓ Restored {consumers_restored:.2f} kW from disabled consumers")
         
         if neutralized:
             self.info_logger.info("")
-            self.info_logger.info(f"✓ Neutralized {neutralized_amount:.2f} kW of conflicting operations")
+            self.info_logger.info(f"Neutralized {neutralized_amount:.1f} kW of conflicting operations")
             self.info_logger.info("   Recalculating balance with simulated state...")
             
             # ═══════════════════════════════════════════════════════════════
@@ -2831,7 +2812,7 @@ class EnergyManager:
             
             return new_balance
         else:
-            self.info_logger.info("✓ No conflicting operations detected")
+            self.info_logger.info("No conflicting operations detected")
             return balance
     
     def check_device_already_operating(self, device_type: str, operation: str) -> tuple:
@@ -3072,6 +3053,8 @@ class EnergyManager:
             bess = self.microgrid.bess
             soc = (bess.charge_level / bess.max_charge_level) * 100
             self.info_logger.info(f"  BESS: {bess.charge_level:.1f}/{bess.max_charge_level:.1f} kWh ({soc:.1f}% SOC)")
+            self.info_logger.info(f"    Max Charge: {bess.max_charge_power:.1f} kW, Max Discharge: {bess.max_discharge_power:.1f} kW")
+            self.info_logger.info(f"    Setpoint: {bess.setpoint_output:.1f} kW, Actual: {bess.actual_output:.1f} kW")
         
         # Grid szczegóły
         self.info_logger.info(f"  Grid: Import={self.osd.current_grid_import:.1f} kW, Export={self.osd.current_grid_export:.1f} kW")

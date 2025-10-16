@@ -115,8 +115,7 @@ class EnergySurplusManager:
             return {"amount_managed": 0, "remaining_surplus": power_surplus}
         
         self.info_logger.info("")
-        self.info_logger.info(" MANAGING SURPLUS")
-        self.info_logger.info("-" * 25)
+        self.info_logger.info("MANAGING SURPLUS")
         
         total_managed = 0
         remaining_surplus = power_surplus
@@ -127,9 +126,7 @@ class EnergySurplusManager:
         try:
             while remaining_surplus > self.EPSILON and iteration < MAX_ITERATIONS:
                 iteration += 1
-                self.info_logger.info(
-                    f"Iteration {iteration}, surplus remaining: {remaining_surplus:.6f} kW"
-                )
+                self.info_logger.info(f"Iteration {iteration}, surplus remaining: {remaining_surplus:.1f} kW")
 
                 #  POPRAWIONA LOGIKA ZGODNIE ZE SCENARIUSZEM
                 # Krok 6: BESS vs GRID (decyzja)
@@ -141,33 +138,22 @@ class EnergySurplusManager:
                 # === KROK 6: BESS vs GRID (decyzja) ===
                 if bess_available and export_possible:
                     # Obie opcje dostępne → DECYZJA (nie używamy BOTH)
-                    self.info_logger.info("")
-                    self.info_logger.info("🤔 DECISION ANALYSIS")
-                    self.info_logger.info("-" * 30)
-                    self.info_logger.info(f"   BESS can charge:   {' YES' if bess_available else ' NO'}")
-                    self.info_logger.info(f"   GRID can export:   {' YES' if export_possible else ' NO'}")
-                    self.info_logger.info("")
-                    self.info_logger.info("  DECISION: Both options available → UTILITY FUNCTION")
-                    self.info_logger.info("   Factors: Economics, BESS state, Risk assessment")
+                    self.info_logger.info(f"BESS can charge: {'YES' if bess_available else 'NO'}")
+                    self.info_logger.info(f"GRID can export: {'YES' if export_possible else 'NO'}")
+                    self.info_logger.info("Both options available → UTILITY FUNCTION")
                     action = self._decide_bess_vs_grid(remaining_surplus)
                 elif bess_available:
                     # Tylko BESS dostępne
-                    self.info_logger.info("")
-                    self.info_logger.info(" DECISION: Only BESS available → CHARGE")
-                    self.info_logger.info("   Reason: Grid cannot export (limit reached or unavailable)")
+                    self.info_logger.info("Only BESS available → CHARGE")
                     action = SurplusAction.CHARGE_BATTERY
                 elif export_possible:
                     # Tylko GRID dostępne
-                    self.info_logger.info("")
-                    self.info_logger.info("💰 DECISION: Only GRID available → SELL")
-                    self.info_logger.info("   Reason: BESS cannot charge (full or unavailable)")
+                    self.info_logger.info("Only GRID available → SELL")
                     action = SurplusAction.SELL_ENERGY
                 else:
                     # === KROK 7: OSTATECZNOŚĆ - Ograniczanie generacji ===
                     if SurplusAction.LIMIT_GENERATION not in attempted_actions:
-                        self.info_logger.info("")
-                        self.info_logger.info("  DECISION: Neither BESS nor GRID available → LIMIT GENERATION")
-                        self.info_logger.info("   Reason: Last resort - reduce generator output")
+                        self.info_logger.info("Neither BESS nor GRID available → LIMIT GENERATION")
                         action = SurplusAction.LIMIT_GENERATION
                     else:
                         self.info_logger.warning("No more available actions to handle surplus.")
