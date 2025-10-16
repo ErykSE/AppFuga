@@ -270,8 +270,18 @@ class EnergyManager:
 
                 # Sprawdź czy są eventy do wykonania
                 triggered_events = self.iteration_scheduler.check_for_triggered_events()
+                bess_stop_pending = False
+                
                 if triggered_events:
-                    self.handle_triggered_events(triggered_events)
+                    for event in triggered_events:
+                        if "bess" in event.event_type.lower():
+                            bess_stop_pending = True
+                            self.info_logger.info(
+                                f"⏰ BESS event: {event.event_type} - "
+                                f"will stop after loading data"
+                            )
+                        else:
+                            self.handle_triggered_events([event])
 
                 # 1. Pobieramy dane z API (jeśli używamy API)
                 if self.use_api:
@@ -302,6 +312,11 @@ class EnergyManager:
                 else:
                     # Tryb bez API - użyj danych początkowych (tylko do testów)
                     self.load_initial_data()
+                
+                # Wykonaj zatrzymanie BESS (jeśli flaga)
+                if bess_stop_pending:
+                    self.info_logger.info("🛑 Executing BESS stop")
+                    self.stop_bess_operation()
 
                 # 3. Wykonujemy algorytm
                 result = self.run_single_iteration()
@@ -1984,38 +1999,46 @@ class EnergyManager:
                 self.error_logger.warning(f"Unknown event type: {event.event_type}")
     
     def stop_bess_operation(self):
-        """Zatrzymuje operację BESS (setpoint -> 0)."""
+        """
+        Zatrzymuje operację BESS (setpoint -> 0).
+        
+        ✅ POPRAWIONE:
+        - Symuluje actual_output dla obliczeń
+        - NIE wysyła do API (zostanie wysłane w normalnym flow)
+        """
         if not self.microgrid.bess:
             return
         
-        self.info_logger.info("🛑 Stopping BESS operation (setpoint -> 0 kW)")
+        self.info_logger.info("🛑 Stopping BESS operation")
         
-        # Ustaw setpoint na 0
+        # Zapisz poprzednie wartości
+        previous_setpoint = self.microgrid.bess.setpoint_output
+        previous_actual = self.microgrid.bess.actual_output
+        
+        # Ustaw setpoint (dla SCADA)
         self.microgrid.bess.setpoint_output = 0
+        
+        # ✅ DODAJ: Symuluj actual (dla obliczeń)
+        self.microgrid.bess.actual_output = 0
+        
+        self.info_logger.info(
+            f"   Setpoint: {previous_setpoint:.2f} → 0 kW"
+        )
+        self.info_logger.info(
+            f"   Actual: {previous_actual:.2f} → 0 kW (simulated)"
+        )
         
         # Dodaj do changed_devices
         device_change = {
             "device": self.microgrid.bess,
             "action": "stop",
+            "previous_value": previous_setpoint,
             "new_value": 0,
             "device_type": "BESS"
         }
         self.changed_devices.append(device_change)
         
-        # Wyślij do API natychmiast
-        if self.use_api and self.has_device_changes():
-            api_changed_data = self.prepare_changed_devices_for_api()
-            api_contract_data = self.prepare_contract_data_for_api()
-            
-            success = self.api_manager.send_updated_data_with_retry(
-                api_changed_data,
-                api_contract_data
-            )
-            
-            if success:
-                self.info_logger.info(" BESS stop command sent to SCADA")
-            else:
-                self.error_logger.error("❌ Failed to send BESS stop command")
+        self.info_logger.info("✓ BESS stop prepared")
     
     def log_grid_operations_for_scada(self):
         """
