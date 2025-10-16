@@ -3320,97 +3320,10 @@ class EnergyManager:
                     restored_count += 1
                     break  # Zwiększ tylko jeden generator na raz
         
-        # Dla NADWYŻKI: Zwiększ obciążenie
-        # Dla NADWYŻKI: Zwiększ obciążenie
+        # Dla NADWYŻKI: NIE zwiększaj zużycia - to jest nielogiczne!
+        # Nadwyżka powinna być zagospodarowana przez BESS lub Grid, nie przez zwiększanie zużycia
         elif balance.has_surplus and not restored:
-            self.info_logger.info("Checking for limited consumers (not in artificial_limitations)...")
-            self.info_logger.info(
-                f"   Found {len(self.consumergrid.adjustable_devices)} adjustable device(s)"
-            )
-            
-            # Sprawdź adjustable devices
-            for device in self.consumergrid.adjustable_devices:
-                self.info_logger.info(
-                    f"   🔍 Checking: {device.name} - "
-                    f"switch_status={device.switch_status}, "
-                    f"power={device.power:.2f}/{device.max_power:.2f} kW"
-                )
-                
-                # Czy device OFF? Włącz go
-                if not device.switch_status:
-                    power_to_set = min(balance.surplus, device.max_power)
-                    
-                    self.info_logger.info(
-                        f"⚙️  Activating {device.name}: OFF → ON ({power_to_set:.2f} kW)"
-                    )
-                    
-                    device.switch_status = True
-                    
-                    if hasattr(device, "set_power"):
-                        device.set_power(power_to_set)
-                    else:
-                        device.power = power_to_set
-                    
-                    device_change = {
-                        "device": device,
-                        "action": f"activate_consumer",
-                        "previous_value": 0,
-                        "new_value": power_to_set,
-                        "device_type": type(device).__name__
-                    }
-                    self.changed_devices.append(device_change)
-                    
-                    restored = True
-                    restored_count += 1
-                    break
-                
-                # Czy device ma rezerwę? Zwiększ moc
-                elif device.power < device.max_power:
-                    available_increase = device.max_power - device.power
-                    
-                    self.info_logger.info(
-                        f"   🔍 Available increase: {available_increase:.2f} kW"
-                    )
-                    
-                    if available_increase > 0.1:  # Minimalny threshold
-                        increase = min(balance.surplus, available_increase)
-                        
-                        # Zapisz wartości
-                        previous_power = device.power
-                        new_power = device.power + increase
-                        
-                        self.info_logger.info(
-                            f"⚙️  Increasing {device.name}: "
-                            f"{previous_power:.2f} → {new_power:.2f} kW "
-                            f"(+{increase:.2f} kW)"
-                        )
-                        
-                        # Ustaw nową moc
-                        if hasattr(device, "set_power"):
-                            device.set_power(new_power)
-                        else:
-                            device.power = new_power
-                        
-                        device_change = {
-                            "device": device,
-                            "action": f"increase_consumption",
-                            "previous_value": previous_power,
-                            "new_value": new_power,
-                            "device_type": type(device).__name__
-                        }
-                        self.changed_devices.append(device_change)
-                        
-                        restored = True
-                        restored_count += 1
-                        break  # Zwiększ tylko jeden device na raz
-                    else:
-                        self.info_logger.info(
-                            f"   ⚠️  {device.name}: available increase too small ({available_increase:.2f} kW)"
-                        )
-                else:
-                    self.info_logger.info(
-                        f"   ⚠️  {device.name}: already at max power"
-                    )
+            self.info_logger.info("Surplus detected - will be managed by BESS/Grid (not by increasing consumption)")
         
         # ═══════════════════════════════════════════════════════════════
         # FINALIZACJA
