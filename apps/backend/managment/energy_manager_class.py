@@ -819,10 +819,14 @@ class EnergyManager:
             decision_text = None
             if balance.has_surplus:
                 result = self.manage_surplus(balance.surplus)
-                decision_text = f"Managed {balance.surplus:.2f} kW surplus"
+                # Oblicz rzeczywistą ilość zagospodarowanej energii
+                actual_managed = initial_balance.balance - balance.balance
+                decision_text = f"Managed {actual_managed:.2f} kW surplus"
             elif balance.has_deficit:
                 result = self.manage_deficit(balance.deficit)
-                decision_text = f"Managed {balance.deficit:.2f} kW deficit"
+                # Oblicz rzeczywistą ilość zagospodarowanej energii
+                actual_managed = balance.deficit - initial_balance.balance
+                decision_text = f"Managed {actual_managed:.2f} kW deficit"
             
             # KROK 8: Oblicz końcowy bilans
             final_balance = self.calculate_energy_balance()
