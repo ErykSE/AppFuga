@@ -2293,11 +2293,11 @@ class EnergyManager:
         self.info_logger.info(" INITIAL SYSTEM STATUS")
         self.info_logger.info("-" * 70)
         
-        total_generated = self.microgrid.total_power_generated()
-        total_consumed = self.consumergrid.total_power_consumed()
+        # Użyj calculate_energy_balance() dla spójności
+        energy_balance = self.calculate_energy_balance()
         
-        self.info_logger.info(f"Generation:  {total_generated:>8.2f} kW")
-        self.info_logger.info(f"Consumption: {total_consumed:>8.2f} kW")
+        self.info_logger.info(f"Generation:  {energy_balance.generation:>8.2f} kW")
+        self.info_logger.info(f"Consumption: {energy_balance.consumption:>8.2f} kW")
         
         # BESS status
         if self.microgrid.bess:
@@ -2320,7 +2320,7 @@ class EnergyManager:
         )
         
         # Balance calculation
-        balance = total_generated - total_consumed
+        balance = energy_balance.balance
         if abs(balance) < 1.0:
             balance_text = "BALANCED"
         elif balance > 0:
@@ -2798,7 +2798,6 @@ class EnergyManager:
         if neutralized:
             self.info_logger.info("")
             self.info_logger.info(f"Neutralized {neutralized_amount:.1f} kW of conflicting operations")
-            self.info_logger.info("   Recalculating balance with simulated state...")
             
             # ═══════════════════════════════════════════════════════════════
             # PRZELICZ BILANS PONOWNIE (używa ZSYMULOWANEGO actual_output!)
@@ -3053,6 +3052,7 @@ class EnergyManager:
             bess = self.microgrid.bess
             soc = (bess.charge_level / bess.max_charge_level) * 100
             self.info_logger.info(f"  BESS: {bess.charge_level:.1f}/{bess.max_charge_level:.1f} kWh ({soc:.1f}% SOC)")
+            self.info_logger.info(f"    Min/Max Level: {bess.min_charge_level:.1f}/{bess.max_charge_level:.1f} kWh")
             self.info_logger.info(f"    Max Charge: {bess.max_charge_power:.1f} kW, Max Discharge: {bess.max_discharge_power:.1f} kW")
             self.info_logger.info(f"    Setpoint: {bess.setpoint_output:.1f} kW, Actual: {bess.actual_output:.1f} kW")
         
