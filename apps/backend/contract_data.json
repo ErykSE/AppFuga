@@ -14,5 +14,5 @@
     "setpoint_grid_import": 0.0,
     "actual_grid_export": 0.0,
     "actual_grid_import": 0.0,
-    "decision_mode": "AUTO"
+    "decision_mode": "AUTOj"
 }
