@@ -78,7 +78,7 @@ class OSD:
         self.decision_mode = decision_mode
     
         # Walidacja
-        valid_modes = ["AUTO", "CHARGE_PRIORITY", "SELL_PRIORITY"]
+        valid_modes = ["AUTO", "BESS_PRIORITY", "GRID_PRIORITY"]
         if decision_mode not in valid_modes:
             if error_logger:
                 error_logger.warning(
