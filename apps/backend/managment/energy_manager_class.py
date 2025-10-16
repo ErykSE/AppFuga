@@ -268,27 +268,12 @@ class EnergyManager:
                 self.info_logger.highlight("Starting new iteration")
                 self.load_configuration()
 
-                # ═══════════════════════════════════════════════════════════
-                # KROK 1: Sprawdź eventy (tylko sprawdź, NIE wykonuj jeszcze!)
-                # ═══════════════════════════════════════════════════════════
+                # Sprawdź czy są eventy do wykonania
                 triggered_events = self.iteration_scheduler.check_for_triggered_events()
-                bess_stop_pending = False
-                
                 if triggered_events:
-                    for event in triggered_events:
-                        if "bess" in event.event_type.lower():
-                            bess_stop_pending = True
-                            self.info_logger.info(
-                                f"⏰ BESS event detected: {event.event_type} - "
-                                f"will stop after loading data"
-                            )
-                        else:
-                            # Inne eventy (nie BESS) można obsłużyć od razu
-                            self.handle_triggered_events([event])
+                    self.handle_triggered_events(triggered_events)
 
-                # ═══════════════════════════════════════════════════════════
-                # KROK 2: Pobierz dane z API
-                # ═══════════════════════════════════════════════════════════
+                # 1. Pobieramy dane z API (jeśli używamy API)
                 if self.use_api:
                     success = self.api_manager.fetch_and_save_data(
                         self.live_data_path, 
@@ -308,9 +293,7 @@ class EnergyManager:
                         self.error_logger.warning("Skipping iteration due to API failure")
                         continue
                     
-                    # ═══════════════════════════════════════════════════════
-                    # KROK 3: Załaduj dane z API
-                    # ═══════════════════════════════════════════════════════
+                    # 2. Ładujemy dane tylko z API (nie z lokalnych plików!)
                     if os.path.exists(self.live_data_path):
                         self.load_live_data()
                     else:
@@ -320,24 +303,14 @@ class EnergyManager:
                     # Tryb bez API - użyj danych początkowych (tylko do testów)
                     self.load_initial_data()
 
-                # ═══════════════════════════════════════════════════════════
-                # KROK 4: Wykonaj zatrzymanie BESS (TERAZ - PO załadowaniu!)
-                # ═══════════════════════════════════════════════════════════
-                if bess_stop_pending:
-                    self.info_logger.info("🛑 Executing BESS stop (after loading data)")
-                    self.stop_bess_operation()
-
-                # ═══════════════════════════════════════════════════════════
-                # KROK 5: Wykonaj algorytm (używa zaktualizowanych danych)
-                # ═══════════════════════════════════════════════════════════
+                # 3. Wykonujemy algorytm
                 result = self.run_single_iteration()
                 
-                # ═══════════════════════════════════════════════════════════
-                # KROK 6-8: Zapisz i wyślij (RESZTA BEZ ZMIAN!)
-                # ═══════════════════════════════════════════════════════════
+                # 4. Zapisujemy wyniki do plików wewnętrznych
+                #self.save_live_data()
                 self.save_contract_data()
                 
-                # Wysyłamy tylko zmienione urządzenia do API
+                # 5. Wysyłamy tylko zmienione urządzenia do API
                 if self.use_api:
                     # 5a. Sprawdź czy są jakiekolwiek zmiany
                     if self.has_device_changes():
@@ -367,16 +340,15 @@ class EnergyManager:
                     else:
                         self.info_logger.info("No device changes detected - skipping API POST operation")
                 
-                # Aktualizujemy profil mocy
+                # 6. Aktualizujemy profil mocy
                 self.update_power_profile(datetime.now())
                 
-                # Loguj czas całej iteracji
+                # 7. Loguj czas całej iteracji
                 iteration_elapsed_time = time.time() - iteration_start_time
                 self.info_logger.info(f"Complete iteration finished in {iteration_elapsed_time:.2f} seconds")
 
-                # ═══════════════════════════════════════════════════════════
-                # KROK 9: Czekaj na następną iterację
-                # ═══════════════════════════════════════════════════════════
+                # 8. Oczekiwanie na następną iterację
+                # Użyj schedulera aby dynamicznie dostosować czas
                 wait_time = self.iteration_scheduler.get_next_wait_time()
                 
                 self.info_logger.important(f"Waiting {wait_time:.1f} seconds for next iteration")
@@ -2018,12 +1990,8 @@ class EnergyManager:
         
         self.info_logger.info("🛑 Stopping BESS operation (setpoint -> 0 kW)")
         
-        # Ustaw setpoint na 0 (polecenie dla SCADA)
+        # Ustaw setpoint na 0
         self.microgrid.bess.setpoint_output = 0
-        
-        # Ustaw actual_output na 0 (symulacja dla obliczeń)
-        # To zapewnia że algorytm widzi BESS jako zatrzymany
-        self.microgrid.bess.actual_output = 0
         
         # Dodaj do changed_devices
         device_change = {
@@ -3358,7 +3326,6 @@ class EnergyManager:
                     restored_count += 1
                     break  # Zwiększ tylko jeden generator na raz
         
-        # Dla NADWYŻKI: NIE zwiększaj zużycia - to jest nielogiczne!
         # Nadwyżka powinna być zagospodarowana przez BESS lub Grid, nie przez zwiększanie zużycia
         elif balance.has_surplus and not restored:
             # TODO: W przyszłości można dodać logikę przywracania wcześniej zmniejszonych urządzeń
