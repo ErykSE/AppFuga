@@ -522,12 +522,7 @@ def should_prioritize_charging_or_selling(
     
     # === KROK 7: Logowanie ===
     
-    if info_logger:
-        info_logger.info("-" * 70)
-        info_logger.info(f"  Decision: {'CHARGE' if decision_charge else 'SELL'}")
-        info_logger.info(f"  Confidence: {confidence*100:.1f}%")
-        info_logger.info(f"  Reason: {reason}")
-        info_logger.info("=" * 70)
+    # Decision już zalogowane w energy_surplus_manager_class.py
     
     return DecisionResult(
         decision=decision_charge,

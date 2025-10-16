@@ -792,8 +792,7 @@ class EnergyManager:
             # KROK 1: Oblicz początkowy bilans
             initial_balance = self.calculate_energy_balance()
             
-            # STAN PRZED
-            self._log_state_before(initial_balance)
+            # STAN PRZED - już wyświetlony w INITIAL SYSTEM STATUS
             
             # KROK 2: Sprawdź czy bilans OK
             if initial_balance.is_balanced(threshold=1.0):
@@ -852,18 +851,7 @@ class EnergyManager:
         managed_amount = result["amount_managed"]
         remaining_surplus = result["remaining_surplus"]
 
-        self.info_logger.important(
-            f"Managed {managed_amount} kW of surplus. Remaining: {remaining_surplus} kW"
-        )
-
-        if remaining_surplus > 0:
-            self.info_logger.warning(
-                f"Surplus management completed. Remaining unresolved surplus: {remaining_surplus} kW"
-            )
-        else:
-            self.info_logger.info(
-                "Surplus management completed. The entire surplus has been dissolved."
-            )
+        # Surplus management results już zalogowane w manage_surplus_energy()
 
     def manage_deficit_automatic(self, power_deficit):
         result = self.deficit_manager.handle_deficit_automatic(power_deficit)
@@ -2296,8 +2284,12 @@ class EnergyManager:
         # Użyj calculate_energy_balance() dla spójności
         energy_balance = self.calculate_energy_balance()
         
-        self.info_logger.info(f"Generation:  {energy_balance.generation:>8.2f} kW")
-        self.info_logger.info(f"Consumption: {energy_balance.consumption:>8.2f} kW")
+        # Oblicz całkowitą generację (urządzenia + BESS + grid)
+        total_generation = energy_balance.generation + energy_balance.bess_discharge + energy_balance.grid_import
+        total_consumption = energy_balance.consumption + energy_balance.bess_charge + energy_balance.grid_export
+        
+        self.info_logger.info(f"Generation:  {total_generation:>8.2f} kW (devices: {energy_balance.generation:.1f} + BESS: {energy_balance.bess_discharge:.1f} + Grid: {energy_balance.grid_import:.1f})")
+        self.info_logger.info(f"Consumption: {total_consumption:>8.2f} kW (loads: {energy_balance.consumption:.1f} + BESS: {energy_balance.bess_charge:.1f} + Grid: {energy_balance.grid_export:.1f})")
         
         # BESS status
         if self.microgrid.bess:
@@ -2710,23 +2702,16 @@ class EnergyManager:
             # 1. BESS rozładowuje się? (dostarcza energię)
             if self.microgrid.bess and self.microgrid.bess.actual_output > 0:
                 bess_discharging = self.microgrid.bess.actual_output
-                self.info_logger.warning(
-                    f"⚠️  BESS is DISCHARGING {bess_discharging:.2f} kW → CAUSING surplus!"
-                )
-                self.info_logger.info(f"   → NEUTRALIZING: Stop BESS discharging")
+                self.info_logger.info(f"BESS discharging {bess_discharging:.1f} kW → stopping")
                 
                 # Zapisz poprzedni stan
                 previous_actual = self.microgrid.bess.actual_output
                 previous_setpoint = self.microgrid.bess.setpoint_output
                 
-                # ═══════════════════════════════════════════════════════════
-                # KROK A: Ustaw setpoint (POLECENIE dla SCADA)
-                # ═══════════════════════════════════════════════════════════
+                # Ustaw setpoint (POLECENIE dla SCADA)
                 self.microgrid.bess.setpoint_output = 0
                 
-                # ═══════════════════════════════════════════════════════════
-                # KROK B: Symuluj actual_output (TYLKO dla obliczeń w Pythonie)
-                # ═══════════════════════════════════════════════════════════
+                # Symuluj actual_output (TYLKO dla obliczeń w Pythonie)
                 self.simulate_device_state_for_calculations(
                     self.microgrid.bess, 
                     "stop_discharging", 
