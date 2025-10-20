@@ -65,3 +65,5 @@ ITERATION COMPLETE in 0.03s
 2025-10-20 22:50:41,708 - INFO - Updated power profile
 2025-10-20 22:50:41,708 - INFO - Complete iteration finished in 0.31 seconds
 2025-10-20 22:50:41,708 - INFO - !!! Waiting 300.0 seconds for next iteration !!!
+2025-10-20 22:50:43,123 - INFO - !!! Energy management stopping !!!
+2025-10-20 22:50:43,123 - INFO - !!! Energy management stopped !!!
