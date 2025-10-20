@@ -1,89 +1,1246 @@
-2025-10-20 23:17:07,191 - INFO - 
+2025-10-20 23:20:00,388 - INFO - 
 ==================================================
 Starting new iteration
 ==================================================
-2025-10-20 23:17:07,191 - INFO - !!! Energy management started !!!
-2025-10-20 23:17:07,192 - INFO - Loaded operation mode: automatic
-2025-10-20 23:17:07,196 - INFO - 
+2025-10-20 23:20:00,388 - INFO - !!! Energy management started !!!
+2025-10-20 23:20:00,388 - INFO - Loaded operation mode: automatic
+2025-10-20 23:20:00,395 - INFO - 
 ==================================================
 NEW ITERATION START
 ==================================================
-2025-10-20 23:17:07,196 - INFO - 
-2025-10-20 23:17:07,196 - INFO -  INITIAL SYSTEM STATUS
-2025-10-20 23:17:07,196 - INFO - ----------------------------------------------------------------------
-2025-10-20 23:17:07,197 - INFO - Generation:    390.00 kW (devices: 390.0 + BESS: 0.0 + Grid: 0.0)
-2025-10-20 23:17:07,199 - INFO - Consumption:   180.00 kW (loads: 180.0 + BESS: 0.0 + Grid: 0.0)
-2025-10-20 23:17:07,199 - INFO - BESS:           30.00/100.00 kWh (actual: +0.00 kW)
-2025-10-20 23:17:07,199 - INFO - Grid:        Import=0.00 kW, Export=0.00 kW
-2025-10-20 23:17:07,199 - INFO - Trading:     Sold=0.00/0.00 kWh, Bought=0.00/200.00 kWh
-2025-10-20 23:17:07,199 - INFO - Balance:        210.0 kW (SURPLUS (+210.0 kW))
-2025-10-20 23:17:07,199 - INFO - ----------------------------------------------------------------------
-2025-10-20 23:17:07,199 - INFO - 
-2025-10-20 23:17:07,199 - INFO - ANALYZING CONFLICTING OPERATIONS
-2025-10-20 23:17:07,199 - INFO - Surplus detected: 210.00 kW
-2025-10-20 23:17:07,205 - INFO - No conflicting operations detected
-2025-10-20 23:17:07,205 - INFO - 
-2025-10-20 23:17:07,207 - INFO - ----------------------------------------------------------------------
-2025-10-20 23:17:07,211 - INFO - ----------------------------------------------------------------------
-2025-10-20 23:17:07,211 - INFO - 
-2025-10-20 23:17:07,211 - INFO - MANAGING SURPLUS
-2025-10-20 23:17:07,211 - INFO - Iteration 1, surplus remaining: 210.0 kW
-2025-10-20 23:17:07,211 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
-2025-10-20 23:17:07,211 - INFO - BESS CHARGE PLAN:
-2025-10-20 23:17:07,211 - INFO -   Setpoint: -50.00 kW
-2025-10-20 23:17:07,211 - INFO -   Energy: 4.17 kWh
-2025-10-20 23:17:07,211 - INFO -   Duration: 5.00 min
-2025-10-20 23:17:07,211 - INFO -   Will continue through entire iteration (5.0 min)
-2025-10-20 23:17:07,211 - INFO - BESS BESS 1 - setpoint set to -50.00 kW (charging)
-2025-10-20 23:17:07,211 - INFO -   Current charge_level: 30.00 kWh (will be updated by SCADA)
-2025-10-20 23:17:07,211 - INFO - DEVICE CHANGED: BESS 1 (BESS) - charge:50
-2025-10-20 23:17:07,211 - INFO - Success: Managed 50.0 kW, remaining: 160.0 kW
-2025-10-20 23:17:07,211 - INFO - Iteration 2, surplus remaining: 160.0 kW
-2025-10-20 23:17:07,219 - INFO - Attempting: SurplusAction.LIMIT_GENERATION
-2025-10-20 23:17:07,219 - INFO - Starting limit_energy_generation with power_surplus: 160.000000
-2025-10-20 23:17:07,219 - INFO - Active generators: ['PV Panel 1', 'PV Panel 2', 'Wind Turbine 1']
-2025-10-20 23:17:07,219 - INFO - Processing device: PV Panel 1, Current output: 150.000000, Min output: 0.000000, Reducible power: 150.000000
-2025-10-20 23:17:07,219 - INFO - Attempting to execute action: set_output:0.0 for device PV Panel 1
-2025-10-20 23:17:07,219 - INFO - EnergyManager.execute_action called with device: PV Panel 1, action: set_output:0.0
-2025-10-20 23:17:07,219 - INFO - [DEBUG] Performing action: PV Panel 1 (PV) - set_output:0.0
-2025-10-20 23:17:07,219 - INFO - Performing action: set_output:0.0 on device: PV Panel 1
-2025-10-20 23:17:07,219 - INFO - Attempting to set output for PV Panel 1 to 0.0 kW
-2025-10-20 23:17:07,219 - INFO - PV Panel 1 setpoint changed: 150.00 -> 0.00 kW
-2025-10-20 23:17:07,219 - INFO - Set output for PV Panel 1 from 150.0 kW to 0.0 kW. Setpoint: 0.0 kW
-2025-10-20 23:17:07,219 - INFO - DEVICE CHANGED: PV Panel 1 (PV) - set_output:0.0
-2025-10-20 23:17:07,219 - INFO - Result of execute_action_func: {'success': True, 'amount': 150.0}
-2025-10-20 23:17:07,219 - INFO - Reduced PV Panel 1 (priority: 1) power by 150.000000 kW from 150.000000 kW to 0.000000 kW. Setpoint: 0.000000 kW
-2025-10-20 23:17:07,219 - INFO - Processing device: PV Panel 2, Current output: 150.000000, Min output: 0.000000, Reducible power: 150.000000
-2025-10-20 23:17:07,219 - INFO - Attempting to execute action: set_output:140.0 for device PV Panel 2
-2025-10-20 23:17:07,220 - INFO - EnergyManager.execute_action called with device: PV Panel 2, action: set_output:140.0
-2025-10-20 23:17:07,220 - INFO - [DEBUG] Performing action: PV Panel 2 (PV) - set_output:140.0
-2025-10-20 23:17:07,220 - INFO - Performing action: set_output:140.0 on device: PV Panel 2
-2025-10-20 23:17:07,220 - INFO - Attempting to set output for PV Panel 2 to 140.0 kW
-2025-10-20 23:17:07,220 - INFO - PV Panel 2 setpoint changed: 150.00 -> 140.00 kW
-2025-10-20 23:17:07,220 - INFO - Set output for PV Panel 2 from 150.0 kW to 140.0 kW. Setpoint: 140.0 kW
-2025-10-20 23:17:07,220 - INFO - DEVICE CHANGED: PV Panel 2 (PV) - set_output:140.0
-2025-10-20 23:17:07,220 - INFO - Result of execute_action_func: {'success': True, 'amount': 10.0}
-2025-10-20 23:17:07,220 - INFO - Reduced PV Panel 2 (priority: 1) power by 10.000000 kW from 150.000000 kW to 140.000000 kW. Setpoint: 140.000000 kW
-2025-10-20 23:17:07,220 - INFO - Total power generation reduced: 160.000000 kW
-2025-10-20 23:17:07,220 - INFO - Remaining surplus: 0.000000 kW
-2025-10-20 23:17:07,220 - INFO - Success: Managed 160.0 kW, remaining: 0.0 kW
-2025-10-20 23:17:07,220 - INFO - 
-2025-10-20 23:17:07,220 - INFO -   CHANGES: 3 device(s) modified
-2025-10-20 23:17:07,220 - INFO -     - BESS 1: charge:50
-2025-10-20 23:17:07,220 - INFO -     - PV Panel 1: set_output:0.0
-2025-10-20 23:17:07,220 - INFO -     - PV Panel 2: set_output:140.0
-2025-10-20 23:17:07,220 - INFO -   Managed 210.00 kW surplus
-2025-10-20 23:17:07,220 - INFO - SCADA GRID STATUS: No grid operations in this iteration
-2025-10-20 23:17:07,220 - INFO - 
+2025-10-20 23:20:00,395 - INFO - 
+2025-10-20 23:20:00,395 - INFO -  INITIAL SYSTEM STATUS
+2025-10-20 23:20:00,395 - INFO - ----------------------------------------------------------------------
+2025-10-20 23:20:00,395 - INFO - Generation:    390.00 kW (devices: 390.0 + BESS: 0.0 + Grid: 0.0)
+2025-10-20 23:20:00,396 - INFO - Consumption:   180.00 kW (loads: 180.0 + BESS: 0.0 + Grid: 0.0)
+2025-10-20 23:20:00,396 - INFO - BESS:           90.00/100.00 kWh (actual: +0.00 kW)
+2025-10-20 23:20:00,396 - INFO - Grid:        Import=0.00 kW, Export=0.00 kW
+2025-10-20 23:20:00,396 - INFO - Trading:     Sold=500.00/500.00 kWh, Bought=0.00/200.00 kWh
+2025-10-20 23:20:00,396 - INFO - Balance:        210.0 kW (SURPLUS (+210.0 kW))
+2025-10-20 23:20:00,396 - INFO - ----------------------------------------------------------------------
+2025-10-20 23:20:00,396 - INFO - 
+2025-10-20 23:20:00,396 - INFO - ANALYZING CONFLICTING OPERATIONS
+2025-10-20 23:20:00,396 - INFO - Surplus detected: 210.00 kW
+2025-10-20 23:20:00,403 - INFO - No conflicting operations detected
+2025-10-20 23:20:00,403 - INFO - 
+2025-10-20 23:20:00,407 - INFO - ----------------------------------------------------------------------
+2025-10-20 23:20:00,409 - INFO - ----------------------------------------------------------------------
+2025-10-20 23:20:00,409 - INFO - 
+2025-10-20 23:20:00,409 - INFO - MANAGING SURPLUS
+2025-10-20 23:20:00,409 - INFO - Iteration 1, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,409 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,409 - INFO - GRID can export: YES
+2025-10-20 23:20:00,413 - INFO - ======================================================================
+2025-10-20 23:20:00,413 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,413 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,413 - INFO - 
+2025-10-20 23:20:00,413 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,413 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,413 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,413 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,414 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,414 - INFO - Iteration 2, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,414 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,414 - INFO - GRID can export: YES
+2025-10-20 23:20:00,417 - INFO - ======================================================================
+2025-10-20 23:20:00,417 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,417 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,417 - INFO - 
+2025-10-20 23:20:00,417 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,417 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,417 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,417 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,417 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,417 - INFO - Iteration 3, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,417 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,417 - INFO - GRID can export: YES
+2025-10-20 23:20:00,422 - INFO - ======================================================================
+2025-10-20 23:20:00,422 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,422 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,422 - INFO - 
+2025-10-20 23:20:00,422 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,422 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,422 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,423 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,423 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,423 - INFO - Iteration 4, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,423 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,423 - INFO - GRID can export: YES
+2025-10-20 23:20:00,426 - INFO - ======================================================================
+2025-10-20 23:20:00,426 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,426 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,426 - INFO - 
+2025-10-20 23:20:00,426 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,426 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,426 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,426 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,426 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,426 - INFO - Iteration 5, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,426 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,426 - INFO - GRID can export: YES
+2025-10-20 23:20:00,429 - INFO - ======================================================================
+2025-10-20 23:20:00,429 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,429 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,429 - INFO - 
+2025-10-20 23:20:00,429 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,429 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,429 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,429 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,429 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,429 - INFO - Iteration 6, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,429 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,429 - INFO - GRID can export: YES
+2025-10-20 23:20:00,430 - INFO - ======================================================================
+2025-10-20 23:20:00,430 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,430 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,430 - INFO - 
+2025-10-20 23:20:00,430 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,430 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,430 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,430 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,430 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,430 - INFO - Iteration 7, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,430 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,430 - INFO - GRID can export: YES
+2025-10-20 23:20:00,437 - INFO - ======================================================================
+2025-10-20 23:20:00,437 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,437 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,437 - INFO - 
+2025-10-20 23:20:00,438 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,438 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,438 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,438 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,438 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,438 - INFO - Iteration 8, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,438 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,438 - INFO - GRID can export: YES
+2025-10-20 23:20:00,440 - INFO - ======================================================================
+2025-10-20 23:20:00,440 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,440 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,440 - INFO - 
+2025-10-20 23:20:00,440 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,440 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,440 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,440 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,440 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,440 - INFO - Iteration 9, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,440 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,440 - INFO - GRID can export: YES
+2025-10-20 23:20:00,440 - INFO - ======================================================================
+2025-10-20 23:20:00,440 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,445 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,445 - INFO - 
+2025-10-20 23:20:00,446 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,446 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,446 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,446 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,446 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,446 - INFO - Iteration 10, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,446 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,446 - INFO - GRID can export: YES
+2025-10-20 23:20:00,449 - INFO - ======================================================================
+2025-10-20 23:20:00,449 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,449 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,449 - INFO - 
+2025-10-20 23:20:00,449 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,449 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,449 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,449 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,449 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,449 - INFO - Iteration 11, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,449 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,449 - INFO - GRID can export: YES
+2025-10-20 23:20:00,452 - INFO - ======================================================================
+2025-10-20 23:20:00,452 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,452 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,452 - INFO - 
+2025-10-20 23:20:00,452 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,452 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,452 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,452 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,452 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,452 - INFO - Iteration 12, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,452 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,452 - INFO - GRID can export: YES
+2025-10-20 23:20:00,456 - INFO - ======================================================================
+2025-10-20 23:20:00,457 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,457 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,457 - INFO - 
+2025-10-20 23:20:00,457 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,457 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,457 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,457 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,457 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,457 - INFO - Iteration 13, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,457 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,457 - INFO - GRID can export: YES
+2025-10-20 23:20:00,460 - INFO - ======================================================================
+2025-10-20 23:20:00,460 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,460 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,460 - INFO - 
+2025-10-20 23:20:00,460 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,460 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,460 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,460 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,460 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,460 - INFO - Iteration 14, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,460 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,460 - INFO - GRID can export: YES
+2025-10-20 23:20:00,473 - INFO - ======================================================================
+2025-10-20 23:20:00,473 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,473 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,473 - INFO - 
+2025-10-20 23:20:00,473 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,473 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,473 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,473 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,473 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,473 - INFO - Iteration 15, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,473 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,473 - INFO - GRID can export: YES
+2025-10-20 23:20:00,488 - INFO - ======================================================================
+2025-10-20 23:20:00,488 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,488 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,488 - INFO - 
+2025-10-20 23:20:00,488 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,488 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,488 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,488 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,488 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,488 - INFO - Iteration 16, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,488 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,488 - INFO - GRID can export: YES
+2025-10-20 23:20:00,488 - INFO - ======================================================================
+2025-10-20 23:20:00,488 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,488 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,501 - INFO - 
+2025-10-20 23:20:00,501 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,501 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,501 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,501 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,501 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,501 - INFO - Iteration 17, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,502 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,502 - INFO - GRID can export: YES
+2025-10-20 23:20:00,503 - INFO - ======================================================================
+2025-10-20 23:20:00,503 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,503 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,503 - INFO - 
+2025-10-20 23:20:00,503 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,503 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,503 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,503 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,503 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,503 - INFO - Iteration 18, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,503 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,503 - INFO - GRID can export: YES
+2025-10-20 23:20:00,503 - INFO - ======================================================================
+2025-10-20 23:20:00,503 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,503 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,503 - INFO - 
+2025-10-20 23:20:00,503 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,503 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,503 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,503 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,503 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,503 - INFO - Iteration 19, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,503 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,503 - INFO - GRID can export: YES
+2025-10-20 23:20:00,523 - INFO - ======================================================================
+2025-10-20 23:20:00,523 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,523 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,523 - INFO - 
+2025-10-20 23:20:00,523 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,523 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,523 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,523 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,523 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,523 - INFO - Iteration 20, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,523 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,523 - INFO - GRID can export: YES
+2025-10-20 23:20:00,524 - INFO - ======================================================================
+2025-10-20 23:20:00,524 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,524 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,524 - INFO - 
+2025-10-20 23:20:00,524 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,524 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,524 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,524 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,524 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,524 - INFO - Iteration 21, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,524 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,524 - INFO - GRID can export: YES
+2025-10-20 23:20:00,524 - INFO - ======================================================================
+2025-10-20 23:20:00,524 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,524 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,524 - INFO - 
+2025-10-20 23:20:00,524 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,524 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,524 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,524 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,524 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,524 - INFO - Iteration 22, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,524 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,524 - INFO - GRID can export: YES
+2025-10-20 23:20:00,537 - INFO - ======================================================================
+2025-10-20 23:20:00,537 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,537 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,538 - INFO - 
+2025-10-20 23:20:00,538 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,538 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,538 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,538 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,538 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,538 - INFO - Iteration 23, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,538 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,538 - INFO - GRID can export: YES
+2025-10-20 23:20:00,543 - INFO - ======================================================================
+2025-10-20 23:20:00,543 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,543 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,543 - INFO - 
+2025-10-20 23:20:00,543 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,543 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,543 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,543 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,543 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,543 - INFO - Iteration 24, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,543 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,543 - INFO - GRID can export: YES
+2025-10-20 23:20:00,547 - INFO - ======================================================================
+2025-10-20 23:20:00,547 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,547 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,547 - INFO - 
+2025-10-20 23:20:00,547 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,547 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,547 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,547 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,547 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,547 - INFO - Iteration 25, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,547 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,547 - INFO - GRID can export: YES
+2025-10-20 23:20:00,553 - INFO - ======================================================================
+2025-10-20 23:20:00,553 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,553 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,553 - INFO - 
+2025-10-20 23:20:00,553 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,553 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,553 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,553 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,553 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,553 - INFO - Iteration 26, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,553 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,553 - INFO - GRID can export: YES
+2025-10-20 23:20:00,557 - INFO - ======================================================================
+2025-10-20 23:20:00,557 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,557 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,557 - INFO - 
+2025-10-20 23:20:00,557 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,557 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,557 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,557 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,557 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,557 - INFO - Iteration 27, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,557 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,558 - INFO - GRID can export: YES
+2025-10-20 23:20:00,561 - INFO - ======================================================================
+2025-10-20 23:20:00,561 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,562 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,562 - INFO - 
+2025-10-20 23:20:00,562 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,562 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,562 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,562 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,562 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,562 - INFO - Iteration 28, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,562 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,562 - INFO - GRID can export: YES
+2025-10-20 23:20:00,565 - INFO - ======================================================================
+2025-10-20 23:20:00,565 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,566 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,566 - INFO - 
+2025-10-20 23:20:00,566 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,566 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,566 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,566 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,566 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,566 - INFO - Iteration 29, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,566 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,566 - INFO - GRID can export: YES
+2025-10-20 23:20:00,570 - INFO - ======================================================================
+2025-10-20 23:20:00,570 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,570 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,570 - INFO - 
+2025-10-20 23:20:00,570 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,570 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,570 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,570 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,570 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,570 - INFO - Iteration 30, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,570 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,570 - INFO - GRID can export: YES
+2025-10-20 23:20:00,576 - INFO - ======================================================================
+2025-10-20 23:20:00,576 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,576 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,576 - INFO - 
+2025-10-20 23:20:00,576 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,576 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,576 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,576 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,576 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,576 - INFO - Iteration 31, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,576 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,577 - INFO - GRID can export: YES
+2025-10-20 23:20:00,580 - INFO - ======================================================================
+2025-10-20 23:20:00,580 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,580 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,580 - INFO - 
+2025-10-20 23:20:00,580 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,580 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,580 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,580 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,580 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,580 - INFO - Iteration 32, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,580 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,580 - INFO - GRID can export: YES
+2025-10-20 23:20:00,580 - INFO - ======================================================================
+2025-10-20 23:20:00,580 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,580 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,580 - INFO - 
+2025-10-20 23:20:00,580 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,580 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,580 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,584 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,584 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,584 - INFO - Iteration 33, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,584 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,584 - INFO - GRID can export: YES
+2025-10-20 23:20:00,587 - INFO - ======================================================================
+2025-10-20 23:20:00,587 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,587 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,587 - INFO - 
+2025-10-20 23:20:00,588 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,588 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,588 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,588 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,588 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,588 - INFO - Iteration 34, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,588 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,588 - INFO - GRID can export: YES
+2025-10-20 23:20:00,591 - INFO - ======================================================================
+2025-10-20 23:20:00,591 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,591 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,591 - INFO - 
+2025-10-20 23:20:00,591 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,591 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,591 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,591 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,591 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,591 - INFO - Iteration 35, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,591 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,591 - INFO - GRID can export: YES
+2025-10-20 23:20:00,596 - INFO - ======================================================================
+2025-10-20 23:20:00,596 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,596 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,596 - INFO - 
+2025-10-20 23:20:00,596 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,596 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,596 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,596 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,596 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,597 - INFO - Iteration 36, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,597 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,597 - INFO - GRID can export: YES
+2025-10-20 23:20:00,601 - INFO - ======================================================================
+2025-10-20 23:20:00,601 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,601 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,601 - INFO - 
+2025-10-20 23:20:00,601 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,601 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,601 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,601 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,602 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,602 - INFO - Iteration 37, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,602 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,602 - INFO - GRID can export: YES
+2025-10-20 23:20:00,606 - INFO - ======================================================================
+2025-10-20 23:20:00,606 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,606 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,606 - INFO - 
+2025-10-20 23:20:00,606 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,606 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,606 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,606 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,606 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,606 - INFO - Iteration 38, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,606 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,606 - INFO - GRID can export: YES
+2025-10-20 23:20:00,606 - INFO - ======================================================================
+2025-10-20 23:20:00,606 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,606 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,606 - INFO - 
+2025-10-20 23:20:00,606 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,606 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,606 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,606 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,606 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,606 - INFO - Iteration 39, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,606 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,606 - INFO - GRID can export: YES
+2025-10-20 23:20:00,613 - INFO - ======================================================================
+2025-10-20 23:20:00,613 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,613 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,613 - INFO - 
+2025-10-20 23:20:00,613 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,613 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,613 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,613 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,613 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,613 - INFO - Iteration 40, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,613 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,613 - INFO - GRID can export: YES
+2025-10-20 23:20:00,617 - INFO - ======================================================================
+2025-10-20 23:20:00,617 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,617 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,617 - INFO - 
+2025-10-20 23:20:00,617 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,617 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,617 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,618 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,618 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,618 - INFO - Iteration 41, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,618 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,618 - INFO - GRID can export: YES
+2025-10-20 23:20:00,621 - INFO - ======================================================================
+2025-10-20 23:20:00,622 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,622 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,622 - INFO - 
+2025-10-20 23:20:00,622 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,622 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,622 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,622 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,622 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,622 - INFO - Iteration 42, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,622 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,622 - INFO - GRID can export: YES
+2025-10-20 23:20:00,625 - INFO - ======================================================================
+2025-10-20 23:20:00,625 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,625 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,625 - INFO - 
+2025-10-20 23:20:00,625 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,625 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,625 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,625 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,625 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,625 - INFO - Iteration 43, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,625 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,625 - INFO - GRID can export: YES
+2025-10-20 23:20:00,625 - INFO - ======================================================================
+2025-10-20 23:20:00,625 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,625 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,625 - INFO - 
+2025-10-20 23:20:00,625 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,625 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,625 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,625 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,625 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,625 - INFO - Iteration 44, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,625 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,625 - INFO - GRID can export: YES
+2025-10-20 23:20:00,632 - INFO - ======================================================================
+2025-10-20 23:20:00,632 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,632 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,632 - INFO - 
+2025-10-20 23:20:00,632 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,632 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,632 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,632 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,632 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,632 - INFO - Iteration 45, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,632 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,632 - INFO - GRID can export: YES
+2025-10-20 23:20:00,636 - INFO - ======================================================================
+2025-10-20 23:20:00,636 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,636 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,636 - INFO - 
+2025-10-20 23:20:00,636 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,636 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,636 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,636 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,636 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,636 - INFO - Iteration 46, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,636 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,636 - INFO - GRID can export: YES
+2025-10-20 23:20:00,640 - INFO - ======================================================================
+2025-10-20 23:20:00,640 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,640 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,640 - INFO - 
+2025-10-20 23:20:00,640 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,640 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,640 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,640 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,640 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,640 - INFO - Iteration 47, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,640 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,640 - INFO - GRID can export: YES
+2025-10-20 23:20:00,641 - INFO - ======================================================================
+2025-10-20 23:20:00,641 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,641 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,641 - INFO - 
+2025-10-20 23:20:00,641 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,641 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,641 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,641 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,641 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,641 - INFO - Iteration 48, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,641 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,641 - INFO - GRID can export: YES
+2025-10-20 23:20:00,647 - INFO - ======================================================================
+2025-10-20 23:20:00,647 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,647 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,647 - INFO - 
+2025-10-20 23:20:00,647 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,647 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,647 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,647 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,647 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,647 - INFO - Iteration 49, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,647 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,647 - INFO - GRID can export: YES
+2025-10-20 23:20:00,650 - INFO - ======================================================================
+2025-10-20 23:20:00,650 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,650 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,650 - INFO - 
+2025-10-20 23:20:00,650 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,650 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,651 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,651 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,651 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,651 - INFO - Iteration 50, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,651 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,651 - INFO - GRID can export: YES
+2025-10-20 23:20:00,652 - INFO - ======================================================================
+2025-10-20 23:20:00,652 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,652 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,652 - INFO - 
+2025-10-20 23:20:00,652 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,652 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,652 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,652 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,652 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,652 - INFO - Iteration 51, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,652 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,652 - INFO - GRID can export: YES
+2025-10-20 23:20:00,658 - INFO - ======================================================================
+2025-10-20 23:20:00,658 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,658 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,658 - INFO - 
+2025-10-20 23:20:00,658 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,658 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,658 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,658 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,658 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,658 - INFO - Iteration 52, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,658 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,658 - INFO - GRID can export: YES
+2025-10-20 23:20:00,662 - INFO - ======================================================================
+2025-10-20 23:20:00,662 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,662 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,662 - INFO - 
+2025-10-20 23:20:00,662 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,662 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,662 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,662 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,662 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,662 - INFO - Iteration 53, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,662 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,662 - INFO - GRID can export: YES
+2025-10-20 23:20:00,665 - INFO - ======================================================================
+2025-10-20 23:20:00,665 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,665 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,665 - INFO - 
+2025-10-20 23:20:00,665 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,665 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,665 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,665 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,665 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,665 - INFO - Iteration 54, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,665 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,665 - INFO - GRID can export: YES
+2025-10-20 23:20:00,669 - INFO - ======================================================================
+2025-10-20 23:20:00,669 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,669 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,669 - INFO - 
+2025-10-20 23:20:00,669 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,669 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,669 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,669 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,670 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,670 - INFO - Iteration 55, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,670 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,670 - INFO - GRID can export: YES
+2025-10-20 23:20:00,673 - INFO - ======================================================================
+2025-10-20 23:20:00,673 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,673 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,673 - INFO - 
+2025-10-20 23:20:00,673 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,673 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,673 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,673 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,674 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,674 - INFO - Iteration 56, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,674 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,674 - INFO - GRID can export: YES
+2025-10-20 23:20:00,677 - INFO - ======================================================================
+2025-10-20 23:20:00,677 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,677 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,677 - INFO - 
+2025-10-20 23:20:00,677 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,677 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,677 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,677 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,677 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,677 - INFO - Iteration 57, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,677 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,677 - INFO - GRID can export: YES
+2025-10-20 23:20:00,678 - INFO - ======================================================================
+2025-10-20 23:20:00,678 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,678 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,678 - INFO - 
+2025-10-20 23:20:00,678 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,678 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,678 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,678 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,678 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,678 - INFO - Iteration 58, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,678 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,678 - INFO - GRID can export: YES
+2025-10-20 23:20:00,684 - INFO - ======================================================================
+2025-10-20 23:20:00,684 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,684 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,685 - INFO - 
+2025-10-20 23:20:00,685 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,685 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,685 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,685 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,686 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,686 - INFO - Iteration 59, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,686 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,686 - INFO - GRID can export: YES
+2025-10-20 23:20:00,688 - INFO - ======================================================================
+2025-10-20 23:20:00,688 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,688 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,688 - INFO - 
+2025-10-20 23:20:00,688 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,688 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,688 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,688 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,688 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,688 - INFO - Iteration 60, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,688 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,688 - INFO - GRID can export: YES
+2025-10-20 23:20:00,693 - INFO - ======================================================================
+2025-10-20 23:20:00,693 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,693 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,693 - INFO - 
+2025-10-20 23:20:00,694 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,694 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,694 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,694 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,694 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,694 - INFO - Iteration 61, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,694 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,694 - INFO - GRID can export: YES
+2025-10-20 23:20:00,697 - INFO - ======================================================================
+2025-10-20 23:20:00,698 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,698 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,698 - INFO - 
+2025-10-20 23:20:00,698 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,698 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,698 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,698 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,698 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,698 - INFO - Iteration 62, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,698 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,698 - INFO - GRID can export: YES
+2025-10-20 23:20:00,701 - INFO - ======================================================================
+2025-10-20 23:20:00,701 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,702 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,702 - INFO - 
+2025-10-20 23:20:00,702 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,702 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,702 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,702 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,702 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,702 - INFO - Iteration 63, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,702 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,702 - INFO - GRID can export: YES
+2025-10-20 23:20:00,707 - INFO - ======================================================================
+2025-10-20 23:20:00,707 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,707 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,707 - INFO - 
+2025-10-20 23:20:00,707 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,707 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,707 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,707 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,707 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,707 - INFO - Iteration 64, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,707 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,708 - INFO - GRID can export: YES
+2025-10-20 23:20:00,708 - INFO - ======================================================================
+2025-10-20 23:20:00,708 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,708 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,708 - INFO - 
+2025-10-20 23:20:00,708 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,708 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,708 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,708 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,708 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,708 - INFO - Iteration 65, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,708 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,708 - INFO - GRID can export: YES
+2025-10-20 23:20:00,715 - INFO - ======================================================================
+2025-10-20 23:20:00,715 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,716 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,716 - INFO - 
+2025-10-20 23:20:00,716 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,716 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,716 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,716 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,716 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,716 - INFO - Iteration 66, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,716 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,716 - INFO - GRID can export: YES
+2025-10-20 23:20:00,720 - INFO - ======================================================================
+2025-10-20 23:20:00,720 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,720 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,720 - INFO - 
+2025-10-20 23:20:00,720 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,720 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,720 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,720 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,721 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,721 - INFO - Iteration 67, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,721 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,721 - INFO - GRID can export: YES
+2025-10-20 23:20:00,724 - INFO - ======================================================================
+2025-10-20 23:20:00,724 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,724 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,724 - INFO - 
+2025-10-20 23:20:00,724 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,724 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,724 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,724 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,724 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,724 - INFO - Iteration 68, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,724 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,724 - INFO - GRID can export: YES
+2025-10-20 23:20:00,724 - INFO - ======================================================================
+2025-10-20 23:20:00,724 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,724 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,724 - INFO - 
+2025-10-20 23:20:00,724 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,724 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,724 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,724 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,724 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,724 - INFO - Iteration 69, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,724 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,729 - INFO - GRID can export: YES
+2025-10-20 23:20:00,734 - INFO - ======================================================================
+2025-10-20 23:20:00,734 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,734 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,734 - INFO - 
+2025-10-20 23:20:00,734 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,734 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,734 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,734 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,734 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,735 - INFO - Iteration 70, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,735 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,735 - INFO - GRID can export: YES
+2025-10-20 23:20:00,738 - INFO - ======================================================================
+2025-10-20 23:20:00,739 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,739 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,739 - INFO - 
+2025-10-20 23:20:00,739 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,739 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,739 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,739 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,739 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,739 - INFO - Iteration 71, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,739 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,739 - INFO - GRID can export: YES
+2025-10-20 23:20:00,741 - INFO - ======================================================================
+2025-10-20 23:20:00,741 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,743 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,743 - INFO - 
+2025-10-20 23:20:00,743 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,743 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,743 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,744 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,744 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,744 - INFO - Iteration 72, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,744 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,744 - INFO - GRID can export: YES
+2025-10-20 23:20:00,747 - INFO - ======================================================================
+2025-10-20 23:20:00,747 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,747 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,747 - INFO - 
+2025-10-20 23:20:00,747 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,747 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,747 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,747 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,747 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,747 - INFO - Iteration 73, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,747 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,747 - INFO - GRID can export: YES
+2025-10-20 23:20:00,750 - INFO - ======================================================================
+2025-10-20 23:20:00,750 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,750 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,750 - INFO - 
+2025-10-20 23:20:00,751 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,751 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,751 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,751 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,751 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,751 - INFO - Iteration 74, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,751 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,751 - INFO - GRID can export: YES
+2025-10-20 23:20:00,753 - INFO - ======================================================================
+2025-10-20 23:20:00,753 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,753 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,753 - INFO - 
+2025-10-20 23:20:00,753 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,753 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,753 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,753 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,753 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,753 - INFO - Iteration 75, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,753 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,753 - INFO - GRID can export: YES
+2025-10-20 23:20:00,758 - INFO - ======================================================================
+2025-10-20 23:20:00,758 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,758 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,758 - INFO - 
+2025-10-20 23:20:00,758 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,758 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,758 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,758 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,758 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,758 - INFO - Iteration 76, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,759 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,759 - INFO - GRID can export: YES
+2025-10-20 23:20:00,761 - INFO - ======================================================================
+2025-10-20 23:20:00,762 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,762 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,762 - INFO - 
+2025-10-20 23:20:00,762 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,762 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,762 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,762 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,762 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,762 - INFO - Iteration 77, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,762 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,762 - INFO - GRID can export: YES
+2025-10-20 23:20:00,765 - INFO - ======================================================================
+2025-10-20 23:20:00,766 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,766 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,766 - INFO - 
+2025-10-20 23:20:00,766 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,766 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,766 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,766 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,766 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,766 - INFO - Iteration 78, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,766 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,766 - INFO - GRID can export: YES
+2025-10-20 23:20:00,769 - INFO - ======================================================================
+2025-10-20 23:20:00,769 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,769 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,769 - INFO - 
+2025-10-20 23:20:00,769 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,769 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,769 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,769 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,769 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,769 - INFO - Iteration 79, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,769 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,769 - INFO - GRID can export: YES
+2025-10-20 23:20:00,774 - INFO - ======================================================================
+2025-10-20 23:20:00,774 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,774 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,774 - INFO - 
+2025-10-20 23:20:00,774 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,774 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,774 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,774 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,774 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,774 - INFO - Iteration 80, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,774 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,775 - INFO - GRID can export: YES
+2025-10-20 23:20:00,778 - INFO - ======================================================================
+2025-10-20 23:20:00,778 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,778 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,778 - INFO - 
+2025-10-20 23:20:00,778 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,778 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,778 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,778 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,778 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,778 - INFO - Iteration 81, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,778 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,778 - INFO - GRID can export: YES
+2025-10-20 23:20:00,778 - INFO - ======================================================================
+2025-10-20 23:20:00,778 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,778 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,778 - INFO - 
+2025-10-20 23:20:00,778 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,778 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,778 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,778 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,778 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,778 - INFO - Iteration 82, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,778 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,778 - INFO - GRID can export: YES
+2025-10-20 23:20:00,786 - INFO - ======================================================================
+2025-10-20 23:20:00,787 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,787 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,787 - INFO - 
+2025-10-20 23:20:00,787 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,787 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,787 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,787 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,787 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,787 - INFO - Iteration 83, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,787 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,787 - INFO - GRID can export: YES
+2025-10-20 23:20:00,790 - INFO - ======================================================================
+2025-10-20 23:20:00,790 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,790 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,790 - INFO - 
+2025-10-20 23:20:00,790 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,790 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,790 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,790 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,790 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,790 - INFO - Iteration 84, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,790 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,790 - INFO - GRID can export: YES
+2025-10-20 23:20:00,794 - INFO - ======================================================================
+2025-10-20 23:20:00,795 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,795 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,795 - INFO - 
+2025-10-20 23:20:00,795 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,795 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,795 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,795 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,795 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,795 - INFO - Iteration 85, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,795 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,795 - INFO - GRID can export: YES
+2025-10-20 23:20:00,798 - INFO - ======================================================================
+2025-10-20 23:20:00,798 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,798 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,798 - INFO - 
+2025-10-20 23:20:00,798 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,798 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,798 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,798 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,798 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,798 - INFO - Iteration 86, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,798 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,798 - INFO - GRID can export: YES
+2025-10-20 23:20:00,803 - INFO - ======================================================================
+2025-10-20 23:20:00,804 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,804 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,804 - INFO - 
+2025-10-20 23:20:00,804 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,804 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,804 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,804 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,804 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,804 - INFO - Iteration 87, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,804 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,804 - INFO - GRID can export: YES
+2025-10-20 23:20:00,808 - INFO - ======================================================================
+2025-10-20 23:20:00,808 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,808 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,809 - INFO - 
+2025-10-20 23:20:00,809 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,809 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,809 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,809 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,809 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,809 - INFO - Iteration 88, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,809 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,809 - INFO - GRID can export: YES
+2025-10-20 23:20:00,809 - INFO - ======================================================================
+2025-10-20 23:20:00,809 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,809 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,809 - INFO - 
+2025-10-20 23:20:00,809 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,809 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,809 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,809 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,809 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,809 - INFO - Iteration 89, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,809 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,809 - INFO - GRID can export: YES
+2025-10-20 23:20:00,815 - INFO - ======================================================================
+2025-10-20 23:20:00,815 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,815 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,815 - INFO - 
+2025-10-20 23:20:00,815 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,815 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,815 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,815 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,815 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,815 - INFO - Iteration 90, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,815 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,815 - INFO - GRID can export: YES
+2025-10-20 23:20:00,820 - INFO - ======================================================================
+2025-10-20 23:20:00,820 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,820 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,820 - INFO - 
+2025-10-20 23:20:00,820 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,820 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,820 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,821 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,821 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,821 - INFO - Iteration 91, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,821 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,821 - INFO - GRID can export: YES
+2025-10-20 23:20:00,823 - INFO - ======================================================================
+2025-10-20 23:20:00,823 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,823 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,824 - INFO - 
+2025-10-20 23:20:00,824 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,824 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,824 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,824 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,824 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,824 - INFO - Iteration 92, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,824 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,824 - INFO - GRID can export: YES
+2025-10-20 23:20:00,824 - INFO - ======================================================================
+2025-10-20 23:20:00,824 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,824 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,824 - INFO - 
+2025-10-20 23:20:00,824 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,824 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,824 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,824 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,824 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,824 - INFO - Iteration 93, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,824 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,824 - INFO - GRID can export: YES
+2025-10-20 23:20:00,830 - INFO - ======================================================================
+2025-10-20 23:20:00,830 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,831 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,831 - INFO - 
+2025-10-20 23:20:00,831 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,831 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,831 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,831 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,831 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,831 - INFO - Iteration 94, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,831 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,831 - INFO - GRID can export: YES
+2025-10-20 23:20:00,834 - INFO - ======================================================================
+2025-10-20 23:20:00,834 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,834 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,834 - INFO - 
+2025-10-20 23:20:00,834 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,835 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,835 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,835 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,836 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,836 - INFO - Iteration 95, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,836 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,836 - INFO - GRID can export: YES
+2025-10-20 23:20:00,839 - INFO - ======================================================================
+2025-10-20 23:20:00,839 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,839 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,839 - INFO - 
+2025-10-20 23:20:00,839 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,839 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,839 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,839 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,839 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,840 - INFO - Iteration 96, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,840 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,840 - INFO - GRID can export: YES
+2025-10-20 23:20:00,843 - INFO - ======================================================================
+2025-10-20 23:20:00,843 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,843 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,843 - INFO - 
+2025-10-20 23:20:00,843 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,843 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,843 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,843 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,843 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,843 - INFO - Iteration 97, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,843 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,843 - INFO - GRID can export: YES
+2025-10-20 23:20:00,844 - INFO - ======================================================================
+2025-10-20 23:20:00,844 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,844 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,844 - INFO - 
+2025-10-20 23:20:00,844 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,844 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,844 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,844 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,844 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,844 - INFO - Iteration 98, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,844 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,844 - INFO - GRID can export: YES
+2025-10-20 23:20:00,851 - INFO - ======================================================================
+2025-10-20 23:20:00,851 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,851 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,851 - INFO - 
+2025-10-20 23:20:00,851 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,851 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,851 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,851 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,851 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,851 - INFO - Iteration 99, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,851 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,851 - INFO - GRID can export: YES
+2025-10-20 23:20:00,853 - INFO - ======================================================================
+2025-10-20 23:20:00,853 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,853 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,853 - INFO - 
+2025-10-20 23:20:00,853 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,853 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,853 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,853 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,853 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,853 - INFO - Iteration 100, surplus remaining: 210.0 kW
+2025-10-20 23:20:00,853 - INFO - BESS can charge: YES
+2025-10-20 23:20:00,853 - INFO - GRID can export: YES
+2025-10-20 23:20:00,858 - INFO - ======================================================================
+2025-10-20 23:20:00,858 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 23:20:00,859 - INFO -   Mode: AUTO
+2025-10-20 23:20:00,859 - INFO - 
+2025-10-20 23:20:00,859 - INFO - Decision: SELL: poor_sell_price(ratio=0.71), critical_free_space(0.0%), high_limit_usage(100%), U_charge=-0.257, U_sell=0.157
+2025-10-20 23:20:00,859 - INFO - Confidence: 20.7%
+2025-10-20 23:20:00,859 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 23:20:00,859 - INFO - The sales limit has been reached. No more energy can be sold.
+2025-10-20 23:20:00,859 - INFO - Failed: Sales limit reached
+2025-10-20 23:20:00,859 - INFO - 
+2025-10-20 23:20:00,859 - INFO -   CHANGES: 0 device(s) modified
+2025-10-20 23:20:00,859 - INFO -   Managed 0.00 kW surplus
+2025-10-20 23:20:00,859 - INFO - SCADA GRID STATUS: No grid operations in this iteration
+2025-10-20 23:20:00,859 - INFO - 
 ==================================================
-ITERATION COMPLETE in 0.02s
+ITERATION COMPLETE in 0.46s
 ==================================================
-2025-10-20 23:17:07,221 - INFO - Live contract data saved to C:/eryk/AppFuga\apps\backend\output_contract_data.json
-2025-10-20 23:17:07,309 - INFO - Weather data updated at 2025-10-20 23:17:07.309776
-2025-10-20 23:17:07,398 - INFO - 5-minute data aggregated and logged at 2025-10-20 23:17:07.398350
-2025-10-20 23:17:07,475 - INFO - Weather forecast updated at 2025-10-20 23:17:07.475007
-2025-10-20 23:17:07,475 - INFO - Updated power profile
-2025-10-20 23:17:07,475 - INFO - Complete iteration finished in 0.28 seconds
-2025-10-20 23:17:07,475 - INFO - !!! Waiting 300.0 seconds for next iteration !!!
-2025-10-20 23:17:10,099 - INFO - !!! Energy management stopping !!!
-2025-10-20 23:17:10,099 - INFO - !!! Energy management stopped !!!
+2025-10-20 23:20:00,861 - INFO - Live contract data saved to C:/eryk/AppFuga\apps\backend\output_contract_data.json
+2025-10-20 23:20:00,937 - INFO - Weather data updated at 2025-10-20 23:20:00.937845
+2025-10-20 23:20:00,999 - INFO - 5-minute data aggregated and logged at 2025-10-20 23:20:00.999504
+2025-10-20 23:20:01,093 - INFO - Weather forecast updated at 2025-10-20 23:20:01.093448
+2025-10-20 23:20:01,093 - INFO - Updated power profile
+2025-10-20 23:20:01,093 - INFO - Complete iteration finished in 0.71 seconds
+2025-10-20 23:20:01,093 - INFO - !!! Waiting 300.0 seconds for next iteration !!!
+2025-10-20 23:20:03,207 - INFO - !!! Energy management stopping !!!
+2025-10-20 23:20:03,207 - INFO - !!! Energy management stopped !!!
