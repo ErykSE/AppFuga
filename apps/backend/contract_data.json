@@ -4,7 +4,7 @@
     "CONTRACTED_MARGIN": 0.05,
     "CONTRACTED_EXPORT_POSSIBILITY": true,
     "CONTRACTED_SALE_LIMIT": 500.0,
-    "CONTRACTED_PURCHASE_LIMIT": 200.0,
+    "CONTRACTED_PURCHASE_LIMIT": 0.0,
     "contracted_billing_cycle": "monthly",
     "sold_power": 0.0,
     "bought_power": 0.0,
@@ -14,5 +14,7 @@
     "setpoint_grid_import": 0.0,
     "actual_grid_export": 0.0,
     "actual_grid_import": 0.0,
-    "decision_mode": "AUTO"
+    "decision_mode": "AUTO",
+    "contracted_billing_period_start": "2025-01-01T00:00:00Z",
+    "contracted_billing_period_end": "2025-01-31T23:59:59Z"
 }
