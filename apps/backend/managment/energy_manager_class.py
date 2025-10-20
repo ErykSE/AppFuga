@@ -3259,6 +3259,8 @@ class EnergyManager:
             
             # Dla NADWYŻKI: Przywróć ograniczone odbiorniki
             elif balance.has_surplus:
+                self.info_logger.info(f"💰 Surplus available: {balance.surplus:.2f} kW")
+                
                 for limitation in self.artificial_limitations[:]:
                     if limitation["type"] == "consumption_limit":
                         device = limitation["device"]
@@ -3266,9 +3268,21 @@ class EnergyManager:
                         was_active = limitation.get("was_active", True)
                         current_power = device.power
                         
+                        # Oblicz ile mocy potrzeba do przywrócenia
+                        power_needed = original_power - current_power
+                        
+                        # Sprawdź czy nadwyżka wystarczy
+                        if balance.surplus < power_needed:
+                            self.info_logger.warning(
+                                f"⚠️  Cannot restore {device.name}: "
+                                f"surplus ({balance.surplus:.2f} kW) < needed ({power_needed:.2f} kW)"
+                            )
+                            continue
+                        
                         if not device.switch_status and was_active:
                             self.info_logger.info(
-                                f"⚙️  Restoring {device.name}: OFF → ON ({original_power:.2f} kW)"
+                                f"⚙️  Restoring {device.name}: OFF → ON ({original_power:.2f} kW) "
+                                f"(surplus: {balance.surplus:.2f} kW)"
                             )
                             
                             device.switch_status = True
@@ -3287,6 +3301,9 @@ class EnergyManager:
                             self.changed_devices.append(device_change)
                             self.artificial_limitations.remove(limitation)
                             
+                            # Aktualizuj nadwyżkę po przywróceniu
+                            balance.surplus -= power_needed
+                            
                             restored = True
                             restored_count += 1
                         
@@ -3294,7 +3311,7 @@ class EnergyManager:
                             self.info_logger.info(
                                 f"⚙️  Restoring {device.name}: "
                                 f"{current_power:.2f} kW → {original_power:.2f} kW "
-                                f"(from restoration list)"
+                                f"(surplus: {balance.surplus:.2f} kW)"
                             )
                             
                             if hasattr(device, "set_power"):
@@ -3311,6 +3328,9 @@ class EnergyManager:
                             }
                             self.changed_devices.append(device_change)
                             self.artificial_limitations.remove(limitation)
+                            
+                            # Aktualizuj nadwyżkę po przywróceniu
+                            balance.surplus -= power_needed
                             
                             restored = True
                             restored_count += 1
