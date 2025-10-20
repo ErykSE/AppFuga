@@ -92,9 +92,9 @@
                 "id": 10,
                 "name": "AC Unit 1",
                 "priority": 2,
-                "power": 100.0,
-                "actual_output": 100.0,
-                "setpoint_output": 100.0,
+                "power": 110.0,
+                "actual_output": 110.0,
+                "setpoint_output": 110.0,
                 "switch_status": true,
                 "min_power": 0,
                 "max_power": 150
@@ -103,9 +103,9 @@
                 "id": 11,
                 "name": "Lighting",
                 "priority": 3,
-                "power": 18.71,
-                "actual_output": 18.71,
-                "setpoint_output": 18.71,
+                "power": 30.0,
+                "actual_output": 30.0,
+                "setpoint_output": 30.0,
                 "switch_status": true,
                 "min_power": 0,
                 "max_power": 120
@@ -153,11 +153,12 @@
         "actual_grid_import": 0.0,
         "decision_mode": "AUTO"
     },
-    "expected_scenario": "BALANCED - NO ACTION REQUIRED",
-    "expected_balance": 0.0,
+    "expected_scenario": "SMALL DEFICIT - BESS CAN HELP",
+    "expected_balance": -15.8,
     "expected_actions": [
-        "No action required",
-        "System should remain balanced"
+        "BESS discharge decision (BESS vs GRID)",
+        "Possible: Reduce adjustable loads (priority 3)",
+        "Possible: Grid import if BESS not chosen"
     ],
-    "description": "Bilans idealnie zrównoważony. Generacja = Konsumpcja. System nie powinien podejmować żadnych działań."
+    "description": "Mały deficyt ~16 kW. BESS na 50% (może rozładować do 50 kW). System powinien podjąć decyzję BESS vs GRID."
 }

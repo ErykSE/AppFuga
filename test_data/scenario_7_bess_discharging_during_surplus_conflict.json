@@ -58,8 +58,8 @@
                 "min_charge_level": 10,
                 "max_charge_level": 90,
                 "charge_level": 50,
-                "actual_output": 0.0,
-                "setpoint_output": 0.0,
+                "actual_output": 25.0,
+                "setpoint_output": 25.0,
                 "max_discharge_power": 50,
                 "max_charge_power": 50,
                 "min_output": 0,
@@ -92,9 +92,9 @@
                 "id": 10,
                 "name": "AC Unit 1",
                 "priority": 2,
-                "power": 100.0,
-                "actual_output": 100.0,
-                "setpoint_output": 100.0,
+                "power": 90.0,
+                "actual_output": 90.0,
+                "setpoint_output": 90.0,
                 "switch_status": true,
                 "min_power": 0,
                 "max_power": 150
@@ -103,9 +103,9 @@
                 "id": 11,
                 "name": "Lighting",
                 "priority": 3,
-                "power": 18.71,
-                "actual_output": 18.71,
-                "setpoint_output": 18.71,
+                "power": 15.0,
+                "actual_output": 15.0,
+                "setpoint_output": 15.0,
                 "switch_status": true,
                 "min_power": 0,
                 "max_power": 120
@@ -153,11 +153,12 @@
         "actual_grid_import": 0.0,
         "decision_mode": "AUTO"
     },
-    "expected_scenario": "BALANCED - NO ACTION REQUIRED",
-    "expected_balance": 0.0,
+    "expected_scenario": "SURPLUS - BESS DISCHARGING CONFLICT",
+    "expected_balance": 9.2,
     "expected_actions": [
-        "No action required",
-        "System should remain balanced"
+        "Stop BESS discharging (neutralize conflict)",
+        "BESS charge decision (BESS vs GRID SELL)",
+        "Possible: Grid export if BESS not chosen"
     ],
-    "description": "Bilans idealnie zrównoważony. Generacja = Konsumpcja. System nie powinien podejmować żadnych działań."
+    "description": "BESS rozładowuje się (25 kW) podczas nadwyżki. System powinien najpierw zatrzymać rozładowanie, potem podjąć decyzję BESS charge vs GRID export."
 }

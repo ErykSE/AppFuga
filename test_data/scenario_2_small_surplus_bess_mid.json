@@ -103,9 +103,9 @@
                 "id": 11,
                 "name": "Lighting",
                 "priority": 3,
-                "power": 18.71,
-                "actual_output": 18.71,
-                "setpoint_output": 18.71,
+                "power": 15.0,
+                "actual_output": 15.0,
+                "setpoint_output": 15.0,
                 "switch_status": true,
                 "min_power": 0,
                 "max_power": 120
@@ -153,11 +153,11 @@
         "actual_grid_import": 0.0,
         "decision_mode": "AUTO"
     },
-    "expected_scenario": "BALANCED - NO ACTION REQUIRED",
-    "expected_balance": 0.0,
+    "expected_scenario": "SMALL SURPLUS - BESS CAN CHARGE",
+    "expected_balance": 8.7,
     "expected_actions": [
-        "No action required",
-        "System should remain balanced"
+        "BESS charge decision (BESS vs GRID SELL)",
+        "Possible: Grid export if BESS not chosen"
     ],
-    "description": "Bilans idealnie zrównoważony. Generacja = Konsumpcja. System nie powinien podejmować żadnych działań."
+    "description": "Mała nadwyżka ~9 kW. BESS na 50% (może ładować do 40 kWh). System powinien podjąć decyzję BESS vs GRID SELL."
 }

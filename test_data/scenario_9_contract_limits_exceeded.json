@@ -7,8 +7,8 @@
                 "priority": 1,
                 "max_output": 100.0,
                 "min_output": 0,
-                "actual_output": 66.50,
-                "setpoint_output": 66.50,
+                "actual_output": 100.0,
+                "setpoint_output": 100.0,
                 "switch_status": true,
                 "device_status": "online"
             },
@@ -18,8 +18,8 @@
                 "priority": 1,
                 "max_output": 100.0,
                 "min_output": 0,
-                "actual_output": 70.21,
-                "setpoint_output": 70.21,
+                "actual_output": 100.0,
+                "setpoint_output": 100.0,
                 "switch_status": true,
                 "device_status": "online"
             }
@@ -31,8 +31,8 @@
                 "priority": 2,
                 "max_output": 90.0,
                 "min_output": 0,
-                "actual_output": 77.0,
-                "setpoint_output": 77.0,
+                "actual_output": 90.0,
+                "setpoint_output": 90.0,
                 "switch_status": true,
                 "device_status": "online"
             },
@@ -57,7 +57,7 @@
                 "capacity": 100,
                 "min_charge_level": 10,
                 "max_charge_level": 90,
-                "charge_level": 50,
+                "charge_level": 90,
                 "actual_output": 0.0,
                 "setpoint_output": 0.0,
                 "max_discharge_power": 50,
@@ -92,9 +92,9 @@
                 "id": 10,
                 "name": "AC Unit 1",
                 "priority": 2,
-                "power": 100.0,
-                "actual_output": 100.0,
-                "setpoint_output": 100.0,
+                "power": 20.0,
+                "actual_output": 20.0,
+                "setpoint_output": 20.0,
                 "switch_status": true,
                 "min_power": 0,
                 "max_power": 150
@@ -103,9 +103,9 @@
                 "id": 11,
                 "name": "Lighting",
                 "priority": 3,
-                "power": 18.71,
-                "actual_output": 18.71,
-                "setpoint_output": 18.71,
+                "power": 10.0,
+                "actual_output": 10.0,
+                "setpoint_output": 10.0,
                 "switch_status": true,
                 "min_power": 0,
                 "max_power": 120
@@ -116,21 +116,21 @@
                 "id": 101,
                 "name": "Meter for PV Panel 1",
                 "status": "online",
-                "measured_power": 66.5,
+                "measured_power": 100.0,
                 "device_id": 1
             },
             {
                 "id": 102,
                 "name": "Meter for PV Panel 2",
                 "status": "online",
-                "measured_power": 70.2,
+                "measured_power": 100.0,
                 "device_id": 2
             },
             {
                 "id": 103,
                 "name": "Meter for Wind Turbine 1",
                 "status": "online",
-                "measured_power": 77.0,
+                "measured_power": 90.0,
                 "device_id": 3
             }
         ]
@@ -143,7 +143,7 @@
         "CONTRACTED_SALE_LIMIT": 500.0,
         "CONTRACTED_PURCHASE_LIMIT": 200.0,
         "contracted_billing_cycle": "monthly",
-        "sold_power": 0.0,
+        "sold_power": 480.0,
         "bought_power": 0.0,
         "current_tariff_buy": 0.35,
         "current_tariff_sell": 0.25,
@@ -153,11 +153,12 @@
         "actual_grid_import": 0.0,
         "decision_mode": "AUTO"
     },
-    "expected_scenario": "BALANCED - NO ACTION REQUIRED",
-    "expected_balance": 0.0,
+    "expected_scenario": "LARGE SURPLUS - CONTRACT LIMIT NEAR",
+    "expected_balance": 305.0,
     "expected_actions": [
-        "No action required",
-        "System should remain balanced"
+        "BESS cannot charge (already at 90%)",
+        "Grid export limited (only 20 kWh left in contract)",
+        "Possible: Curtail generation if needed"
     ],
-    "description": "Bilans idealnie zrównoważony. Generacja = Konsumpcja. System nie powinien podejmować żadnych działań."
+    "description": "Duża nadwyżka ~305 kW. BESS pełny. Contract sale limit prawie wyczerpany (480/500 kWh). System powinien eksportować tylko do limitu, potem może ograniczyć generację."
 }
