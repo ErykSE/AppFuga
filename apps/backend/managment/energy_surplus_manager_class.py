@@ -543,8 +543,20 @@ class EnergySurplusManager:
             return False
 
     def check_bess_availability(self):
+        """Sprawdza czy BESS może ładować (nie ładuje się już)"""
         try:
-            return self.microgrid.bess.get_switch_status()
+            if not self.microgrid.bess.get_switch_status():
+                return False
+            
+            # Sprawdź czy BESS już nie ładuje się
+            if self.energy_manager_ref:
+                is_already_charging, _ = self.energy_manager_ref.check_device_already_operating(
+                    "BESS", "charging"
+                )
+                if is_already_charging:
+                    return False
+            
+            return True
         except Exception as e:
             self.error_logger.error(f"Error checking bess possibility: {str(e)}")
             return False
