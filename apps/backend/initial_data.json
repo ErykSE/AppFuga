@@ -70,7 +70,7 @@
         {
             "id": 8,
             "name": "Critical Load 1",
-            "priority": 2,
+            "priority": 1,
             "power": 150.0,
             "actual_output": 150.0,
             "setpoint_output": 150.0,
@@ -79,7 +79,7 @@
         {
             "id": 9,
             "name": "Critical Load 2",
-            "priority": 2,
+            "priority": 1,
             "power": 150.0,
             "actual_output": 150.0,
             "setpoint_output": 150.0,
@@ -90,7 +90,7 @@
         {
             "id": 10,
             "name": "AC Unit 1",
-            "priority": 1,
+            "priority": 2,
             "power": 80.0,
             "actual_output": 80.0,
             "setpoint_output": 80.0,
