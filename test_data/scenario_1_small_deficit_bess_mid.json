@@ -153,13 +153,13 @@
         "actual_grid_import": 0.0,
         "decision_mode": "AUTO"
     },
-    "expected_scenario": "SMALL DEFICIT - NO ADJUSTABLE GENERATORS",
+    "expected_scenario": "SMALL DEFICIT - CAN INCREASE GENERATORS",
     "expected_balance": -15.8,
     "expected_actions": [
+        "Possible: Increase PV/Wind generators (if below max)",
         "BESS discharge decision (BESS vs GRID)",
         "Possible: Reduce adjustable loads (priority 3)",
-        "Possible: Grid import if BESS not chosen",
-        "NO: Cannot increase generators (PV/Wind are non-adjustable)"
+        "Possible: Grid import if BESS not chosen"
     ],
-    "description": "Mały deficyt ~16 kW. BESS na 50% (może rozładować do 50 kW). Brak fuel_turbines/fuel_cells (adjustable generators). System powinien: BESS discharge vs GRID import lub reduce loads."
+    "description": "Mały deficyt ~16 kW. BESS na 50% (może rozładować do 50 kW). PV i Wind są adjustable - można zwiększyć jeśli nie na max. System powinien: increase generators lub BESS discharge vs GRID import lub reduce loads."
 }
