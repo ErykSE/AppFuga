@@ -1190,18 +1190,10 @@ class EnergyManager:
         """Generuje i zapisuje aktualne dane kontraktowe do osobnego pliku JSON."""
         try:
             contract_data = {
-                "CONTRACTED_TYPE": self.osd.CONTRACTED_TYPE,
-                "CONTRACTED_DURATION": self.osd.CONTRACTED_DURATION,
-                "CONTRACTED_MARGIN": self.osd.CONTRACTED_MARGIN,
-                "CONTRACTED_EXPORT_POSSIBILITY": self.osd.CONTRACTED_EXPORT_POSSIBILITY,
-                "CONTRACTED_SALE_LIMIT": self.osd.CONTRACTED_SALE_LIMIT,
-                "CONTRACTED_PURCHASE_LIMIT": self.osd.CONTRACTED_PURCHASE_LIMIT,
-                "sold_power": self.osd.get_sold_power(),
-                "bought_power": self.osd.get_bought_power(),
-                "current_tariff_buy": self.osd.get_current_buy_price(),
-                "current_tariff_sell": self.osd.get_current_sell_price(),
                 "setpoint_grid_import": self.osd.setpoint_grid_import,
                 "setpoint_grid_export": self.osd.setpoint_grid_export,
+                "sold_power": self.osd.get_sold_power(),
+                "bought_power": self.osd.get_bought_power(),
             }
 
             # Upewnij się, że katalogi istnieją
