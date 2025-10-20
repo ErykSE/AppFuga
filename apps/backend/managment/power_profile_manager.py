@@ -166,6 +166,10 @@ class PowerProfileManager:
         aggregated_data = self.power_profile.aggregate_5min_data()
         current_date = datetime.now().date()
         self.data_manager.save_detailed_data(current_date, aggregated_data)
+        
+        # Wyczyść dane po zapisaniu, aby uniknąć duplikatów w kolejnych agregacjach
+        self.power_profile.current_data = pd.DataFrame()
+        
         self.last_5min_aggregation = datetime.now()
         self.info_logger.info(
             f"5-minute data aggregated and logged at {self.last_5min_aggregation}"
