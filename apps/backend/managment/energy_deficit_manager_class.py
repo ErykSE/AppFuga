@@ -369,8 +369,10 @@ class EnergyDeficitManager:
                     self.info_logger.warning(
                         f"Failed to handle deficit: {result.get('reason', 'unknown')}"
                     )
-                    # Jeśli nie udało się - spróbuj ograniczyć zużycie
-                    break
+                    # Jeśli nie udało się - przejdź do ograniczania zużycia
+                    # (zmień flagi, aby pętla przeszła do bloku else)
+                    bess_available = False
+                    can_buy_energy = False
 
             elif bess_available:
                 #  Tylko DISCHARGE → _execute_discharge()
@@ -494,17 +496,38 @@ class EnergyDeficitManager:
             return {"success": False, "amount": 0, "error": str(e)}
 
     def is_bess_available(self):
-
-        return (
-            self.microgrid.bess
-            and self.microgrid.bess.get_switch_status()
-            and self.microgrid.bess.get_charge_level() > 0
-        )
+        """Sprawdza czy BESS może rozładować (z uwzględnieniem bezpieczeństwa)"""
+        if not (self.microgrid.bess and self.microgrid.bess.get_switch_status()):
+            return False
+        
+        # Użyj BESSCapabilityChecker jeśli dostępny
+        if self.energy_manager_ref and self.energy_manager_ref.bess_checker:
+            # Sprawdź czy BESS już nie rozładowuje się
+            is_already_discharging, _ = self.energy_manager_ref.check_device_already_operating(
+                "BESS", "discharging"
+            )
+            if is_already_discharging:
+                return False
+            
+            # Sprawdź fizyczne możliwości (z bezpieczeństwem)
+            plan = self.energy_manager_ref.bess_checker.check_discharge_capability(1.0)  # Dowolny mały deficyt
+            return plan.is_feasible
+        
+        # Fallback: proste sprawdzenie
+        return self.microgrid.bess.get_charge_level() > 0
 
     def can_buy_energy(self):
-        result = self.osd.get_bought_power() < self.osd.get_purchase_limit()
-
-        return result
+        """Sprawdza czy Grid może kupować (z uwzględnieniem limitu)"""
+        # Sprawdź czy Grid już nie importuje
+        if self.energy_manager_ref:
+            is_already_importing, _ = self.energy_manager_ref.check_device_already_operating(
+                "GRID", "importing"
+            )
+            if is_already_importing:
+                return False
+        
+        # Sprawdź czy jest dostępna pojemność
+        return self.osd.get_remaining_purchase_capacity() > 0
 
     def discharge_bess(self, power_deficit):
         """
