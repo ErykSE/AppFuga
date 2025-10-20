@@ -2222,6 +2222,15 @@ class EnergyManager:
         #  POPRAWKA: Użyj setpoint_grid_export (polecenie dla SCADA)
         grid_export = self.osd.setpoint_grid_export
         
+        # DEBUG: Loguj wartości grid
+        self.info_logger.debug(f"🔍 DEBUG calculate_energy_balance:")
+        self.info_logger.debug(f"   setpoint_grid_export: {self.osd.setpoint_grid_export:.2f} kW")
+        self.info_logger.debug(f"   actual_grid_export: {self.osd.actual_grid_export:.2f} kW")
+        self.info_logger.debug(f"   current_grid_export: {self.osd.current_grid_export:.2f} kW")
+        self.info_logger.debug(f"   setpoint_grid_import: {self.osd.setpoint_grid_import:.2f} kW")
+        self.info_logger.debug(f"   actual_grid_import: {self.osd.actual_grid_import:.2f} kW")
+        self.info_logger.debug(f"   current_grid_import: {self.osd.current_grid_import:.2f} kW")
+        
         # 3. BESS charge (ładowanie baterii)
         # ⚠️ WAŻNE: actual_output < 0 → BESS pobiera energię (ładowanie)
         bess_charge = 0.0
@@ -2230,6 +2239,12 @@ class EnergyManager:
         
         # Suma popytu
         total_demand = consumption + grid_export + bess_charge
+        
+        # DEBUG: Loguj obliczenia
+        self.info_logger.debug(f"   consumption: {consumption:.2f} kW")
+        self.info_logger.debug(f"   grid_export: {grid_export:.2f} kW")
+        self.info_logger.debug(f"   bess_charge: {bess_charge:.2f} kW")
+        self.info_logger.debug(f"   total_demand: {total_demand:.2f} kW")
         
         # ====================================================================
         # BILANS
@@ -2318,6 +2333,15 @@ class EnergyManager:
         # Grid actual values
         grid_import_actual = self.osd.current_grid_import
         grid_export_actual = self.osd.current_grid_export
+        
+        # DEBUG: Loguj wartości grid
+        self.info_logger.debug(f"🔍 DEBUG _log_initial_system_status:")
+        self.info_logger.debug(f"   setpoint_grid_export: {self.osd.setpoint_grid_export:.2f} kW")
+        self.info_logger.debug(f"   actual_grid_export: {self.osd.actual_grid_export:.2f} kW")
+        self.info_logger.debug(f"   current_grid_export: {self.osd.current_grid_export:.2f} kW")
+        self.info_logger.debug(f"   setpoint_grid_import: {self.osd.setpoint_grid_import:.2f} kW")
+        self.info_logger.debug(f"   actual_grid_import: {self.osd.actual_grid_import:.2f} kW")
+        self.info_logger.debug(f"   current_grid_import: {self.osd.current_grid_import:.2f} kW")
         
         # Oblicz całkowitą generację (urządzenia + BESS + grid)
         total_generation = actual_generation + max(0, bess_actual) + grid_import_actual

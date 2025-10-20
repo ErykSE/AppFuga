@@ -1,176 +1,61 @@
-2025-10-20 10:42:53,990 - INFO - Inicjalizacja ApiManager z bazowym URL: http://localhost:5002
-2025-10-20 10:42:53,991 - INFO - Retry config: max_retries=3, initial_delay=30s, max_delay=300s, exponential_backoff=True, scada_check_interval=60s
-2025-10-20 10:42:53,991 - INFO - Starting heartbeat tag sender (every 1 second)
-2025-10-20 10:42:53,992 - INFO - 
+2025-10-20 11:03:06,790 - INFO - Inicjalizacja ApiManager z bazowym URL: http://localhost:5002
+2025-10-20 11:03:06,791 - INFO - Retry config: max_retries=3, initial_delay=30s, max_delay=300s, exponential_backoff=True, scada_check_interval=60s
+2025-10-20 11:03:06,791 - INFO - Starting heartbeat tag sender (every 1 second)
+2025-10-20 11:03:06,794 - INFO - 
 ==================================================
 Starting new iteration
 ==================================================
-2025-10-20 10:42:53,992 - INFO - !!! Energy management started !!!
-2025-10-20 10:42:53,993 - INFO - Loaded operation mode: automatic
-2025-10-20 10:42:53,993 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
-2025-10-20 10:42:55,214 - INFO - Algorytm bêdzie kontynuowany z dostêpnymi urz¹dzeniami [SYSTEM]
-2025-10-20 10:42:55,218 - INFO - Status zapisany: Some devices are not accessible [SYSTEM]
-2025-10-20 10:42:55,218 - INFO - Pobieranie danych kontraktu z http://localhost:5002/api/Scada/contract-info
-2025-10-20 10:42:55,273 - INFO - Dane urz¹dzeñ zapisane do C:/eryk/AppFuga\apps\backend\live_data.json [SYSTEM]
-2025-10-20 10:42:55,273 - INFO - Dane kontraktu zapisane do C:/eryk/AppFuga\apps\backend\live_contract_data.json [SYSTEM]
-2025-10-20 10:42:55,273 - INFO - Status systemu zapisany do C:/eryk/AppFuga\apps\backend\system_status.json [SYSTEM]
-2025-10-20 10:42:55,284 - INFO - Loaded live data
-2025-10-20 10:42:55,284 - INFO - 
+2025-10-20 11:03:06,794 - INFO - !!! Energy management started !!!
+2025-10-20 11:03:06,794 - INFO - Loaded operation mode: automatic
+2025-10-20 11:03:06,794 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-10-20 11:03:07,050 - INFO - Algorytm bêdzie kontynuowany z dostêpnymi urz¹dzeniami [SYSTEM]
+2025-10-20 11:03:07,052 - INFO - Status zapisany: Some devices are not accessible [SYSTEM]
+2025-10-20 11:03:07,052 - INFO - Pobieranie danych kontraktu z http://localhost:5002/api/Scada/contract-info
+2025-10-20 11:03:07,116 - INFO - Dane urz¹dzeñ zapisane do C:/eryk/AppFuga\apps\backend\live_data.json [SYSTEM]
+2025-10-20 11:03:07,117 - INFO - Dane kontraktu zapisane do C:/eryk/AppFuga\apps\backend\live_contract_data.json [SYSTEM]
+2025-10-20 11:03:07,117 - INFO - Status systemu zapisany do C:/eryk/AppFuga\apps\backend\system_status.json [SYSTEM]
+2025-10-20 11:03:07,134 - INFO - Loaded live data
+2025-10-20 11:03:07,135 - INFO - 
 ==================================================
 NEW ITERATION START
 ==================================================
-2025-10-20 10:42:55,284 - INFO - 
-2025-10-20 10:42:55,284 - INFO -  INITIAL SYSTEM STATUS
-2025-10-20 10:42:55,284 - INFO - ----------------------------------------------------------------------
-2025-10-20 10:42:55,284 - INFO - Generation:    161.44 kW (devices: 161.4 + BESS: 0.0 + Grid: 0.0)
-2025-10-20 10:42:55,284 - INFO - Consumption:   177.20 kW (loads: 177.2 + BESS: 0.0 + Grid: 0.0)
-2025-10-20 10:42:55,287 - INFO - BESS:          100.00/200.00 kWh (actual: +0.00 kW)
-2025-10-20 10:42:55,287 - INFO - Grid:        Import=0.00 kW, Export=0.00 kW
-2025-10-20 10:42:55,287 - INFO - Trading:     Sold=155.43/250.00 kWh, Bought=13.76/120.00 kWh
-2025-10-20 10:42:55,287 - INFO - Balance:        -15.8 kW (DEFICIT (-15.8 kW))
-2025-10-20 10:42:55,287 - INFO - ----------------------------------------------------------------------
-2025-10-20 10:42:55,287 - INFO - 
-2025-10-20 10:42:55,287 - INFO - ANALYZING CONFLICTING OPERATIONS
-2025-10-20 10:42:55,287 - INFO - Deficit detected: 181.20 kW
-2025-10-20 10:42:55,287 - INFO - No conflicting operations detected
-2025-10-20 10:42:55,288 - INFO - 
-2025-10-20 10:42:55,300 - INFO - ----------------------------------------------------------------------
-2025-10-20 10:42:55,300 - INFO - Checking for limited generators (not in artificial_limitations)...
-2025-10-20 10:42:55,304 - INFO - ----------------------------------------------------------------------
-2025-10-20 10:42:55,304 - INFO - Start managing power deficit: 181.2 kW
-2025-10-20 10:42:55,304 - INFO - DEBUG: EnergyDeficitManager.handle_deficit_automatic START
-2025-10-20 10:42:55,304 - INFO - 
-2025-10-20 10:42:55,304 - INFO -  MANAGING DEFICIT
-2025-10-20 10:42:55,304 - INFO - -------------------------
-2025-10-20 10:42:55,304 - INFO - DEBUG: maximize_power_output START
-2025-10-20 10:42:55,304 - INFO -  DEBUG: maximize_power_output calculations
-2025-10-20 10:42:55,304 - INFO - Current output: 161.44 kW
-2025-10-20 10:42:55,304 - INFO - Max potential output: 161.44 kW
-2025-10-20 10:42:55,304 - INFO - Power deficit: 181.2 kW
-2025-10-20 10:42:55,304 - INFO - Potential surplus: -181.2 kW
-2025-10-20 10:42:55,304 - INFO - BESS free capacity: 100 kWh
-2025-10-20 10:42:55,304 - INFO - Available sale capacity: 94.57 kWh
-2025-10-20 10:42:55,304 - INFO - Total available capacity: 194.57 kWh
-2025-10-20 10:42:55,304 - INFO - Handleable additional power: -181.2 kW
-2025-10-20 10:42:55,304 - INFO - Current output: 161.44 kW
-2025-10-20 10:42:55,304 - INFO - Max potential output: 161.44 kW
-2025-10-20 10:42:55,304 - INFO - Power deficit: 181.2 kW
-2025-10-20 10:42:55,304 - INFO - Handleable power: -181.2 kW
-2025-10-20 10:42:55,304 - INFO - Target output: 161.44 kW
-2025-10-20 10:42:55,304 - INFO - DEBUG: Processing device PV Panel 1, increased_power=0.0, power_deficit=181.2
-2025-10-20 10:42:55,304 - INFO - DEBUG: Device PV Panel 1: 51.6 -> 51.6 kW (increase: 0.0)
-2025-10-20 10:42:55,304 - INFO - DEBUG: Processing device PV Panel 2, increased_power=0.0, power_deficit=181.2
-2025-10-20 10:42:55,304 - INFO - DEBUG: Device PV Panel 2: 58.2 -> 58.2 kW (increase: 0.0)
-2025-10-20 10:42:55,304 - INFO - DEBUG: Processing device Wind Turbine 1, increased_power=0.0, power_deficit=181.2
-2025-10-20 10:42:55,304 - INFO - DEBUG: Device Wind Turbine 1: 22.4 -> 22.4 kW (increase: 0.0)
-2025-10-20 10:42:55,304 - INFO - DEBUG: Processing device Wind Turbine 2, increased_power=0.0, power_deficit=181.2
-2025-10-20 10:42:55,304 - INFO - DEBUG: Device Wind Turbine 2: 29.2 -> 29.2 kW (increase: 0.0)
-2025-10-20 10:42:55,304 - INFO - In total, power was increased by 0 kW
-2025-10-20 10:42:55,304 - INFO - Final output: 161.44 kW
-2025-10-20 10:42:55,308 - INFO -  Increased production: +0.00 kW
-2025-10-20 10:42:55,308 - INFO -   Remaining deficit: 181.20 kW
-2025-10-20 10:42:55,308 - INFO - Iteration 1, remaining deficit: 181.2 kW
-2025-10-20 10:42:55,316 - INFO - Deficit decision: 181.20 kW
-2025-10-20 10:42:55,316 - INFO -  BESS can DISCHARGE: 8.33 kWh at 100.00 kW
-2025-10-20 10:42:55,316 - INFO -  GRID can BUY: 106.24 kWh remaining capacity
-2025-10-20 10:42:55,316 - INFO - 
-2025-10-20 10:42:55,324 - INFO - ------------------------------
-2025-10-20 10:42:55,324 - INFO -    BESS can discharge:  YES
-2025-10-20 10:42:55,324 - INFO -    GRID can import:     YES
-2025-10-20 10:42:55,324 - INFO - 
-2025-10-20 10:42:55,332 - INFO -    Factors: Economics, BESS state, Risk assessment
-2025-10-20 10:42:55,332 - INFO - ======================================================================
-2025-10-20 10:42:55,332 - INFO - DEFICIT DECISION ANALYSIS - should_prioritize_discharging_or_buying()
-2025-10-20 10:42:55,332 - INFO -   Mode: AUTO
-2025-10-20 10:42:55,332 - INFO -   ASSUMPTION: Both DISCHARGE and BUY are physically possible
-2025-10-20 10:42:55,332 - INFO -   BESS: 100.00/180.00 kWh
-2025-10-20 10:42:55,332 - INFO -   Charge: 50.0% | Available: 80.00 kWh
-2025-10-20 10:42:55,332 - INFO -   Tariff BUY: 1.790 $/kWh | SELL: 1.170 $/kWh
-2025-10-20 10:42:55,332 - INFO -   Buy/Sell ratio: 1.530
-2025-10-20 10:42:55,332 - INFO - ----------------------------------------------------------------------
-2025-10-20 10:42:55,332 - INFO -   Decision: DISCHARGE
-2025-10-20 10:42:55,332 - INFO -   Confidence: 56.1%
-2025-10-20 10:42:55,332 - INFO -   Reason: DISCHARGE: expensive_energy(ratio=1.53), moderate_charge(50.0%), U_discharge=0.600, U_buy=-0.523
-2025-10-20 10:42:55,332 - INFO - ======================================================================
-2025-10-20 10:42:55,332 - INFO - 
-2025-10-20 10:42:55,336 - INFO - -----------------------------------
-2025-10-20 10:42:55,341 - INFO -    Decision: DISCHARGE: expensive_energy(ratio=1.53), moderate_charge(50.0%), U_discharge=0.600, U_buy=-0.523
-2025-10-20 10:42:55,341 - INFO -    Confidence: 56.1%
-2025-10-20 10:42:55,341 - INFO -    Action: DISCHARGE BESS
-2025-10-20 10:42:55,342 - INFO - Executing DISCHARGE (with plan): 100.00 kW
-2025-10-20 10:42:55,342 - INFO - BESS BESS 1 - setpoint set to 80.00 kW (discharging)
-2025-10-20 10:42:55,342 - INFO -   Current charge_level: 100.00 kWh (will be updated by SCADA)
-2025-10-20 10:42:55,342 - INFO - BESS discharged: 80.00 kWh (40.00%). New level: 100.00 kWh
-2025-10-20 10:42:55,342 - INFO - DEVICE CHANGED: BESS 1 (BESS) - discharge:80.00
-2025-10-20 10:42:55,342 - INFO - Discharged 80.00 kW, 101.20 kW remains. BESS won't finish early - attempting to buy remaining now.
-2025-10-20 10:42:55,342 - INFO - Executing BUY: 101.20 kW
-2025-10-20 10:42:55,342 - INFO - Bought 101.20 kW from grid successfully
-2025-10-20 10:42:55,342 - INFO - DEVICE CHANGED: OSD - buy:101.20
-2025-10-20 10:42:55,342 - INFO - Smart decision handled 181.20 kW. Remaining deficit: 0.00 kW
-2025-10-20 10:42:55,342 - INFO - After iteration 1: Total managed 181.20 kW, remaining deficit 0.00 kW
-2025-10-20 10:42:55,342 - INFO -  Managed additional: +181.20 kW
-2025-10-20 10:42:55,342 - INFO -  Total managed: 181.20 kW, Remaining: 0.00 kW
-2025-10-20 10:42:55,343 - INFO - !!! Managed 181.2 kW of deficit. Remaining: 0.0 kW !!!
-2025-10-20 10:42:55,343 - INFO - Deficit management completed. The entire deficit has been resolved.
-2025-10-20 10:42:55,343 - INFO - PODSUMOWANIE:
-2025-10-20 10:42:55,343 - INFO -   Initial Balance: -181.2 kW
-2025-10-20 10:42:55,343 - INFO -   Final Balance: -181.2 kW
-2025-10-20 10:42:55,343 - INFO -   Balance Change: +0.0 kW
-2025-10-20 10:42:55,343 - INFO - 
-2025-10-20 10:42:55,343 - INFO -   FINAL STATE (SETPOINTS FOR SCADA):
-2025-10-20 10:42:55,343 - INFO -     Generation: 177.2 kW (devices: -4.0 + BESS: 80.0 + Grid: 101.2)
-2025-10-20 10:42:55,343 - INFO -     Consumption: 177.2 kW (loads: 177.2 + BESS: 0.0 + Grid: 0.0)
-2025-10-20 10:42:55,343 - INFO -     BESS: 80.0 kW (setpoint)
-2025-10-20 10:42:55,343 - INFO -     Grid: Import=101.2 kW, Export=0.0 kW (setpoints)
-2025-10-20 10:42:55,343 - INFO - 
-2025-10-20 10:42:55,343 - INFO -   CHANGES: 2 device(s) modified
-2025-10-20 10:42:55,343 - INFO -     - BESS 1: discharge:80
-2025-10-20 10:42:55,343 - INFO -     - OSD: buy:101.19999999999999
-2025-10-20 10:42:55,343 - INFO -   Decision: Managed 362.40 kW deficit
-2025-10-20 10:42:55,343 - INFO - 
-2025-10-20 10:42:55,347 - INFO - 
+2025-10-20 11:03:07,135 - INFO - 
+2025-10-20 11:03:07,136 - INFO -  INITIAL SYSTEM STATUS
+2025-10-20 11:03:07,136 - INFO - ----------------------------------------------------------------------
+2025-10-20 11:03:07,137 - INFO - Generation:    243.94 kW (devices: 163.9 + BESS: 80.0 + Grid: 0.0)
+2025-10-20 11:03:07,137 - INFO - Consumption:   176.59 kW (loads: 176.6 + BESS: 0.0 + Grid: 0.0)
+2025-10-20 11:03:07,137 - INFO - BESS:           73.88/200.00 kWh (actual: +80.00 kW)
+2025-10-20 11:03:07,137 - INFO - Grid:        Import=0.00 kW, Export=0.00 kW
+2025-10-20 11:03:07,137 - INFO - Trading:     Sold=155.43/250.00 kWh, Bought=114.96/120.00 kWh
+2025-10-20 11:03:07,137 - INFO - Balance:         67.3 kW (SURPLUS (+67.3 kW))
+2025-10-20 11:03:07,139 - INFO - ----------------------------------------------------------------------
+2025-10-20 11:03:07,139 - INFO - PODSUMOWANIE:
+2025-10-20 11:03:07,139 - INFO -   Initial Balance: 0.6 kW
+2025-10-20 11:03:07,139 - INFO -   Final Balance: 0.6 kW
+2025-10-20 11:03:07,139 - INFO -   Balance Change: +0.0 kW
+2025-10-20 11:03:07,140 - INFO - 
+2025-10-20 11:03:07,140 - INFO -   FINAL STATE (SETPOINTS FOR SCADA):
+2025-10-20 11:03:07,140 - INFO -     Generation: 76.0 kW (devices: -4.0 + BESS: 80.0 + Grid: 0.0)
+2025-10-20 11:03:07,140 - INFO -     Consumption: 176.6 kW (loads: 176.6 + BESS: 0.0 + Grid: 0.0)
+2025-10-20 11:03:07,140 - INFO -     BESS: 80.0 kW (setpoint)
+2025-10-20 11:03:07,141 - INFO -     Grid: Import=0.0 kW, Export=0.0 kW (setpoints)
+2025-10-20 11:03:07,141 - INFO - 
+2025-10-20 11:03:07,141 - INFO -   CHANGES: 0 device(s) modified
+2025-10-20 11:03:07,141 - INFO -   Decision: System balanced - no action required
+2025-10-20 11:03:07,141 - INFO - 
+2025-10-20 11:03:07,141 - INFO - SCADA GRID STATUS: No grid operations in this iteration
+2025-10-20 11:03:07,142 - INFO - 
 ==================================================
-ITERATION COMPLETE in 0.06s
+ITERATION COMPLETE in 0.01s
 ==================================================
-2025-10-20 10:42:55,351 - INFO - Live contract data saved to C:/eryk/AppFuga\apps\backend\output_contract_data.json
-2025-10-20 10:42:55,354 - INFO - 
--------------------- Algorithm Changes Summary --------------------
-2025-10-20 10:42:55,358 - INFO - Changed devices data saved to C:/eryk/AppFuga\apps\backend\output_data.json
-2025-10-20 10:42:55,358 - INFO - Wysy³anie danych systemu (próba 1/3) [RETRY]
-2025-10-20 10:42:55,434 - INFO - Dane systemu wys³ane pomyœlnie [NETWORK]
-2025-10-20 10:42:55,434 - INFO - Wysy³anie danych kontraktu (próba 1/3) [RETRY]
-2025-10-20 10:42:55,434 - INFO - ======================================================================
-2025-10-20 10:42:55,434 - INFO - CONTRACT DATA BEING SENT TO API:
-2025-10-20 10:42:55,434 - INFO - {
-  "contracted_type": "Type B",
-  "contracted_duration": 12,
-  "contracted_margin": 0.12,
-  "contracted_export_possibility": true,
-  "contracted_sale_limit": 250,
-  "contracted_purchase_limit": 120,
-  "contracted_billing_cycle": "monthly",
-  "contracted_billing_period_start": "01.10.2025",
-  "contracted_billing_period_end": "31.10.2025",
-  "sold_power": 155.43,
-  "bought_power": 114.96,
-  "current_tariff_buy": 1.79,
-  "current_tariff_sell": 1.17,
-  "grid_export": 0.0,
-  "grid_import": 101.19999999999999,
-  "setpoint_grid_export": 0.0,
-  "setpoint_grid_import": 101.19999999999999
-}
-2025-10-20 10:42:55,434 - INFO - ======================================================================
-2025-10-20 10:42:56,044 - INFO - API Response Status Code: 200
-2025-10-20 10:42:56,044 - INFO - Dane kontraktu wys³ane pomyœlnie [NETWORK]
-2025-10-20 10:42:56,317 - INFO - Algorithm decision sent successfully
-2025-10-20 10:42:56,317 - INFO - Changed devices data sent to API successfully
-2025-10-20 10:42:56,693 - INFO - Weather data updated at 2025-10-20 10:42:56.693359
-2025-10-20 10:42:56,759 - INFO - 5-minute data aggregated and logged at 2025-10-20 10:42:56.759361
-2025-10-20 10:42:57,143 - INFO - Weather forecast updated at 2025-10-20 10:42:57.143997
-2025-10-20 10:42:57,143 - INFO - Updated power profile
-2025-10-20 10:42:57,143 - INFO - Complete iteration finished in 3.15 seconds
-2025-10-20 10:42:57,143 - INFO - !!! Waiting 300.0 seconds for next iteration !!!
-2025-10-20 10:43:05,524 - INFO - Stopping heartbeat tag sender
-2025-10-20 10:43:05,528 - INFO - !!! Energy management stopped !!!
-2025-10-20 10:43:05,528 - INFO - !!! Energy management stopping !!!
+2025-10-20 11:03:07,146 - INFO - Live contract data saved to C:/eryk/AppFuga\apps\backend\output_contract_data.json
+2025-10-20 11:03:07,147 - INFO - No device changes detected - skipping API POST operation
+2025-10-20 11:03:07,537 - INFO - Weather data updated at 2025-10-20 11:03:07.537972
+2025-10-20 11:03:07,696 - INFO - 5-minute data aggregated and logged at 2025-10-20 11:03:07.696499
+2025-10-20 11:03:08,093 - INFO - Weather forecast updated at 2025-10-20 11:03:08.093807
+2025-10-20 11:03:08,095 - INFO - Updated power profile
+2025-10-20 11:03:08,096 - INFO - Complete iteration finished in 1.30 seconds
+2025-10-20 11:03:08,096 - INFO - !!! Waiting 300.0 seconds for next iteration !!!
+2025-10-20 11:03:09,531 - INFO - Stopping heartbeat tag sender
+2025-10-20 11:03:09,531 - INFO - !!! Energy management stopped !!!
+2025-10-20 11:03:09,531 - INFO - !!! Energy management stopping !!!
