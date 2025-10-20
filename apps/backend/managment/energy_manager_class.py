@@ -2202,8 +2202,8 @@ class EnergyManager:
                     generation += device.get_actual_output()
         
         # 2. Grid import (kupno energii z sieci)
-        #  POPRAWKA: Użyj actual_grid_import (rzeczywisty stan)
-        grid_import = self.osd.actual_grid_import
+        #  POPRAWKA: Użyj setpoint_grid_import (polecenia dla SCADA)
+        grid_import = self.osd.setpoint_grid_import
         
         # 3. BESS discharge (rozładowanie baterii)
         # ⚠️ WAŻNE: setpoint_output > 0 → BESS dostarcza energię (rozładowanie)
@@ -2232,8 +2232,8 @@ class EnergyManager:
                 consumption += device.get_current_power()
         
         # 2. Grid export (sprzedaż energii do sieci)
-        #  POPRAWKA: Użyj actual_grid_export (stan rzeczywisty z SCADA)
-        grid_export = self.osd.actual_grid_export
+        #  POPRAWKA: Użyj setpoint_grid_export (polecenia dla SCADA)
+        grid_export = self.osd.setpoint_grid_export
         
         # 3. BESS charge (ładowanie baterii)
         # ⚠️ WAŻNE: setpoint_output < 0 → BESS pobiera energię (ładowanie)
