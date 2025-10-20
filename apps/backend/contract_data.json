@@ -8,7 +8,7 @@
     "contracted_billing_cycle": "monthly",
     "sold_power": 0.0,
     "bought_power": 50.0,
-    "current_tariff_buy": 0.40,
+    "current_tariff_buy": 0.20,
     "current_tariff_sell": 0.25,
     "setpoint_grid_export": 0.0,
     "setpoint_grid_import": 0.0,

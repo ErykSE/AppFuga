@@ -56,7 +56,7 @@
             "capacity": 100,
             "min_charge_level": 10,
             "max_charge_level": 90,
-            "charge_level": 70,
+            "charge_level": 25,
             "actual_output": 0.0,
             "setpoint_output": 0.0,
             "max_discharge_power": 50,
