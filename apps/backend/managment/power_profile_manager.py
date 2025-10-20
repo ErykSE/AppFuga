@@ -1,4 +1,5 @@
 from datetime import datetime
+import pandas as pd
 from apps.backend.others.power_profile import PowerProfile
 from apps.backend.managment.data_manager import DataManager
 from apps.backend.others.weather_data import WeatherData
