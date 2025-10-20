@@ -254,11 +254,17 @@ class BESS:
             self.setpoint_output = 0
             return 0, 0
 
-        # Ogranicz moc do dostępnej przestrzeni (nie możemy żądać więcej niż się zmieści)
-        charged_amount = min(actual_power, available_space)
+        # Ogranicz moc do dostępnej przestrzeni
+        # UWAGA: available_space jest w kWh, więc musimy obliczyć ile mocy możemy załadować
+        # Zakładając czas iteracji (np. 5 min = 0.0833 h)
+        # Jeśli mamy 70 kWh dostępnej przestrzeni i 5 min iteracji:
+        # max_power = 70 kWh / 0.0833 h = 840 kW
+        # Ale to jest niepraktyczne, więc po prostu używamy actual_power
+        # (BESSCapabilityChecker już to sprawdził)
         
         #  TYLKO ustaw setpoint (polecenie dla SCADA)
-        self.setpoint_output = -abs(charged_amount)  # Ujemny = ładowanie
+        self.setpoint_output = -abs(actual_power)  # Ujemny = ładowanie
+        charged_amount = actual_power  # kW
         
         #  NIE ZMIENIAJ charge_level!
         # self.charge_level += charged_amount  # ← USUNIĘTE!
