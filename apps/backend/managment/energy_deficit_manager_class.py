@@ -1263,6 +1263,10 @@ class EnergyDeficitManager:
                         new_power=new_power,
                         was_active=True
                     )
+                    self.info_logger.info(
+                        f"📋 Added to restoration list: {device.name} "
+                        f"({current_power:.2f} kW → {new_power:.2f} kW)"
+                    )
                 
                 # Tracking zmian
                 if self.energy_manager_ref:
@@ -1288,6 +1292,10 @@ class EnergyDeficitManager:
                         original_power=current_power,
                         new_power=0,
                         was_active=True
+                    )
+                    self.info_logger.info(
+                        f"📋 Added to restoration list: {device.name} "
+                        f"(OFF, was {current_power:.2f} kW)"
                     )
                 
                 device.deactivate()

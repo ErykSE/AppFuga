@@ -3293,7 +3293,8 @@ class EnergyManager:
                         elif current_power < original_power:
                             self.info_logger.info(
                                 f"⚙️  Restoring {device.name}: "
-                                f"{current_power:.2f} kW → {original_power:.2f} kW"
+                                f"{current_power:.2f} kW → {original_power:.2f} kW "
+                                f"(from restoration list)"
                             )
                             
                             if hasattr(device, "set_power"):
