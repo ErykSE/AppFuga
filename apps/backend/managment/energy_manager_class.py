@@ -1192,8 +1192,6 @@ class EnergyManager:
             contract_data = {
                 "setpoint_grid_import": self.osd.setpoint_grid_import,
                 "setpoint_grid_export": self.osd.setpoint_grid_export,
-                "sold_power": self.osd.get_sold_power(),
-                "bought_power": self.osd.get_bought_power(),
             }
 
             # Upewnij się, że katalogi istnieją
