@@ -49,7 +49,7 @@
             "actual_output": 0.0,
             "setpoint_output": 0.0,
             "max_discharge_power": 200,
-            "max_charge_power": 50,
+            "max_charge_power": 200,
             "min_output": 5,
             "switch_status": true,
             "device_status": "online"
