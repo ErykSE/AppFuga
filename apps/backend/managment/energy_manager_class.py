@@ -2206,10 +2206,10 @@ class EnergyManager:
         grid_import = self.osd.actual_grid_import
         
         # 3. BESS discharge (rozładowanie baterii)
-        # ⚠️ WAŻNE: actual_output > 0 → BESS dostarcza energię (rozładowanie)
+        # ⚠️ WAŻNE: setpoint_output > 0 → BESS dostarcza energię (rozładowanie)
         bess_discharge = 0.0
-        if self.microgrid.bess and self.microgrid.bess.actual_output > 0:
-            bess_discharge = self.microgrid.bess.actual_output
+        if self.microgrid.bess and self.microgrid.bess.setpoint_output > 0:
+            bess_discharge = self.microgrid.bess.setpoint_output
         
         # Suma podaży
         total_supply = generation + grid_import + bess_discharge
@@ -2236,10 +2236,10 @@ class EnergyManager:
         grid_export = self.osd.actual_grid_export
         
         # 3. BESS charge (ładowanie baterii)
-        # ⚠️ WAŻNE: actual_output < 0 → BESS pobiera energię (ładowanie)
+        # ⚠️ WAŻNE: setpoint_output < 0 → BESS pobiera energię (ładowanie)
         bess_charge = 0.0
-        if self.microgrid.bess and self.microgrid.bess.actual_output < 0:
-            bess_charge = abs(self.microgrid.bess.actual_output)  # Zamień na wartość dodatnią
+        if self.microgrid.bess and self.microgrid.bess.setpoint_output < 0:
+            bess_charge = abs(self.microgrid.bess.setpoint_output)  # Zamień na wartość dodatnią
         
         # Suma popytu
         total_demand = consumption + grid_export + bess_charge
