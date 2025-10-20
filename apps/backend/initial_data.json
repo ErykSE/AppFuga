@@ -91,9 +91,9 @@
             "id": 10,
             "name": "AC Unit 1",
             "priority": 2,
-            "power": 110.0,
-            "actual_output": 110.0,
-            "setpoint_output": 110.0,
+            "power": 125.0,
+            "actual_output": 125.0,
+            "setpoint_output": 125.0,
             "switch_status": true,
             "min_power": 0,
             "max_power": 150
