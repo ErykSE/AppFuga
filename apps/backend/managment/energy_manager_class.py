@@ -2219,8 +2219,8 @@ class EnergyManager:
                 consumption += device.get_current_power()
         
         # 2. Grid export (sprzedaż energii do sieci)
-        #  POPRAWKA: Użyj setpoint_grid_export (polecenie dla SCADA)
-        grid_export = self.osd.setpoint_grid_export
+        #  POPRAWKA: Użyj actual_grid_export (stan rzeczywisty z SCADA)
+        grid_export = self.osd.actual_grid_export
         
         # DEBUG: Loguj wartości grid
         self.info_logger.debug(f"🔍 DEBUG calculate_energy_balance:")
@@ -2331,8 +2331,8 @@ class EnergyManager:
         bess_actual = self.microgrid.bess.actual_output if self.microgrid.bess else 0.0
         
         # Grid actual values
-        grid_import_actual = self.osd.current_grid_import
-        grid_export_actual = self.osd.current_grid_export
+        grid_import_actual = self.osd.actual_grid_import
+        grid_export_actual = self.osd.actual_grid_export
         
         # DEBUG: Loguj wartości grid
         self.info_logger.debug(f"🔍 DEBUG _log_initial_system_status:")
