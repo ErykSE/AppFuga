@@ -1,107 +1,95 @@
-2025-10-20 15:55:43,328 - INFO - 
+2025-10-20 16:02:40,523 - INFO - 
 ==================================================
 Starting new iteration
 ==================================================
-2025-10-20 15:55:43,328 - INFO - !!! Energy management started !!!
-2025-10-20 15:55:43,329 - INFO - Loaded operation mode: automatic
-2025-10-20 15:55:43,334 - INFO - 
+2025-10-20 16:02:40,523 - INFO - !!! Energy management started !!!
+2025-10-20 16:02:40,524 - INFO - Loaded operation mode: automatic
+2025-10-20 16:02:40,530 - INFO - 
 ==================================================
 NEW ITERATION START
 ==================================================
-2025-10-20 15:55:43,334 - INFO - 
-2025-10-20 15:55:43,334 - INFO -  INITIAL SYSTEM STATUS
-2025-10-20 15:55:43,334 - INFO - ----------------------------------------------------------------------
-2025-10-20 15:55:43,334 - INFO - Generation:    380.00 kW (devices: 380.0 + BESS: 0.0 + Grid: 0.0)
-2025-10-20 15:55:43,334 - INFO - Consumption:   410.00 kW (loads: 410.0 + BESS: 0.0 + Grid: 0.0)
-2025-10-20 15:55:43,334 - INFO - BESS:           25.00/100.00 kWh (actual: +0.00 kW)
-2025-10-20 15:55:43,334 - INFO - Grid:        Import=0.00 kW, Export=0.00 kW
-2025-10-20 15:55:43,334 - INFO - Trading:     Sold=0.00/500.00 kWh, Bought=50.00/200.00 kWh
-2025-10-20 15:55:43,334 - INFO - Balance:        -30.0 kW (DEFICIT (-30.0 kW))
-2025-10-20 15:55:43,334 - INFO - ----------------------------------------------------------------------
-2025-10-20 15:55:43,334 - INFO - 
-2025-10-20 15:55:43,334 - INFO - ANALYZING CONFLICTING OPERATIONS
-2025-10-20 15:55:43,334 - INFO - Deficit detected: 30.00 kW
-2025-10-20 15:55:43,334 - INFO - No conflicting operations detected
-2025-10-20 15:55:43,334 - INFO - 
-2025-10-20 15:55:43,340 - INFO - ----------------------------------------------------------------------
-2025-10-20 15:55:43,341 - INFO - Checking for limited generators (not in artificial_limitations)...
-2025-10-20 15:55:43,343 - INFO - ----------------------------------------------------------------------
-2025-10-20 15:55:43,344 - INFO - Start managing power deficit: 30.0 kW
-2025-10-20 15:55:43,344 - INFO - DEBUG: EnergyDeficitManager.handle_deficit_automatic START
-2025-10-20 15:55:43,344 - INFO - 
-2025-10-20 15:55:43,344 - INFO -  MANAGING DEFICIT
-2025-10-20 15:55:43,344 - INFO - -------------------------
-2025-10-20 15:55:43,344 - INFO - DEBUG: maximize_power_output START
-2025-10-20 15:55:43,344 - INFO -  DEBUG: maximize_power_output calculations
-2025-10-20 15:55:43,344 - INFO - Current output: 380.0 kW
-2025-10-20 15:55:43,344 - INFO - Max potential output: 380.0 kW
-2025-10-20 15:55:43,344 - INFO - Power deficit: 30.0 kW
-2025-10-20 15:55:43,344 - INFO - Potential surplus: -30.0 kW
-2025-10-20 15:55:43,344 - INFO - BESS free capacity: 75 kWh
-2025-10-20 15:55:43,344 - INFO - Available sale capacity: 500.0 kWh
-2025-10-20 15:55:43,344 - INFO - Total available capacity: 575.0 kWh
-2025-10-20 15:55:43,344 - INFO - Handleable additional power: -30.0 kW
-2025-10-20 15:55:43,344 - INFO - Current output: 380.0 kW
-2025-10-20 15:55:43,345 - INFO - Max potential output: 380.0 kW
-2025-10-20 15:55:43,345 - INFO - Power deficit: 30.0 kW
-2025-10-20 15:55:43,345 - INFO - Handleable power: -30.0 kW
-2025-10-20 15:55:43,345 - INFO - Target output: 380.0 kW
-2025-10-20 15:55:43,345 - INFO - DEBUG: Processing device PV Panel 1, increased_power=0.0, power_deficit=30.0
-2025-10-20 15:55:43,345 - INFO - DEBUG: Device PV Panel 1: 100.0 -> 100.0 kW (increase: 0.0)
-2025-10-20 15:55:43,345 - INFO - DEBUG: Processing device PV Panel 2, increased_power=0.0, power_deficit=30.0
-2025-10-20 15:55:43,345 - INFO - DEBUG: Device PV Panel 2: 100.0 -> 100.0 kW (increase: 0.0)
-2025-10-20 15:55:43,345 - INFO - DEBUG: Processing device Wind Turbine 1, increased_power=0.0, power_deficit=30.0
-2025-10-20 15:55:43,345 - INFO - DEBUG: Device Wind Turbine 1: 90.0 -> 90.0 kW (increase: 0.0)
-2025-10-20 15:55:43,345 - INFO - DEBUG: Processing device Wind Turbine 2, increased_power=0.0, power_deficit=30.0
-2025-10-20 15:55:43,345 - INFO - DEBUG: Device Wind Turbine 2: 90.0 -> 90.0 kW (increase: 0.0)
-2025-10-20 15:55:43,345 - INFO - In total, power was increased by 0 kW
-2025-10-20 15:55:43,345 - INFO - Final output: 380.0 kW
-2025-10-20 15:55:43,345 - INFO -  Increased production: +0.00 kW
-2025-10-20 15:55:43,345 - INFO -   Remaining deficit: 30.00 kW
-2025-10-20 15:55:43,346 - INFO - Iteration 1, remaining deficit: 30.0 kW
-2025-10-20 15:55:43,351 - INFO - Deficit decision: 30.00 kW
-2025-10-20 15:55:43,351 - WARNING - [WARNING]  BESS SAFETY: Charge too low for discharge (18.8% < 20%)
-2025-10-20 15:55:43,354 - INFO -  GRID can BUY: 150.00 kWh remaining capacity
-2025-10-20 15:55:43,354 - INFO - 
-2025-10-20 15:55:43,358 - INFO - ------------------------------
-2025-10-20 15:55:43,359 - INFO -    BESS can discharge:  NO
-2025-10-20 15:55:43,359 - INFO -    GRID can import:     YES
-2025-10-20 15:55:43,359 - INFO - 
-2025-10-20 15:55:43,363 - INFO -    Reason: BESS cannot discharge (low charge or unavailable)
-2025-10-20 15:55:43,363 - INFO - Executing BUY: 30.00 kW
-2025-10-20 15:55:43,363 - INFO - Bought 30.00 kW from grid successfully
-2025-10-20 15:55:43,363 - INFO - DEVICE CHANGED: OSD - buy:30.00
-2025-10-20 15:55:43,363 - INFO - Smart decision handled 30.00 kW. Remaining deficit: 0.00 kW
-2025-10-20 15:55:43,363 - INFO - After iteration 1: Total managed 30.00 kW, remaining deficit 0.00 kW
-2025-10-20 15:55:43,363 - INFO -  Managed additional: +30.00 kW
-2025-10-20 15:55:43,363 - INFO -  Total managed: 30.00 kW, Remaining: 0.00 kW
-2025-10-20 15:55:43,363 - INFO - !!! Managed 30.0 kW of deficit. Remaining: 0.0 kW !!!
-2025-10-20 15:55:43,363 - INFO - Deficit management completed. The entire deficit has been resolved.
-2025-10-20 15:55:43,363 - INFO - PODSUMOWANIE:
-2025-10-20 15:55:43,363 - INFO -   Initial Balance: -30.0 kW
-2025-10-20 15:55:43,363 - INFO -   Final Balance: -30.0 kW
-2025-10-20 15:55:43,363 - INFO -   Balance Change: +0.0 kW
-2025-10-20 15:55:43,363 - INFO - 
-2025-10-20 15:55:43,363 - INFO -   FINAL STATE (SETPOINTS FOR SCADA):
-2025-10-20 15:55:43,363 - INFO -     Generation: 410.0 kW (devices: 380.0 + BESS: 0.0 + Grid: 30.0)
-2025-10-20 15:55:43,363 - INFO -     Consumption: 410.0 kW (loads: 410.0 + BESS: 0.0 + Grid: 0.0)
-2025-10-20 15:55:43,364 - INFO -     BESS: 0.0 kW (setpoint)
-2025-10-20 15:55:43,364 - INFO -     Grid: Import=30.0 kW, Export=0.0 kW (setpoints)
-2025-10-20 15:55:43,364 - INFO - 
-2025-10-20 15:55:43,364 - INFO -   CHANGES: 1 device(s) modified
-2025-10-20 15:55:43,364 - INFO -     - OSD: buy:30.0
-2025-10-20 15:55:43,364 - INFO -   Decision: Managed 0.00 kW deficit
-2025-10-20 15:55:43,364 - INFO - 
-2025-10-20 15:55:43,368 - INFO - 
+2025-10-20 16:02:40,531 - INFO - 
+2025-10-20 16:02:40,531 - INFO -  INITIAL SYSTEM STATUS
+2025-10-20 16:02:40,531 - INFO - ----------------------------------------------------------------------
+2025-10-20 16:02:40,531 - INFO - Generation:    380.00 kW (devices: 380.0 + BESS: 0.0 + Grid: 0.0)
+2025-10-20 16:02:40,531 - INFO - Consumption:   410.00 kW (loads: 410.0 + BESS: 0.0 + Grid: 0.0)
+2025-10-20 16:02:40,531 - INFO - BESS:           10.00/100.00 kWh (actual: +0.00 kW)
+2025-10-20 16:02:40,531 - INFO - Grid:        Import=0.00 kW, Export=0.00 kW
+2025-10-20 16:02:40,531 - INFO - Trading:     Sold=0.00/500.00 kWh, Bought=200.00/200.00 kWh
+2025-10-20 16:02:40,531 - INFO - Balance:        -30.0 kW (DEFICIT (-30.0 kW))
+2025-10-20 16:02:40,531 - INFO - ----------------------------------------------------------------------
+2025-10-20 16:02:40,531 - INFO - 
+2025-10-20 16:02:40,532 - INFO - ANALYZING CONFLICTING OPERATIONS
+2025-10-20 16:02:40,532 - INFO - Deficit detected: 30.00 kW
+2025-10-20 16:02:40,532 - INFO - No conflicting operations detected
+2025-10-20 16:02:40,533 - INFO - 
+2025-10-20 16:02:40,539 - INFO - ----------------------------------------------------------------------
+2025-10-20 16:02:40,539 - INFO - Checking for limited generators (not in artificial_limitations)...
+2025-10-20 16:02:40,542 - INFO - ----------------------------------------------------------------------
+2025-10-20 16:02:40,542 - INFO - Start managing power deficit: 30.0 kW
+2025-10-20 16:02:40,542 - INFO - DEBUG: EnergyDeficitManager.handle_deficit_automatic START
+2025-10-20 16:02:40,542 - INFO - 
+2025-10-20 16:02:40,542 - INFO -  MANAGING DEFICIT
+2025-10-20 16:02:40,542 - INFO - -------------------------
+2025-10-20 16:02:40,542 - INFO - DEBUG: maximize_power_output START
+2025-10-20 16:02:40,542 - INFO -  DEBUG: maximize_power_output calculations
+2025-10-20 16:02:40,542 - INFO - Current output: 380.0 kW
+2025-10-20 16:02:40,543 - INFO - Max potential output: 380.0 kW
+2025-10-20 16:02:40,543 - INFO - Power deficit: 30.0 kW
+2025-10-20 16:02:40,543 - INFO - Potential surplus: -30.0 kW
+2025-10-20 16:02:40,543 - INFO - BESS free capacity: 90 kWh
+2025-10-20 16:02:40,543 - INFO - Available sale capacity: 500.0 kWh
+2025-10-20 16:02:40,543 - INFO - Total available capacity: 590.0 kWh
+2025-10-20 16:02:40,543 - INFO - Handleable additional power: -30.0 kW
+2025-10-20 16:02:40,543 - INFO - Current output: 380.0 kW
+2025-10-20 16:02:40,543 - INFO - Max potential output: 380.0 kW
+2025-10-20 16:02:40,543 - INFO - Power deficit: 30.0 kW
+2025-10-20 16:02:40,543 - INFO - Handleable power: -30.0 kW
+2025-10-20 16:02:40,543 - INFO - Target output: 380.0 kW
+2025-10-20 16:02:40,543 - INFO - DEBUG: Processing device PV Panel 1, increased_power=0.0, power_deficit=30.0
+2025-10-20 16:02:40,543 - INFO - DEBUG: Device PV Panel 1: 100.0 -> 100.0 kW (increase: 0.0)
+2025-10-20 16:02:40,543 - INFO - DEBUG: Processing device PV Panel 2, increased_power=0.0, power_deficit=30.0
+2025-10-20 16:02:40,543 - INFO - DEBUG: Device PV Panel 2: 100.0 -> 100.0 kW (increase: 0.0)
+2025-10-20 16:02:40,543 - INFO - DEBUG: Processing device Wind Turbine 1, increased_power=0.0, power_deficit=30.0
+2025-10-20 16:02:40,543 - INFO - DEBUG: Device Wind Turbine 1: 90.0 -> 90.0 kW (increase: 0.0)
+2025-10-20 16:02:40,543 - INFO - DEBUG: Processing device Wind Turbine 2, increased_power=0.0, power_deficit=30.0
+2025-10-20 16:02:40,543 - INFO - DEBUG: Device Wind Turbine 2: 90.0 -> 90.0 kW (increase: 0.0)
+2025-10-20 16:02:40,543 - INFO - In total, power was increased by 0 kW
+2025-10-20 16:02:40,544 - INFO - Final output: 380.0 kW
+2025-10-20 16:02:40,544 - INFO -  Increased production: +0.00 kW
+2025-10-20 16:02:40,544 - INFO -   Remaining deficit: 30.00 kW
+2025-10-20 16:02:40,544 - INFO - Iteration 1, remaining deficit: 30.0 kW
+2025-10-20 16:02:40,550 - WARNING - [WARNING]  BESS SAFETY: Charge too low for discharge (0.0% < 20%)
+2025-10-20 16:02:40,550 - WARNING - [WARNING] BESS discharge not feasible: BESS charge too low (0.0% < 20%)
+2025-10-20 16:02:40,550 - INFO -  Managed additional: +0.00 kW
+2025-10-20 16:02:40,550 - INFO -  Total managed: 0.00 kW, Remaining: 30.00 kW
+2025-10-20 16:02:40,550 - INFO - !!! Managed 0 kW of deficit. Remaining: 30.0 kW !!!
+2025-10-20 16:02:40,550 - WARNING - [WARNING] Deficit management completed. Remaining unresolved deficit: 30.0 kW
+2025-10-20 16:02:40,550 - INFO - PODSUMOWANIE:
+2025-10-20 16:02:40,551 - INFO -   Initial Balance: -30.0 kW
+2025-10-20 16:02:40,551 - INFO -   Final Balance: -30.0 kW
+2025-10-20 16:02:40,551 - INFO -   Balance Change: +0.0 kW
+2025-10-20 16:02:40,551 - INFO - 
+2025-10-20 16:02:40,551 - INFO -   FINAL STATE (SETPOINTS FOR SCADA):
+2025-10-20 16:02:40,551 - INFO -     Generation: 380.0 kW (devices: 380.0 + BESS: 0.0 + Grid: 0.0)
+2025-10-20 16:02:40,551 - INFO -     Consumption: 410.0 kW (loads: 410.0 + BESS: 0.0 + Grid: 0.0)
+2025-10-20 16:02:40,551 - INFO -     BESS: 0.0 kW (setpoint)
+2025-10-20 16:02:40,551 - INFO -     Grid: Import=0.0 kW, Export=0.0 kW (setpoints)
+2025-10-20 16:02:40,551 - INFO - 
+2025-10-20 16:02:40,551 - INFO -   CHANGES: 0 device(s) modified
+2025-10-20 16:02:40,551 - INFO -   Decision: Managed 0.00 kW deficit
+2025-10-20 16:02:40,551 - INFO - 
+2025-10-20 16:02:40,551 - INFO - SCADA GRID STATUS: No grid operations in this iteration
+2025-10-20 16:02:40,551 - INFO - 
 ==================================================
-ITERATION COMPLETE in 0.03s
+ITERATION COMPLETE in 0.02s
 ==================================================
-2025-10-20 15:55:43,370 - INFO - Live contract data saved to C:/eryk/AppFuga\apps\backend\output_contract_data.json
-2025-10-20 15:55:43,464 - INFO - Weather data updated at 2025-10-20 15:55:43.464684
-2025-10-20 15:55:43,546 - INFO - 5-minute data aggregated and logged at 2025-10-20 15:55:43.546816
-2025-10-20 15:55:43,646 - INFO - Weather forecast updated at 2025-10-20 15:55:43.646572
-2025-10-20 15:55:43,646 - INFO - Updated power profile
-2025-10-20 15:55:43,646 - INFO - Complete iteration finished in 0.32 seconds
-2025-10-20 15:55:43,647 - INFO - !!! Waiting 300.0 seconds for next iteration !!!
-2025-10-20 15:55:45,368 - INFO - !!! Energy management stopping !!!
-2025-10-20 15:55:45,368 - INFO - !!! Energy management stopped !!!
+2025-10-20 16:02:40,553 - INFO - Live contract data saved to C:/eryk/AppFuga\apps\backend\output_contract_data.json
+2025-10-20 16:02:40,629 - INFO - Weather data updated at 2025-10-20 16:02:40.629555
+2025-10-20 16:02:40,768 - INFO - 5-minute data aggregated and logged at 2025-10-20 16:02:40.768653
+2025-10-20 16:02:40,871 - INFO - Weather forecast updated at 2025-10-20 16:02:40.871064
+2025-10-20 16:02:40,871 - INFO - Updated power profile
+2025-10-20 16:02:40,871 - INFO - Complete iteration finished in 0.35 seconds
+2025-10-20 16:02:40,872 - INFO - !!! Waiting 300.0 seconds for next iteration !!!
+2025-10-20 16:02:42,687 - INFO - !!! Energy management stopping !!!
+2025-10-20 16:02:42,688 - INFO - !!! Energy management stopped !!!

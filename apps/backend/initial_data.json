@@ -56,7 +56,7 @@
             "capacity": 100,
             "min_charge_level": 10,
             "max_charge_level": 90,
-            "charge_level": 25,
+            "charge_level": 10,
             "actual_output": 0.0,
             "setpoint_output": 0.0,
             "max_discharge_power": 50,
@@ -91,12 +91,23 @@
             "id": 10,
             "name": "AC Unit 1",
             "priority": 2,
-            "power": 110.0,
-            "actual_output": 110.0,
-            "setpoint_output": 110.0,
+            "power": 80.0,
+            "actual_output": 80.0,
+            "setpoint_output": 80.0,
             "switch_status": true,
             "min_power": 20,
             "max_power": 150
+        },
+        {
+            "id": 11,
+            "name": "Lighting",
+            "priority": 3,
+            "power": 30.0,
+            "actual_output": 30.0,
+            "setpoint_output": 30.0,
+            "switch_status": true,
+            "min_power": 10,
+            "max_power": 120
         }
     ],
     "power_meters": []
