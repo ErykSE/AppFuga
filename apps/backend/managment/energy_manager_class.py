@@ -324,7 +324,6 @@ class EnergyManager:
                 # 4. Zapisujemy wyniki do plików wewnętrznych
                 #self.save_live_data()
                 self.save_contract_data()
-                self.save_output_data()
                 
                 # 5. Wysyłamy tylko zmienione urządzenia do API
                 if self.use_api:
@@ -1217,87 +1216,6 @@ class EnergyManager:
             self.info_logger.info(f"Live contract data saved to {self.output_contract_path}")
         except Exception as e:
             self.error_logger.error(f"Error saving contract data: {str(e)}")
-    
-    def save_output_data(self):
-        """Generuje i zapisuje dane wszystkich urządzeń z setpointami do pliku JSON."""
-        try:
-            output_data = {
-                "pv_panels": [],
-                "wind_turbines": [],
-                "fuel_turbines": [],
-                "fuel_cells": [],
-                "bess": [],
-                "non_adjustable_devices": [],
-                "adjustable_devices": [],
-                "power_meters": []
-            }
-            
-            # Zbierz dane z mikrosieci
-            for device in self.microgrid.get_all_devices():
-                device_dict = {
-                    "id": device.id,
-                    "name": device.name,
-                    "priority": device.priority,
-                    "max_output": device.max_output,
-                    "min_output": device.min_output,
-                    "actual_output": device.get_actual_output(),
-                    "setpoint_output": device.setpoint_output,
-                    "switch_status": device.get_switch_status(),
-                    "device_status": device.device_status
-                }
-                
-                # Dodaj specyficzne pola dla różnych typów urządzeń
-                if device.type == "PV":
-                    output_data["pv_panels"].append(device_dict)
-                elif device.type == "Wind":
-                    output_data["wind_turbines"].append(device_dict)
-                elif device.type == "Fuel Turbine":
-                    output_data["fuel_turbines"].append(device_dict)
-                elif device.type == "Fuel Cell":
-                    output_data["fuel_cells"].append(device_dict)
-                elif device.type == "BESS":
-                    device_dict.update({
-                        "capacity": device.capacity,
-                        "min_charge_level": device.min_charge_level,
-                        "max_charge_level": device.max_charge_level,
-                        "charge_level": device.charge_level,
-                        "max_discharge_power": device.max_discharge_power,
-                        "max_charge_power": device.max_charge_power,
-                    })
-                    output_data["bess"].append(device_dict)
-            
-            # Zbierz dane odbiorników
-            for device in self.consumergrid.adjustable_devices + self.consumergrid.non_adjustable_devices:
-                device_dict = {
-                    "id": device.id,
-                    "name": device.name,
-                    "priority": device.priority,
-                    "power": device.power,
-                    "actual_output": device.get_current_power(),
-                    "setpoint_output": device.power,
-                    "switch_status": device.switch_status
-                }
-                
-                if hasattr(device, 'min_power'):
-                    device_dict.update({
-                        "min_power": device.min_power,
-                        "max_power": device.max_power
-                    })
-                    output_data["adjustable_devices"].append(device_dict)
-                else:
-                    output_data["non_adjustable_devices"].append(device_dict)
-            
-            # Upewnij się, że katalogi istnieją
-            output_path = os.path.join(os.path.dirname(self.output_contract_path), "output_data.json")
-            os.makedirs(os.path.dirname(output_path), exist_ok=True)
-            
-            # Zapisujemy dane do pliku wyjściowego
-            with open(output_path, "w") as f:
-                json.dump(output_data, f, indent=4)
-            
-            self.info_logger.info(f"Output data saved to {output_path}")
-        except Exception as e:
-            self.error_logger.error(f"Error saving output data: {str(e)}")
 
     def update_power_profile(self, current_time):
         consumption = self.consumergrid.total_power_consumed()
