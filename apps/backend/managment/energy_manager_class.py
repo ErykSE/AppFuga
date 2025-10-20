@@ -832,32 +832,20 @@ class EnergyManager:
             
             # KROK 7: Zarządzaj deficytem/nadwyżką
             decision_text = None
+            actual_managed = None
             if balance.has_surplus:
                 result = self.manage_surplus(balance.surplus)
-                # Oblicz rzeczywistą ilość zagospodarowanej energii
-                actual_managed = initial_balance.balance - balance.balance
+                # Użyj amount_managed z result
+                actual_managed = result.get("amount_managed", 0)
                 decision_text = f"Managed {actual_managed:.2f} kW surplus"
             elif balance.has_deficit:
                 result = self.manage_deficit(balance.deficit)
-                # Oblicz rzeczywistą ilość zagospodarowanej energii
-                # actual_managed = różnica między początkowym a końcowym bilansem
-                # (będzie obliczone po obliczeniu final_balance)
-                actual_managed = None  # Zostanie obliczone później
-                decision_text = None  # Zostanie ustawione później
+                # Użyj amount_managed z result
+                actual_managed = result.get("amount_managed", 0)
+                decision_text = f"Managed {actual_managed:.2f} kW deficit"
             
             # KROK 8: Oblicz końcowy bilans
             final_balance = self.calculate_energy_balance()
-            
-            # Oblicz rzeczywistą ilość zarządzonej energii (po obliczeniu final_balance)
-            if actual_managed is None:
-                if initial_balance.has_surplus:
-                    actual_managed = initial_balance.balance - final_balance.balance
-                    decision_text = f"Managed {actual_managed:.2f} kW surplus"
-                elif initial_balance.has_deficit:
-                    actual_managed = initial_balance.balance - final_balance.balance
-                    decision_text = f"Managed {abs(actual_managed):.2f} kW deficit"
-                else:
-                    decision_text = "No action needed"
             
             # STAN PO
             self._log_state_after(final_balance)
