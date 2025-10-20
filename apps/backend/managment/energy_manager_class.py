@@ -1202,8 +1202,6 @@ class EnergyManager:
                 "current_tariff_sell": self.osd.get_current_sell_price(),
                 "setpoint_grid_import": self.osd.setpoint_grid_import,
                 "setpoint_grid_export": self.osd.setpoint_grid_export,
-                "actual_grid_import": self.osd.actual_grid_import,
-                "actual_grid_export": self.osd.actual_grid_export,
             }
 
             # Upewnij się, że katalogi istnieją

@@ -10,7 +10,5 @@
     "current_tariff_buy": 0.35,
     "current_tariff_sell": 0.2,
     "setpoint_grid_import": 0.0,
-    "setpoint_grid_export": 10.0,
-    "actual_grid_import": 0.0,
-    "actual_grid_export": 0.0
+    "setpoint_grid_export": 10.0
 }

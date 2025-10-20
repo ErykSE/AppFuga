@@ -1,69 +1,69 @@
-2025-10-20 22:50:41,394 - INFO - 
+2025-10-20 22:52:51,597 - INFO - 
 ==================================================
 Starting new iteration
 ==================================================
-2025-10-20 22:50:41,394 - INFO - !!! Energy management started !!!
-2025-10-20 22:50:41,394 - INFO - Loaded operation mode: automatic
-2025-10-20 22:50:41,402 - INFO - 
+2025-10-20 22:52:51,597 - INFO - !!! Energy management started !!!
+2025-10-20 22:52:51,597 - INFO - Loaded operation mode: automatic
+2025-10-20 22:52:51,604 - INFO - 
 ==================================================
 NEW ITERATION START
 ==================================================
-2025-10-20 22:50:41,403 - INFO - 
-2025-10-20 22:50:41,403 - INFO -  INITIAL SYSTEM STATUS
-2025-10-20 22:50:41,403 - INFO - ----------------------------------------------------------------------
-2025-10-20 22:50:41,403 - INFO - Generation:    390.00 kW (devices: 390.0 + BESS: 0.0 + Grid: 0.0)
-2025-10-20 22:50:41,407 - INFO - Consumption:   180.00 kW (loads: 180.0 + BESS: 0.0 + Grid: 0.0)
-2025-10-20 22:50:41,407 - INFO - BESS:           20.00/100.00 kWh (actual: +0.00 kW)
-2025-10-20 22:50:41,407 - INFO - Grid:        Import=0.00 kW, Export=0.00 kW
-2025-10-20 22:50:41,407 - INFO - Trading:     Sold=100.00/500.00 kWh, Bought=0.00/200.00 kWh
-2025-10-20 22:50:41,407 - INFO - Balance:        210.0 kW (SURPLUS (+210.0 kW))
-2025-10-20 22:50:41,407 - INFO - ----------------------------------------------------------------------
-2025-10-20 22:50:41,407 - INFO - 
-2025-10-20 22:50:41,407 - INFO - ANALYZING CONFLICTING OPERATIONS
-2025-10-20 22:50:41,407 - INFO - Surplus detected: 210.00 kW
-2025-10-20 22:50:41,414 - INFO - No conflicting operations detected
-2025-10-20 22:50:41,414 - INFO - 
-2025-10-20 22:50:41,419 - INFO - ----------------------------------------------------------------------
-2025-10-20 22:50:41,422 - INFO - ----------------------------------------------------------------------
-2025-10-20 22:50:41,422 - INFO - 
-2025-10-20 22:50:41,422 - INFO - MANAGING SURPLUS
-2025-10-20 22:50:41,422 - INFO - Iteration 1, surplus remaining: 210.0 kW
-2025-10-20 22:50:41,422 - INFO - BESS can charge: YES
-2025-10-20 22:50:41,422 - INFO - GRID can export: YES
-2025-10-20 22:50:41,425 - INFO - ======================================================================
-2025-10-20 22:50:41,426 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
-2025-10-20 22:50:41,426 - INFO -   Mode: AUTO
-2025-10-20 22:50:41,426 - INFO - 
-2025-10-20 22:50:41,426 - INFO - Decision: CHARGE: poor_sell_price(ratio=0.57), high_free_space(87.5%), U_charge=0.439, U_sell=-0.379
-2025-10-20 22:50:41,426 - INFO - Confidence: 40.9%
-2025-10-20 22:50:41,426 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
-2025-10-20 22:50:41,426 - INFO - BESS CHARGE PLAN:
-2025-10-20 22:50:41,426 - INFO -   Setpoint: -200.00 kW
-2025-10-20 22:50:41,426 - INFO -   Energy: 16.67 kWh
-2025-10-20 22:50:41,426 - INFO -   Duration: 5.00 min
-2025-10-20 22:50:41,426 - INFO -   Will continue through entire iteration (5.0 min)
-2025-10-20 22:50:41,426 - INFO - BESS BESS 1 - setpoint set to -200.00 kW (charging)
-2025-10-20 22:50:41,426 - INFO -   Current charge_level: 20.00 kWh (will be updated by SCADA)
-2025-10-20 22:50:41,426 - INFO - DEVICE CHANGED: BESS 1 (BESS) - charge:200
-2025-10-20 22:50:41,426 - INFO - Success: Managed 200.0 kW, remaining: 10.0 kW
-2025-10-20 22:50:41,426 - INFO - Iteration 2, surplus remaining: 10.0 kW
-2025-10-20 22:50:41,430 - INFO - Attempting: SurplusAction.SELL_ENERGY
-2025-10-20 22:50:41,431 - INFO - Success: Managed 10.0 kW, remaining: 0.0 kW
-2025-10-20 22:50:41,431 - INFO - 
-2025-10-20 22:50:41,431 - INFO -   CHANGES: 2 device(s) modified
-2025-10-20 22:50:41,431 - INFO -     - BESS 1: charge:200
-2025-10-20 22:50:41,431 - INFO -     - OSD: sell:10.0
-2025-10-20 22:50:41,431 - INFO -   Managed 210.00 kW surplus
-2025-10-20 22:50:41,434 - INFO - 
+2025-10-20 22:52:51,604 - INFO - 
+2025-10-20 22:52:51,604 - INFO -  INITIAL SYSTEM STATUS
+2025-10-20 22:52:51,604 - INFO - ----------------------------------------------------------------------
+2025-10-20 22:52:51,604 - INFO - Generation:    390.00 kW (devices: 390.0 + BESS: 0.0 + Grid: 0.0)
+2025-10-20 22:52:51,604 - INFO - Consumption:   180.00 kW (loads: 180.0 + BESS: 0.0 + Grid: 0.0)
+2025-10-20 22:52:51,605 - INFO - BESS:           20.00/100.00 kWh (actual: +0.00 kW)
+2025-10-20 22:52:51,605 - INFO - Grid:        Import=0.00 kW, Export=0.00 kW
+2025-10-20 22:52:51,605 - INFO - Trading:     Sold=100.00/500.00 kWh, Bought=0.00/200.00 kWh
+2025-10-20 22:52:51,605 - INFO - Balance:        210.0 kW (SURPLUS (+210.0 kW))
+2025-10-20 22:52:51,605 - INFO - ----------------------------------------------------------------------
+2025-10-20 22:52:51,605 - INFO - 
+2025-10-20 22:52:51,605 - INFO - ANALYZING CONFLICTING OPERATIONS
+2025-10-20 22:52:51,605 - INFO - Surplus detected: 210.00 kW
+2025-10-20 22:52:51,612 - INFO - No conflicting operations detected
+2025-10-20 22:52:51,612 - INFO - 
+2025-10-20 22:52:51,615 - INFO - ----------------------------------------------------------------------
+2025-10-20 22:52:51,618 - INFO - ----------------------------------------------------------------------
+2025-10-20 22:52:51,618 - INFO - 
+2025-10-20 22:52:51,619 - INFO - MANAGING SURPLUS
+2025-10-20 22:52:51,619 - INFO - Iteration 1, surplus remaining: 210.0 kW
+2025-10-20 22:52:51,619 - INFO - BESS can charge: YES
+2025-10-20 22:52:51,619 - INFO - GRID can export: YES
+2025-10-20 22:52:51,619 - INFO - ======================================================================
+2025-10-20 22:52:51,619 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-20 22:52:51,619 - INFO -   Mode: AUTO
+2025-10-20 22:52:51,619 - INFO - 
+2025-10-20 22:52:51,619 - INFO - Decision: CHARGE: poor_sell_price(ratio=0.57), high_free_space(87.5%), U_charge=0.439, U_sell=-0.379
+2025-10-20 22:52:51,619 - INFO - Confidence: 40.9%
+2025-10-20 22:52:51,619 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-20 22:52:51,619 - INFO - BESS CHARGE PLAN:
+2025-10-20 22:52:51,619 - INFO -   Setpoint: -200.00 kW
+2025-10-20 22:52:51,619 - INFO -   Energy: 16.67 kWh
+2025-10-20 22:52:51,619 - INFO -   Duration: 5.00 min
+2025-10-20 22:52:51,619 - INFO -   Will continue through entire iteration (5.0 min)
+2025-10-20 22:52:51,619 - INFO - BESS BESS 1 - setpoint set to -200.00 kW (charging)
+2025-10-20 22:52:51,619 - INFO -   Current charge_level: 20.00 kWh (will be updated by SCADA)
+2025-10-20 22:52:51,619 - INFO - DEVICE CHANGED: BESS 1 (BESS) - charge:200
+2025-10-20 22:52:51,619 - INFO - Success: Managed 200.0 kW, remaining: 10.0 kW
+2025-10-20 22:52:51,619 - INFO - Iteration 2, surplus remaining: 10.0 kW
+2025-10-20 22:52:51,626 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-20 22:52:51,626 - INFO - Success: Managed 10.0 kW, remaining: 0.0 kW
+2025-10-20 22:52:51,626 - INFO - 
+2025-10-20 22:52:51,626 - INFO -   CHANGES: 2 device(s) modified
+2025-10-20 22:52:51,626 - INFO -     - BESS 1: charge:200
+2025-10-20 22:52:51,626 - INFO -     - OSD: sell:10.0
+2025-10-20 22:52:51,626 - INFO -   Managed 210.00 kW surplus
+2025-10-20 22:52:51,630 - INFO - 
 ==================================================
 ITERATION COMPLETE in 0.03s
 ==================================================
-2025-10-20 22:50:41,436 - INFO - Live contract data saved to C:/eryk/AppFuga\apps\backend\output_contract_data.json
-2025-10-20 22:50:41,520 - INFO - Weather data updated at 2025-10-20 22:50:41.520648
-2025-10-20 22:50:41,614 - INFO - 5-minute data aggregated and logged at 2025-10-20 22:50:41.614214
-2025-10-20 22:50:41,708 - INFO - Weather forecast updated at 2025-10-20 22:50:41.708684
-2025-10-20 22:50:41,708 - INFO - Updated power profile
-2025-10-20 22:50:41,708 - INFO - Complete iteration finished in 0.31 seconds
-2025-10-20 22:50:41,708 - INFO - !!! Waiting 300.0 seconds for next iteration !!!
-2025-10-20 22:50:43,123 - INFO - !!! Energy management stopping !!!
-2025-10-20 22:50:43,123 - INFO - !!! Energy management stopped !!!
+2025-10-20 22:52:51,631 - INFO - Live contract data saved to C:/eryk/AppFuga\apps\backend\output_contract_data.json
+2025-10-20 22:52:51,715 - INFO - Weather data updated at 2025-10-20 22:52:51.715598
+2025-10-20 22:52:51,795 - INFO - 5-minute data aggregated and logged at 2025-10-20 22:52:51.795233
+2025-10-20 22:52:51,878 - INFO - Weather forecast updated at 2025-10-20 22:52:51.878982
+2025-10-20 22:52:51,878 - INFO - Updated power profile
+2025-10-20 22:52:51,878 - INFO - Complete iteration finished in 0.28 seconds
+2025-10-20 22:52:51,878 - INFO - !!! Waiting 300.0 seconds for next iteration !!!
+2025-10-20 22:52:52,738 - INFO - !!! Energy management stopping !!!
+2025-10-20 22:52:52,738 - INFO - !!! Energy management stopped !!!
