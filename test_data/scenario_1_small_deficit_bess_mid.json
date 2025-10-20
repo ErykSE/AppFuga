@@ -154,7 +154,7 @@
         "decision_mode": "AUTO"
     },
     "expected_scenario": "SMALL DEFICIT - BESS CAN HELP",
-    "expected_balance": -16.3,
+    "expected_balance": -16.29,
     "expected_actions": [
         "BESS discharge decision (BESS vs GRID)",
         "Possible: Reduce adjustable loads (priority 3)",
