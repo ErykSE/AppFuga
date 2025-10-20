@@ -1,91 +1,89 @@
-2025-10-20 23:13:59,720 - INFO - 
+2025-10-20 23:17:07,191 - INFO - 
 ==================================================
 Starting new iteration
 ==================================================
-2025-10-20 23:13:59,720 - INFO - !!! Energy management started !!!
-2025-10-20 23:13:59,720 - INFO - Loaded operation mode: automatic
-2025-10-20 23:13:59,727 - INFO - 
+2025-10-20 23:17:07,191 - INFO - !!! Energy management started !!!
+2025-10-20 23:17:07,192 - INFO - Loaded operation mode: automatic
+2025-10-20 23:17:07,196 - INFO - 
 ==================================================
 NEW ITERATION START
 ==================================================
-2025-10-20 23:13:59,727 - INFO - 
-2025-10-20 23:13:59,727 - INFO -  INITIAL SYSTEM STATUS
-2025-10-20 23:13:59,728 - INFO - ----------------------------------------------------------------------
-2025-10-20 23:13:59,728 - INFO - Generation:    390.00 kW (devices: 390.0 + BESS: 0.0 + Grid: 0.0)
-2025-10-20 23:13:59,728 - INFO - Consumption:   180.00 kW (loads: 180.0 + BESS: 0.0 + Grid: 0.0)
-2025-10-20 23:13:59,728 - INFO - BESS:           30.00/100.00 kWh (actual: +0.00 kW)
-2025-10-20 23:13:59,728 - INFO - Grid:        Import=0.00 kW, Export=0.00 kW
-2025-10-20 23:13:59,728 - INFO - Trading:     Sold=0.00/0.00 kWh, Bought=0.00/200.00 kWh
-2025-10-20 23:13:59,729 - INFO - Balance:        210.0 kW (SURPLUS (+210.0 kW))
-2025-10-20 23:13:59,729 - INFO - ----------------------------------------------------------------------
-2025-10-20 23:13:59,729 - INFO - 
-2025-10-20 23:13:59,729 - INFO - ANALYZING CONFLICTING OPERATIONS
-2025-10-20 23:13:59,729 - INFO - Surplus detected: 210.00 kW
-2025-10-20 23:13:59,736 - INFO - No conflicting operations detected
-2025-10-20 23:13:59,737 - INFO - 
-2025-10-20 23:13:59,739 - INFO - ----------------------------------------------------------------------
-2025-10-20 23:13:59,742 - INFO - ----------------------------------------------------------------------
-2025-10-20 23:13:59,742 - INFO - 
-2025-10-20 23:13:59,742 - INFO - MANAGING SURPLUS
-2025-10-20 23:13:59,742 - INFO - Iteration 1, surplus remaining: 210.0 kW
-2025-10-20 23:13:59,748 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
-2025-10-20 23:13:59,748 - INFO - BESS CHARGE PLAN:
-2025-10-20 23:13:59,748 - INFO -   Setpoint: -50.00 kW
-2025-10-20 23:13:59,748 - INFO -   Energy: 4.17 kWh
-2025-10-20 23:13:59,748 - INFO -   Duration: 5.00 min
-2025-10-20 23:13:59,748 - INFO -   Will continue through entire iteration (5.0 min)
-2025-10-20 23:13:59,748 - INFO - BESS BESS 1 - setpoint set to -50.00 kW (charging)
-2025-10-20 23:13:59,748 - INFO -   Current charge_level: 30.00 kWh (will be updated by SCADA)
-2025-10-20 23:13:59,748 - INFO - DEVICE CHANGED: BESS 1 (BESS) - charge:50
-2025-10-20 23:13:59,748 - INFO - Success: Managed 50.0 kW, remaining: 160.0 kW
-2025-10-20 23:13:59,748 - INFO - Iteration 2, surplus remaining: 160.0 kW
-2025-10-20 23:13:59,751 - INFO - Attempting: SurplusAction.LIMIT_GENERATION
-2025-10-20 23:13:59,751 - INFO - Starting limit_energy_generation with power_surplus: 160.000000
-2025-10-20 23:13:59,751 - INFO - Active generators: ['PV Panel 1', 'PV Panel 2', 'Wind Turbine 1']
-2025-10-20 23:13:59,751 - INFO - Processing device: PV Panel 1, Current output: 150.000000, Min output: 0.000000, Reducible power: 150.000000
-2025-10-20 23:13:59,752 - INFO - Attempting to execute action: set_output:0.0 for device PV Panel 1
-2025-10-20 23:13:59,752 - INFO - EnergyManager.execute_action called with device: PV Panel 1, action: set_output:0.0
-2025-10-20 23:13:59,752 - INFO - [DEBUG] Performing action: PV Panel 1 (PV) - set_output:0.0
-2025-10-20 23:13:59,752 - INFO - Performing action: set_output:0.0 on device: PV Panel 1
-2025-10-20 23:13:59,752 - INFO - Attempting to set output for PV Panel 1 to 0.0 kW
-2025-10-20 23:13:59,752 - INFO - PV Panel 1 setpoint changed: 150.00 -> 0.00 kW
-2025-10-20 23:13:59,752 - INFO - Set output for PV Panel 1 from 150.0 kW to 0.0 kW. Setpoint: 0.0 kW
-2025-10-20 23:13:59,752 - INFO - DEVICE CHANGED: PV Panel 1 (PV) - set_output:0.0
-2025-10-20 23:13:59,752 - INFO - Result of execute_action_func: {'success': True, 'amount': 150.0}
-2025-10-20 23:13:59,752 - INFO - Reduced PV Panel 1 (priority: 1) power by 150.000000 kW from 150.000000 kW to 0.000000 kW. Setpoint: 0.000000 kW
-2025-10-20 23:13:59,753 - INFO - Processing device: PV Panel 2, Current output: 150.000000, Min output: 0.000000, Reducible power: 150.000000
-2025-10-20 23:13:59,753 - INFO - Attempting to execute action: set_output:140.0 for device PV Panel 2
-2025-10-20 23:13:59,753 - INFO - EnergyManager.execute_action called with device: PV Panel 2, action: set_output:140.0
-2025-10-20 23:13:59,753 - INFO - [DEBUG] Performing action: PV Panel 2 (PV) - set_output:140.0
-2025-10-20 23:13:59,753 - INFO - Performing action: set_output:140.0 on device: PV Panel 2
-2025-10-20 23:13:59,753 - INFO - Attempting to set output for PV Panel 2 to 140.0 kW
-2025-10-20 23:13:59,753 - INFO - PV Panel 2 setpoint changed: 150.00 -> 140.00 kW
-2025-10-20 23:13:59,753 - INFO - Set output for PV Panel 2 from 150.0 kW to 140.0 kW. Setpoint: 140.0 kW
-2025-10-20 23:13:59,753 - INFO - DEVICE CHANGED: PV Panel 2 (PV) - set_output:140.0
-2025-10-20 23:13:59,753 - INFO - Result of execute_action_func: {'success': True, 'amount': 10.0}
-2025-10-20 23:13:59,753 - INFO - Reduced PV Panel 2 (priority: 1) power by 10.000000 kW from 150.000000 kW to 140.000000 kW. Setpoint: 140.000000 kW
-2025-10-20 23:13:59,753 - INFO - Total power generation reduced: 160.000000 kW
-2025-10-20 23:13:59,753 - INFO - Remaining surplus: 0.000000 kW
-2025-10-20 23:13:59,753 - INFO - Success: Managed 160.0 kW, remaining: 0.0 kW
-2025-10-20 23:13:59,753 - INFO - 
-2025-10-20 23:13:59,753 - INFO -   CHANGES: 5 device(s) modified
-2025-10-20 23:13:59,753 - INFO -     - BESS 1: charge:50
-2025-10-20 23:13:59,753 - INFO -     - PV Panel 1: set_output:0.0
-2025-10-20 23:13:59,753 - INFO -     - PV Panel 1: limit_output:0.00
-2025-10-20 23:13:59,753 - INFO -     - PV Panel 2: set_output:140.0
-2025-10-20 23:13:59,753 - INFO -     - PV Panel 2: limit_output:140.00
-2025-10-20 23:13:59,753 - INFO -   Managed 210.00 kW surplus
-2025-10-20 23:13:59,753 - INFO - SCADA GRID STATUS: No grid operations in this iteration
-2025-10-20 23:13:59,753 - INFO - 
+2025-10-20 23:17:07,196 - INFO - 
+2025-10-20 23:17:07,196 - INFO -  INITIAL SYSTEM STATUS
+2025-10-20 23:17:07,196 - INFO - ----------------------------------------------------------------------
+2025-10-20 23:17:07,197 - INFO - Generation:    390.00 kW (devices: 390.0 + BESS: 0.0 + Grid: 0.0)
+2025-10-20 23:17:07,199 - INFO - Consumption:   180.00 kW (loads: 180.0 + BESS: 0.0 + Grid: 0.0)
+2025-10-20 23:17:07,199 - INFO - BESS:           30.00/100.00 kWh (actual: +0.00 kW)
+2025-10-20 23:17:07,199 - INFO - Grid:        Import=0.00 kW, Export=0.00 kW
+2025-10-20 23:17:07,199 - INFO - Trading:     Sold=0.00/0.00 kWh, Bought=0.00/200.00 kWh
+2025-10-20 23:17:07,199 - INFO - Balance:        210.0 kW (SURPLUS (+210.0 kW))
+2025-10-20 23:17:07,199 - INFO - ----------------------------------------------------------------------
+2025-10-20 23:17:07,199 - INFO - 
+2025-10-20 23:17:07,199 - INFO - ANALYZING CONFLICTING OPERATIONS
+2025-10-20 23:17:07,199 - INFO - Surplus detected: 210.00 kW
+2025-10-20 23:17:07,205 - INFO - No conflicting operations detected
+2025-10-20 23:17:07,205 - INFO - 
+2025-10-20 23:17:07,207 - INFO - ----------------------------------------------------------------------
+2025-10-20 23:17:07,211 - INFO - ----------------------------------------------------------------------
+2025-10-20 23:17:07,211 - INFO - 
+2025-10-20 23:17:07,211 - INFO - MANAGING SURPLUS
+2025-10-20 23:17:07,211 - INFO - Iteration 1, surplus remaining: 210.0 kW
+2025-10-20 23:17:07,211 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-20 23:17:07,211 - INFO - BESS CHARGE PLAN:
+2025-10-20 23:17:07,211 - INFO -   Setpoint: -50.00 kW
+2025-10-20 23:17:07,211 - INFO -   Energy: 4.17 kWh
+2025-10-20 23:17:07,211 - INFO -   Duration: 5.00 min
+2025-10-20 23:17:07,211 - INFO -   Will continue through entire iteration (5.0 min)
+2025-10-20 23:17:07,211 - INFO - BESS BESS 1 - setpoint set to -50.00 kW (charging)
+2025-10-20 23:17:07,211 - INFO -   Current charge_level: 30.00 kWh (will be updated by SCADA)
+2025-10-20 23:17:07,211 - INFO - DEVICE CHANGED: BESS 1 (BESS) - charge:50
+2025-10-20 23:17:07,211 - INFO - Success: Managed 50.0 kW, remaining: 160.0 kW
+2025-10-20 23:17:07,211 - INFO - Iteration 2, surplus remaining: 160.0 kW
+2025-10-20 23:17:07,219 - INFO - Attempting: SurplusAction.LIMIT_GENERATION
+2025-10-20 23:17:07,219 - INFO - Starting limit_energy_generation with power_surplus: 160.000000
+2025-10-20 23:17:07,219 - INFO - Active generators: ['PV Panel 1', 'PV Panel 2', 'Wind Turbine 1']
+2025-10-20 23:17:07,219 - INFO - Processing device: PV Panel 1, Current output: 150.000000, Min output: 0.000000, Reducible power: 150.000000
+2025-10-20 23:17:07,219 - INFO - Attempting to execute action: set_output:0.0 for device PV Panel 1
+2025-10-20 23:17:07,219 - INFO - EnergyManager.execute_action called with device: PV Panel 1, action: set_output:0.0
+2025-10-20 23:17:07,219 - INFO - [DEBUG] Performing action: PV Panel 1 (PV) - set_output:0.0
+2025-10-20 23:17:07,219 - INFO - Performing action: set_output:0.0 on device: PV Panel 1
+2025-10-20 23:17:07,219 - INFO - Attempting to set output for PV Panel 1 to 0.0 kW
+2025-10-20 23:17:07,219 - INFO - PV Panel 1 setpoint changed: 150.00 -> 0.00 kW
+2025-10-20 23:17:07,219 - INFO - Set output for PV Panel 1 from 150.0 kW to 0.0 kW. Setpoint: 0.0 kW
+2025-10-20 23:17:07,219 - INFO - DEVICE CHANGED: PV Panel 1 (PV) - set_output:0.0
+2025-10-20 23:17:07,219 - INFO - Result of execute_action_func: {'success': True, 'amount': 150.0}
+2025-10-20 23:17:07,219 - INFO - Reduced PV Panel 1 (priority: 1) power by 150.000000 kW from 150.000000 kW to 0.000000 kW. Setpoint: 0.000000 kW
+2025-10-20 23:17:07,219 - INFO - Processing device: PV Panel 2, Current output: 150.000000, Min output: 0.000000, Reducible power: 150.000000
+2025-10-20 23:17:07,219 - INFO - Attempting to execute action: set_output:140.0 for device PV Panel 2
+2025-10-20 23:17:07,220 - INFO - EnergyManager.execute_action called with device: PV Panel 2, action: set_output:140.0
+2025-10-20 23:17:07,220 - INFO - [DEBUG] Performing action: PV Panel 2 (PV) - set_output:140.0
+2025-10-20 23:17:07,220 - INFO - Performing action: set_output:140.0 on device: PV Panel 2
+2025-10-20 23:17:07,220 - INFO - Attempting to set output for PV Panel 2 to 140.0 kW
+2025-10-20 23:17:07,220 - INFO - PV Panel 2 setpoint changed: 150.00 -> 140.00 kW
+2025-10-20 23:17:07,220 - INFO - Set output for PV Panel 2 from 150.0 kW to 140.0 kW. Setpoint: 140.0 kW
+2025-10-20 23:17:07,220 - INFO - DEVICE CHANGED: PV Panel 2 (PV) - set_output:140.0
+2025-10-20 23:17:07,220 - INFO - Result of execute_action_func: {'success': True, 'amount': 10.0}
+2025-10-20 23:17:07,220 - INFO - Reduced PV Panel 2 (priority: 1) power by 10.000000 kW from 150.000000 kW to 140.000000 kW. Setpoint: 140.000000 kW
+2025-10-20 23:17:07,220 - INFO - Total power generation reduced: 160.000000 kW
+2025-10-20 23:17:07,220 - INFO - Remaining surplus: 0.000000 kW
+2025-10-20 23:17:07,220 - INFO - Success: Managed 160.0 kW, remaining: 0.0 kW
+2025-10-20 23:17:07,220 - INFO - 
+2025-10-20 23:17:07,220 - INFO -   CHANGES: 3 device(s) modified
+2025-10-20 23:17:07,220 - INFO -     - BESS 1: charge:50
+2025-10-20 23:17:07,220 - INFO -     - PV Panel 1: set_output:0.0
+2025-10-20 23:17:07,220 - INFO -     - PV Panel 2: set_output:140.0
+2025-10-20 23:17:07,220 - INFO -   Managed 210.00 kW surplus
+2025-10-20 23:17:07,220 - INFO - SCADA GRID STATUS: No grid operations in this iteration
+2025-10-20 23:17:07,220 - INFO - 
 ==================================================
-ITERATION COMPLETE in 0.03s
+ITERATION COMPLETE in 0.02s
 ==================================================
-2025-10-20 23:13:59,753 - INFO - Live contract data saved to C:/eryk/AppFuga\apps\backend\output_contract_data.json
-2025-10-20 23:13:59,853 - INFO - Weather data updated at 2025-10-20 23:13:59.853096
-2025-10-20 23:13:59,901 - INFO - 5-minute data aggregated and logged at 2025-10-20 23:13:59.901982
-2025-10-20 23:14:00,002 - INFO - Weather forecast updated at 2025-10-20 23:14:00.002303
-2025-10-20 23:14:00,002 - INFO - Updated power profile
-2025-10-20 23:14:00,002 - INFO - Complete iteration finished in 0.28 seconds
-2025-10-20 23:14:00,002 - INFO - !!! Waiting 300.0 seconds for next iteration !!!
-2025-10-20 23:14:00,928 - INFO - !!! Energy management stopping !!!
-2025-10-20 23:14:00,928 - INFO - !!! Energy management stopped !!!
+2025-10-20 23:17:07,221 - INFO - Live contract data saved to C:/eryk/AppFuga\apps\backend\output_contract_data.json
+2025-10-20 23:17:07,309 - INFO - Weather data updated at 2025-10-20 23:17:07.309776
+2025-10-20 23:17:07,398 - INFO - 5-minute data aggregated and logged at 2025-10-20 23:17:07.398350
+2025-10-20 23:17:07,475 - INFO - Weather forecast updated at 2025-10-20 23:17:07.475007
+2025-10-20 23:17:07,475 - INFO - Updated power profile
+2025-10-20 23:17:07,475 - INFO - Complete iteration finished in 0.28 seconds
+2025-10-20 23:17:07,475 - INFO - !!! Waiting 300.0 seconds for next iteration !!!
+2025-10-20 23:17:10,099 - INFO - !!! Energy management stopping !!!
+2025-10-20 23:17:10,099 - INFO - !!! Energy management stopped !!!

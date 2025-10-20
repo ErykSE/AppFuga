@@ -498,17 +498,6 @@ class EnergySurplusManager:
                         reduction=actual_reduction
                     )
                 
-                # Tracking zmian
-                if self.energy_manager_ref:
-                    device_change = {
-                        "device": device,
-                        "action": f"limit_output:{new_output:.2f}",
-                        "previous_value": current_output,
-                        "new_value": new_output,
-                        "device_type": type(device).__name__
-                    }
-                    self.energy_manager_ref.changed_devices.append(device_change)
-                
                 total_reduced += actual_reduction
                 self.info_logger.info(
                     f"Reduced {device.name} (priority: {device.priority}) power by {actual_reduction:.6f} kW "
