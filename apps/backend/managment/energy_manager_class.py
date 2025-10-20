@@ -3261,7 +3261,19 @@ class EnergyManager:
             elif balance.has_surplus:
                 self.info_logger.info(f"💰 Surplus available: {balance.surplus:.2f} kW")
                 
-                for limitation in self.artificial_limitations[:]:
+                # Sortuj urządzenia według priorytetu (niższy priorytet = wyższy priorytet przywracania)
+                consumption_limitations = [
+                    lim for lim in self.artificial_limitations 
+                    if lim["type"] == "consumption_limit"
+                ]
+                consumption_limitations.sort(key=lambda x: x["device"].priority)
+                
+                self.info_logger.info(
+                    f"📋 Found {len(consumption_limitations)} devices to restore "
+                    f"(sorted by priority: {[lim['device'].name for lim in consumption_limitations]})"
+                )
+                
+                for limitation in consumption_limitations:
                     if limitation["type"] == "consumption_limit":
                         device = limitation["device"]
                         original_power = limitation["original_power"]
