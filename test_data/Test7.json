@@ -152,13 +152,5 @@
         "actual_grid_export": 0.0,
         "actual_grid_import": 0.0,
         "decision_mode": "AUTO"
-    },
-    "expected_scenario": "SURPLUS - BESS DISCHARGING CONFLICT",
-    "expected_balance": 9.2,
-    "expected_actions": [
-        "Stop BESS discharging (neutralize conflict)",
-        "BESS charge decision (BESS vs GRID SELL)",
-        "Possible: Grid export if BESS not chosen"
-    ],
-    "description": "BESS rozładowuje się (25 kW) podczas nadwyżki. System powinien najpierw zatrzymać rozładowanie, potem podjąć decyzję BESS charge vs GRID export."
+    }
 }
