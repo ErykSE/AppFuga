@@ -1,7 +1,0 @@
-2025-10-20 22:32:41,135 - ERROR - Error in check_energy_conditions: 'NoneType' object has no attribute 'get'
-2025-10-20 22:32:41,135 - ERROR - Full traceback:
-Traceback (most recent call last):
-  File "c:\eryk\AppFuga\apps\backend\managment\energy_manager_class.py", line 839, in check_energy_conditions
-    actual_managed = result.get("amount_managed", 0)
-                     ^^^^^^^^^^
-AttributeError: 'NoneType' object has no attribute 'get'

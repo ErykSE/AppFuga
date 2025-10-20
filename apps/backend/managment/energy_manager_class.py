@@ -872,6 +872,8 @@ class EnergyManager:
         remaining_surplus = result["remaining_surplus"]
 
         # Surplus management results już zalogowane w manage_surplus_energy()
+        
+        return result
 
     def manage_deficit_automatic(self, power_deficit):
         result = self.deficit_manager.handle_deficit_automatic(power_deficit)
