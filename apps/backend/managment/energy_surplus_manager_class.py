@@ -526,14 +526,31 @@ class EnergySurplusManager:
         }
 
     def is_export_possible(self):
+        """Sprawdza czy Grid może eksportować (kontrakt + limit)"""
         try:
-            return self.osd.get_contracted_export_possibility()
+            # Sprawdź czy kontrakt pozwala na eksport
+            if not self.osd.get_contracted_export_possibility():
+                return False
+            
+            # Sprawdź czy Grid już nie eksportuje
+            if self.energy_manager_ref:
+                is_already_exporting, _ = self.energy_manager_ref.check_device_already_operating(
+                    "GRID", "exporting"
+                )
+                if is_already_exporting:
+                    return False
+            
+            # Sprawdź czy limit sprzedaży został osiągnięty
+            if self.osd.get_sold_power() >= self.osd.get_sale_limit():
+                return False
+            
+            return True
         except Exception as e:
             self.error_logger.error(f"Error checking export possibility: {str(e)}")
             return False
 
     def check_bess_availability(self):
-        """Sprawdza czy BESS może ładować (nie ładuje się już)"""
+        """Sprawdza czy BESS może ładować (nie ładuje się już + ma wolne miejsce)"""
         try:
             if not self.microgrid.bess.get_switch_status():
                 return False
@@ -545,6 +562,11 @@ class EnergySurplusManager:
                 )
                 if is_already_charging:
                     return False
+            
+            # Sprawdź czy BESS ma wolne miejsce
+            free_capacity = self.microgrid.bess.max_charge_level - self.microgrid.bess.charge_level
+            if free_capacity <= 0:
+                return False
             
             return True
         except Exception as e:
