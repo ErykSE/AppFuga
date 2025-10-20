@@ -153,12 +153,13 @@
         "actual_grid_import": 0.0,
         "decision_mode": "AUTO"
     },
-    "expected_scenario": "DEFICIT - BESS CHARGING CONFLICT",
+    "expected_scenario": "DEFICIT - BESS CHARGING CONFLICT - NO ADJUSTABLE GENERATORS",
     "expected_balance": -45.8,
     "expected_actions": [
         "Stop BESS charging (neutralize conflict)",
         "BESS discharge decision (BESS vs GRID)",
-        "Possible: Reduce adjustable loads"
+        "Possible: Reduce adjustable loads",
+        "NO: Cannot increase generators (PV/Wind are non-adjustable)"
     ],
-    "description": "BESS ładuje się (30 kW) podczas deficytu. System powinien najpierw zatrzymać ładowanie, potem podjąć decyzję BESS discharge vs GRID import."
+    "description": "BESS ładuje się (30 kW) podczas deficytu. Brak fuel_turbines/fuel_cells. System powinien: stop charging → BESS discharge vs GRID import lub reduce loads."
 }

@@ -153,13 +153,14 @@
         "actual_grid_import": 0.0,
         "decision_mode": "AUTO"
     },
-    "expected_scenario": "LARGE DEFICIT - BESS + GRID REQUIRED",
+    "expected_scenario": "LARGE DEFICIT - NO ADJUSTABLE GENERATORS",
     "expected_balance": -125.0,
     "expected_actions": [
         "BESS discharge (max 50 kW)",
         "Grid import (remaining ~75 kW)",
         "Reduce adjustable loads (priority 3 first)",
-        "Possible: Reduce priority 2 loads if still in deficit"
+        "Possible: Reduce priority 2 loads if still in deficit",
+        "NO: Cannot increase generators (PV/Wind are non-adjustable)"
     ],
-    "description": "Duży deficyt ~125 kW. BESS może rozładować max 50 kW. System powinien: BESS discharge + Grid import + reduce loads."
+    "description": "Duży deficyt ~125 kW. BESS może rozładować max 50 kW. Brak fuel_turbines/fuel_cells. System powinien: BESS discharge + Grid import + reduce loads."
 }
