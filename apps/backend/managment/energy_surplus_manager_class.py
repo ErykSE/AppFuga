@@ -482,10 +482,11 @@ class EnergySurplusManager:
                 #  Ustaw setpoint dla SCADA
                 if action == "deactivate":
                     device.setpoint_output = 0
+                    new_output = 0
                 else:
                     device.setpoint_output = new_output
                 
-                actual_reduction = current_output - device.get_actual_output()
+                actual_reduction = current_output - new_output
                 
                 #  ETAP 2: Dodaj do listy ograniczeń
                 if self.energy_manager_ref:
@@ -493,7 +494,7 @@ class EnergySurplusManager:
                         device=device,
                         limitation_type="generation_limit",
                         original_output=current_output,
-                        new_output=device.get_actual_output(),
+                        new_output=new_output,
                         reduction=actual_reduction
                     )
                 
@@ -501,9 +502,9 @@ class EnergySurplusManager:
                 if self.energy_manager_ref:
                     device_change = {
                         "device": device,
-                        "action": f"limit_output:{device.get_actual_output():.2f}",
+                        "action": f"limit_output:{new_output:.2f}",
                         "previous_value": current_output,
-                        "new_value": device.get_actual_output(),
+                        "new_value": new_output,
                         "device_type": type(device).__name__
                     }
                     self.energy_manager_ref.changed_devices.append(device_change)
@@ -511,7 +512,7 @@ class EnergySurplusManager:
                 total_reduced += actual_reduction
                 self.info_logger.info(
                     f"Reduced {device.name} (priority: {device.priority}) power by {actual_reduction:.6f} kW "
-                    f"from {current_output:.6f} kW to {device.get_actual_output():.6f} kW. "
+                    f"from {current_output:.6f} kW to {new_output:.6f} kW. "
                     f"Setpoint: {device.setpoint_output:.6f} kW"
                 )
             else:
