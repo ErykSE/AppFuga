@@ -2860,13 +2860,13 @@ class EnergyManager:
                 return False, 0.0
             
             if operation == "charging":
-                if self.microgrid.bess.actual_output < 0:
-                    return True, abs(self.microgrid.bess.actual_output)
+                if self.microgrid.bess.setpoint_output < 0:
+                    return True, abs(self.microgrid.bess.setpoint_output)
                 return False, 0.0
             
             elif operation == "discharging":
-                if self.microgrid.bess.actual_output > 0:
-                    return True, self.microgrid.bess.actual_output
+                if self.microgrid.bess.setpoint_output > 0:
+                    return True, self.microgrid.bess.setpoint_output
                 return False, 0.0
         
         elif device_type == "GRID":
