@@ -847,11 +847,12 @@ class EnergyManager:
             # KROK 8: Oblicz końcowy bilans
             final_balance = self.calculate_energy_balance()
             
-            # STAN PO
-            self._log_state_after(final_balance)
-            
-            # PODSUMOWANIE
-            self._log_simple_summary(initial_balance, final_balance, self.changed_devices, decision_text)
+            # Krótkie podsumowanie
+            self.info_logger.info("")
+            self.info_logger.info(f"  CHANGES: {len(self.changed_devices)} device(s) modified")
+            for change in self.changed_devices:
+                self.info_logger.info(f"    - {change['device'].name}: {change['action']}")
+            self.info_logger.info(f"  {decision_text}")
             
             return {"status": "managed", "balance": final_balance.balance}
             
