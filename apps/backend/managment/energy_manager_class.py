@@ -2342,8 +2342,8 @@ class EnergyManager:
         
         # Grid status
         self.info_logger.info(
-            f"Grid:        Import={self.osd.current_grid_import:.2f} kW, "
-            f"Export={self.osd.current_grid_export:.2f} kW"
+            f"Grid:        Import={grid_import_actual:.2f} kW, "
+            f"Export={grid_export_actual:.2f} kW"
         )
         
         # Trading status
