@@ -376,3 +376,4 @@ Starting new iteration
 ==================================================
 2025-10-21 14:07:23,024 - INFO - Loaded operation mode: automatic
 2025-10-21 14:07:23,024 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-10-21 14:07:38,050 - INFO - Próba po³¹czenia z system-state (1/5) [RETRY]
