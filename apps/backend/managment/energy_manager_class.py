@@ -1902,8 +1902,18 @@ class EnergyManager:
         return api_data
 
     def has_device_changes(self):
-        """Sprawdza czy algorytm wykonał jakiekolwiek zmiany na urządzeniach."""
-        return len(self.changed_devices) > 0
+        """
+        Sprawdza czy algorytm wykonał jakiekolwiek zmiany na urządzeniach.
+        
+        POPRAWIONE: Ignoruje zmiany OSD (bo te idą przez contract data).
+        Zwraca True tylko jeśli są zmiany na rzeczywistych urządzeniach (BESS, PV, etc.).
+        """
+        # Sprawdź czy są jakieś zmiany poza OSD
+        non_osd_changes = [
+            change for change in self.changed_devices 
+            if change.get("device_type") != "OSD"
+        ]
+        return len(non_osd_changes) > 0
 
     def reset_changed_devices(self):
         """Resetuje listę zmienionych urządzeń na początku każdej iteracji."""
