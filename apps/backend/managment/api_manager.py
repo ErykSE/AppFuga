@@ -566,6 +566,12 @@ class ApiManager:
                                    f"Wysyłanie danych systemu (próba {attempt}/{self.retry_config.max_retries})", 
                                    "RETRY")
                 
+                #  DIAGNOSTYKA: Log danych przed wysłaniem (jak dla contract data)
+                self.info_logger.info("=" * 70)
+                self.info_logger.info("SYSTEM DATA BEING SENT TO API:")
+                self.info_logger.info(json.dumps(system_data, indent=2))
+                self.info_logger.info("=" * 70)
+                
                 response = requests.post(
                     url,
                     json=system_data,
@@ -573,6 +579,34 @@ class ApiManager:
                     verify=self.verify_ssl,
                     timeout=self.retry_config.connection_timeout
                 )
+                
+                #  DIAGNOSTYKA: Log odpowiedzi API
+                self.info_logger.info(f"API Response Status Code: {response.status_code}")
+                
+                # NOWE: Dla błędów klienta (4xx) nie rób retry - to błędy danych/konfiguracji, nie sieci
+                # 400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found, 422 Unprocessable Entity
+                if 400 <= response.status_code < 500:
+                    error_names = {
+                        400: "Bad Request - błąd w danych",
+                        401: "Unauthorized - brak autoryzacji", 
+                        403: "Forbidden - brak uprawnień",
+                        404: "Not Found - nieznany endpoint",
+                        422: "Unprocessable Entity - błąd walidacji"
+                    }
+                    error_desc = error_names.get(response.status_code, "Client Error")
+                    
+                    self._log_with_flag("ERROR", 
+                                       f"{response.status_code} {error_desc}", 
+                                       "API")
+                    self.error_logger.error(f"API Error Response: {response.text}")
+                    self._log_with_flag("ERROR", 
+                                       "Nie będziemy ponownie próbować (błąd po stronie klienta/danych)", 
+                                       "RETRY")
+                    return False
+                
+                if response.status_code != 200:
+                    self.error_logger.error(f"API Error Response Body: {response.text}")
+                
                 response.raise_for_status()
                 
                 # Sprawdź odpowiedź z API
@@ -633,6 +667,27 @@ class ApiManager:
                 
                 #  DIAGNOSTYKA: Log odpowiedzi API
                 self.info_logger.info(f"API Response Status Code: {response.status_code}")
+                
+                # NOWE: Dla błędów klienta (4xx) nie rób retry - to błędy danych/konfiguracji, nie sieci
+                # 400 Bad Request, 401 Unauthorized, 403 Forbidden, 404 Not Found, 422 Unprocessable Entity
+                if 400 <= response.status_code < 500:
+                    error_names = {
+                        400: "Bad Request - błąd w danych kontraktu",
+                        401: "Unauthorized - brak autoryzacji", 
+                        403: "Forbidden - brak uprawnień",
+                        404: "Not Found - nieznany endpoint",
+                        422: "Unprocessable Entity - błąd walidacji"
+                    }
+                    error_desc = error_names.get(response.status_code, "Client Error")
+                    
+                    self._log_with_flag("ERROR", 
+                                       f"{response.status_code} {error_desc}", 
+                                       "API")
+                    self.error_logger.error(f"API Error Response: {response.text}")
+                    self._log_with_flag("ERROR", 
+                                       "Nie będziemy ponownie próbować (błąd po stronie klienta/danych)", 
+                                       "RETRY")
+                    return False
                 
                 if response.status_code != 200:
                     self.error_logger.error(f"API Error Response Body: {response.text}")
