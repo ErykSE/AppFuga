@@ -87,8 +87,18 @@ class BESSCapabilityChecker:
             )
         
         # 3. Sprawdź limit min_output
-        if power_surplus < self.bess.min_output:
+        # POPRAWIONE: Jeśli BESS już się ładuje, sprawdź CAŁKOWITĄ moc (obecna + nowa)
+        current_charge_power = abs(self.bess.setpoint_output) if self.bess.setpoint_output < 0 else 0
+        total_charge_power = current_charge_power + power_surplus
+        
+        if total_charge_power < self.bess.min_output:
             self._set_bess_zero_if_needed()
+            if current_charge_power > 0:
+                reason = (f"Total charge power ({total_charge_power:.2f} kW = current {current_charge_power:.2f} + surplus {power_surplus:.2f}) "
+                         f"would be below min_output ({self.bess.min_output:.2f} kW)")
+            else:
+                reason = f"Power surplus ({power_surplus:.2f} kW) is below min_output ({self.bess.min_output:.2f} kW)"
+            
             return BESSOperationPlan(
                 is_feasible=False,
                 power_setpoint=0,
@@ -96,11 +106,12 @@ class BESSCapabilityChecker:
                 energy_amount=0,
                 will_finish_before_next_iteration=False,
                 time_to_completion_minutes=None,
-                reason=f"Power surplus ({power_surplus:.2f} kW) is below min_output ({self.bess.min_output:.2f} kW)"
+                reason=reason
             )
         
         # 4. Oblicz rzeczywistą moc ładowania (ogranicz do max_charge_power)
-        charge_power = min(power_surplus, self.bess.max_charge_power)
+        # POPRAWIONE: Użyj całkowitej mocy (obecna + nowa), ale ogranicz do max_charge_power
+        charge_power = min(total_charge_power, self.bess.max_charge_power)
         
         # 5. Oblicz ile energii możemy załadować w czasie iteracji
         energy_in_iteration = charge_power * self.iteration_time_hours  # kWh
