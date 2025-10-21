@@ -2975,7 +2975,14 @@ class EnergyManager:
             if consumer.get_switch_status():
                 continue  # Pomiń aktywne odbiorniki
                 
-            max_power = consumer.get_max_output() if hasattr(consumer, 'get_max_output') else consumer.max_power
+            # Pobierz max_power w zależności od typu urządzenia
+            if hasattr(consumer, 'get_max_output'):
+                max_power = consumer.get_max_output()
+            elif hasattr(consumer, 'max_power'):
+                max_power = consumer.max_power
+            else:
+                # NonAdjustableDevice ma tylko 'power'
+                max_power = consumer.power
             
             # Sprawdź czy odbiornik może być włączony
             if max_power > self.EPSILON:
