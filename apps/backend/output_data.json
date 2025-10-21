@@ -1,16 +1,32 @@
 {
-    "bess": [
+    "adjustable_devices": [
         {
-            "name": "BESS 1",
+            "name": "Adjustable Device 2",
             "switch_status": true,
-            "setpoint_output": 80,
-            "charge_level": 100
+            "setpoint_output": 0.0
+        },
+        {
+            "name": "Adjustable Device 1",
+            "switch_status": true,
+            "setpoint_output": 0
+        }
+    ],
+    "non_adjustable_devices": [
+        {
+            "name": "Non Adjustable Device 1",
+            "switch_status": false,
+            "setpoint_output": 0
+        },
+        {
+            "name": "Non Adjustable Device 2",
+            "switch_status": false,
+            "setpoint_output": 0
         }
     ],
     "algorithm_decision": {
-        "status": "BALANCED",
+        "status": "ACTIVE",
         "message": "Minor adjustments",
-        "balance_kW": -15.8,
-        "devices_count": 2
+        "balance_kW": 15.8,
+        "devices_count": 5
     }
 }
