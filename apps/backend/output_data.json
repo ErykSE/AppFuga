@@ -3,13 +3,13 @@
         {
             "name": "PV Panel 1",
             "switch_status": true,
-            "setpoint_output": 70.79
+            "setpoint_output": 67.84
         }
     ],
     "algorithm_decision": {
         "status": "BALANCED",
         "message": "Minor adjustments",
-        "balance_kW": 30.7,
+        "balance_kW": 25.7,
         "devices_count": 1
     }
 }
