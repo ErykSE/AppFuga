@@ -246,3 +246,123 @@ ITERATION COMPLETE in 0.03s
 2025-10-21 13:59:34,412 - INFO - Heartbeat tag: 420
 2025-10-21 14:00:36,274 - INFO - Heartbeat tag: 480
 2025-10-21 14:01:37,919 - INFO - Heartbeat tag: 540
+2025-10-21 14:02:22,311 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-10-21 14:02:22,311 - INFO - Loaded operation mode: automatic
+2025-10-21 14:02:22,311 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-10-21 14:02:22,381 - INFO - Algorytm bêdzie kontynuowany z dostêpnymi urz¹dzeniami [SYSTEM]
+2025-10-21 14:02:22,381 - INFO - Status zapisany: Some devices are not accessible [SYSTEM]
+2025-10-21 14:02:22,381 - INFO - Pobieranie danych kontraktu z http://localhost:5002/api/Scada/contract-info
+2025-10-21 14:02:22,396 - INFO - Dane urz¹dzeñ zapisane do C:/eryk/AppFuga\apps\backend\live_data.json [SYSTEM]
+2025-10-21 14:02:22,396 - INFO - Dane kontraktu zapisane do C:/eryk/AppFuga\apps\backend\live_contract_data.json [SYSTEM]
+2025-10-21 14:02:22,396 - INFO - Status systemu zapisany do C:/eryk/AppFuga\apps\backend\system_status.json [SYSTEM]
+2025-10-21 14:02:22,408 - INFO - Loaded live data
+2025-10-21 14:02:22,413 - INFO - 
+==================================================
+NEW ITERATION START
+==================================================
+2025-10-21 14:02:22,413 - INFO - 
+2025-10-21 14:02:22,413 - INFO -  INITIAL SYSTEM STATUS
+2025-10-21 14:02:22,413 - INFO - ----------------------------------------------------------------------
+2025-10-21 14:02:22,413 - INFO - Generation:    203.27 kW (devices: 203.3 + BESS: 0.0 + Grid: 0.0)
+2025-10-21 14:02:22,415 - INFO - Consumption:   200.31 kW (loads: 177.6 + BESS: 22.7 + Grid: 0.0)
+2025-10-21 14:02:22,415 - INFO - BESS:          123.54/200.00 kWh (actual: -22.73 kW)
+2025-10-21 14:02:22,415 - INFO - Grid:        Import=0.00 kW, Export=0.00 kW
+2025-10-21 14:02:22,415 - INFO - Trading:     Sold=250.00/250.00 kWh, Bought=120.00/120.00 kWh
+2025-10-21 14:02:22,415 - INFO - Balance:          3.0 kW (SURPLUS (+3.0 kW))
+2025-10-21 14:02:22,415 - INFO - ----------------------------------------------------------------------
+2025-10-21 14:02:22,415 - INFO - 
+2025-10-21 14:02:22,415 - INFO - ANALYZING CONFLICTING OPERATIONS
+2025-10-21 14:02:22,415 - INFO - Surplus detected: 2.96 kW
+2025-10-21 14:02:22,417 - INFO - No conflicting operations detected
+2025-10-21 14:02:22,417 - INFO - 
+2025-10-21 14:02:22,427 - INFO - ----------------------------------------------------------------------
+2025-10-21 14:02:22,427 - INFO - Found 1 previous limitations to restore
+2025-10-21 14:02:22,453 - INFO - ----------------------------------------------------------------------
+2025-10-21 14:02:22,454 - INFO - 
+2025-10-21 14:02:22,454 - INFO - MANAGING SURPLUS
+2025-10-21 14:02:22,454 - INFO - Iteration 1, surplus remaining: 3.0 kW
+2025-10-21 14:02:22,465 - INFO - Attempting: SurplusAction.LIMIT_GENERATION
+2025-10-21 14:02:22,465 - INFO - Starting limit_energy_generation with power_surplus: 2.960000
+2025-10-21 14:02:22,465 - INFO - Active generators: ['PV Panel 1', 'PV Panel 2', 'Wind Turbine 1', 'Wind Turbine 2']
+2025-10-21 14:02:22,465 - INFO - Processing device: PV Panel 1, Current output: 70.800000, Min output: 10.000000, Reducible power: 60.800000
+2025-10-21 14:02:22,465 - INFO - Attempting to execute action: set_output:67.84 for device PV Panel 1
+2025-10-21 14:02:22,466 - INFO - EnergyManager.execute_action called with device: PV Panel 1, action: set_output:67.84
+2025-10-21 14:02:22,466 - INFO - [DEBUG] Performing action: PV Panel 1 (PV) - set_output:67.84
+2025-10-21 14:02:22,466 - INFO - Performing action: set_output:67.84 on device: PV Panel 1
+2025-10-21 14:02:22,466 - INFO - Attempting to set output for PV Panel 1 to 67.84 kW
+2025-10-21 14:02:22,466 - INFO - PV Panel 1 setpoint changed: 70.80 -> 67.84 kW
+2025-10-21 14:02:22,466 - INFO - Set output for PV Panel 1 from 70.8 kW to 67.84 kW. Setpoint: 67.84 kW
+2025-10-21 14:02:22,466 - INFO - DEVICE CHANGED: PV Panel 1 (PV) - set_output:67.84
+2025-10-21 14:02:22,466 - INFO - Result of execute_action_func: {'success': True, 'amount': 2.9599999999999937}
+2025-10-21 14:02:22,467 - INFO - Reduced PV Panel 1 (priority: 1) power by 2.960000 kW from 70.800000 kW to 67.840000 kW. Setpoint: 67.840000 kW
+2025-10-21 14:02:22,467 - INFO - Total power generation reduced: 2.960000 kW
+2025-10-21 14:02:22,467 - INFO - Remaining surplus: 0.000000 kW
+2025-10-21 14:02:22,467 - INFO - Success: Managed 3.0 kW, remaining: 0.0 kW
+2025-10-21 14:02:22,467 - INFO - 
+2025-10-21 14:02:22,467 - INFO -   CHANGES: 1 device(s) modified
+2025-10-21 14:02:22,467 - INFO -     - PV Panel 1: set_output:67.84
+2025-10-21 14:02:22,467 - INFO -   Managed 2.96 kW surplus
+2025-10-21 14:02:22,467 - INFO - SCADA GRID STATUS: No grid operations in this iteration
+2025-10-21 14:02:22,467 - INFO - 
+==================================================
+ITERATION COMPLETE in 0.05s
+==================================================
+2025-10-21 14:02:22,470 - INFO - Live contract data saved to C:/eryk/AppFuga\apps\backend\output_contract_data.json
+2025-10-21 14:02:22,470 - INFO - 
+-------------------- Algorithm Changes Summary --------------------
+2025-10-21 14:02:22,482 - INFO - Changed devices data saved to C:/eryk/AppFuga\apps\backend\output_data.json
+2025-10-21 14:02:22,482 - INFO - Wysy³anie danych systemu (próba 1/3) [RETRY]
+2025-10-21 14:02:22,482 - INFO - ======================================================================
+2025-10-21 14:02:22,482 - INFO - SYSTEM DATA BEING SENT TO API:
+2025-10-21 14:02:22,482 - INFO - {
+  "pv_panels": [
+    {
+      "name": "PV Panel 1",
+      "switch_status": true,
+      "setpoint_output": 67.84
+    }
+  ],
+  "algorithm_decision": {
+    "status": "BALANCED",
+    "message": "Minor adjustments",
+    "balance_kW": 25.7,
+    "devices_count": 1
+  }
+}
+2025-10-21 14:02:22,482 - INFO - ======================================================================
+2025-10-21 14:02:22,506 - INFO - API Response Status Code: 200
+2025-10-21 14:02:22,506 - INFO - Dane systemu wys³ane pomyœlnie [NETWORK]
+2025-10-21 14:02:22,506 - INFO - Wysy³anie danych kontraktu (próba 1/3) [RETRY]
+2025-10-21 14:02:22,506 - INFO - ======================================================================
+2025-10-21 14:02:22,509 - INFO - CONTRACT DATA BEING SENT TO API:
+2025-10-21 14:02:22,509 - INFO - {
+  "contracted_type": "Type B",
+  "contracted_duration": 12,
+  "contracted_margin": 0.12,
+  "contracted_export_possibility": true,
+  "contracted_sale_limit": 250,
+  "contracted_purchase_limit": 120,
+  "contracted_billing_cycle": "monthly",
+  "contracted_billing_period_start": "01.10.2025",
+  "contracted_billing_period_end": "31.10.2025",
+  "sold_power": 250,
+  "bought_power": 120,
+  "current_tariff_buy": 1.19,
+  "current_tariff_sell": 1.03,
+  "grid_export": 0,
+  "grid_import": 0,
+  "setpoint_grid_export": 0,
+  "setpoint_grid_import": 0
+}
+2025-10-21 14:02:22,509 - INFO - ======================================================================
+2025-10-21 14:02:22,723 - INFO - API Response Status Code: 200
+2025-10-21 14:02:22,723 - INFO - Dane kontraktu wys³ane pomyœlnie [NETWORK]
+2025-10-21 14:02:22,868 - INFO - Algorithm decision sent successfully
+2025-10-21 14:02:22,872 - INFO - Changed devices data sent to API successfully
+2025-10-21 14:02:22,981 - INFO - Updated power profile
+2025-10-21 14:02:22,981 - INFO - Complete iteration finished in 0.67 seconds
+2025-10-21 14:02:22,981 - INFO - !!! Waiting 300.0 seconds for next iteration !!!
+2025-10-21 14:02:39,481 - INFO - Heartbeat tag: 600
