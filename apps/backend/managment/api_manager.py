@@ -12,7 +12,7 @@ import datetime
 class RetryConfig:
     """Konfiguracja mechanizmów retry i timeoutów"""
     max_retries: int = 3
-    initial_retry_delay: int = 30  # początkowe opóźnienie w sekundach
+    initial_retry_delay: int = 5  # początkowe opóźnienie w sekundach (zmniejszone z 30s na 5s)
     max_retry_delay: int = 300     # maksymalne opóźnienie (5 minut)
     scada_check_interval: int = 60  # sekundy co ile sprawdzać połączenie z SCADA
     connection_timeout: int = 15    # timeout dla requestów
