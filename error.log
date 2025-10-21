@@ -1,2 +1,7 @@
 2025-10-21 11:30:37,905 - WARNING - [WARNING] Wykryto 2 brakuj¹cych urz¹dzeñ: [5, 6] [SYSTEM]
 2025-10-21 11:30:37,992 - ERROR - B³¹d podczas wysy³ania danych systemu (próba 1): 400 Client Error: Bad Request for url: http://localhost:5002/api/Scada/update-system-state [RETRY]
+2025-10-21 11:31:08,037 - ERROR - B³¹d podczas wysy³ania danych systemu (próba 2): 400 Client Error: Bad Request for url: http://localhost:5002/api/Scada/update-system-state [RETRY]
+2025-10-21 11:32:08,152 - ERROR - B³¹d podczas wysy³ania danych systemu (próba 3): 400 Client Error: Bad Request for url: http://localhost:5002/api/Scada/update-system-state [RETRY]
+2025-10-21 11:32:08,153 - CRITICAL - Przekroczono maksymaln¹ liczbê prób wys³ania danych systemu [ALERT]
+2025-10-21 11:32:08,972 - ERROR - Failed to send data to API after all retry attempts
+2025-10-21 11:32:09,626 - ERROR - Error updating power profile: can't register atexit after shutdown

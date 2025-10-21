@@ -58,3 +58,38 @@ ITERATION COMPLETE in 0.04s
 2025-10-21 11:30:37,992 - INFO - Ponowna próba za 30 sekund... [RETRY]
 2025-10-21 11:30:39,678 - INFO - Stopping heartbeat tag sender
 2025-10-21 11:30:39,688 - INFO - !!! Energy management stopping !!!
+2025-10-21 11:31:07,991 - INFO - Wysy³anie danych systemu (próba 2/3) [RETRY]
+2025-10-21 11:31:08,037 - INFO - Exponential backoff: próba 2, opóŸnienie 60s (obliczone: 60s, max: 300s) [RETRY]
+2025-10-21 11:31:08,037 - INFO - Ponowna próba za 60 sekund... [RETRY]
+2025-10-21 11:32:08,035 - INFO - Wysy³anie danych systemu (próba 3/3) [RETRY]
+2025-10-21 11:32:08,154 - INFO - Wysy³anie danych kontraktu (próba 1/3) [RETRY]
+2025-10-21 11:32:08,154 - INFO - ======================================================================
+2025-10-21 11:32:08,155 - INFO - CONTRACT DATA BEING SENT TO API:
+2025-10-21 11:32:08,155 - INFO - {
+  "contracted_type": "Type B",
+  "contracted_duration": 12,
+  "contracted_margin": 0.12,
+  "contracted_export_possibility": true,
+  "contracted_sale_limit": 250,
+  "contracted_purchase_limit": 120,
+  "contracted_billing_cycle": "monthly",
+  "contracted_billing_period_start": "01.10.2025",
+  "contracted_billing_period_end": "31.10.2025",
+  "sold_power": 222.33,
+  "bought_power": 120,
+  "current_tariff_buy": 1.75,
+  "current_tariff_sell": 1.17,
+  "grid_export": 40.77000000000001,
+  "grid_import": 0.0,
+  "setpoint_grid_export": 40.77000000000001,
+  "setpoint_grid_import": 0.0
+}
+2025-10-21 11:32:08,155 - INFO - ======================================================================
+2025-10-21 11:32:08,385 - INFO - API Response Status Code: 200
+2025-10-21 11:32:08,385 - INFO - Dane kontraktu wys³ane pomyœlnie [NETWORK]
+2025-10-21 11:32:08,972 - INFO - Algorithm decision sent successfully
+2025-10-21 11:32:09,504 - INFO - Weather data updated at 2025-10-21 11:32:09.504469
+2025-10-21 11:32:09,626 - INFO - Updated power profile
+2025-10-21 11:32:09,626 - INFO - Complete iteration finished in 91.82 seconds
+2025-10-21 11:32:09,626 - INFO - !!! Waiting 300.0 seconds for next iteration !!!
+2025-10-21 11:32:09,626 - INFO - !!! Energy management stopped !!!
