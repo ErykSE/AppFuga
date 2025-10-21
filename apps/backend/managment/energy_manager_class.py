@@ -387,6 +387,9 @@ class EnergyManager:
 
         # NOWE: Resetuj setpointy grid na początku każdej iteracji
         self.osd.reset_current_grid_values()
+        
+        # NOWE: Inicjalizuj setpointy urządzeń wartościami z actual
+        self._initialize_device_setpoints()
 
         # Resetuj listę zmienionych urządzeń
         self.reset_changed_devices()
@@ -2154,6 +2157,28 @@ class EnergyManager:
         except Exception as e:
             self.error_logger.error(f"❌ Error loading BESS config: {e}. Using default: 20%")
             return 0.20
+    
+    def _initialize_device_setpoints(self):
+        """
+        Inicjalizuje setpointy wszystkich urządzeń wartościami z actual na początku iteracji.
+        To zapewnia, że obliczenia bilansu będą spójne ze stanem rzeczywistym z API/SCADA.
+        """
+        # BESS
+        if self.microgrid.bess:
+            self.microgrid.bess.setpoint_output = self.microgrid.bess.actual_output
+            
+        # Generatory (PV, Wind, Fuel Turbines, Fuel Cells)
+        for device in self.microgrid.get_all_devices():
+            if hasattr(device, 'setpoint_output') and hasattr(device, 'actual_output'):
+                device.setpoint_output = device.actual_output
+        
+        # Consumers (Adjustable i Non-Adjustable)
+        for device in (self.consumergrid.adjustable_devices + 
+                      self.consumergrid.non_adjustable_devices):
+            if hasattr(device, 'setpoint_output') and hasattr(device, 'actual_output'):
+                device.setpoint_output = device.actual_output
+        
+        self.info_logger.debug("Initialized all device setpoints from actual values")
         
     def calculate_energy_balance(self) -> EnergyBalance:
         """

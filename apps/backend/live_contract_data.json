@@ -8,10 +8,10 @@
     "CONTRACTED_BILLING_CYCLE": "monthly",
     "contracted_billing_period_start": "01.10.2025",
     "contracted_billing_period_end": "31.10.2025",
-    "sold_power": 181.56,
+    "sold_power": 222.33,
     "bought_power": 120,
     "current_tariff_buy": 1.75,
     "current_tariff_sell": 1.17,
-    "current_grid_export": 0,
+    "current_grid_export": 40.77,
     "current_grid_import": 0
 }

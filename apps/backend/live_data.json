@@ -91,9 +91,9 @@
             "id": 10,
             "name": "Adjustable Device 1",
             "priority": 2,
-            "power": 36.86,
-            "actual_output": 36.86,
-            "setpoint_output": 36.86,
+            "power": 39.22,
+            "actual_output": 39.22,
+            "setpoint_output": 39.22,
             "switch_status": true,
             "min_power": 0,
             "max_power": 0
