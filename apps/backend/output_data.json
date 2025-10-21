@@ -1,27 +1,8 @@
 {
-    "adjustable_devices": [
-        {
-            "name": "Adjustable Device 2",
-            "switch_status": true,
-            "setpoint_output": 0.0
-        }
-    ],
-    "non_adjustable_devices": [
-        {
-            "name": "Non Adjustable Device 1",
-            "switch_status": false,
-            "setpoint_output": 0
-        },
-        {
-            "name": "Non Adjustable Device 2",
-            "switch_status": false,
-            "setpoint_output": 0
-        }
-    ],
     "algorithm_decision": {
         "status": "ACTIVE",
-        "message": "Minor adjustments",
-        "balance_kW": 22.6,
-        "devices_count": 4
+        "message": "Sold to grid",
+        "balance_kW": 160.5,
+        "devices_count": 1
     }
 }

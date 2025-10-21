@@ -10,8 +10,8 @@
     "contracted_billing_period_end": "31.10.2025",
     "sold_power": 181.56,
     "bought_power": 120,
-    "current_tariff_buy": 1.79,
-    "current_tariff_sell": 1.2,
-    "current_grid_export": 4.22,
+    "current_tariff_buy": 1.75,
+    "current_tariff_sell": 1.17,
+    "current_grid_export": 0,
     "current_grid_import": 0
 }

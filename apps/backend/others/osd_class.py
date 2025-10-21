@@ -413,16 +413,23 @@ class OSD:
         return 0.0
 
     def reset_current_grid_values(self):
-        """Resetuje setpointy grid na początku iteracji."""
-        self.setpoint_grid_export = 0.0  # NOWE
-        self.setpoint_grid_import = 0.0  # NOWE
+        """
+        Inicjalizuje setpointy grid wartościami z actual na początku iteracji.
+        To zapewnia, że obliczenia bilansu będą spójne ze stanem rzeczywistym.
+        """
+        # Inicjalizuj setpointy wartościami z actual (stan z SCADA)
+        self.setpoint_grid_export = self.actual_grid_export
+        self.setpoint_grid_import = self.actual_grid_import
         
         # Backward compatibility
-        self.current_grid_export = 0.0
-        self.current_grid_import = 0.0
+        self.current_grid_export = self.actual_grid_export
+        self.current_grid_import = self.actual_grid_import
         
         if self.info_logger:
-            self.info_logger.debug("Reset grid setpoints to 0.0")
+            self.info_logger.debug(
+                f"Initialized grid setpoints: export={self.setpoint_grid_export:.2f} kW, "
+                f"import={self.setpoint_grid_import:.2f} kW (from actual values)"
+            )
 
     def get_current_grid_export(self):
         """Zwraca aktualny setpoint eksportu do sieci w kW"""

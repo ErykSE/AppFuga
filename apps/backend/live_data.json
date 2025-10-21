@@ -71,19 +71,19 @@
             "id": 8,
             "name": "Non Adjustable Device 1",
             "priority": 1,
-            "power": 50.7,
-            "actual_output": 50.7,
-            "setpoint_output": 50.7,
-            "switch_status": true
+            "power": 0,
+            "actual_output": 0,
+            "setpoint_output": 0,
+            "switch_status": false
         },
         {
             "id": 9,
             "name": "Non Adjustable Device 2",
             "priority": 1,
-            "power": 50.6,
-            "actual_output": 50.6,
-            "setpoint_output": 50.6,
-            "switch_status": true
+            "power": 0,
+            "actual_output": 0,
+            "setpoint_output": 0,
+            "switch_status": false
         }
     ],
     "adjustable_devices": [
@@ -91,9 +91,9 @@
             "id": 10,
             "name": "Adjustable Device 1",
             "priority": 2,
-            "power": 36.82,
-            "actual_output": 36.82,
-            "setpoint_output": 36.82,
+            "power": 36.86,
+            "actual_output": 36.86,
+            "setpoint_output": 36.86,
             "switch_status": true,
             "min_power": 0,
             "max_power": 0
@@ -102,9 +102,9 @@
             "id": 11,
             "name": "Adjustable Device 2",
             "priority": 0,
-            "power": 36.59,
-            "actual_output": 36.59,
-            "setpoint_output": 36.59,
+            "power": 0,
+            "actual_output": 0,
+            "setpoint_output": 0,
             "switch_status": true,
             "min_power": 0,
             "max_power": 100
