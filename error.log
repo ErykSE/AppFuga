@@ -1,13 +1,1 @@
-2025-10-21 12:42:34,339 - WARNING - [WARNING] Wykryto 2 brakuj¹cych urz¹dzeñ: [5, 6] [SYSTEM]
-2025-10-21 12:42:34,418 - ERROR - B³¹d podczas wysy³ania danych systemu (próba 1): 400 Client Error: Bad Request for url: http://localhost:5002/api/Scada/update-system-state [RETRY]
-2025-10-21 12:43:04,417 - ERROR - B³¹d podczas wysy³ania danych systemu (próba 2): 400 Client Error: Bad Request for url: http://localhost:5002/api/Scada/update-system-state [RETRY]
-2025-10-21 12:44:04,418 - ERROR - B³¹d podczas wysy³ania danych systemu (próba 3): 400 Client Error: Bad Request for url: http://localhost:5002/api/Scada/update-system-state [RETRY]
-2025-10-21 12:44:04,418 - CRITICAL - Przekroczono maksymaln¹ liczbê prób wys³ania danych systemu [ALERT]
-2025-10-21 12:44:04,761 - ERROR - Failed to send data to API after all retry attempts
-2025-10-21 12:44:04,817 - ERROR - Error updating weather data: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))
-2025-10-21 12:44:04,863 - ERROR - Error updating power profile: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))
-2025-10-21 12:44:55,085 - WARNING - [WARNING] Heartbeat tag failed: HTTPConnectionPool(host='localhost', port=5002): Read timed out. (read timeout=2)
-2025-10-21 12:49:04,910 - WARNING - [WARNING] Wykryto 2 brakuj¹cych urz¹dzeñ: [5, 6] [SYSTEM]
-2025-10-21 12:49:05,798 - ERROR - Error updating weather data: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))
-2025-10-21 12:49:05,836 - ERROR - Error updating power profile: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))
-2025-10-21 12:49:58,410 - WARNING - [WARNING] Heartbeat tag failed: HTTPConnectionPool(host='localhost', port=5002): Read timed out. (read timeout=2)
+2025-10-21 13:11:47,959 - WARNING - [WARNING] Wykryto 2 brakuj¹cych urz¹dzeñ: [5, 6] [SYSTEM]
