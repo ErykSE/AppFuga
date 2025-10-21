@@ -1,15 +1,16 @@
 {
-    "pv_panels": [
+    "bess": [
         {
-            "name": "PV Panel 1",
+            "name": "BESS 1",
             "switch_status": true,
-            "setpoint_output": 67.84
+            "setpoint_output": -11.159999999999997,
+            "charge_level": 125.99
         }
     ],
     "algorithm_decision": {
         "status": "BALANCED",
         "message": "Minor adjustments",
-        "balance_kW": 25.7,
-        "devices_count": 1
+        "balance_kW": 11.2,
+        "devices_count": 2
     }
 }

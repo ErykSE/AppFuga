@@ -1,38 +1,5 @@
-2025-10-21 13:52:20,562 - WARNING - [WARNING] Wykryto 2 brakuj¹cych urz¹dzeñ: [5, 6] [SYSTEM]
-2025-10-21 13:52:21,563 - ERROR - Error updating weather data: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))
-2025-10-21 13:52:21,598 - ERROR - Error updating power profile: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))
-2025-10-21 13:56:14,172 - WARNING - [WARNING] Heartbeat tag failed: HTTPConnectionPool(host='localhost', port=5002): Read timed out. (read timeout=2)
-2025-10-21 13:57:21,779 - WARNING - [WARNING] Wykryto 2 brakuj¹cych urz¹dzeñ: [5, 6] [SYSTEM]
-2025-10-21 13:57:22,257 - ERROR - Error updating weather data: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))
-2025-10-21 13:57:22,295 - ERROR - Error updating power profile: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))
-2025-10-21 14:02:22,381 - WARNING - [WARNING] Wykryto 2 brakuj¹cych urz¹dzeñ: [5, 6] [SYSTEM]
-2025-10-21 14:02:22,940 - ERROR - Error updating weather data: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))
-2025-10-21 14:02:22,981 - ERROR - Error updating power profile: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))
-2025-10-21 14:03:12,057 - WARNING - [WARNING] Heartbeat tag failed: HTTPConnectionPool(host='localhost', port=5002): Read timed out. (read timeout=2)
-2025-10-21 14:03:15,107 - WARNING - [WARNING] Heartbeat tag failed: HTTPConnectionPool(host='localhost', port=5002): Read timed out. (read timeout=2)
-2025-10-21 14:05:59,579 - WARNING - [WARNING] Heartbeat tag failed: HTTPConnectionPool(host='localhost', port=5002): Read timed out. (read timeout=2)
-2025-10-21 14:07:25,299 - WARNING - [WARNING] Heartbeat tag failed: HTTPConnectionPool(host='localhost', port=5002): Read timed out. (read timeout=2)
-2025-10-21 14:07:28,332 - WARNING - [WARNING] Heartbeat tag failed: HTTPConnectionPool(host='localhost', port=5002): Read timed out. (read timeout=2)
-2025-10-21 14:07:31,358 - WARNING - [WARNING] Heartbeat tag failed: HTTPConnectionPool(host='localhost', port=5002): Read timed out. (read timeout=2)
-2025-10-21 14:07:34,370 - WARNING - [WARNING] Heartbeat tag failed: HTTPConnectionPool(host='localhost', port=5002): Read timed out. (read timeout=2)
-2025-10-21 14:07:37,384 - WARNING - [WARNING] Heartbeat tag failed: HTTPConnectionPool(host='localhost', port=5002): Read timed out. (read timeout=2)
-2025-10-21 14:07:38,050 - ERROR - B³¹d po³¹czenia z system-state: HTTPConnectionPool(host='localhost', port=5002): Read timed out. (read timeout=15) [NETWORK]
-2025-10-21 14:07:38,050 - WARNING - [WARNING] Rozpoczynam 5 prób po³¹czenia z system-state... [RETRY]
-2025-10-21 14:07:40,398 - WARNING - [WARNING] Heartbeat tag failed: HTTPConnectionPool(host='localhost', port=5002): Read timed out. (read timeout=2)
-2025-10-21 14:07:43,423 - WARNING - [WARNING] Heartbeat tag failed: HTTPConnectionPool(host='localhost', port=5002): Read timed out. (read timeout=2)
-2025-10-21 14:07:46,454 - WARNING - [WARNING] Heartbeat tag failed: HTTPConnectionPool(host='localhost', port=5002): Read timed out. (read timeout=2)
-2025-10-21 14:07:49,469 - WARNING - [WARNING] Heartbeat tag failed: HTTPConnectionPool(host='localhost', port=5002): Read timed out. (read timeout=2)
-2025-10-21 14:07:52,494 - WARNING - [WARNING] Heartbeat tag failed: HTTPConnectionPool(host='localhost', port=5002): Read timed out. (read timeout=2)
-2025-10-21 14:07:53,060 - ERROR - Próba 1 nieudana: HTTPConnectionPool(host='localhost', port=5002): Read timed out. (read timeout=15) [RETRY]
-2025-10-21 14:07:53,060 - WARNING - [WARNING] Nastêpna próba za 60 sekund... [RETRY]
-2025-10-21 14:07:55,526 - WARNING - [WARNING] Heartbeat tag failed: HTTPConnectionPool(host='localhost', port=5002): Read timed out. (read timeout=2)
-2025-10-21 14:07:58,535 - WARNING - [WARNING] Heartbeat tag failed: HTTPConnectionPool(host='localhost', port=5002): Read timed out. (read timeout=2)
-2025-10-21 14:08:01,583 - WARNING - [WARNING] Heartbeat tag failed: HTTPConnectionPool(host='localhost', port=5002): Read timed out. (read timeout=2)
-2025-10-21 14:08:04,598 - WARNING - [WARNING] Heartbeat tag failed: HTTPConnectionPool(host='localhost', port=5002): Read timed out. (read timeout=2)
-2025-10-21 14:08:07,618 - WARNING - [WARNING] Heartbeat tag failed: HTTPConnectionPool(host='localhost', port=5002): Read timed out. (read timeout=2)
-2025-10-21 14:08:10,659 - WARNING - [WARNING] Heartbeat tag failed: HTTPConnectionPool(host='localhost', port=5002): Read timed out. (read timeout=2)
-2025-10-21 14:08:13,699 - WARNING - [WARNING] Heartbeat tag failed: HTTPConnectionPool(host='localhost', port=5002): Read timed out. (read timeout=2)
-2025-10-21 14:08:16,730 - WARNING - [WARNING] Heartbeat tag failed: HTTPConnectionPool(host='localhost', port=5002): Read timed out. (read timeout=2)
-2025-10-21 14:08:19,770 - WARNING - [WARNING] Heartbeat tag failed: HTTPConnectionPool(host='localhost', port=5002): Read timed out. (read timeout=2)
-2025-10-21 14:08:22,796 - WARNING - [WARNING] Heartbeat tag failed: HTTPConnectionPool(host='localhost', port=5002): Read timed out. (read timeout=2)
-2025-10-21 14:08:25,821 - WARNING - [WARNING] Heartbeat tag failed: HTTPConnectionPool(host='localhost', port=5002): Read timed out. (read timeout=2)
+2025-10-21 14:09:13,904 - WARNING - [WARNING] Wykryto 2 brakuj¹cych urz¹dzeñ: [5, 6] [SYSTEM]
+2025-10-21 14:09:14,201 - ERROR - 400 Bad Request - b³¹d w danych kontraktu [API]
+2025-10-21 14:09:14,201 - ERROR - API Error Response: {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"contracted_type":["The contracted_type field is required."],"contracted_billing_cycle":["The contracted_billing_cycle field is required."],"contracted_billing_period_end":["The contracted_billing_period_end field is required."],"contracted_billing_period_start":["The contracted_billing_period_start field is required."]},"traceId":"00-d82a3a74177ae2cbf69bfdad5142c9b4-f0f8637d20bc119a-00"}
+2025-10-21 14:09:14,201 - ERROR - Nie bêdziemy ponownie próbowaæ (b³¹d po stronie klienta/danych) [RETRY]
+2025-10-21 14:09:14,254 - ERROR - Failed to send data to API after all retry attempts
