@@ -8,3 +8,6 @@ Starting new iteration
 2025-10-21 10:58:52,305 - INFO - !!! Energy management started !!!
 2025-10-21 10:58:52,306 - INFO - Loaded operation mode: automatic
 2025-10-21 10:58:52,306 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-10-21 10:58:55,228 - INFO - Stopping heartbeat tag sender
+2025-10-21 10:58:56,379 - INFO - Próba po³¹czenia z system-state (1/5) [RETRY]
+2025-10-21 10:58:57,239 - INFO - !!! Energy management stopping !!!
