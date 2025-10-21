@@ -7,7 +7,7 @@
             "max_output": 70.8,
             "min_output": 10,
             "actual_output": 70.8,
-            "setpoint_output": 53.45,
+            "setpoint_output": 52.27,
             "switch_status": true,
             "device_status": "online"
         },
@@ -58,7 +58,7 @@
             "max_charge_level": 180,
             "charge_level": 100,
             "actual_output": 0,
-            "setpoint_output": -100,
+            "setpoint_output": -20.39,
             "max_discharge_power": 100,
             "max_charge_power": 100,
             "min_output": 10,
@@ -71,19 +71,19 @@
             "id": 8,
             "name": "Non Adjustable Device 1",
             "priority": 1,
-            "power": 0,
-            "actual_output": 0,
-            "setpoint_output": 0,
-            "switch_status": false
+            "power": 48.55,
+            "actual_output": 48.55,
+            "setpoint_output": 48.55,
+            "switch_status": true
         },
         {
             "id": 9,
             "name": "Non Adjustable Device 2",
             "priority": 1,
-            "power": 0,
-            "actual_output": 0,
-            "setpoint_output": 0,
-            "switch_status": false
+            "power": 50.2,
+            "actual_output": 50.2,
+            "setpoint_output": 50.2,
+            "switch_status": true
         }
     ],
     "adjustable_devices": [
@@ -91,9 +91,9 @@
             "id": 10,
             "name": "Adjustable Device 1",
             "priority": 2,
-            "power": 38.04,
-            "actual_output": 38.04,
-            "setpoint_output": 38.04,
+            "power": 38.34,
+            "actual_output": 38.34,
+            "setpoint_output": 38.34,
             "switch_status": true,
             "min_power": 0,
             "max_power": 0
@@ -102,9 +102,9 @@
             "id": 11,
             "name": "Adjustable Device 2",
             "priority": 0,
-            "power": 0,
-            "actual_output": 0,
-            "setpoint_output": 0,
+            "power": 39.63,
+            "actual_output": 39.63,
+            "setpoint_output": 39.63,
             "switch_status": true,
             "min_power": 0,
             "max_power": 100

@@ -1,91 +1,78 @@
-2025-10-21 12:38:59,671 - INFO - Inicjalizacja ApiManager z bazowym URL: http://localhost:5002
-2025-10-21 12:38:59,671 - INFO - Retry config: max_retries=3, initial_delay=30s, max_delay=300s, exponential_backoff=True, scada_check_interval=60s
-2025-10-21 12:38:59,671 - INFO - Starting heartbeat tag sender (every 1 second)
-2025-10-21 12:38:59,671 - INFO - 
+2025-10-21 12:42:34,235 - INFO - Inicjalizacja ApiManager z bazowym URL: http://localhost:5002
+2025-10-21 12:42:34,235 - INFO - Retry config: max_retries=3, initial_delay=30s, max_delay=300s, exponential_backoff=True, scada_check_interval=60s
+2025-10-21 12:42:34,235 - INFO - Starting heartbeat tag sender (every 1 second)
+2025-10-21 12:42:34,239 - INFO - 
 ==================================================
 Starting new iteration
 ==================================================
-2025-10-21 12:38:59,671 - INFO - !!! Energy management started !!!
-2025-10-21 12:38:59,671 - INFO - Loaded operation mode: automatic
-2025-10-21 12:38:59,671 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
-2025-10-21 12:38:59,783 - INFO - Algorytm bêdzie kontynuowany z dostêpnymi urz¹dzeniami [SYSTEM]
-2025-10-21 12:38:59,783 - INFO - Status zapisany: Some devices are not accessible [SYSTEM]
-2025-10-21 12:38:59,783 - INFO - Pobieranie danych kontraktu z http://localhost:5002/api/Scada/contract-info
-2025-10-21 12:38:59,832 - INFO - Dane urz¹dzeñ zapisane do C:/eryk/AppFuga\apps\backend\live_data.json [SYSTEM]
-2025-10-21 12:38:59,832 - INFO - Dane kontraktu zapisane do C:/eryk/AppFuga\apps\backend\live_contract_data.json [SYSTEM]
-2025-10-21 12:38:59,832 - INFO - Status systemu zapisany do C:/eryk/AppFuga\apps\backend\system_status.json [SYSTEM]
-2025-10-21 12:38:59,839 - INFO - Loaded live data
-2025-10-21 12:38:59,839 - INFO - 
+2025-10-21 12:42:34,239 - INFO - !!! Energy management started !!!
+2025-10-21 12:42:34,239 - INFO - Loaded operation mode: automatic
+2025-10-21 12:42:34,239 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-10-21 12:42:34,339 - INFO - Algorytm bêdzie kontynuowany z dostêpnymi urz¹dzeniami [SYSTEM]
+2025-10-21 12:42:34,340 - INFO - Status zapisany: Some devices are not accessible [SYSTEM]
+2025-10-21 12:42:34,340 - INFO - Pobieranie danych kontraktu z http://localhost:5002/api/Scada/contract-info
+2025-10-21 12:42:34,361 - INFO - Dane urz¹dzeñ zapisane do C:/eryk/AppFuga\apps\backend\live_data.json [SYSTEM]
+2025-10-21 12:42:34,361 - INFO - Dane kontraktu zapisane do C:/eryk/AppFuga\apps\backend\live_contract_data.json [SYSTEM]
+2025-10-21 12:42:34,361 - INFO - Status systemu zapisany do C:/eryk/AppFuga\apps\backend\system_status.json [SYSTEM]
+2025-10-21 12:42:34,371 - INFO - Loaded live data
+2025-10-21 12:42:34,371 - INFO - 
 ==================================================
 NEW ITERATION START
 ==================================================
-2025-10-21 12:38:59,840 - INFO - 
-2025-10-21 12:38:59,840 - INFO -  INITIAL SYSTEM STATUS
-2025-10-21 12:38:59,840 - INFO - ----------------------------------------------------------------------
-2025-10-21 12:38:59,840 - INFO - Generation:    197.34 kW (devices: 197.3 + BESS: 0.0 + Grid: 0.0)
-2025-10-21 12:38:59,840 - INFO - Consumption:    78.81 kW (loads: 38.0 + BESS: 0.0 + Grid: 40.8)
-2025-10-21 12:38:59,840 - INFO - BESS:          100.00/200.00 kWh (actual: +0.00 kW)
-2025-10-21 12:38:59,840 - INFO - Grid:        Import=0.00 kW, Export=40.77 kW
-2025-10-21 12:38:59,840 - INFO - Trading:     Sold=222.33/250.00 kWh, Bought=120.00/120.00 kWh
-2025-10-21 12:38:59,840 - INFO - Balance:        118.5 kW (SURPLUS (+118.5 kW))
-2025-10-21 12:38:59,840 - INFO - ----------------------------------------------------------------------
-2025-10-21 12:38:59,840 - INFO - 
-2025-10-21 12:38:59,840 - INFO - ANALYZING CONFLICTING OPERATIONS
-2025-10-21 12:38:59,840 - INFO - Surplus detected: 118.53 kW
-2025-10-21 12:38:59,849 - INFO - No conflicting operations detected
-2025-10-21 12:38:59,849 - INFO - 
-2025-10-21 12:38:59,853 - INFO - ----------------------------------------------------------------------
-2025-10-21 12:38:59,857 - INFO - ----------------------------------------------------------------------
-2025-10-21 12:38:59,858 - INFO - 
-2025-10-21 12:38:59,858 - INFO - MANAGING SURPLUS
-2025-10-21 12:38:59,858 - INFO - Iteration 1, surplus remaining: 118.5 kW
-2025-10-21 12:38:59,863 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
-2025-10-21 12:38:59,864 - INFO - BESS CHARGE PLAN:
-2025-10-21 12:38:59,864 - INFO -   Setpoint: -100.00 kW
-2025-10-21 12:38:59,864 - INFO -   Energy: 8.33 kWh
-2025-10-21 12:38:59,864 - INFO -   Duration: 5.00 min
-2025-10-21 12:38:59,864 - INFO -   Will continue through entire iteration (5.0 min)
-2025-10-21 12:38:59,864 - INFO - BESS BESS 1 - setpoint set to -100.00 kW (charging)
-2025-10-21 12:38:59,864 - INFO -   Current charge_level: 100.00 kWh (will be updated by SCADA)
-2025-10-21 12:38:59,864 - INFO - DEVICE CHANGED: BESS 1 (BESS) - charge:100
-2025-10-21 12:38:59,864 - INFO - Success: Managed 100.0 kW, remaining: 18.5 kW
-2025-10-21 12:38:59,864 - INFO - Iteration 2, surplus remaining: 18.5 kW
-2025-10-21 12:38:59,868 - INFO - Attempting: SurplusAction.LIMIT_GENERATION
-2025-10-21 12:38:59,868 - INFO - Starting limit_energy_generation with power_surplus: 18.530000
-2025-10-21 12:38:59,868 - INFO - Active generators: ['PV Panel 1', 'PV Panel 2', 'Wind Turbine 1', 'Wind Turbine 2']
-2025-10-21 12:38:59,869 - INFO - Processing device: PV Panel 1, Current output: 70.800000, Min output: 10.000000, Reducible power: 60.800000
-2025-10-21 12:38:59,869 - INFO - Attempting to execute action: set_output:52.27 for device PV Panel 1
-2025-10-21 12:38:59,869 - INFO - EnergyManager.execute_action called with device: PV Panel 1, action: set_output:52.27
-2025-10-21 12:38:59,869 - INFO - [DEBUG] Performing action: PV Panel 1 (PV) - set_output:52.27
-2025-10-21 12:38:59,869 - INFO - Performing action: set_output:52.27 on device: PV Panel 1
-2025-10-21 12:38:59,869 - INFO - Attempting to set output for PV Panel 1 to 52.27 kW
-2025-10-21 12:38:59,869 - INFO - PV Panel 1 setpoint changed: 70.80 -> 52.27 kW
-2025-10-21 12:38:59,869 - INFO - Set output for PV Panel 1 from 70.8 kW to 52.27 kW. Setpoint: 52.27 kW
-2025-10-21 12:38:59,869 - INFO - DEVICE CHANGED: PV Panel 1 (PV) - set_output:52.27
-2025-10-21 12:38:59,869 - INFO - Result of execute_action_func: {'success': True, 'amount': 18.529999999999994}
-2025-10-21 12:38:59,869 - INFO - Reduced PV Panel 1 (priority: 1) power by 18.530000 kW from 70.800000 kW to 52.270000 kW. Setpoint: 52.270000 kW
-2025-10-21 12:38:59,869 - INFO - Total power generation reduced: 18.530000 kW
-2025-10-21 12:38:59,869 - INFO - Remaining surplus: 0.000000 kW
-2025-10-21 12:38:59,869 - INFO - Success: Managed 18.5 kW, remaining: 0.0 kW
-2025-10-21 12:38:59,870 - INFO - 
-2025-10-21 12:38:59,870 - INFO -   CHANGES: 2 device(s) modified
-2025-10-21 12:38:59,870 - INFO -     - BESS 1: charge:100
-2025-10-21 12:38:59,870 - INFO -     - PV Panel 1: set_output:52.27
-2025-10-21 12:38:59,870 - INFO -   Managed 118.53 kW surplus
-2025-10-21 12:38:59,874 - INFO - 
+2025-10-21 12:42:34,371 - INFO - 
+2025-10-21 12:42:34,371 - INFO -  INITIAL SYSTEM STATUS
+2025-10-21 12:42:34,371 - INFO - ----------------------------------------------------------------------
+2025-10-21 12:42:34,371 - INFO - Generation:    197.34 kW (devices: 197.3 + BESS: 0.0 + Grid: 0.0)
+2025-10-21 12:42:34,371 - INFO - Consumption:   172.69 kW (loads: 172.7 + BESS: 0.0 + Grid: 0.0)
+2025-10-21 12:42:34,371 - INFO - BESS:          100.00/200.00 kWh (actual: +0.00 kW)
+2025-10-21 12:42:34,371 - INFO - Grid:        Import=0.00 kW, Export=0.00 kW
+2025-10-21 12:42:34,371 - INFO - Trading:     Sold=222.33/250.00 kWh, Bought=120.00/120.00 kWh
+2025-10-21 12:42:34,371 - INFO - Balance:         24.6 kW (SURPLUS (+24.6 kW))
+2025-10-21 12:42:34,371 - INFO - ----------------------------------------------------------------------
+2025-10-21 12:42:34,371 - INFO - 
+2025-10-21 12:42:34,371 - INFO - ANALYZING CONFLICTING OPERATIONS
+2025-10-21 12:42:34,371 - INFO - Surplus detected: 24.65 kW
+2025-10-21 12:42:34,383 - INFO - No conflicting operations detected
+2025-10-21 12:42:34,383 - INFO - 
+2025-10-21 12:42:34,388 - INFO - ----------------------------------------------------------------------
+2025-10-21 12:42:34,393 - INFO - ----------------------------------------------------------------------
+2025-10-21 12:42:34,393 - INFO - 
+2025-10-21 12:42:34,393 - INFO - MANAGING SURPLUS
+2025-10-21 12:42:34,393 - INFO - Iteration 1, surplus remaining: 24.7 kW
+2025-10-21 12:42:34,393 - INFO - BESS can charge: YES
+2025-10-21 12:42:34,393 - INFO - GRID can export: YES
+2025-10-21 12:42:34,399 - INFO - ======================================================================
+2025-10-21 12:42:34,399 - INFO - DECISION ANALYSIS - should_prioritize_charging_or_selling()
+2025-10-21 12:42:34,399 - INFO -   Mode: AUTO
+2025-10-21 12:42:34,399 - INFO - 
+2025-10-21 12:42:34,400 - INFO - Decision: SELL: good_sell_price(ratio=0.85), moderate_free_space(50.0%), high_limit_usage(89%), U_charge=-0.118, U_sell=0.041
+2025-10-21 12:42:34,400 - INFO - Confidence: 8.0%
+2025-10-21 12:42:34,400 - INFO - Attempting: SurplusAction.SELL_ENERGY
+2025-10-21 12:42:34,400 - INFO - Success: Managed 24.6 kW, remaining: 0.0 kW
+2025-10-21 12:42:34,400 - INFO - 
+2025-10-21 12:42:34,400 - INFO -   CHANGES: 1 device(s) modified
+2025-10-21 12:42:34,400 - INFO -     - OSD: sell:24.650000000000006
+2025-10-21 12:42:34,400 - INFO -   Managed 24.65 kW surplus
+2025-10-21 12:42:34,406 - INFO - 
 ==================================================
-ITERATION COMPLETE in 0.04s
+ITERATION COMPLETE in 0.03s
 ==================================================
-2025-10-21 12:38:59,875 - INFO - Live contract data saved to C:/eryk/AppFuga\apps\backend\output_contract_data.json
-2025-10-21 12:38:59,877 - INFO - 
+2025-10-21 12:42:34,408 - INFO - Live contract data saved to C:/eryk/AppFuga\apps\backend\output_contract_data.json
+2025-10-21 12:42:34,409 - INFO - 
 -------------------- Algorithm Changes Summary --------------------
-2025-10-21 12:38:59,884 - INFO - Changed devices data saved to C:/eryk/AppFuga\apps\backend\output_data.json
-2025-10-21 12:38:59,884 - INFO - Wysy³anie danych systemu (próba 1/3) [RETRY]
-2025-10-21 12:38:59,917 - INFO - Dane systemu wys³ane pomyœlnie [NETWORK]
-2025-10-21 12:38:59,917 - INFO - Wysy³anie danych kontraktu (próba 1/3) [RETRY]
-2025-10-21 12:38:59,917 - INFO - ======================================================================
-2025-10-21 12:38:59,918 - INFO - CONTRACT DATA BEING SENT TO API:
-2025-10-21 12:38:59,918 - INFO - {
+2025-10-21 12:42:34,409 - INFO - Changed devices data saved to C:/eryk/AppFuga\apps\backend\output_data.json
+2025-10-21 12:42:34,409 - INFO - Wysy³anie danych systemu (próba 1/3) [RETRY]
+2025-10-21 12:42:34,418 - INFO - Exponential backoff: próba 1, opóŸnienie 30s (obliczone: 30s, max: 300s) [RETRY]
+2025-10-21 12:42:34,418 - INFO - Ponowna próba za 30 sekund... [RETRY]
+2025-10-21 12:43:04,411 - INFO - Wysy³anie danych systemu (próba 2/3) [RETRY]
+2025-10-21 12:43:04,417 - INFO - Exponential backoff: próba 2, opóŸnienie 60s (obliczone: 60s, max: 300s) [RETRY]
+2025-10-21 12:43:04,417 - INFO - Ponowna próba za 60 sekund... [RETRY]
+2025-10-21 12:43:35,785 - INFO - Heartbeat tag: 60
+2025-10-21 12:44:04,411 - INFO - Wysy³anie danych systemu (próba 3/3) [RETRY]
+2025-10-21 12:44:04,419 - INFO - Wysy³anie danych kontraktu (próba 1/3) [RETRY]
+2025-10-21 12:44:04,419 - INFO - ======================================================================
+2025-10-21 12:44:04,419 - INFO - CONTRACT DATA BEING SENT TO API:
+2025-10-21 12:44:04,419 - INFO - {
   "contracted_type": "Type B",
   "contracted_duration": 12,
   "contracted_margin": 0.12,
@@ -95,23 +82,124 @@ ITERATION COMPLETE in 0.04s
   "contracted_billing_cycle": "monthly",
   "contracted_billing_period_start": "01.10.2025",
   "contracted_billing_period_end": "31.10.2025",
-  "sold_power": 222.33,
+  "sold_power": 246.98000000000002,
   "bought_power": 120,
   "current_tariff_buy": 1.19,
   "current_tariff_sell": 1.01,
-  "grid_export": 40.77,
+  "grid_export": 24.650000000000006,
+  "grid_import": 0.0,
+  "setpoint_grid_export": 24.650000000000006,
+  "setpoint_grid_import": 0.0
+}
+2025-10-21 12:44:04,419 - INFO - ======================================================================
+2025-10-21 12:44:04,667 - INFO - API Response Status Code: 200
+2025-10-21 12:44:04,667 - INFO - Dane kontraktu wys³ane pomyœlnie [NETWORK]
+2025-10-21 12:44:04,761 - INFO - Algorithm decision sent successfully
+2025-10-21 12:44:04,864 - INFO - Updated power profile
+2025-10-21 12:44:04,864 - INFO - Complete iteration finished in 90.62 seconds
+2025-10-21 12:44:04,864 - INFO - !!! Waiting 300.0 seconds for next iteration !!!
+2025-10-21 12:44:37,638 - INFO - Heartbeat tag: 120
+2025-10-21 12:45:41,394 - INFO - Heartbeat tag: 180
+2025-10-21 12:46:45,665 - INFO - Heartbeat tag: 240
+2025-10-21 12:47:47,656 - INFO - Heartbeat tag: 300
+2025-10-21 12:48:49,669 - INFO - Heartbeat tag: 360
+2025-10-21 12:49:04,840 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-10-21 12:49:04,840 - INFO - Loaded operation mode: automatic
+2025-10-21 12:49:04,840 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-10-21 12:49:04,911 - INFO - Algorytm bêdzie kontynuowany z dostêpnymi urz¹dzeniami [SYSTEM]
+2025-10-21 12:49:04,913 - INFO - Status zapisany: Some devices are not accessible [SYSTEM]
+2025-10-21 12:49:04,913 - INFO - Pobieranie danych kontraktu z http://localhost:5002/api/Scada/contract-info
+2025-10-21 12:49:04,929 - INFO - Dane urz¹dzeñ zapisane do C:/eryk/AppFuga\apps\backend\live_data.json [SYSTEM]
+2025-10-21 12:49:04,929 - INFO - Dane kontraktu zapisane do C:/eryk/AppFuga\apps\backend\live_contract_data.json [SYSTEM]
+2025-10-21 12:49:04,929 - INFO - Status systemu zapisany do C:/eryk/AppFuga\apps\backend\system_status.json [SYSTEM]
+2025-10-21 12:49:04,937 - INFO - Loaded live data
+2025-10-21 12:49:04,943 - INFO - 
+==================================================
+NEW ITERATION START
+==================================================
+2025-10-21 12:49:04,943 - INFO - 
+2025-10-21 12:49:04,943 - INFO -  INITIAL SYSTEM STATUS
+2025-10-21 12:49:04,943 - INFO - ----------------------------------------------------------------------
+2025-10-21 12:49:04,943 - INFO - Generation:    197.34 kW (devices: 197.3 + BESS: 0.0 + Grid: 0.0)
+2025-10-21 12:49:04,943 - INFO - Consumption:   201.37 kW (loads: 176.7 + BESS: 0.0 + Grid: 24.6)
+2025-10-21 12:49:04,943 - INFO - BESS:          100.00/200.00 kWh (actual: +0.00 kW)
+2025-10-21 12:49:04,943 - INFO - Grid:        Import=0.00 kW, Export=24.65 kW
+2025-10-21 12:49:04,943 - INFO - Trading:     Sold=246.98/250.00 kWh, Bought=120.00/120.00 kWh
+2025-10-21 12:49:04,943 - INFO - Balance:         -4.0 kW (DEFICIT (-4.0 kW))
+2025-10-21 12:49:04,943 - INFO - ----------------------------------------------------------------------
+2025-10-21 12:49:04,943 - INFO - 
+2025-10-21 12:49:04,944 - INFO - ANALYZING CONFLICTING OPERATIONS
+2025-10-21 12:49:04,944 - INFO - Deficit detected: 4.03 kW
+2025-10-21 12:49:04,949 - INFO - 
+2025-10-21 12:49:04,949 - INFO - Neutralized 24.6 kW of conflicting operations
+2025-10-21 12:49:04,949 - INFO -    Reason: BESS was charging during deficit (causing more deficit)
+2025-10-21 12:49:04,950 - INFO -    New balance: +20.62 kW (was: -4.03 kW, delta: +24.65 kW)
+2025-10-21 12:49:04,950 - INFO - 
+2025-10-21 12:49:04,955 - INFO - ----------------------------------------------------------------------
+2025-10-21 12:49:04,961 - INFO - ----------------------------------------------------------------------
+2025-10-21 12:49:04,961 - INFO - 
+2025-10-21 12:49:04,961 - INFO - MANAGING SURPLUS
+2025-10-21 12:49:04,961 - INFO - Iteration 1, surplus remaining: 20.6 kW
+2025-10-21 12:49:04,968 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 12:49:04,968 - INFO - BESS CHARGE PLAN:
+2025-10-21 12:49:04,969 - INFO -   Setpoint: -20.62 kW
+2025-10-21 12:49:04,969 - INFO -   Energy: 1.72 kWh
+2025-10-21 12:49:04,969 - INFO -   Duration: 5.00 min
+2025-10-21 12:49:04,969 - INFO -   Will continue through entire iteration (5.0 min)
+2025-10-21 12:49:04,969 - INFO - BESS BESS 1 - setpoint set to -20.62 kW (charging)
+2025-10-21 12:49:04,969 - INFO -   Current charge_level: 100.00 kWh (will be updated by SCADA)
+2025-10-21 12:49:04,969 - INFO - DEVICE CHANGED: BESS 1 (BESS) - charge:20.620000000000005
+2025-10-21 12:49:04,969 - INFO - Success: Managed 20.6 kW, remaining: 0.0 kW
+2025-10-21 12:49:04,969 - INFO - 
+2025-10-21 12:49:04,969 - INFO -   CHANGES: 2 device(s) modified
+2025-10-21 12:49:04,970 - INFO -     - OSD: stop_export
+2025-10-21 12:49:04,970 - INFO -     - BESS 1: charge:20.620000000000005
+2025-10-21 12:49:04,970 - INFO -   Managed 20.62 kW surplus
+2025-10-21 12:49:04,970 - INFO - SCADA GRID STATUS: No grid operations in this iteration
+2025-10-21 12:49:04,970 - INFO - 
+==================================================
+ITERATION COMPLETE in 0.03s
+==================================================
+2025-10-21 12:49:04,972 - INFO - Live contract data saved to C:/eryk/AppFuga\apps\backend\output_contract_data.json
+2025-10-21 12:49:04,975 - INFO - 
+-------------------- Algorithm Changes Summary --------------------
+2025-10-21 12:49:04,979 - INFO - Changed devices data saved to C:/eryk/AppFuga\apps\backend\output_data.json
+2025-10-21 12:49:04,980 - INFO - Wysy³anie danych systemu (próba 1/3) [RETRY]
+2025-10-21 12:49:05,000 - INFO - Dane systemu wys³ane pomyœlnie [NETWORK]
+2025-10-21 12:49:05,000 - INFO - Wysy³anie danych kontraktu (próba 1/3) [RETRY]
+2025-10-21 12:49:05,000 - INFO - ======================================================================
+2025-10-21 12:49:05,000 - INFO - CONTRACT DATA BEING SENT TO API:
+2025-10-21 12:49:05,000 - INFO - {
+  "contracted_type": "Type B",
+  "contracted_duration": 12,
+  "contracted_margin": 0.12,
+  "contracted_export_possibility": true,
+  "contracted_sale_limit": 250,
+  "contracted_purchase_limit": 120,
+  "contracted_billing_cycle": "monthly",
+  "contracted_billing_period_start": "01.10.2025",
+  "contracted_billing_period_end": "31.10.2025",
+  "sold_power": 246.98,
+  "bought_power": 120,
+  "current_tariff_buy": 1.22,
+  "current_tariff_sell": 1.02,
+  "grid_export": 0,
   "grid_import": 0,
-  "setpoint_grid_export": 40.77,
+  "setpoint_grid_export": 0,
   "setpoint_grid_import": 0
 }
-2025-10-21 12:38:59,918 - INFO - ======================================================================
-2025-10-21 12:39:00,652 - INFO - API Response Status Code: 200
-2025-10-21 12:39:00,652 - INFO - Dane kontraktu wys³ane pomyœlnie [NETWORK]
-2025-10-21 12:39:00,765 - INFO - Algorithm decision sent successfully
-2025-10-21 12:39:00,765 - INFO - Changed devices data sent to API successfully
-2025-10-21 12:39:00,900 - INFO - Updated power profile
-2025-10-21 12:39:00,900 - INFO - Complete iteration finished in 1.23 seconds
-2025-10-21 12:39:00,900 - INFO - !!! Waiting 300.0 seconds for next iteration !!!
-2025-10-21 12:39:05,430 - INFO - Stopping heartbeat tag sender
-2025-10-21 12:39:05,430 - INFO - !!! Energy management stopped !!!
-2025-10-21 12:39:05,430 - INFO - !!! Energy management stopping !!!
+2025-10-21 12:49:05,000 - INFO - ======================================================================
+2025-10-21 12:49:05,596 - INFO - API Response Status Code: 200
+2025-10-21 12:49:05,597 - INFO - Dane kontraktu wys³ane pomyœlnie [NETWORK]
+2025-10-21 12:49:05,741 - INFO - Algorithm decision sent successfully
+2025-10-21 12:49:05,741 - INFO - Changed devices data sent to API successfully
+2025-10-21 12:49:05,836 - INFO - Updated power profile
+2025-10-21 12:49:05,837 - INFO - Complete iteration finished in 1.00 seconds
+2025-10-21 12:49:05,837 - INFO - !!! Waiting 300.0 seconds for next iteration !!!
+2025-10-21 12:49:51,282 - INFO - Heartbeat tag: 420
+2025-10-21 12:50:01,587 - INFO - Stopping heartbeat tag sender
+2025-10-21 12:50:01,588 - INFO - !!! Energy management stopped !!!
+2025-10-21 12:50:01,589 - INFO - !!! Energy management stopping !!!
