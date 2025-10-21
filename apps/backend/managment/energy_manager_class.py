@@ -1832,8 +1832,11 @@ class EnergyManager:
         """
         Przygotowuje dane API tylko dla urządzeń zmienionych przez algorytm.
         Używa setpoint_output zamiast actual_output dla SCADA.
+        
+        POPRAWIONE: Deduplikuje urządzenia - każde urządzenie tylko RAZ (z ostatnim stanem).
         """
-        api_data = {}
+        # Użyj słownika do deduplikacji - klucz: (device_id, device_type)
+        unique_devices = {}
         
         for change in self.changed_devices:
             device = change["device"]
@@ -1843,24 +1846,38 @@ class EnergyManager:
                 # OSD nie jest wysyłane jako urządzenie, tylko jako dane kontraktu
                 continue
             
+            # Utwórz unikalny klucz dla urządzenia
+            device_key = (getattr(device, 'id', device.name), device_type)
+            
+            # Przygotuj dane urządzenia
             device_api_data = {
                 "name": device.name,
                 "switch_status": device.switch_status if hasattr(device, 'switch_status') else True
             }
             
             if device_type == "BESS":
-                #  POPRAWKA: Używamy setpoint_output (ujemny = ładowanie, dodatni = rozładowanie)
                 device_api_data["setpoint_output"] = device.setpoint_output
                 device_api_data["charge_level"] = device.get_charge_level()
                 
-                if "bess" not in api_data:
-                    api_data["bess"] = []
-                api_data["bess"].append(device_api_data)
-                
             elif device_type in ["PV", "WindTurbine", "FuelTurbine", "FuelCell"]:
-                #  POPRAWKA: Używamy setpoint_output zamiast actual_output
                 device_api_data["setpoint_output"] = device.setpoint_output
                 
+            elif device_type in ["AdjustableDevice", "NonAdjustableDevice"]:
+                device_api_data["setpoint_output"] = device.setpoint_output
+            
+            # Zapisz (nadpisz jeśli już istnieje - zachowamy ostatni stan)
+            unique_devices[device_key] = (device_type, device_api_data)
+        
+        # Buduj api_data ze zdeduplikowanych urządzeń
+        api_data = {}
+        
+        for (device_id, device_type), (dtype, device_data) in unique_devices.items():
+            if device_type == "BESS":
+                if "bess" not in api_data:
+                    api_data["bess"] = []
+                api_data["bess"].append(device_data)
+                
+            elif device_type in ["PV", "WindTurbine", "FuelTurbine", "FuelCell"]:
                 category_map = {
                     "PV": "pv_panels",
                     "WindTurbine": "wind_turbines", 
@@ -1870,16 +1887,13 @@ class EnergyManager:
                 category = category_map.get(device_type, "pv_panels")
                 if category not in api_data:
                     api_data[category] = []
-                api_data[category].append(device_api_data)
+                api_data[category].append(device_data)
                 
             elif device_type in ["AdjustableDevice", "NonAdjustableDevice"]:
-                #  POPRAWKA: Używamy setpoint_output zamiast actual_output
-                device_api_data["setpoint_output"] = device.setpoint_output
-                
                 category = "adjustable_devices" if device_type == "AdjustableDevice" else "non_adjustable_devices"
                 if category not in api_data:
                     api_data[category] = []
-                api_data[category].append(device_api_data)
+                api_data[category].append(device_data)
 
         # Dodaj podsumowanie decyzji algorytmu
         decision_summary = self.generate_decision_summary()
