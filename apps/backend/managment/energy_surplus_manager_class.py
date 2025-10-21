@@ -270,7 +270,15 @@ class EnergySurplusManager:
             
             # Wykonaj ładowanie
             bess = self.microgrid.bess
+            
+            # POPRAWIONE: Sprawdź czy BESS już się ładuje aby obliczyć dodatkową moc
+            previous_charge_power = abs(bess.setpoint_output) if bess.setpoint_output < 0 else 0
+            
+            # Ustaw nową całkowitą moc ładowania
             charged_amount, charged_percent = bess.charge(abs(plan.power_setpoint))
+            
+            # Oblicz dodatkową moc (przyrost) - to co faktycznie zarządzamy z surplus
+            additional_power = abs(plan.power_setpoint) - previous_charge_power
             
             # Jeśli skończy się wcześniej - zaplanuj przyspieszoną iterację
             if plan.will_finish_before_next_iteration:
@@ -284,16 +292,19 @@ class EnergySurplusManager:
             if self.energy_manager_ref:
                 device_change = {
                     "device": bess,
-                    "action": f"charge:{charged_amount}",
-                    "new_value": charged_amount,
+                    "action": f"charge:{additional_power}",  # Loguj przyrost, nie całość
+                    "new_value": abs(plan.power_setpoint),  # Nowa całkowita moc
                     "device_type": "BESS"
                 }
                 self.energy_manager_ref.changed_devices.append(device_change)
-                self.info_logger.info(f"DEVICE CHANGED: {bess.name} (BESS) - charge:{charged_amount}")
+                if previous_charge_power > 0:
+                    self.info_logger.info(f"DEVICE CHANGED: {bess.name} (BESS) - increased charging from {previous_charge_power:.2f} to {abs(plan.power_setpoint):.2f} kW (+{additional_power:.2f} kW)")
+                else:
+                    self.info_logger.info(f"DEVICE CHANGED: {bess.name} (BESS) - charge:{additional_power}")
             
             return {
                 "success": True,
-                "amount": charged_amount,
+                "amount": additional_power,  # Zwróć tylko dodatkową moc dla surplus management
                 "percent": charged_percent
             }
         
