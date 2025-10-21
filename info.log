@@ -104,3 +104,6 @@ ITERATION COMPLETE in 0.08s
 2025-10-21 14:09:15,896 - INFO - Updated power profile
 2025-10-21 14:09:15,896 - INFO - Complete iteration finished in 2.16 seconds
 2025-10-21 14:09:15,896 - INFO - !!! Waiting 300.0 seconds for next iteration !!!
+2025-10-21 14:09:36,735 - INFO - Stopping heartbeat tag sender
+2025-10-21 14:09:36,735 - INFO - !!! Energy management stopped !!!
+2025-10-21 14:09:36,735 - INFO - !!! Energy management stopping !!!
