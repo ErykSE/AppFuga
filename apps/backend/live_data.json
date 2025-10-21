@@ -7,7 +7,7 @@
             "max_output": 70.8,
             "min_output": 10,
             "actual_output": 70.8,
-            "setpoint_output": 51.09,
+            "setpoint_output": 53.45,
             "switch_status": true,
             "device_status": "online"
         },
@@ -91,9 +91,9 @@
             "id": 10,
             "name": "Adjustable Device 1",
             "priority": 2,
-            "power": 39.22,
-            "actual_output": 39.22,
-            "setpoint_output": 39.22,
+            "power": 38.04,
+            "actual_output": 38.04,
+            "setpoint_output": 38.04,
             "switch_status": true,
             "min_power": 0,
             "max_power": 0
