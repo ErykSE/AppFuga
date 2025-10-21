@@ -1,16 +1,8 @@
 {
-    "bess": [
-        {
-            "name": "BESS 1",
-            "switch_status": true,
-            "setpoint_output": -11.159999999999997,
-            "charge_level": 125.99
-        }
-    ],
     "algorithm_decision": {
         "status": "BALANCED",
         "message": "Minor adjustments",
-        "balance_kW": 11.2,
-        "devices_count": 2
+        "balance_kW": 21.2,
+        "devices_count": 1
     }
 }

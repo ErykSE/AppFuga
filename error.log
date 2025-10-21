@@ -1,2 +1,5 @@
-2025-10-21 14:12:12,234 - WARNING - [WARNING] Wykryto 2 brakuj¹cych urz¹dzeñ: [5, 6] [SYSTEM]
-2025-10-21 14:12:13,457 - ERROR - The maximum number of iterations (100) has been reached without solving the surplus.
+2025-10-21 14:24:18,346 - WARNING - [WARNING] Wykryto 2 brakuj¹cych urz¹dzeñ: [5, 6] [SYSTEM]
+2025-10-21 14:24:18,432 - ERROR - 400 Bad Request - b³¹d w danych [API]
+2025-10-21 14:24:18,432 - ERROR - API Error Response: {"success":false,"error":"no_operations","message":"No valid update operations provided","timestamp":"2025-10-21T12:24:18.4312365Z"}
+2025-10-21 14:24:18,432 - ERROR - Nie bêdziemy ponownie próbowaæ (b³¹d po stronie klienta/danych) [RETRY]
+2025-10-21 14:24:19,229 - ERROR - Failed to send data to API after all retry attempts
