@@ -1788,18 +1788,44 @@ class EnergyManager:
 
     def prepare_contract_data_for_api(self):
         """
-        Przygotowuje dane do wysłania do /api/Scada/update-contract.
+        Przygotowuje dane kontraktu w formacie API C# (snake_case).
         
-        POPRAWIONE: Wysyła TYLKO setpointy grid (to co się zmienia podczas działania algorytmu).
-        Dane kontraktowe (limity, taryfy, etc.) są statyczne i zarządzane przez SCADA.
+        Mapowanie pól:
+        - sold_power, bought_power: skumulowana energia (kWh) od początku okresu
+        - grid_export, grid_import: setpointy mocy (kW) dla bieżącej iteracji
+        - setpoint_grid_export, setpoint_grid_import: duplikaty (wymagane przez API C#)
         
         Returns:
-            dict: Setpointy grid dla SCADA
+            dict: Dane kontraktu w formacie zgodnym z API C#
         """
         return {
-            # Tylko setpointy mocy grid (kW) - to co algorytm zmienia
-            "setpoint_grid_export": self.osd.current_grid_export,  # kW do eksportu
-            "setpoint_grid_import": self.osd.current_grid_import,  # kW do importu
+            # === DANE KONTRAKTOWE (stałe) - WYMAGANE PRZEZ API ===
+            "contracted_type": self.osd.CONTRACTED_TYPE,
+            "contracted_duration": self.osd.CONTRACTED_DURATION,
+            "contracted_margin": self.osd.CONTRACTED_MARGIN,
+            "contracted_export_possibility": self.osd.CONTRACTED_EXPORT_POSSIBILITY,
+            "contracted_sale_limit": self.osd.CONTRACTED_SALE_LIMIT,
+            "contracted_purchase_limit": self.osd.CONTRACTED_PURCHASE_LIMIT,
+            
+            # === CYKL ROZLICZENIOWY ===
+            "contracted_billing_cycle": self.osd.contracted_billing_cycle,
+            "contracted_billing_period_start": self.osd.contracted_billing_period_start,
+            "contracted_billing_period_end": self.osd.contracted_billing_period_end,
+            
+            # === DANE SKUMULOWANE (kWh od początku okresu rozliczeniowego) ===
+            "sold_power": self.osd.get_sold_power(),      # Całkowita sprzedana energia
+            "bought_power": self.osd.get_bought_power(),  # Całkowita kupiona energia
+            
+            # === TARYFY (PLN/kWh) ===
+            "current_tariff_buy": self.osd.get_current_buy_price(),
+            "current_tariff_sell": self.osd.get_current_sell_price(),
+            
+            # === SETPOINTY MOCY dla SCADA (kW - BIEŻĄCA iteracja) ===
+            # Uwaga: API wymaga duplikacji - grid_* to alias dla setpoint_grid_*
+            "grid_export": self.osd.current_grid_export,         # kW do eksportu (setpoint)
+            "grid_import": self.osd.current_grid_import,         # kW do importu (setpoint)
+            "setpoint_grid_export": self.osd.current_grid_export,  # Duplikat dla kompatybilności
+            "setpoint_grid_import": self.osd.current_grid_import,  # Duplikat dla kompatybilności
         }
     
     def prepare_changed_devices_for_api(self):

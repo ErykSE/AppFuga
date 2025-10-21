@@ -1,109 +1,460 @@
-2025-10-21 14:09:13,735 - INFO - Inicjalizacja ApiManager z bazowym URL: http://localhost:5002
-2025-10-21 14:09:13,736 - INFO - Retry config: max_retries=3, initial_delay=5s, max_delay=300s, exponential_backoff=True, scada_check_interval=60s
-2025-10-21 14:09:13,737 - INFO - Starting heartbeat tag sender (every 1 second)
-2025-10-21 14:09:13,739 - INFO - 
+2025-10-21 14:12:12,098 - INFO - Inicjalizacja ApiManager z bazowym URL: http://localhost:5002
+2025-10-21 14:12:12,098 - INFO - Retry config: max_retries=3, initial_delay=5s, max_delay=300s, exponential_backoff=True, scada_check_interval=60s
+2025-10-21 14:12:12,098 - INFO - Starting heartbeat tag sender (every 1 second)
+2025-10-21 14:12:12,100 - INFO - 
 ==================================================
 Starting new iteration
 ==================================================
-2025-10-21 14:09:13,739 - INFO - !!! Energy management started !!!
-2025-10-21 14:09:13,740 - INFO - Loaded operation mode: automatic
-2025-10-21 14:09:13,741 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
-2025-10-21 14:09:13,904 - INFO - Algorytm bêdzie kontynuowany z dostêpnymi urz¹dzeniami [SYSTEM]
-2025-10-21 14:09:13,908 - INFO - Status zapisany: Some devices are not accessible [SYSTEM]
-2025-10-21 14:09:13,908 - INFO - Pobieranie danych kontraktu z http://localhost:5002/api/Scada/contract-info
-2025-10-21 14:09:13,942 - INFO - Dane urz¹dzeñ zapisane do C:/eryk/AppFuga\apps\backend\live_data.json [SYSTEM]
-2025-10-21 14:09:13,942 - INFO - Dane kontraktu zapisane do C:/eryk/AppFuga\apps\backend\live_contract_data.json [SYSTEM]
-2025-10-21 14:09:13,944 - INFO - Status systemu zapisany do C:/eryk/AppFuga\apps\backend\system_status.json [SYSTEM]
-2025-10-21 14:09:13,959 - INFO - Loaded live data
-2025-10-21 14:09:13,960 - INFO - 
+2025-10-21 14:12:12,100 - INFO - !!! Energy management started !!!
+2025-10-21 14:12:12,100 - INFO - Loaded operation mode: automatic
+2025-10-21 14:12:12,101 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
+2025-10-21 14:12:12,234 - INFO - Algorytm bêdzie kontynuowany z dostêpnymi urz¹dzeniami [SYSTEM]
+2025-10-21 14:12:12,239 - INFO - Status zapisany: Some devices are not accessible [SYSTEM]
+2025-10-21 14:12:12,239 - INFO - Pobieranie danych kontraktu z http://localhost:5002/api/Scada/contract-info
+2025-10-21 14:12:12,284 - INFO - Dane urz¹dzeñ zapisane do C:/eryk/AppFuga\apps\backend\live_data.json [SYSTEM]
+2025-10-21 14:12:12,284 - INFO - Dane kontraktu zapisane do C:/eryk/AppFuga\apps\backend\live_contract_data.json [SYSTEM]
+2025-10-21 14:12:12,284 - INFO - Status systemu zapisany do C:/eryk/AppFuga\apps\backend\system_status.json [SYSTEM]
+2025-10-21 14:12:12,294 - INFO - Loaded live data
+2025-10-21 14:12:12,294 - INFO - 
 ==================================================
 NEW ITERATION START
 ==================================================
-2025-10-21 14:09:13,961 - INFO - 
-2025-10-21 14:09:13,962 - INFO -  INITIAL SYSTEM STATUS
-2025-10-21 14:09:13,962 - INFO - ----------------------------------------------------------------------
-2025-10-21 14:09:13,963 - INFO - Generation:    190.16 kW (devices: 190.2 + BESS: 0.0 + Grid: 0.0)
-2025-10-21 14:09:13,964 - INFO - Consumption:   196.94 kW (loads: 179.0 + BESS: 17.9 + Grid: 0.0)
-2025-10-21 14:09:13,964 - INFO - BESS:          125.99/200.00 kWh (actual: -17.94 kW)
-2025-10-21 14:09:13,964 - INFO - Grid:        Import=0.00 kW, Export=0.00 kW
-2025-10-21 14:09:13,964 - INFO - Trading:     Sold=250.00/250.00 kWh, Bought=120.00/120.00 kWh
-2025-10-21 14:09:13,964 - INFO - Balance:         -6.8 kW (DEFICIT (-6.8 kW))
-2025-10-21 14:09:13,964 - INFO - ----------------------------------------------------------------------
-2025-10-21 14:09:13,965 - INFO - 
-2025-10-21 14:09:13,965 - INFO - ANALYZING CONFLICTING OPERATIONS
-2025-10-21 14:09:13,965 - INFO - Deficit detected: 6.78 kW
-2025-10-21 14:09:13,987 - INFO - 
-2025-10-21 14:09:13,987 - INFO - Neutralized 17.9 kW of conflicting operations
-2025-10-21 14:09:13,988 - INFO -    Reason: BESS was charging during deficit (causing more deficit)
-2025-10-21 14:09:13,988 - INFO -    New balance: +11.16 kW (was: -6.78 kW, delta: +17.94 kW)
-2025-10-21 14:09:13,988 - INFO - 
-2025-10-21 14:09:13,996 - INFO - ----------------------------------------------------------------------
-2025-10-21 14:09:14,004 - INFO - ----------------------------------------------------------------------
-2025-10-21 14:09:14,005 - INFO - 
-2025-10-21 14:09:14,005 - INFO - MANAGING SURPLUS
-2025-10-21 14:09:14,005 - INFO - Iteration 1, surplus remaining: 11.2 kW
-2025-10-21 14:09:14,021 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
-2025-10-21 14:09:14,022 - INFO - BESS CHARGE PLAN:
-2025-10-21 14:09:14,023 - INFO -   Setpoint: -11.16 kW
-2025-10-21 14:09:14,028 - INFO -   Energy: 0.93 kWh
-2025-10-21 14:09:14,029 - INFO -   Duration: 5.00 min
-2025-10-21 14:09:14,032 - INFO -   Will continue through entire iteration (5.0 min)
-2025-10-21 14:09:14,032 - INFO - BESS BESS 1 - setpoint set to -11.16 kW (charging)
-2025-10-21 14:09:14,034 - INFO -   Current charge_level: 125.99 kWh (will be updated by SCADA)
-2025-10-21 14:09:14,035 - INFO - DEVICE CHANGED: BESS 1 (BESS) - charge:11.159999999999997
-2025-10-21 14:09:14,035 - INFO - Success: Managed 11.2 kW, remaining: 0.0 kW
-2025-10-21 14:09:14,036 - INFO - 
-2025-10-21 14:09:14,037 - INFO -   CHANGES: 2 device(s) modified
-2025-10-21 14:09:14,038 - INFO -     - BESS 1: stop_charging
-2025-10-21 14:09:14,039 - INFO -     - BESS 1: charge:11.159999999999997
-2025-10-21 14:09:14,040 - INFO -   Managed 11.16 kW surplus
-2025-10-21 14:09:14,040 - INFO - SCADA GRID STATUS: No grid operations in this iteration
-2025-10-21 14:09:14,040 - INFO - 
+2025-10-21 14:12:12,294 - INFO - 
+2025-10-21 14:12:12,294 - INFO -  INITIAL SYSTEM STATUS
+2025-10-21 14:12:12,294 - INFO - ----------------------------------------------------------------------
+2025-10-21 14:12:12,294 - INFO - Generation:    191.94 kW (devices: 191.9 + BESS: 0.0 + Grid: 0.0)
+2025-10-21 14:12:12,294 - INFO - Consumption:   188.76 kW (loads: 177.6 + BESS: 11.2 + Grid: 0.0)
+2025-10-21 14:12:12,294 - INFO - BESS:          126.71/200.00 kWh (actual: -11.16 kW)
+2025-10-21 14:12:12,294 - INFO - Grid:        Import=0.00 kW, Export=0.00 kW
+2025-10-21 14:12:12,294 - INFO - Trading:     Sold=250.00/250.00 kWh, Bought=120.00/120.00 kWh
+2025-10-21 14:12:12,294 - INFO - Balance:          3.2 kW (SURPLUS (+3.2 kW))
+2025-10-21 14:12:12,294 - INFO - ----------------------------------------------------------------------
+2025-10-21 14:12:12,294 - INFO - 
+2025-10-21 14:12:12,294 - INFO - ANALYZING CONFLICTING OPERATIONS
+2025-10-21 14:12:12,294 - INFO - Surplus detected: 3.18 kW
+2025-10-21 14:12:12,303 - INFO - No conflicting operations detected
+2025-10-21 14:12:12,303 - INFO - 
+2025-10-21 14:12:12,314 - INFO - ----------------------------------------------------------------------
+2025-10-21 14:12:12,323 - INFO - ----------------------------------------------------------------------
+2025-10-21 14:12:12,324 - INFO - 
+2025-10-21 14:12:12,324 - INFO - MANAGING SURPLUS
+2025-10-21 14:12:12,324 - INFO - Iteration 1, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,334 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,334 - INFO - BESS cannot operate - setpoint set to 0 kW
+2025-10-21 14:12:12,337 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,337 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,337 - INFO - Iteration 2, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,349 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,349 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,349 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,349 - INFO - Iteration 3, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,359 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,359 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,359 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,359 - INFO - Iteration 4, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,375 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,375 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,376 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,376 - INFO - Iteration 5, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,386 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,387 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,387 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,387 - INFO - Iteration 6, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,393 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,395 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,395 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,395 - INFO - Iteration 7, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,403 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,404 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,404 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,404 - INFO - Iteration 8, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,416 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,416 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,416 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,416 - INFO - Iteration 9, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,430 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,430 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,430 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,430 - INFO - Iteration 10, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,443 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,443 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,443 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,443 - INFO - Iteration 11, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,455 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,455 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,455 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,455 - INFO - Iteration 12, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,469 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,470 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,470 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,470 - INFO - Iteration 13, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,480 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,481 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,481 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,481 - INFO - Iteration 14, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,491 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,491 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,491 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,491 - INFO - Iteration 15, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,504 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,504 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,504 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,504 - INFO - Iteration 16, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,511 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,511 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,511 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,511 - INFO - Iteration 17, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,520 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,520 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,520 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,520 - INFO - Iteration 18, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,528 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,528 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,528 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,528 - INFO - Iteration 19, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,538 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,538 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,538 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,538 - INFO - Iteration 20, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,550 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,550 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,551 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,551 - INFO - Iteration 21, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,562 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,563 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,563 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,563 - INFO - Iteration 22, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,573 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,573 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,573 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,574 - INFO - Iteration 23, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,587 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,587 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,588 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,588 - INFO - Iteration 24, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,596 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,596 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,596 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,597 - INFO - Iteration 25, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,609 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,609 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,609 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,609 - INFO - Iteration 26, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,620 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,620 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,620 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,620 - INFO - Iteration 27, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,630 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,630 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,630 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,631 - INFO - Iteration 28, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,640 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,640 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,640 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,640 - INFO - Iteration 29, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,652 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,652 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,653 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,654 - INFO - Iteration 30, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,663 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,663 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,663 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,663 - INFO - Iteration 31, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,672 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,672 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,672 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,672 - INFO - Iteration 32, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,683 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,683 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,683 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,684 - INFO - Iteration 33, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,697 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,698 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,698 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,698 - INFO - Iteration 34, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,707 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,707 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,707 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,707 - INFO - Iteration 35, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,721 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,721 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,722 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,722 - INFO - Iteration 36, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,729 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,729 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,730 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,730 - INFO - Iteration 37, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,735 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,735 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,735 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,735 - INFO - Iteration 38, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,755 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,755 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,755 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,755 - INFO - Iteration 39, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,764 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,764 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,764 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,765 - INFO - Iteration 40, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,774 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,776 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,776 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,776 - INFO - Iteration 41, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,790 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,790 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,790 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,790 - INFO - Iteration 42, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,802 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,802 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,802 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,802 - INFO - Iteration 43, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,817 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,817 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,818 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,818 - INFO - Iteration 44, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,830 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,830 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,830 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,830 - INFO - Iteration 45, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,848 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,848 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,848 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,848 - INFO - Iteration 46, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,859 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,859 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,859 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,859 - INFO - Iteration 47, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,874 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,874 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,875 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,875 - INFO - Iteration 48, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,887 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,887 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,887 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,887 - INFO - Iteration 49, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,902 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,902 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,902 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,902 - INFO - Iteration 50, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,912 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,912 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,914 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,914 - INFO - Iteration 51, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,923 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,923 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,923 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,923 - INFO - Iteration 52, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,934 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,935 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,935 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,935 - INFO - Iteration 53, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,944 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,944 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,944 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,944 - INFO - Iteration 54, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,953 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,953 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,953 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,953 - INFO - Iteration 55, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,963 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,963 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,963 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,964 - INFO - Iteration 56, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,972 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,973 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,973 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,973 - INFO - Iteration 57, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,981 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,982 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,982 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,983 - INFO - Iteration 58, surplus remaining: 3.2 kW
+2025-10-21 14:12:12,995 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:12,996 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,996 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:12,996 - INFO - Iteration 59, surplus remaining: 3.2 kW
+2025-10-21 14:12:13,007 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:13,008 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,008 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,008 - INFO - Iteration 60, surplus remaining: 3.2 kW
+2025-10-21 14:12:13,019 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:13,019 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,020 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,020 - INFO - Iteration 61, surplus remaining: 3.2 kW
+2025-10-21 14:12:13,035 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:13,035 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,037 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,037 - INFO - Iteration 62, surplus remaining: 3.2 kW
+2025-10-21 14:12:13,048 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:13,049 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,049 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,049 - INFO - Iteration 63, surplus remaining: 3.2 kW
+2025-10-21 14:12:13,060 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:13,061 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,061 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,061 - INFO - Iteration 64, surplus remaining: 3.2 kW
+2025-10-21 14:12:13,073 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:13,074 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,074 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,074 - INFO - Iteration 65, surplus remaining: 3.2 kW
+2025-10-21 14:12:13,087 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:13,087 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,087 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,087 - INFO - Iteration 66, surplus remaining: 3.2 kW
+2025-10-21 14:12:13,101 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:13,101 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,101 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,102 - INFO - Iteration 67, surplus remaining: 3.2 kW
+2025-10-21 14:12:13,119 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:13,119 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,119 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,120 - INFO - Iteration 68, surplus remaining: 3.2 kW
+2025-10-21 14:12:13,132 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:13,132 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,132 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,132 - INFO - Iteration 69, surplus remaining: 3.2 kW
+2025-10-21 14:12:13,143 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:13,144 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,144 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,145 - INFO - Iteration 70, surplus remaining: 3.2 kW
+2025-10-21 14:12:13,158 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:13,158 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,158 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,158 - INFO - Iteration 71, surplus remaining: 3.2 kW
+2025-10-21 14:12:13,168 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:13,169 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,169 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,169 - INFO - Iteration 72, surplus remaining: 3.2 kW
+2025-10-21 14:12:13,176 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:13,177 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,177 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,177 - INFO - Iteration 73, surplus remaining: 3.2 kW
+2025-10-21 14:12:13,188 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:13,188 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,188 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,188 - INFO - Iteration 74, surplus remaining: 3.2 kW
+2025-10-21 14:12:13,201 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:13,201 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,201 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,201 - INFO - Iteration 75, surplus remaining: 3.2 kW
+2025-10-21 14:12:13,209 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:13,209 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,210 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,210 - INFO - Iteration 76, surplus remaining: 3.2 kW
+2025-10-21 14:12:13,221 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:13,221 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,221 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,221 - INFO - Iteration 77, surplus remaining: 3.2 kW
+2025-10-21 14:12:13,232 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:13,233 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,234 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,234 - INFO - Iteration 78, surplus remaining: 3.2 kW
+2025-10-21 14:12:13,244 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:13,246 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,246 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,246 - INFO - Iteration 79, surplus remaining: 3.2 kW
+2025-10-21 14:12:13,259 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:13,259 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,260 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,260 - INFO - Iteration 80, surplus remaining: 3.2 kW
+2025-10-21 14:12:13,270 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:13,270 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,270 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,270 - INFO - Iteration 81, surplus remaining: 3.2 kW
+2025-10-21 14:12:13,282 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:13,282 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,283 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,283 - INFO - Iteration 82, surplus remaining: 3.2 kW
+2025-10-21 14:12:13,292 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:13,293 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,293 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,293 - INFO - Iteration 83, surplus remaining: 3.2 kW
+2025-10-21 14:12:13,303 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:13,303 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,303 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,303 - INFO - Iteration 84, surplus remaining: 3.2 kW
+2025-10-21 14:12:13,313 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:13,313 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,314 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,314 - INFO - Iteration 85, surplus remaining: 3.2 kW
+2025-10-21 14:12:13,322 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:13,323 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,323 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,323 - INFO - Iteration 86, surplus remaining: 3.2 kW
+2025-10-21 14:12:13,330 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:13,330 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,330 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,330 - INFO - Iteration 87, surplus remaining: 3.2 kW
+2025-10-21 14:12:13,341 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:13,341 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,341 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,341 - INFO - Iteration 88, surplus remaining: 3.2 kW
+2025-10-21 14:12:13,350 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:13,350 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,350 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,350 - INFO - Iteration 89, surplus remaining: 3.2 kW
+2025-10-21 14:12:13,358 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:13,358 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,358 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,358 - INFO - Iteration 90, surplus remaining: 3.2 kW
+2025-10-21 14:12:13,364 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:13,364 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,365 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,365 - INFO - Iteration 91, surplus remaining: 3.2 kW
+2025-10-21 14:12:13,374 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:13,375 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,375 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,375 - INFO - Iteration 92, surplus remaining: 3.2 kW
+2025-10-21 14:12:13,384 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:13,384 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,384 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,385 - INFO - Iteration 93, surplus remaining: 3.2 kW
+2025-10-21 14:12:13,393 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:13,393 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,393 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,393 - INFO - Iteration 94, surplus remaining: 3.2 kW
+2025-10-21 14:12:13,402 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:13,402 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,402 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,402 - INFO - Iteration 95, surplus remaining: 3.2 kW
+2025-10-21 14:12:13,410 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:13,410 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,410 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,410 - INFO - Iteration 96, surplus remaining: 3.2 kW
+2025-10-21 14:12:13,418 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:13,418 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,418 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,418 - INFO - Iteration 97, surplus remaining: 3.2 kW
+2025-10-21 14:12:13,424 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:13,424 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,424 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,424 - INFO - Iteration 98, surplus remaining: 3.2 kW
+2025-10-21 14:12:13,434 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:13,434 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,434 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,434 - INFO - Iteration 99, surplus remaining: 3.2 kW
+2025-10-21 14:12:13,448 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:13,448 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,448 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,449 - INFO - Iteration 100, surplus remaining: 3.2 kW
+2025-10-21 14:12:13,457 - INFO - Attempting: SurplusAction.CHARGE_BATTERY
+2025-10-21 14:12:13,457 - WARNING - [WARNING] BESS charge NOT FEASIBLE: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,457 - INFO - Failed: Power surplus (3.18 kW) is below min_output (10.00 kW)
+2025-10-21 14:12:13,457 - INFO - 
+2025-10-21 14:12:13,457 - INFO -   CHANGES: 0 device(s) modified
+2025-10-21 14:12:13,457 - INFO -   Managed 0.00 kW surplus
+2025-10-21 14:12:13,457 - INFO - SCADA GRID STATUS: No grid operations in this iteration
+2025-10-21 14:12:13,457 - INFO - 
 ==================================================
-ITERATION COMPLETE in 0.08s
+ITERATION COMPLETE in 1.16s
 ==================================================
-2025-10-21 14:09:14,050 - INFO - Live contract data saved to C:/eryk/AppFuga\apps\backend\output_contract_data.json
-2025-10-21 14:09:14,060 - INFO - 
--------------------- Algorithm Changes Summary --------------------
-2025-10-21 14:09:14,091 - INFO - Changed devices data saved to C:/eryk/AppFuga\apps\backend\output_data.json
-2025-10-21 14:09:14,092 - INFO - Wysy³anie danych systemu (próba 1/3) [RETRY]
-2025-10-21 14:09:14,092 - INFO - ======================================================================
-2025-10-21 14:09:14,092 - INFO - SYSTEM DATA BEING SENT TO API:
-2025-10-21 14:09:14,093 - INFO - {
-  "bess": [
-    {
-      "name": "BESS 1",
-      "switch_status": true,
-      "setpoint_output": -11.159999999999997,
-      "charge_level": 125.99
-    }
-  ],
-  "algorithm_decision": {
-    "status": "BALANCED",
-    "message": "Minor adjustments",
-    "balance_kW": 11.2,
-    "devices_count": 2
-  }
-}
-2025-10-21 14:09:14,093 - INFO - ======================================================================
-2025-10-21 14:09:14,155 - INFO - API Response Status Code: 200
-2025-10-21 14:09:14,155 - INFO - Dane systemu wys³ane pomyœlnie [NETWORK]
-2025-10-21 14:09:14,155 - INFO - Wysy³anie danych kontraktu (próba 1/3) [RETRY]
-2025-10-21 14:09:14,155 - INFO - ======================================================================
-2025-10-21 14:09:14,155 - INFO - CONTRACT DATA BEING SENT TO API:
-2025-10-21 14:09:14,155 - INFO - {
-  "setpoint_grid_export": 0,
-  "setpoint_grid_import": 0
-}
-2025-10-21 14:09:14,155 - INFO - ======================================================================
-2025-10-21 14:09:14,199 - INFO - API Response Status Code: 400
-2025-10-21 14:09:14,254 - INFO - Algorithm decision sent successfully
-2025-10-21 14:09:14,914 - INFO - Weather data updated at 2025-10-21 14:09:14.913235
-2025-10-21 14:09:15,064 - INFO - 5-minute data aggregated and logged at 2025-10-21 14:09:15.064426
-2025-10-21 14:09:15,896 - INFO - Weather forecast updated at 2025-10-21 14:09:15.896586
-2025-10-21 14:09:15,896 - INFO - Updated power profile
-2025-10-21 14:09:15,896 - INFO - Complete iteration finished in 2.16 seconds
-2025-10-21 14:09:15,896 - INFO - !!! Waiting 300.0 seconds for next iteration !!!
-2025-10-21 14:09:36,735 - INFO - Stopping heartbeat tag sender
-2025-10-21 14:09:36,735 - INFO - !!! Energy management stopped !!!
-2025-10-21 14:09:36,735 - INFO - !!! Energy management stopping !!!
+2025-10-21 14:12:13,457 - INFO - Live contract data saved to C:/eryk/AppFuga\apps\backend\output_contract_data.json
+2025-10-21 14:12:13,464 - INFO - No device changes detected - skipping API POST operation
+2025-10-21 14:12:14,267 - INFO - Weather data updated at 2025-10-21 14:12:14.267371
+2025-10-21 14:12:14,412 - INFO - 5-minute data aggregated and logged at 2025-10-21 14:12:14.412550
+2025-10-21 14:12:15,037 - INFO - Weather forecast updated at 2025-10-21 14:12:15.037432
+2025-10-21 14:12:15,037 - INFO - Updated power profile
+2025-10-21 14:12:15,037 - INFO - Complete iteration finished in 2.94 seconds
+2025-10-21 14:12:15,037 - INFO - !!! Waiting 300.0 seconds for next iteration !!!
+2025-10-21 14:12:22,135 - INFO - Stopping heartbeat tag sender
+2025-10-21 14:12:22,135 - INFO - !!! Energy management stopped !!!
+2025-10-21 14:12:22,135 - INFO - !!! Energy management stopping !!!

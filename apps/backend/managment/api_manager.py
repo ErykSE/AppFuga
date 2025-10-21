@@ -651,10 +651,12 @@ class ApiManager:
                                 f"Wysyłanie danych kontraktu (próba {attempt}/{self.retry_config.max_retries})", 
                                 "RETRY")
                 
-                #  DIAGNOSTYKA: Log danych przed wysłaniem
+                #  DIAGNOSTYKA: Log tylko najważniejszych pól (setpointy grid - to co się zmienia)
                 self.info_logger.info("=" * 70)
-                self.info_logger.info("CONTRACT DATA BEING SENT TO API:")
-                self.info_logger.info(json.dumps(contract_data, indent=2))
+                self.info_logger.info("CONTRACT DATA - Grid Setpoints:")
+                self.info_logger.info(f"  setpoint_grid_export: {contract_data.get('setpoint_grid_export', 0)} kW")
+                self.info_logger.info(f"  setpoint_grid_import: {contract_data.get('setpoint_grid_import', 0)} kW")
+                self.info_logger.info(f"  (Full payload with {len(contract_data)} fields sent to API)")
                 self.info_logger.info("=" * 70)
                 
                 response = requests.post(

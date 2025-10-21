@@ -1,5 +1,2 @@
-2025-10-21 14:09:13,904 - WARNING - [WARNING] Wykryto 2 brakuj¹cych urz¹dzeñ: [5, 6] [SYSTEM]
-2025-10-21 14:09:14,201 - ERROR - 400 Bad Request - b³¹d w danych kontraktu [API]
-2025-10-21 14:09:14,201 - ERROR - API Error Response: {"type":"https://tools.ietf.org/html/rfc9110#section-15.5.1","title":"One or more validation errors occurred.","status":400,"errors":{"contracted_type":["The contracted_type field is required."],"contracted_billing_cycle":["The contracted_billing_cycle field is required."],"contracted_billing_period_end":["The contracted_billing_period_end field is required."],"contracted_billing_period_start":["The contracted_billing_period_start field is required."]},"traceId":"00-d82a3a74177ae2cbf69bfdad5142c9b4-f0f8637d20bc119a-00"}
-2025-10-21 14:09:14,201 - ERROR - Nie bêdziemy ponownie próbowaæ (b³¹d po stronie klienta/danych) [RETRY]
-2025-10-21 14:09:14,254 - ERROR - Failed to send data to API after all retry attempts
+2025-10-21 14:12:12,234 - WARNING - [WARNING] Wykryto 2 brakuj¹cych urz¹dzeñ: [5, 6] [SYSTEM]
+2025-10-21 14:12:13,457 - ERROR - The maximum number of iterations (100) has been reached without solving the surplus.
