@@ -12,6 +12,6 @@
     "bought_power": 120,
     "current_tariff_buy": 1.79,
     "current_tariff_sell": 1.2,
-    "current_grid_export": 21.91,
+    "current_grid_export": 0,
     "current_grid_import": 0
 }
