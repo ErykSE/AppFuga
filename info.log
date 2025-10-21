@@ -368,3 +368,11 @@ ITERATION COMPLETE in 0.05s
 2025-10-21 14:02:39,481 - INFO - Heartbeat tag: 600
 2025-10-21 14:03:50,330 - INFO - Heartbeat tag: 660
 2025-10-21 14:04:52,575 - INFO - Heartbeat tag: 720
+2025-10-21 14:05:54,488 - INFO - Heartbeat tag: 780
+2025-10-21 14:06:58,629 - INFO - Heartbeat tag: 840
+2025-10-21 14:07:23,024 - INFO - 
+==================================================
+Starting new iteration
+==================================================
+2025-10-21 14:07:23,024 - INFO - Loaded operation mode: automatic
+2025-10-21 14:07:23,024 - INFO - Pobieranie danych stanu systemu z http://localhost:5002/api/Scada/system-state
