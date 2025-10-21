@@ -411,20 +411,32 @@ class ApiManager:
         
         for category, api_key in energy_sources.items():
             for device in system_data_raw.get(api_key, []):
+                actual_output = device.get("actual_output", 0)
+                setpoint_output = device.get("setpoint_output", 0)
+                # Jeśli setpoint_output == -1 (nie ustawiono), użyj actual_output
+                if setpoint_output == -1:
+                    setpoint_output = actual_output
+                    
                 devices_data[category].append({
                     "id": device.get("id", 0),
                     "name": device.get("name", "Unknown Device"),
                     "priority": device.get("priority", 1),
                     "max_output": device.get("max_output", 100),
                     "min_output": device.get("min_output", 0),
-                    "actual_output": device.get("actual_output", 0),
-                    "setpoint_output": device.get("setpoint_output", 0),  #  NOWE
+                    "actual_output": actual_output,
+                    "setpoint_output": setpoint_output,  #  NOWE
                     "switch_status": device.get("switch_status", False),
                     "device_status": "online" if device.get("switch_status", False) else "offline"
                 })
         
         # === BESS ===
         for bess in system_data_raw.get("bess", []):
+            actual_output = bess.get("actual_output", 0)
+            setpoint_output = bess.get("setpoint_output", 0)
+            # Jeśli setpoint_output == -1 (nie ustawiono), użyj actual_output
+            if setpoint_output == -1:
+                setpoint_output = actual_output
+                
             devices_data["bess"].append({
                 "id": bess.get("id", 7),
                 "name": bess.get("name", "BESS 1"),
@@ -432,8 +444,8 @@ class ApiManager:
                 "min_charge_level": bess.get("min_charge_level", 10),
                 "max_charge_level": bess.get("max_charge_level", 200),  #  NOWE
                 "charge_level": bess.get("charge_level", 0),
-                "actual_output": bess.get("actual_output", 0),  #  NOWE
-                "setpoint_output": bess.get("setpoint_output", 0),  #  NOWE
+                "actual_output": actual_output,  #  NOWE
+                "setpoint_output": setpoint_output,  #  NOWE
                 "max_discharge_power": bess.get("max_discharge_power", 100),  #  NOWE
                 "max_charge_power": bess.get("max_charge_power", 100),  #  NOWE
                 "min_output": bess.get("min_output", 0),  #  NOWE
@@ -443,25 +455,37 @@ class ApiManager:
         
         # === NON-ADJUSTABLE DEVICES ===
         for device in system_data_raw.get("non_adjustable_devices", []):
+            actual_output = device.get("actual_output", 0)
+            setpoint_output = device.get("setpoint_output", 0)
+            # Jeśli setpoint_output == -1 (nie ustawiono), użyj actual_output
+            if setpoint_output == -1:
+                setpoint_output = actual_output
+                
             devices_data["non_adjustable_devices"].append({
                 "id": device.get("id", 0),
                 "name": device.get("name", "Unknown Device"),
                 "priority": device.get("priority", 1),
-                "power": device.get("actual_output", 0),  #  API używa actual_output
-                "actual_output": device.get("actual_output", 0),  #  NOWE - dla kompatybilności
-                "setpoint_output": device.get("setpoint_output", 0),  #  NOWE
+                "power": actual_output,  #  API używa actual_output
+                "actual_output": actual_output,  #  NOWE - dla kompatybilności
+                "setpoint_output": setpoint_output,  #  NOWE
                 "switch_status": device.get("switch_status", False)
             })
         
         # === ADJUSTABLE DEVICES ===
         for device in system_data_raw.get("adjustable_devices", []):
+            actual_output = device.get("actual_output", 0)
+            setpoint_output = device.get("setpoint_output", 0)
+            # Jeśli setpoint_output == -1 (nie ustawiono), użyj actual_output
+            if setpoint_output == -1:
+                setpoint_output = actual_output
+                
             devices_data["adjustable_devices"].append({
                 "id": device.get("id", 0),
                 "name": device.get("name", "Unknown Device"),
                 "priority": device.get("priority", 1),
-                "power": device.get("actual_output", 0),  #  API używa actual_output
-                "actual_output": device.get("actual_output", 0),  #  NOWE - dla kompatybilności
-                "setpoint_output": device.get("setpoint_output", 0),  #  NOWE
+                "power": actual_output,  #  API używa actual_output
+                "actual_output": actual_output,  #  NOWE - dla kompatybilności
+                "setpoint_output": setpoint_output,  #  NOWE
                 "switch_status": device.get("switch_status", False),
                 "min_power": device.get("min_power", 0),
                 "max_power": device.get("max_power", 100)

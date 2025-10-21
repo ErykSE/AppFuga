@@ -1,3 +1,0 @@
-2025-10-21 10:47:55,218 - WARNING - [WARNING] Wykryto 2 brakuj¹cych urz¹dzeñ: [5, 6] [SYSTEM]
-2025-10-21 10:47:57,539 - ERROR - Error updating weather data: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))
-2025-10-21 10:47:57,582 - ERROR - Error updating power profile: ('Connection aborted.', ConnectionResetError(10054, 'An existing connection was forcibly closed by the remote host', None, 10054, None))

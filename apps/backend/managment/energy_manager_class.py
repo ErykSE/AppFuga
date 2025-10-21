@@ -2178,8 +2178,8 @@ class EnergyManager:
         generation = 0.0
         for device in self.microgrid.get_all_devices():
             if device.get_switch_status():
-                # Użyj setpoint_output jeśli dostępny, w przeciwnym razie actual_output
-                if hasattr(device, 'setpoint_output'):
+                # Użyj setpoint_output jeśli dostępny i != -1, w przeciwnym razie actual_output
+                if hasattr(device, 'setpoint_output') and device.setpoint_output != -1:
                     generation += device.setpoint_output
                 else:
                     generation += device.get_actual_output()
@@ -2191,8 +2191,13 @@ class EnergyManager:
         # 3. BESS discharge (rozładowanie baterii)
         # ⚠️ WAŻNE: setpoint_output > 0 → BESS dostarcza energię (rozładowanie)
         bess_discharge = 0.0
-        if self.microgrid.bess and self.microgrid.bess.setpoint_output > 0:
-            bess_discharge = self.microgrid.bess.setpoint_output
+        if self.microgrid.bess:
+            bess_setpoint = self.microgrid.bess.setpoint_output
+            # Jeśli setpoint == -1 (nie ustawiono), użyj actual_output
+            if bess_setpoint == -1:
+                bess_setpoint = self.microgrid.bess.actual_output
+            if bess_setpoint > 0:
+                bess_discharge = bess_setpoint
         
         # Suma podaży
         total_supply = generation + grid_import + bess_discharge
@@ -2221,8 +2226,13 @@ class EnergyManager:
         # 3. BESS charge (ładowanie baterii)
         # ⚠️ WAŻNE: setpoint_output < 0 → BESS pobiera energię (ładowanie)
         bess_charge = 0.0
-        if self.microgrid.bess and self.microgrid.bess.setpoint_output < 0:
-            bess_charge = abs(self.microgrid.bess.setpoint_output)  # Zamień na wartość dodatnią
+        if self.microgrid.bess:
+            bess_setpoint = self.microgrid.bess.setpoint_output
+            # Jeśli setpoint == -1 (nie ustawiono), użyj actual_output
+            if bess_setpoint == -1:
+                bess_setpoint = self.microgrid.bess.actual_output
+            if bess_setpoint < 0:
+                bess_charge = abs(bess_setpoint)  # Zamień na wartość dodatnią
         
         # Suma popytu
         total_demand = consumption + grid_export + bess_charge
