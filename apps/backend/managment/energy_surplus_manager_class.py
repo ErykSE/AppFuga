@@ -550,25 +550,41 @@ class EnergySurplusManager:
             return False
 
     def check_bess_availability(self):
-        """Sprawdza czy BESS może ładować (nie ładuje się już + ma wolne miejsce)"""
+        """
+        Sprawdza czy BESS może ładować (rozpocząć lub zwiększyć ładowanie).
+        
+        POPRAWIONE: Zwraca True również gdy BESS już się ładuje ale można zwiększyć moc ładowania.
+        """
         try:
             if not self.microgrid.bess.get_switch_status():
                 return False
             
-            # Sprawdź czy BESS już nie ładuje się
+            # Sprawdź czy BESS ma wolne miejsce (to jest główny warunek)
+            free_capacity = self.microgrid.bess.max_charge_level - self.microgrid.bess.charge_level
+            if free_capacity <= 0:
+                self.info_logger.debug("BESS unavailable: fully charged")
+                return False
+            
+            # NOWE: Sprawdź czy można zwiększyć moc ładowania (jeśli już się ładuje)
             if self.energy_manager_ref:
-                is_already_charging, _ = self.energy_manager_ref.check_device_already_operating(
+                is_already_charging, current_charge_power = self.energy_manager_ref.check_device_already_operating(
                     "BESS", "charging"
                 )
                 if is_already_charging:
-                    return False
+                    # BESS już się ładuje - sprawdź czy można zwiększyć moc
+                    current_charge = abs(current_charge_power) if current_charge_power else 0
+                    max_charge = self.microgrid.bess.max_charge_power
+                    
+                    if current_charge >= max_charge:
+                        self.info_logger.debug(f"BESS unavailable: already charging at max power ({current_charge:.2f}/{max_charge:.2f} kW)")
+                        return False
+                    else:
+                        self.info_logger.debug(f"BESS available: can increase charging from {current_charge:.2f} to {max_charge:.2f} kW")
+                        return True  # Można zwiększyć ładowanie!
             
-            # Sprawdź czy BESS ma wolne miejsce
-            free_capacity = self.microgrid.bess.max_charge_level - self.microgrid.bess.charge_level
-            if free_capacity <= 0:
-                return False
-            
+            # BESS nie ładuje się i ma wolne miejsce
             return True
+            
         except Exception as e:
             self.error_logger.error(f"Error checking bess possibility: {str(e)}")
             return False
