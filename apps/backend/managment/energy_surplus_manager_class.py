@@ -142,22 +142,23 @@ class EnergySurplusManager:
                     self.info_logger.info(f"GRID can export: {'YES' if export_possible else 'NO'}")
                     self.info_logger.info("Both options available → UTILITY FUNCTION")
                     action = self._decide_bess_vs_grid(remaining_surplus)
-                elif bess_available:
-                    # Tylko BESS dostępne
+                elif bess_available and SurplusAction.CHARGE_BATTERY not in attempted_actions:
+                    # Tylko BESS dostępne (i jeszcze nie próbowane)
                     self.info_logger.info("Only BESS available → CHARGE")
                     action = SurplusAction.CHARGE_BATTERY
-                elif export_possible:
-                    # Tylko GRID dostępne
+                elif export_possible and SurplusAction.SELL_ENERGY not in attempted_actions:
+                    # Tylko GRID dostępne (i jeszcze nie próbowane)
                     self.info_logger.info("Only GRID available → SELL")
                     action = SurplusAction.SELL_ENERGY
                 else:
                     # === KROK 7: OSTATECZNOŚĆ - Ograniczanie generacji ===
                     if SurplusAction.LIMIT_GENERATION not in attempted_actions:
-                        self.info_logger.info("Neither BESS nor GRID available → LIMIT GENERATION")
+                        self.info_logger.info("Neither BESS nor GRID available (or already tried) → LIMIT GENERATION")
                         action = SurplusAction.LIMIT_GENERATION
                     else:
                         self.info_logger.warning("No more available actions to handle surplus.")
                         break
+                
                 attempted_actions.add(action)
 
                 self.info_logger.info(f"Attempting: {action}")
@@ -169,10 +170,13 @@ class EnergySurplusManager:
                     self.info_logger.info(
                         f"Success: Managed {result['amount']:.1f} kW, remaining: {remaining_surplus:.1f} kW"
                     )
+                    # Wyczyść attempted_actions po sukcesie - pozwól ponownie próbować w następnej iteracji
+                    attempted_actions.clear()
                 else:
                     self.info_logger.info(
                         f"Failed: {result.get('reason', 'Unknown')}"
                     )
+                    # NIE czyść attempted_actions - akcja została już próbowana i failowała
 
             if iteration == MAX_ITERATIONS:
                 self.error_logger.error(
