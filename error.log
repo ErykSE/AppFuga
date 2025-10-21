@@ -1,14 +1,1 @@
-2025-10-21 11:03:06,578 - WARNING - [WARNING] Wykryto 2 brakuj¹cych urz¹dzeñ: [5, 6] [SYSTEM]
-2025-10-21 11:03:06,675 - ERROR - Error in check_energy_conditions: 'NonAdjustableDevice' object has no attribute 'max_power'
-2025-10-21 11:03:06,676 - ERROR - Full traceback:
-Traceback (most recent call last):
-  File "c:\eryk\AppFuga\apps\backend\managment\energy_manager_class.py", line 818, in check_energy_conditions
-    balance = self.neutralize_conflicting_operations(initial_balance)
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "c:\eryk\AppFuga\apps\backend\managment\energy_manager_class.py", line 2819, in neutralize_conflicting_operations
-    consumers_restored = self._check_and_restore_disabled_consumers(balance.surplus)
-                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "c:\eryk\AppFuga\apps\backend\managment\energy_manager_class.py", line 2978, in _check_and_restore_disabled_consumers
-    max_power = consumer.get_max_output() if hasattr(consumer, 'get_max_output') else consumer.max_power
-                                                                                      ^^^^^^^^^^^^^^^^^^
-AttributeError: 'NonAdjustableDevice' object has no attribute 'max_power'
+2025-10-21 11:15:01,057 - WARNING - [WARNING] Wykryto 2 brakuj¹cych urz¹dzeñ: [5, 6] [SYSTEM]
